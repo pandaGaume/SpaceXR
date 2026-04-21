@@ -1,0 +1,15 @@
+import { ICodec } from "../../codecs/tiles.codecs.interfaces";
+import { ITileset } from "../interfaces";
+import { Nullable } from "../../../types";
+
+export class TilesetCodec implements ICodec<ITileset> {
+    public static Shared = new TilesetCodec();
+
+    public async decodeAsync(r: void | Response): Promise<Nullable<ITileset>> {
+        if (r instanceof Response) {
+            const b: ITileset = await r.json();
+            return b;
+        }
+        return null;
+    }
+}

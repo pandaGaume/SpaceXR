@@ -2,6 +2,9 @@
     "compilerOptions": {
         "ignoreDeprecations": "5.0",
         "baseUrl": "packages",
+        "paths": {
+            "core/*": ["./dev/core/src/*"]
+        },
         "moduleResolution": "node",
         "importHelpers": true,
         "experimentalDecorators": true,

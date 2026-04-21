@@ -2490,7 +2490,6 @@ class GeodeticSystem {
         target.lat = lat;
         target.lon = lon;
         target.alt = alt;
-        target.hasAltitude = true;
         return true;
     }
 }

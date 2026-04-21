@@ -496,6 +496,121 @@ class Collection extends _validable__WEBPACK_IMPORTED_MODULE_2__.ValidableBase {
 
 /***/ },
 
+/***/ "../core/dist/collections/concurrentQueue.js"
+/*!***************************************************!*\
+  !*** ../core/dist/collections/concurrentQueue.js ***!
+  \***************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   ActionCancelledError: () => (/* binding */ ActionCancelledError),
+/* harmony export */   ActionQueueStatus: () => (/* binding */ ActionQueueStatus),
+/* harmony export */   ConcurrentActionQueue: () => (/* binding */ ConcurrentActionQueue)
+/* harmony export */ });
+/* harmony import */ var _priorityQueue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./priorityQueue */ "../core/dist/collections/priorityQueue.js");
+
+class ActionCancelledError extends Error {
+    constructor(msg = "Cancelled") {
+        super(msg);
+        this.name = "CancelledError";
+    }
+}
+var ActionQueueStatus;
+(function (ActionQueueStatus) {
+    ActionQueueStatus[ActionQueueStatus["fulfilled"] = 0] = "fulfilled";
+    ActionQueueStatus[ActionQueueStatus["rejected"] = 1] = "rejected";
+    ActionQueueStatus[ActionQueueStatus["cancelled"] = 2] = "cancelled";
+})(ActionQueueStatus || (ActionQueueStatus = {}));
+/**
+ * Generic concurrent loader with pluggable queue.
+ * Plug in a PriorityQueue<QueueItem<T>> that implements IQueue<T>.
+ */
+class ConcurrentActionQueue {
+    constructor(action, concurrency = 4, queue) {
+        this.running = 0;
+        this.queuedByData = new Map();
+        this._action = action;
+        this.queue = queue ?? new _priorityQueue__WEBPACK_IMPORTED_MODULE_0__.PriorityQueue((a, b) => b.priority - a.priority);
+        this.concurrency = concurrency;
+    }
+    enqueue(data, opts) {
+        if (this.queuedByData.has(data)) {
+            // dedupe: return same promise
+            return new Promise((resolve, reject) => {
+                const item = this.queuedByData.get(data);
+                item.resolve = this.chainResolve(item.resolve, resolve);
+                item.reject = this.chainReject(item.reject, reject);
+            });
+        }
+        let _resolve;
+        let _reject;
+        const promise = new Promise((res, rej) => {
+            _resolve = res;
+            _reject = rej;
+        });
+        const item = {
+            data,
+            resolve: _resolve,
+            reject: _reject,
+            onSettled: opts?.onSettled,
+            priority: opts?.priority ?? 0,
+        };
+        this.queuedByData.set(data, item);
+        this.queue.enqueue(item);
+        this.tick();
+        return promise;
+    }
+    cancelPending(data) {
+        const item = this.queuedByData.get(data);
+        if (!item)
+            return false;
+        this.queuedByData.delete(data);
+        item.reject(new ActionCancelledError());
+        item.onSettled?.({ data, status: ActionQueueStatus.cancelled, reason: "Cancelled before start" });
+        return true;
+    }
+    tick() {
+        while (this.running < this.concurrency && !this.queue.isEmpty()) {
+            const item = this.queue.dequeue();
+            this.queuedByData.delete(item.data);
+            this.start(item);
+        }
+    }
+    start(item) {
+        const controller = new AbortController();
+        this.running++;
+        this._action(item.data, controller.signal)
+            .then((v) => {
+            item.resolve(v);
+            item.onSettled?.({ data: item.data, status: ActionQueueStatus.fulfilled, value: v });
+        })
+            .catch((err) => {
+            item.reject(err);
+            item.onSettled?.({ data: item.data, status: ActionQueueStatus.rejected, reason: err });
+        })
+            .finally(() => {
+            this.running--;
+            this.tick();
+        });
+    }
+    chainResolve(a, b) {
+        return (v) => {
+            a(v);
+            b(v);
+        };
+    }
+    chainReject(a, b) {
+        return (e) => {
+            a(e);
+            b(e);
+        };
+    }
+}
+//# sourceMappingURL=concurrentQueue.js.map
+
+/***/ },
+
 /***/ "../core/dist/collections/orderedCollection.js"
 /*!*****************************************************!*\
   !*** ../core/dist/collections/orderedCollection.js ***!
@@ -560,6 +675,114 @@ class OrderedCollection extends _collection__WEBPACK_IMPORTED_MODULE_0__.Collect
     }
 }
 //# sourceMappingURL=orderedCollection.js.map
+
+/***/ },
+
+/***/ "../core/dist/collections/priorityQueue.js"
+/*!*************************************************!*\
+  !*** ../core/dist/collections/priorityQueue.js ***!
+  \*************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   PriorityQueue: () => (/* binding */ PriorityQueue),
+/* harmony export */   isPriorityQueue: () => (/* binding */ isPriorityQueue)
+/* harmony export */ });
+function isPriorityQueue(x) {
+    // duck-typing : adapte selon ton API réelle (enqueue/dequeue/peek/size)
+    return !!x && typeof x === "object" && typeof x.enqueue === "function" && typeof x.dequeue === "function";
+}
+/**
+ * PriorityQueue<T>
+ * - Binary heap with O(log n) push/pop, O(1) peek
+ * - Comparator: return < 0 if a has HIGHER priority than b
+ */
+class PriorityQueue {
+    constructor(compare) {
+        this._heap = [];
+        this._compare = compare;
+    }
+    /** Number of items */
+    size() {
+        return this._heap.length;
+    }
+    /** True if empty */
+    isEmpty() {
+        return this._heap.length === 0;
+    }
+    /** Peek best item (highest priority) without removing it */
+    peek() {
+        return this._heap[0];
+    }
+    /** Push an item (O(log n)) */
+    enqueue(value) {
+        this._heap.push(value);
+        this._siftUp(this._heap.length - 1);
+    }
+    /** Pop best item (O(log n)) */
+    dequeue() {
+        const n = this._heap.length;
+        if (n === 0)
+            return undefined;
+        this._swap(0, n - 1);
+        const out = this._heap.pop();
+        if (this._heap.length > 0)
+            this._siftDown(0);
+        return out;
+    }
+    /** Remove all items */
+    clear() {
+        this._heap.length = 0;
+    }
+    /** Build a Min-heap by numeric key: smaller key = higher priority */
+    static fromMin(key) {
+        return new PriorityQueue((a, b) => key(a) - key(b));
+    }
+    /** Build a Max-heap by numeric key: larger key = higher priority */
+    static fromMax(key) {
+        return new PriorityQueue((a, b) => key(b) - key(a));
+    }
+    // --- internals ---
+    _siftUp(i) {
+        while (i > 0) {
+            const p = (i - 1) >> 1;
+            if (this._compare(this._heap[i], this._heap[p]) < 0) {
+                this._swap(i, p);
+                i = p;
+            }
+            else
+                break;
+        }
+    }
+    _siftDown(i) {
+        const n = this._heap.length;
+        while (true) {
+            const l = (i << 1) + 1;
+            const r = l + 1;
+            let best = i;
+            if (l < n && this._compare(this._heap[l], this._heap[best]) < 0)
+                best = l;
+            if (r < n && this._compare(this._heap[r], this._heap[best]) < 0)
+                best = r;
+            if (best !== i) {
+                this._swap(i, best);
+                i = best;
+            }
+            else
+                break;
+        }
+    }
+    _swap(a, b) {
+        const tmp = this._heap[a];
+        this._heap[a] = this._heap[b];
+        this._heap[b] = tmp;
+    }
+    includes(item) {
+        return this._heap.includes(item);
+    }
+}
+//# sourceMappingURL=priorityQueue.js.map
 
 /***/ },
 
@@ -2291,8 +2514,8 @@ class GeodeticSystem {
     }
     geodeticFloatToCartesianToRef(lat, lon, alt, target, deg = true) {
         target = target || _geometry__WEBPACK_IMPORTED_MODULE_3__.Cartesian3.Zero();
-        let lambda = deg ? lat * _math__WEBPACK_IMPORTED_MODULE_2__.Scalar.DEG2RAD : lat;
-        let phi = deg ? lon * _math__WEBPACK_IMPORTED_MODULE_2__.Scalar.DEG2RAD : lon;
+        const lambda = deg ? lat * _math__WEBPACK_IMPORTED_MODULE_2__.Scalar.DEG2RAD : lat;
+        const phi = deg ? lon * _math__WEBPACK_IMPORTED_MODULE_2__.Scalar.DEG2RAD : lon;
         // firs pass is to ECEF
         const sin_lambda = Math.sin(lambda);
         const cos_lambda = Math.cos(lambda);
@@ -2353,7 +2576,7 @@ class GeodeticSystem {
         let t5 = 0.5 * (beta - i);
         t5 = Math.abs(t5); // numeric turbulence fix near +-45.3 deg
         const t6 = Math.sqrt(t5);
-        const t7 = (m < n) ? t6 : -t6;
+        const t7 = m < n ? t6 : -t6;
         const t = t4 + t7;
         // Newton-Raphson correction
         const j = this._ellipsoid._l * (m - n);
@@ -2376,13 +2599,12 @@ class GeodeticSystem {
         const dw = w - wv * invuv;
         const dz = z - zu * this._ellipsoid._p1mee * invuv;
         const da = Math.sqrt(dw * dw + dz * dz);
-        const alt = (u < 1) ? -da : da;
+        const alt = u < 1 ? -da : da;
         // longitude in degrees
         const lon = Math.atan2(y, x) * _geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.r2d;
         target.lat = lat;
         target.lon = lon;
         target.alt = alt;
-        target.hasAltitude = true;
         return true;
     }
 }
@@ -3907,10 +4129,10 @@ class Cartesian3 extends Cartesian2 {
     ///   Check if four points are coplanar
     /// </summary>
     static AreCoplanar(a, b, c, d, epsilon) {
-        var n1 = Cartesian3.Cross(Cartesian3.Subtract(c, a), Cartesian3.Subtract(c, b));
-        var n2 = Cartesian3.Cross(Cartesian3.Subtract(d, a), Cartesian3.Subtract(d, b));
-        var m1 = Cartesian3.Magnitude(n1);
-        var m2 = Cartesian3.Magnitude(n2);
+        const n1 = Cartesian3.Cross(Cartesian3.Subtract(c, a), Cartesian3.Subtract(c, b));
+        const n2 = Cartesian3.Cross(Cartesian3.Subtract(d, a), Cartesian3.Subtract(d, b));
+        const m1 = Cartesian3.Magnitude(n1);
+        const m2 = Cartesian3.Magnitude(n2);
         const EPSILON = epsilon ?? _math__WEBPACK_IMPORTED_MODULE_0__.Scalar.EPSILON;
         return (m1 <= EPSILON ||
             m2 <= EPSILON ||
@@ -4049,7 +4271,7 @@ class Cartesian3 extends Cartesian2 {
         if (epsilon) {
             return Cartesian3.EqualsWithinEpsilon(a, b, epsilon);
         }
-        return b.x == a.x && b.y == a.y && b.z == a.z;
+        return b.x === a.x && b.y === a.y && b.z === a.z;
     }
     static EqualsWithinEpsilon(a, b, epsilon) {
         epsilon = epsilon ?? _math__WEBPACK_IMPORTED_MODULE_0__.Scalar.EPSILON;
@@ -4057,6 +4279,16 @@ class Cartesian3 extends Cartesian2 {
     }
     static Clone(other) {
         return new Cartesian3(other.x, other.y, other.z);
+    }
+    static Reset(a, x, y, z = 0.0) {
+        a.x = x;
+        a.y = y;
+        a.z = z;
+    }
+    static ResetFromArray(a, src, offset = 0) {
+        a.x = src[offset++];
+        a.y = src[offset++];
+        a.z = src[offset];
     }
     constructor(x, y, z = 0.0) {
         super(x, y);
@@ -6672,7 +6904,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   AbstractRange: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_8__.AbstractRange),
 /* harmony export */   AbstractShape: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.AbstractShape),
-/* harmony export */   AbstractStreamSourceProducer: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_15__.AbstractStreamSourceProducer),
 /* harmony export */   AbstractTileLoader: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.AbstractTileLoader),
 /* harmony export */   AbstractTileMetrics: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.AbstractTileMetrics),
 /* harmony export */   Angle: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_8__.Angle),
@@ -6701,9 +6932,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   CartesianMode: () => (/* reexport safe */ _geodesy_index__WEBPACK_IMPORTED_MODULE_3__.CartesianMode),
 /* harmony export */   CellCoordinateReference: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.CellCoordinateReference),
 /* harmony export */   Circle: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.Circle),
+/* harmony export */   ClosestDistanceToAABB: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_15__.ClosestDistanceToAABB),
+/* harmony export */   ConstantSSEBudget: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_15__.ConstantSSEBudget),
 /* harmony export */   Context2DTileMap: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_7__.Context2DTileMap),
 /* harmony export */   Current: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_8__.Current),
 /* harmony export */   DebugTouchConsole: () => (/* reexport safe */ _utils_index__WEBPACK_IMPORTED_MODULE_10__.DebugTouchConsole),
+/* harmony export */   DefaultScreenSpaceErrorFn: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_15__.DefaultScreenSpaceErrorFn),
 /* harmony export */   DemInfos: () => (/* reexport safe */ _dem_index__WEBPACK_IMPORTED_MODULE_12__.DemInfos),
 /* harmony export */   DemTileWebClient: () => (/* reexport safe */ _dem_index__WEBPACK_IMPORTED_MODULE_12__.DemTileWebClient),
 /* harmony export */   DeserializeLocalizableString: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.DeserializeLocalizableString),
@@ -6711,6 +6945,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   EPSG3857: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.EPSG3857),
 /* harmony export */   ElevationHelpers: () => (/* reexport safe */ _dem_index__WEBPACK_IMPORTED_MODULE_12__.ElevationHelpers),
 /* harmony export */   Ellipsoid: () => (/* reexport safe */ _geodesy_index__WEBPACK_IMPORTED_MODULE_3__.Ellipsoid),
+/* harmony export */   EmptyTileBounds: () => (/* reexport safe */ _streaming_tile__WEBPACK_IMPORTED_MODULE_16__.EmptyTileBounds),
 /* harmony export */   Envelope: () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_4__.Envelope),
 /* harmony export */   EventArgs: () => (/* reexport safe */ _events_index__WEBPACK_IMPORTED_MODULE_2__.EventArgs),
 /* harmony export */   EventEmitter: () => (/* reexport safe */ _events_index__WEBPACK_IMPORTED_MODULE_2__.EventEmitter),
@@ -6748,7 +6983,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   InpustNavigationControllerOptions: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_7__.InpustNavigationControllerOptions),
 /* harmony export */   InputController: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_7__.InputController),
 /* harmony export */   InputsNavigationController: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_7__.InputsNavigationController),
+/* harmony export */   IntersectsBoundingBox: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_15__.IntersectsBoundingBox),
 /* harmony export */   IsArrayOfTile: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.IsArrayOfTile),
+/* harmony export */   IsBeyondHorizon: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_15__.IsBeyondHorizon),
 /* harmony export */   IsBounded: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.IsBounded),
 /* harmony export */   IsBounds: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.IsBounds),
 /* harmony export */   IsDemInfos: () => (/* reexport safe */ _dem_index__WEBPACK_IMPORTED_MODULE_12__.IsDemInfos),
@@ -6767,7 +7004,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   IsSize: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.IsSize),
 /* harmony export */   IsSize3: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.IsSize3),
 /* harmony export */   IsStreamSource: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_15__.IsStreamSource),
-/* harmony export */   IsStreamingViewTarget: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_15__.IsStreamingViewTarget),
+/* harmony export */   IsStreamSubEngine: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_15__.IsStreamSubEngine),
 /* harmony export */   IsString: () => (/* reexport safe */ _types__WEBPACK_IMPORTED_MODULE_0__.IsString),
 /* harmony export */   IsTargetBlock: () => (/* reexport safe */ _dataflow_index__WEBPACK_IMPORTED_MODULE_6__.IsTargetBlock),
 /* harmony export */   IsTile: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.IsTile),
@@ -6790,6 +7027,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   LocalString: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.LocalString),
 /* harmony export */   Luminosity: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_8__.Luminosity),
 /* harmony export */   MakePlaneFromPointAndNormal: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.MakePlaneFromPointAndNormal),
+/* harmony export */   MapOverflightVisibilityPolicy: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_15__.MapOverflightVisibilityPolicy),
 /* harmony export */   MapScale: () => (/* reexport safe */ _geodesy_index__WEBPACK_IMPORTED_MODULE_3__.MapScale),
 /* harmony export */   MapZen: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.MapZen),
 /* harmony export */   MapZenDemUrlBuilder: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.MapZenDemUrlBuilder),
@@ -6808,6 +7046,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   OctreeNode: () => (/* reexport safe */ _tree__WEBPACK_IMPORTED_MODULE_14__.OctreeNode),
 /* harmony export */   OctreeSplitter: () => (/* reexport safe */ _tree__WEBPACK_IMPORTED_MODULE_14__.OctreeSplitter),
 /* harmony export */   PathUtils: () => (/* reexport safe */ _utils_index__WEBPACK_IMPORTED_MODULE_10__.PathUtils),
+/* harmony export */   PiecewiseLinearSSEBudget: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_15__.PiecewiseLinearSSEBudget),
 /* harmony export */   PlaneCruncher: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.PlaneCruncher),
 /* harmony export */   PlaneDefinition: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.PlaneDefinition),
 /* harmony export */   Point: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.Point),
@@ -6828,6 +7067,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   RGBTileCodec: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.RGBTileCodec),
 /* harmony export */   Range: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_8__.Range),
 /* harmony export */   RegionCode: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.RegionCode),
+/* harmony export */   ResolveSSEBudget: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_15__.ResolveSSEBudget),
 /* harmony export */   RibbonBuilder: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.RibbonBuilder),
 /* harmony export */   RibbonOptions: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.RibbonOptions),
 /* harmony export */   RoundRobin: () => (/* reexport safe */ _tree__WEBPACK_IMPORTED_MODULE_14__.RoundRobin),
@@ -6844,8 +7084,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   SpatialTreeNode: () => (/* reexport safe */ _tree__WEBPACK_IMPORTED_MODULE_14__.SpatialTreeNode),
 /* harmony export */   Speed: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_8__.Speed),
 /* harmony export */   SphericalCalculator: () => (/* reexport safe */ _geodesy_index__WEBPACK_IMPORTED_MODULE_3__.SphericalCalculator),
+/* harmony export */   StepwiseSSEBudget: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_15__.StepwiseSSEBudget),
+/* harmony export */   StreamActiveContext: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_15__.StreamActiveContext),
+/* harmony export */   StreamSourceContentAdapter: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_15__.StreamSourceContentAdapter),
 /* harmony export */   StreamingEngine: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_15__.StreamingEngine),
-/* harmony export */   StreamingView: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_15__.StreamingView),
+/* harmony export */   TILE_PYRAMID_CONTENT_TYPE: () => (/* reexport safe */ _streaming_tile__WEBPACK_IMPORTED_MODULE_16__.TILE_PYRAMID_CONTENT_TYPE),
 /* harmony export */   TILE_STREAM_CONTENT_TYPE: () => (/* reexport safe */ _streaming_tile__WEBPACK_IMPORTED_MODULE_16__.TILE_STREAM_CONTENT_TYPE),
 /* harmony export */   TargetProxy: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TargetProxy),
 /* harmony export */   Temperature: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_8__.Temperature),
@@ -6859,6 +7102,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   TileCollection: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TileCollection),
 /* harmony export */   TileContentFetcher: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TileContentFetcher),
 /* harmony export */   TileLoader: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TileLoader),
+/* harmony export */   TileLoaderAdapter: () => (/* reexport safe */ _streaming_tile__WEBPACK_IMPORTED_MODULE_16__.TileLoaderAdapter),
 /* harmony export */   TileMapBase: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TileMapBase),
 /* harmony export */   TileMapLayer: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TileMapLayer),
 /* harmony export */   TileMapLayerView: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TileMapLayerView),
@@ -6867,8 +7111,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   TileNavigationState: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TileNavigationState),
 /* harmony export */   TileNavigationStateSynchronizer: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TileNavigationStateSynchronizer),
 /* harmony export */   TilePipelineLink: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TilePipelineLink),
+/* harmony export */   TilePyramidStreamSource: () => (/* reexport safe */ _streaming_tile__WEBPACK_IMPORTED_MODULE_16__.TilePyramidStreamSource),
 /* harmony export */   TileStreamSource: () => (/* reexport safe */ _streaming_tile__WEBPACK_IMPORTED_MODULE_16__.TileStreamSource),
-/* harmony export */   TileStreamSourceProducer: () => (/* reexport safe */ _streaming_tile__WEBPACK_IMPORTED_MODULE_16__.TileStreamSourceProducer),
 /* harmony export */   TileSystemBounds: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TileSystemBounds),
 /* harmony export */   TileVectorRenderer: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TileVectorRenderer),
 /* harmony export */   TileView: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TileView),
@@ -9264,18 +9508,30 @@ Speed.Units = {};
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   AbstractStreamSourceProducer: () => (/* reexport safe */ _streaming_producer_abstract__WEBPACK_IMPORTED_MODULE_3__.AbstractStreamSourceProducer),
+/* harmony export */   ClosestDistanceToAABB: () => (/* reexport safe */ _streaming_visibility_overflight__WEBPACK_IMPORTED_MODULE_4__.ClosestDistanceToAABB),
+/* harmony export */   ConstantSSEBudget: () => (/* reexport safe */ _streaming_visibility_budget__WEBPACK_IMPORTED_MODULE_2__.ConstantSSEBudget),
+/* harmony export */   DefaultScreenSpaceErrorFn: () => (/* reexport safe */ _streaming_visibility_overflight__WEBPACK_IMPORTED_MODULE_4__.DefaultScreenSpaceErrorFn),
+/* harmony export */   IntersectsBoundingBox: () => (/* reexport safe */ _streaming_engine__WEBPACK_IMPORTED_MODULE_6__.IntersectsBoundingBox),
+/* harmony export */   IsBeyondHorizon: () => (/* reexport safe */ _streaming_visibility_overflight__WEBPACK_IMPORTED_MODULE_4__.IsBeyondHorizon),
 /* harmony export */   IsStreamSource: () => (/* reexport safe */ _streaming_datasource_interfaces__WEBPACK_IMPORTED_MODULE_0__.IsStreamSource),
-/* harmony export */   IsStreamingViewTarget: () => (/* reexport safe */ _streaming_view__WEBPACK_IMPORTED_MODULE_4__.IsStreamingViewTarget),
-/* harmony export */   ScreenSpaceErrorPolicy: () => (/* reexport safe */ _streaming_visibility_sse__WEBPACK_IMPORTED_MODULE_1__.ScreenSpaceErrorPolicy),
-/* harmony export */   StreamingEngine: () => (/* reexport safe */ _streaming_engine__WEBPACK_IMPORTED_MODULE_2__.StreamingEngine),
-/* harmony export */   StreamingView: () => (/* reexport safe */ _streaming_view__WEBPACK_IMPORTED_MODULE_4__.StreamingView)
+/* harmony export */   IsStreamSubEngine: () => (/* reexport safe */ _streaming_subengine_interfaces__WEBPACK_IMPORTED_MODULE_1__.IsStreamSubEngine),
+/* harmony export */   MapOverflightVisibilityPolicy: () => (/* reexport safe */ _streaming_visibility_overflight__WEBPACK_IMPORTED_MODULE_4__.MapOverflightVisibilityPolicy),
+/* harmony export */   PiecewiseLinearSSEBudget: () => (/* reexport safe */ _streaming_visibility_budget__WEBPACK_IMPORTED_MODULE_2__.PiecewiseLinearSSEBudget),
+/* harmony export */   ResolveSSEBudget: () => (/* reexport safe */ _streaming_visibility_budget__WEBPACK_IMPORTED_MODULE_2__.ResolveSSEBudget),
+/* harmony export */   ScreenSpaceErrorPolicy: () => (/* reexport safe */ _streaming_visibility_sse__WEBPACK_IMPORTED_MODULE_3__.ScreenSpaceErrorPolicy),
+/* harmony export */   StepwiseSSEBudget: () => (/* reexport safe */ _streaming_visibility_budget__WEBPACK_IMPORTED_MODULE_2__.StepwiseSSEBudget),
+/* harmony export */   StreamActiveContext: () => (/* reexport safe */ _streaming_active_context__WEBPACK_IMPORTED_MODULE_5__.StreamActiveContext),
+/* harmony export */   StreamSourceContentAdapter: () => (/* reexport safe */ _streaming_content_adapter__WEBPACK_IMPORTED_MODULE_7__.StreamSourceContentAdapter),
+/* harmony export */   StreamingEngine: () => (/* reexport safe */ _streaming_engine__WEBPACK_IMPORTED_MODULE_6__.StreamingEngine)
 /* harmony export */ });
 /* harmony import */ var _streaming_datasource_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./streaming.datasource.interfaces */ "../core/dist/streaming/streaming.datasource.interfaces.js");
-/* harmony import */ var _streaming_visibility_sse__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./streaming.visibility.sse */ "../core/dist/streaming/streaming.visibility.sse.js");
-/* harmony import */ var _streaming_engine__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./streaming.engine */ "../core/dist/streaming/streaming.engine.js");
-/* harmony import */ var _streaming_producer_abstract__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./streaming.producer.abstract */ "../core/dist/streaming/streaming.producer.abstract.js");
-/* harmony import */ var _streaming_view__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./streaming.view */ "../core/dist/streaming/streaming.view.js");
+/* harmony import */ var _streaming_subengine_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./streaming.subengine.interfaces */ "../core/dist/streaming/streaming.subengine.interfaces.js");
+/* harmony import */ var _streaming_visibility_budget__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./streaming.visibility.budget */ "../core/dist/streaming/streaming.visibility.budget.js");
+/* harmony import */ var _streaming_visibility_sse__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./streaming.visibility.sse */ "../core/dist/streaming/streaming.visibility.sse.js");
+/* harmony import */ var _streaming_visibility_overflight__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./streaming.visibility.overflight */ "../core/dist/streaming/streaming.visibility.overflight.js");
+/* harmony import */ var _streaming_active_context__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./streaming.active.context */ "../core/dist/streaming/streaming.active.context.js");
+/* harmony import */ var _streaming_engine__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./streaming.engine */ "../core/dist/streaming/streaming.engine.js");
+/* harmony import */ var _streaming_content_adapter__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./streaming.content.adapter */ "../core/dist/streaming/streaming.content.adapter.js");
 // Public surface of the streaming module is domain-agnostic.
 // Tile-specific adapters live under streaming/tile and must be imported
 // explicitly (or via the root barrel) by consumers that need them.
@@ -9285,7 +9541,123 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
+
 //# sourceMappingURL=index.js.map
+
+/***/ },
+
+/***/ "../core/dist/streaming/streaming.active.context.js"
+/*!**********************************************************!*\
+  !*** ../core/dist/streaming/streaming.active.context.js ***!
+  \**********************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   StreamActiveContext: () => (/* binding */ StreamActiveContext)
+/* harmony export */ });
+/* harmony import */ var _collections_priorityQueue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../collections/priorityQueue */ "../core/dist/collections/priorityQueue.js");
+
+/**
+ * Per-view mutable state maintained by StreamingEngine.
+ *
+ * Matches the "cut / parents / frontier" terminology commonly used in 3DTiles
+ * engines :
+ *  - `cut`       : items currently emitted to consumers (the leaves of the
+ *                  current selection).
+ *  - `parents`   : octree cells whose decision was "refine" this frame
+ *                  (ancestors of cut cells, kept for warm-start traversal).
+ *  - `frontier`  : octree cells whose decision was "load" this frame (the
+ *                  cells whose items populate `cut`).
+ *  - `refinePQ`  : priority queue of candidate refine operations, ordered so
+ *                  `dequeue` returns the highest-SSE item first (worst
+ *                  offender = most urgent to refine).
+ *  - `coarsenPQ` : priority queue of candidate coarsen operations, ordered so
+ *                  `dequeue` returns the lowest-SSE item first (least useful
+ *                  = safest to drop when coarsening is budgeted).
+ *
+ * `parents` and `frontier` are populated only by traversals that use the
+ * octree (the engine's default `_traverse`). Custom sub-engines that walk
+ * their own structure (tile pyramid, 3DTiles tree, …) simply leave them
+ * untouched.
+ */
+class StreamActiveContext {
+    constructor() {
+        this.camera = null;
+        this.cut = new Map();
+        this.parents = new Set();
+        this.frontier = new Set();
+        /** Monotonic frame counter incremented on every `_refresh`. */
+        this.frame = 0;
+        this.refinePQ = _collections_priorityQueue__WEBPACK_IMPORTED_MODULE_0__.PriorityQueue.fromMax((e) => e.priority);
+        this.coarsenPQ = _collections_priorityQueue__WEBPACK_IMPORTED_MODULE_0__.PriorityQueue.fromMin((e) => e.priority);
+    }
+    /** Drops the octree warm-start frontier. Forces a cold traversal from the roots next frame. */
+    resetTraversalFrontier() {
+        this.parents.clear();
+        this.frontier.clear();
+    }
+}
+//# sourceMappingURL=streaming.active.context.js.map
+
+/***/ },
+
+/***/ "../core/dist/streaming/streaming.content.adapter.js"
+/*!***********************************************************!*\
+  !*** ../core/dist/streaming/streaming.content.adapter.js ***!
+  \***********************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   StreamSourceContentAdapter: () => (/* binding */ StreamSourceContentAdapter)
+/* harmony export */ });
+/* harmony import */ var _tiles_pipeline_tiles_pipeline_sourceblock__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../tiles/pipeline/tiles.pipeline.sourceblock */ "../core/dist/tiles/pipeline/tiles.pipeline.sourceblock.js");
+
+/**
+ * Generic unwrap adapter for streaming pipelines.
+ *
+ * Target side : `ITargetBlock<IStreamSource<T>>` (receives stream sources).
+ * Source side : `ISourceBlock<T>` (emits their `content`, skipping null ones).
+ *
+ * Lets hosts wire any `IStreamSource<T>` emitter (typically a sub-engine like
+ * TilePyramidStreamSource) to a downstream block that consumes the raw `T`
+ * content (e.g. an existing ITileLoader that consumes `ITile2DAddress`).
+ *
+ * Items whose `content` is null / undefined are silently skipped on each of
+ * the three channels; only payload-bearing items propagate.
+ */
+class StreamSourceContentAdapter extends _tiles_pipeline_tiles_pipeline_sourceblock__WEBPACK_IMPORTED_MODULE_0__.SourceBlock {
+    constructor() {
+        super(...arguments);
+        this.added = (batch, _es) => {
+            const out = this._unwrap(batch);
+            if (out.length > 0)
+                this.notifyAdded(out);
+        };
+        this.updated = (batch, _es) => {
+            const out = this._unwrap(batch);
+            if (out.length > 0)
+                this.notifyUpdated(out);
+        };
+        this.removed = (batch, _es) => {
+            const out = this._unwrap(batch);
+            if (out.length > 0)
+                this.notifyRemoved(out);
+        };
+    }
+    _unwrap(batch) {
+        const out = [];
+        for (const s of batch) {
+            const c = s.content;
+            if (c !== null && c !== undefined)
+                out.push(c);
+        }
+        return out;
+    }
+}
+//# sourceMappingURL=streaming.content.adapter.js.map
 
 /***/ },
 
@@ -9317,188 +9689,65 @@ function IsStreamSource(b) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   IntersectsBoundingBox: () => (/* binding */ IntersectsBoundingBox),
+/* harmony export */   StreamActiveContext: () => (/* reexport safe */ _streaming_active_context__WEBPACK_IMPORTED_MODULE_1__.StreamActiveContext),
 /* harmony export */   StreamingEngine: () => (/* binding */ StreamingEngine)
 /* harmony export */ });
 /* harmony import */ var _tiles_pipeline_tiles_pipeline_sourceblock__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../tiles/pipeline/tiles.pipeline.sourceblock */ "../core/dist/tiles/pipeline/tiles.pipeline.sourceblock.js");
-/* harmony import */ var _streaming_visibility_sse__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./streaming.visibility.sse */ "../core/dist/streaming/streaming.visibility.sse.js");
+/* harmony import */ var _streaming_active_context__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./streaming.active.context */ "../core/dist/streaming/streaming.active.context.js");
+/* harmony import */ var _streaming_subengine_interfaces__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./streaming.subengine.interfaces */ "../core/dist/streaming/streaming.subengine.interfaces.js");
+/* harmony import */ var _streaming_visibility_sse__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./streaming.visibility.sse */ "../core/dist/streaming/streaming.visibility.sse.js");
+
+
 
 
 /**
- * Per-camera engine that traverses shared octrees, applies visibility policies,
- * diffs against the previous active set, and emits datasource activations
- * through the SourceBlock pipeline pattern.
+ * AABB intersection test on two IBoundingBox (min/max). Inclusive on the edges.
+ */
+function IntersectsBoundingBox(a, b) {
+    return (a.minimum.x <= b.maximum.x &&
+        a.maximum.x >= b.minimum.x &&
+        a.minimum.y <= b.maximum.y &&
+        a.maximum.y >= b.minimum.y &&
+        a.minimum.z <= b.maximum.z &&
+        a.maximum.z >= b.minimum.z);
+}
+/**
+ * Multi-view streaming engine.
  *
- * Emission model:
- *  - addedObservable: datasources newly activated (operation: activate)
- *  - removedObservable: datasources newly deactivated (operation: deactivate)
- *  - updatedObservable: active datasources whose bounds changed (operation: update)
+ * Drives the streaming pipeline for one or more cameras through explicit
+ * `setContext(viewId, camera, clipBounds?)` pushes.
  *
- * The engine holds a Set of currently-visible cells and a Map of active sources,
- * which lets it react incrementally to octree mutations (fleet-monitoring case).
+ * Each refresh :
+ *  1. Full traversal populates `cut` candidates (desired set).
+ *  2. Diff vs the current cut seeds the `refinePQ` (new sources, max-SSE first)
+ *     and `coarsenPQ` (dropped sources, min-SSE first) of the view's
+ *     `StreamActiveContext`.
+ *  3. Up to `maxRefinePerFrame` items are dequeued from `refinePQ` and
+ *     activated ; up to `maxCoarsenPerFrame` from `coarsenPQ` and
+ *     deactivated. Leftovers are seen again next frame (lazy convergence).
+ *  4. `setContext(viewId, camera, clipBounds)` is forwarded to every active
+ *     sub-engine so they refresh their own sub-traversal.
+ *
+ * The default `_traverse` walks the configured octrees with the given policy
+ * and is designed to be overridden by subclasses that model their own spatial
+ * structure (quadtree + ellipsoid for `TilePyramidStreamSource`, for example).
  */
 class StreamingEngine extends _tiles_pipeline_tiles_pipeline_sourceblock__WEBPACK_IMPORTED_MODULE_0__.SourceBlock {
-    constructor(options) {
+    constructor(options = {}) {
         super();
-        this._visibleCells = new Set();
-        this._refineCells = new Set();
-        this._active = new Map();
-        this._cameraObserver = null;
+        this._views = new Map();
+        this._activeSubEngines = new Set();
         this._octreeObservers = [];
-        this._viewId = options.viewId;
-        this._camera = options.camera;
-        this._octrees = options.octrees;
-        this._defaultPolicy = options.defaultPolicy ?? new _streaming_visibility_sse__WEBPACK_IMPORTED_MODULE_1__.ScreenSpaceErrorPolicy();
-        this._autoRefresh = options.autoRefresh ?? true;
-        if (this._autoRefresh) {
-            this._subscribeAll();
-        }
-    }
-    get viewId() {
-        return this._viewId;
-    }
-    get visibleCells() {
-        return this._visibleCells;
-    }
-    get activeSources() {
-        return this._active;
-    }
-    /**
-     * Runs a traversal, diffs against the current state and emits activations.
-     *
-     * By default the traversal is incremental: it starts from the parents of last
-     * frame's frontier (_refineCells ∪ _visibleCells), dedup'd via a visited set.
-     * This avoids re-walking the whole tree when the camera moves slightly.
-     *
-     * Pass `clearCache = true` to force a full traversal from the tree roots
-     * (camera teleport, octree swap, fresh world, etc.).
-     *
-     * Diff semantics:
-     *   - invisible → visible : emit "activate"
-     *   - visible   → invisible : emit "deactivate"
-     * The engine is the visibility authority. It does not broadcast bounds changes
-     * of active items: the scene already holds the IStreamSource reference and can
-     * observe its bounds directly if needed.
-     */
-    refresh(clearCache = false) {
-        if (clearCache) {
-            this._refineCells.clear();
-            this._visibleCells.clear();
-        }
-        const nextRefine = new Set();
-        const nextCells = new Set();
-        const nextItems = new Map();
-        const visited = new Set();
-        const startCells = this._computeStartCells();
-        for (const start of startCells) {
-            this._traverse(start, visited, nextRefine, nextCells, nextItems);
-        }
-        const added = [];
-        const removed = [];
-        for (const [id, src] of nextItems) {
-            if (!this._active.has(id)) {
-                added.push({ source: src, operation: "activate", priority: 0, viewId: this._viewId });
-            }
-        }
-        for (const [id, src] of this._active) {
-            if (!nextItems.has(id)) {
-                removed.push({ source: src, operation: "deactivate", priority: 0, viewId: this._viewId });
-            }
-        }
-        this._refineCells = nextRefine;
-        this._visibleCells = nextCells;
-        this._active = nextItems;
-        if (added.length > 0)
-            this.notifyAdded(added);
-        if (removed.length > 0)
-            this.notifyRemoved(removed);
-    }
-    /**
-     * Forces the next refresh to traverse from the roots. Use after camera teleports
-     * or any event that invalidates the incremental state. Equivalent to `refresh(true)`
-     * when called before `refresh()`.
-     */
-    resetTraversalCache() {
-        this._refineCells.clear();
-        this._visibleCells.clear();
-    }
-    dispose() {
-        this._unsubscribeAll();
-        super.dispose();
-    }
-    _traverse(node, visited, refineOut, cellsOut, itemsOut) {
-        if (visited.has(node))
-            return;
-        visited.add(node);
-        const policy = node.resolveVisibilityPolicy?.() ?? this._defaultPolicy;
-        const decision = policy.evaluate(node, this._camera);
-        switch (decision.kind) {
-            case "cull":
-                return;
-            case "load":
-                cellsOut.add(node);
-                this._collectSubtree(node, itemsOut);
-                return;
-            case "refine":
-                if (node.children && node.children.length > 0) {
-                    refineOut.add(node);
-                    for (const c of node.children) {
-                        this._traverse(c, visited, refineOut, cellsOut, itemsOut);
-                    }
-                }
-                else {
-                    cellsOut.add(node);
-                    this._collectSubtree(node, itemsOut);
-                }
-                return;
-        }
-    }
-    /**
-     * Returns the nodes from which the traversal should descend on this frame.
-     *
-     * - Cold start (no prior frontier): the roots of every octree.
-     * - Warm start: parents of every cell in the prior frontier. Walking up one
-     *   level catches siblings that transition from cull to load/refine when the
-     *   camera moves slightly. The `visited` set in `_traverse` handles the overlap.
-     *
-     * For a camera jump that moves past that one-level neighborhood, call
-     * `refresh(true)` or `resetTraversalCache()` to force a full re-traversal.
-     */
-    _computeStartCells() {
-        if (this._refineCells.size === 0 && this._visibleCells.size === 0) {
-            return this._octrees.map((t) => t.root);
-        }
-        const starts = new Set();
-        const push = (cell) => {
-            const anchor = cell.parent ?? cell;
-            starts.add(anchor);
-        };
-        for (const cell of this._refineCells)
-            push(cell);
-        for (const cell of this._visibleCells)
-            push(cell);
-        return Array.from(starts);
-    }
-    _collectSubtree(node, out) {
-        if (node.items) {
-            for (const item of node.items.data) {
-                out.set(item.id, item);
-            }
-        }
-        if (node.children) {
-            for (const c of node.children) {
-                this._collectSubtree(c, out);
-            }
-        }
-    }
-    _subscribeAll() {
-        if (this._camera.propertyChangedObservable) {
-            const obs = this._camera.propertyChangedObservable.add(() => this.refresh());
-            this._cameraObserver = obs;
-        }
+        this._octrees = options.octrees ?? [];
+        this._defaultPolicy = options.defaultPolicy ?? new _streaming_visibility_sse__WEBPACK_IMPORTED_MODULE_3__.ScreenSpaceErrorPolicy();
+        this._maxRefinePerFrame = options.maxRefinePerFrame ?? Number.POSITIVE_INFINITY;
+        this._maxCoarsenPerFrame = options.maxCoarsenPerFrame ?? Number.POSITIVE_INFINITY;
+        this._minFramesBeforeCoarsen = Math.max(0, options.minFramesBeforeCoarsen ?? 0);
         for (const tree of this._octrees) {
-            const onAdded = tree.addedObservable.add(() => this.refresh());
-            const onRemoved = tree.removedObservable.add(() => this.refresh());
-            const onUpdated = tree.updatedObservable.add(() => this.refresh());
+            const onAdded = tree.addedObservable.add(() => this._onOctreeChanged());
+            const onRemoved = tree.removedObservable.add(() => this._onOctreeChanged());
+            const onUpdated = tree.updatedObservable.add(() => this._onOctreeChanged());
             if (onAdded)
                 this._octreeObservers.push(onAdded);
             if (onRemoved)
@@ -9506,348 +9755,540 @@ class StreamingEngine extends _tiles_pipeline_tiles_pipeline_sourceblock__WEBPAC
             if (onUpdated)
                 this._octreeObservers.push(onUpdated);
         }
-        this.refresh();
     }
-    _unsubscribeAll() {
-        this._cameraObserver?.disconnect();
-        this._cameraObserver = null;
+    get activeViewCount() {
+        return this._views.size;
+    }
+    get maxRefinePerFrame() {
+        return this._maxRefinePerFrame;
+    }
+    get maxCoarsenPerFrame() {
+        return this._maxCoarsenPerFrame;
+    }
+    activate(viewId) {
+        if (this._views.has(viewId))
+            return;
+        this._views.set(viewId, new _streaming_active_context__WEBPACK_IMPORTED_MODULE_1__.StreamActiveContext());
+    }
+    setContext(viewId, camera, clipBounds) {
+        let ctx = this._views.get(viewId);
+        if (!ctx) {
+            this.activate(viewId);
+            ctx = this._views.get(viewId);
+        }
+        ctx.camera = camera;
+        ctx.clipBounds = clipBounds;
+        this._refresh(viewId, ctx);
+    }
+    deactivate(viewId) {
+        const ctx = this._views.get(viewId);
+        if (!ctx)
+            return;
+        const removed = [];
+        for (const entry of ctx.cut.values()) {
+            if ((0,_streaming_subengine_interfaces__WEBPACK_IMPORTED_MODULE_2__.IsStreamSubEngine)(entry.source)) {
+                const se = entry.source;
+                se.deactivate(viewId);
+                if (se.activeViewCount === 0)
+                    this._activeSubEngines.delete(se);
+            }
+            removed.push(entry.source);
+        }
+        this._views.delete(viewId);
+        if (removed.length > 0)
+            this.notifyRemoved(removed);
+    }
+    dispose() {
+        for (const viewId of Array.from(this._views.keys()))
+            this.deactivate(viewId);
+        this._activeSubEngines.clear();
         for (const o of this._octreeObservers)
             o.disconnect();
         this._octreeObservers = [];
+        super.dispose();
+    }
+    /**
+     * Drops the octree warm-start frontier for one view (or all). Next refresh
+     * runs a cold traversal from the octree roots.
+     */
+    resetTraversalCache(viewId) {
+        if (viewId) {
+            this._views.get(viewId)?.resetTraversalFrontier();
+            return;
+        }
+        for (const ctx of this._views.values())
+            ctx.resetTraversalFrontier();
+    }
+    /** Read-only view of a context's cut (for diagnostics). */
+    getActiveSources(viewId) {
+        const ctx = this._views.get(viewId);
+        if (!ctx)
+            return undefined;
+        const out = new Map();
+        for (const [id, entry] of ctx.cut)
+            out.set(id, entry.source);
+        return out;
+    }
+    // ───────── refresh / diff / forwarding ─────────
+    _refresh(viewId, ctx) {
+        if (!ctx.camera)
+            return;
+        ctx.frame++;
+        const frame = ctx.frame;
+        // Reset octree frontier for this refresh. Traversal will re-populate.
+        const nextParents = new Set();
+        const nextFrontier = new Set();
+        const nextEntries = new Map();
+        this._traverse(ctx.camera, ctx, nextParents, nextFrontier, nextEntries);
+        // Swap in fresh octree frontier immediately : it tracks traversal state,
+        // not emission state, and next frame's warm-start reads it directly.
+        ctx.parents.clear();
+        for (const n of nextParents)
+            ctx.parents.add(n);
+        ctx.frontier.clear();
+        for (const n of nextFrontier)
+            ctx.frontier.add(n);
+        // Build refine / coarsen queues from the diff.
+        ctx.refinePQ.clear();
+        ctx.coarsenPQ.clear();
+        for (const [id, entry] of nextEntries) {
+            if (!ctx.cut.has(id))
+                ctx.refinePQ.enqueue(entry);
+        }
+        for (const [id, entry] of ctx.cut) {
+            if (!nextEntries.has(id)) {
+                // Min-age gate : freshly-added entries survive at least a few frames
+                // to avoid activation/deactivation oscillation near a SSE threshold.
+                if (this._minFramesBeforeCoarsen > 0 && frame - entry.activatedFrame < this._minFramesBeforeCoarsen) {
+                    continue;
+                }
+                ctx.coarsenPQ.enqueue(entry);
+            }
+        }
+        // Apply per-frame budgets. Leftovers survive to next refresh via the diff.
+        const addedSources = [];
+        let refineBudget = this._maxRefinePerFrame;
+        while (refineBudget > 0 && !ctx.refinePQ.isEmpty()) {
+            const entry = ctx.refinePQ.dequeue();
+            if (!entry)
+                break;
+            entry.activatedFrame = frame;
+            entry.lastSeenFrame = frame;
+            ctx.cut.set(entry.source.id, entry);
+            if ((0,_streaming_subengine_interfaces__WEBPACK_IMPORTED_MODULE_2__.IsStreamSubEngine)(entry.source)) {
+                const se = entry.source;
+                se.activate(viewId);
+                this._activeSubEngines.add(se);
+            }
+            addedSources.push(entry.source);
+            refineBudget--;
+        }
+        const removedSources = [];
+        let coarsenBudget = this._maxCoarsenPerFrame;
+        while (coarsenBudget > 0 && !ctx.coarsenPQ.isEmpty()) {
+            const entry = ctx.coarsenPQ.dequeue();
+            if (!entry)
+                break;
+            ctx.cut.delete(entry.source.id);
+            if ((0,_streaming_subengine_interfaces__WEBPACK_IMPORTED_MODULE_2__.IsStreamSubEngine)(entry.source)) {
+                const se = entry.source;
+                se.deactivate(viewId);
+                if (se.activeViewCount === 0)
+                    this._activeSubEngines.delete(se);
+            }
+            removedSources.push(entry.source);
+            coarsenBudget--;
+        }
+        // Refresh stored priorities + lastSeenFrame of entries still present on
+        // both sides (their SSE moved as the camera moved, they are still alive).
+        for (const [id, entry] of ctx.cut) {
+            const next = nextEntries.get(id);
+            if (next) {
+                entry.priority = next.priority;
+                entry.lastSeenFrame = frame;
+            }
+        }
+        // Forward the fresh context to every currently-active sub-engine. Each
+        // sub-engine no-ops on viewIds it has not activated.
+        for (const se of this._activeSubEngines) {
+            se.setContext(viewId, ctx.camera, ctx.clipBounds);
+        }
+        if (addedSources.length > 0)
+            this.notifyAdded(addedSources);
+        if (removedSources.length > 0)
+            this.notifyRemoved(removedSources);
+    }
+    // ───────── traversal (overridable) ─────────
+    /**
+     * Default octree-based traversal : walks from the frontier anchors (or the
+     * octree roots on a cold start), applies per-cell visibility policies and
+     * collects leaf items with their cell-level priority.
+     *
+     * Subclasses override this when their engine does not use an octree (e.g.
+     * a tile pyramid traverses its implicit quadtree with a per-tile SSE).
+     * Octree-specific `parentsOut` / `frontierOut` populate the `parents` and
+     * `frontier` sets of `StreamActiveContext` ; subclasses may leave them empty.
+     */
+    _traverse(camera, ctx, parentsOut, frontierOut, entriesOut) {
+        const visited = new Set();
+        const starts = this._computeStartCells(ctx);
+        for (const start of starts) {
+            this._traverseNode(start, camera, ctx.clipBounds, visited, parentsOut, frontierOut, entriesOut);
+        }
+    }
+    _traverseNode(node, camera, clipBounds, visited, parentsOut, frontierOut, entriesOut) {
+        if (visited.has(node))
+            return;
+        visited.add(node);
+        // clipBounds pre-filter : skip whole sub-trees outside the requested region.
+        if (clipBounds && node.boundingBox && !IntersectsBoundingBox(node.boundingBox, clipBounds)) {
+            return;
+        }
+        const policy = node.resolveVisibilityPolicy?.() ?? this._defaultPolicy;
+        const decision = policy.evaluate(node, camera);
+        switch (decision.kind) {
+            case "cull":
+                return;
+            case "load": {
+                frontierOut.add(node);
+                const priority = decision.priority ?? 0;
+                this._collectSubtree(node, clipBounds, priority, entriesOut);
+                return;
+            }
+            case "refine":
+                if (node.children && node.children.length > 0) {
+                    parentsOut.add(node);
+                    for (const c of node.children) {
+                        this._traverseNode(c, camera, clipBounds, visited, parentsOut, frontierOut, entriesOut);
+                    }
+                }
+                else {
+                    frontierOut.add(node);
+                    const priority = decision.priority ?? 0;
+                    this._collectSubtree(node, clipBounds, priority, entriesOut);
+                }
+                return;
+        }
+    }
+    _computeStartCells(ctx) {
+        if (ctx.parents.size === 0 && ctx.frontier.size === 0) {
+            return this._octrees.map((t) => t.root);
+        }
+        const starts = new Set();
+        const push = (cell) => {
+            const anchor = cell.parent ?? cell;
+            starts.add(anchor);
+        };
+        for (const cell of ctx.parents)
+            push(cell);
+        for (const cell of ctx.frontier)
+            push(cell);
+        return Array.from(starts);
+    }
+    _collectSubtree(node, clipBounds, priority, out) {
+        if (node.items) {
+            for (const item of node.items.data) {
+                if (clipBounds && item.boundingBox && !IntersectsBoundingBox(item.boundingBox, clipBounds))
+                    continue;
+                const existing = out.get(item.id);
+                if (existing) {
+                    if (priority > existing.priority)
+                        existing.priority = priority;
+                }
+                else {
+                    // activatedFrame / lastSeenFrame are stamped when the entry actually
+                    // enters the cut in `_refresh` ; seed them to -1 so the aging check
+                    // treats this as a candidate (not yet promoted).
+                    out.set(item.id, { source: item, priority, activatedFrame: -1, lastSeenFrame: -1 });
+                }
+            }
+        }
+        if (node.children) {
+            for (const c of node.children) {
+                if (clipBounds && c.boundingBox && !IntersectsBoundingBox(c.boundingBox, clipBounds))
+                    continue;
+                this._collectSubtree(c, clipBounds, priority, out);
+            }
+        }
+    }
+    // ───────── octree mutation handling ─────────
+    _onOctreeChanged() {
+        for (const [viewId, ctx] of this._views) {
+            if (ctx.camera)
+                this._refresh(viewId, ctx);
+        }
     }
 }
+// Re-export for callers that only pull StreamingEngine + want the context type.
+
 //# sourceMappingURL=streaming.engine.js.map
 
 /***/ },
 
-/***/ "../core/dist/streaming/streaming.producer.abstract.js"
+/***/ "../core/dist/streaming/streaming.subengine.interfaces.js"
+/*!****************************************************************!*\
+  !*** ../core/dist/streaming/streaming.subengine.interfaces.js ***!
+  \****************************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   IsStreamSubEngine: () => (/* binding */ IsStreamSubEngine)
+/* harmony export */ });
+function IsStreamSubEngine(b) {
+    if (b === null || typeof b !== "object")
+        return false;
+    const s = b;
+    return typeof s.activate === "function" && typeof s.setContext === "function" && typeof s.deactivate === "function" && typeof s.activeViewCount === "number";
+}
+//# sourceMappingURL=streaming.subengine.interfaces.js.map
+
+/***/ },
+
+/***/ "../core/dist/streaming/streaming.visibility.budget.js"
 /*!*************************************************************!*\
-  !*** ../core/dist/streaming/streaming.producer.abstract.js ***!
+  !*** ../core/dist/streaming/streaming.visibility.budget.js ***!
   \*************************************************************/
 (__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   AbstractStreamSourceProducer: () => (/* binding */ AbstractStreamSourceProducer)
+/* harmony export */   ConstantSSEBudget: () => (/* binding */ ConstantSSEBudget),
+/* harmony export */   PiecewiseLinearSSEBudget: () => (/* binding */ PiecewiseLinearSSEBudget),
+/* harmony export */   ResolveSSEBudget: () => (/* binding */ ResolveSSEBudget),
+/* harmony export */   StepwiseSSEBudget: () => (/* binding */ StepwiseSSEBudget)
 /* harmony export */ });
-/* harmony import */ var _cache_cache__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../cache/cache */ "../core/dist/cache/cache.js");
-/* harmony import */ var _tiles_pipeline_tiles_pipeline_sourceblock__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../tiles/pipeline/tiles.pipeline.sourceblock */ "../core/dist/tiles/pipeline/tiles.pipeline.sourceblock.js");
-
-
-/**
- * Base class for 1:1 (static) datasource producers.
- *
- * For each activation:
- *  1. ADD is emitted immediately with status = "downloading"
- *  2. _load(source) runs asynchronously
- *  3. on success  : status = "ready", content = payload, UPDATE emitted
- *     on failure  : status = "failed" (or "failed-permanently" if subclass decides), UPDATE emitted
- *     on cancel   : REMOVE emitted, payload discarded
- *  4. on deactivate : status = "deactivated", REMOVE emitted (content stays cached for re-activation)
- *  5. on unload     : cache.delete, content dropped
- *
- * Cancellation is safe: a deactivate arriving while the source is still loading
- * flips the internal state to "cancelled"; the pending load's result is discarded
- * for THIS view but the shared load keeps running for other views (see `_pending`).
- *
- * Spawner producers (1:N) should extend IStreamSourceProducer directly and NOT rely
- * on this base class: their lifecycle does not match the 1:1 model.
- */
-class AbstractStreamSourceProducer extends _tiles_pipeline_tiles_pipeline_sourceblock__WEBPACK_IMPORTED_MODULE_1__.SourceBlock {
-    constructor(cache) {
-        super();
-        this._pending = new Map();
-        this._states = new Map();
-        this.added = (batch, _es) => {
-            void this._handle(batch);
-        };
-        this.removed = (batch, _es) => {
-            void this._handle(batch);
-        };
-        this.updated = (batch, _es) => {
-            void this._handle(batch);
-        };
-        this._cache = cache ?? new _cache_cache__WEBPACK_IMPORTED_MODULE_0__.MemoryCache();
+/** Altitude-independent budget : the classic "one maxSSE for all". */
+class ConstantSSEBudget {
+    constructor(maxSSE) {
+        this.maxSSE = maxSSE;
     }
-    handles(source) {
-        return source.contentType === this.contentType;
-    }
-    /** Optional hook for subclasses (e.g. ref-counting). Default no-op. */
-    _onActivated(_source, _viewId) { }
-    /** Optional hook for subclasses (e.g. ref-counting). Default no-op. */
-    _onDeactivated(_source, _viewId) { }
-    /** Optional hook on unload. Default no-op. */
-    _onUnloaded(_source, _payload) { }
-    dispose() {
-        this._states.clear();
-        this._pending.clear();
-        this._cache.dispose();
-        super.dispose();
-    }
-    async _handle(batch) {
-        for (const a of batch) {
-            if (!this.handles(a.source))
-                continue;
-            switch (a.operation) {
-                case "load":
-                    await this._ensureLoaded(a.source);
-                    break;
-                case "activate":
-                    await this._doActivate(a);
-                    break;
-                case "update":
-                    this._doUpdate(a);
-                    break;
-                case "deactivate":
-                    this._doDeactivate(a);
-                    break;
-                case "unload":
-                    this._doUnload(a);
-                    break;
-            }
-        }
-    }
-    async _doActivate(a) {
-        const src = a.source;
-        const existing = this._getState(a.viewId, src.id);
-        if (existing && (existing.status === "loading" || existing.status === "active")) {
-            return;
-        }
-        const state = { status: "loading" };
-        this._setState(a.viewId, src.id, state);
-        // Emit ADD immediately with downloading status so the scene can render placeholders.
-        src.status = "downloading";
-        this.notifyAdded([src]);
-        let payload;
-        try {
-            payload = await this._ensureLoaded(src);
-        }
-        catch (err) {
-            if (this._getState(a.viewId, src.id) === state) {
-                src.status = "failed";
-                this.notifyUpdated([src]);
-                this._deleteState(a.viewId, src.id);
-            }
-            throw err;
-        }
-        if (state.status === "cancelled") {
-            // deactivate raced with the load; ADD was already emitted so we must emit REMOVE
-            this._deleteState(a.viewId, src.id);
-            src.status = "deactivated";
-            this.notifyRemoved([src]);
-            return;
-        }
-        state.status = "active";
-        src.status = "ready";
-        src.content = payload;
-        this._onActivated(src, a.viewId);
-        this.notifyUpdated([src]);
-    }
-    _doUpdate(a) {
-        const src = a.source;
-        const state = this._getState(a.viewId, src.id);
-        if (state?.status === "active") {
-            this.notifyUpdated([src]);
-        }
-    }
-    _doDeactivate(a) {
-        const src = a.source;
-        const state = this._getState(a.viewId, src.id);
-        if (!state)
-            return;
-        if (state.status === "loading") {
-            state.status = "cancelled";
-            return;
-        }
-        if (state.status === "active") {
-            src.status = "deactivated";
-            this._onDeactivated(src, a.viewId);
-            this._deleteState(a.viewId, src.id);
-            this.notifyRemoved([src]);
-        }
-    }
-    _doUnload(a) {
-        const src = a.source;
-        const state = this._getState(a.viewId, src.id);
-        if (state?.status === "loading") {
-            state.status = "cancelled";
-        }
-        else if (state?.status === "active") {
-            src.status = "deactivated";
-            this._onDeactivated(src, a.viewId);
-            this._deleteState(a.viewId, src.id);
-            this.notifyRemoved([src]);
-        }
-        const payload = this._cache.get(src.id);
-        if (payload !== undefined) {
-            this._onUnloaded(src, payload);
-            this._cache.delete(src.id);
-            src.content = null;
-        }
-    }
-    async _ensureLoaded(source) {
-        const cached = this._cache.get(source.id);
-        if (cached !== undefined)
-            return cached;
-        let pending = this._pending.get(source.id);
-        if (!pending) {
-            pending = (async () => {
-                try {
-                    const p = await this._load(source);
-                    this._cache.set(source.id, p);
-                    return p;
-                }
-                finally {
-                    this._pending.delete(source.id);
-                }
-            })();
-            this._pending.set(source.id, pending);
-        }
-        return pending;
-    }
-    _getState(viewId, sourceId) {
-        return this._states.get(viewId)?.get(sourceId);
-    }
-    _setState(viewId, sourceId, state) {
-        let m = this._states.get(viewId);
-        if (!m) {
-            m = new Map();
-            this._states.set(viewId, m);
-        }
-        m.set(sourceId, state);
-    }
-    _deleteState(viewId, sourceId) {
-        const m = this._states.get(viewId);
-        if (!m)
-            return;
-        m.delete(sourceId);
-        if (m.size === 0)
-            this._states.delete(viewId);
+    getMaxSSE(_altitude) {
+        return this.maxSSE;
     }
 }
-//# sourceMappingURL=streaming.producer.abstract.js.map
+/**
+ * Step function in altitude : first step whose `upToAltitude` is >= the current
+ * altitude wins, else `aboveLastMaxSSE` is used for altitudes above the last step.
+ *
+ * Example : `new StepwiseSSEBudget([{upToAltitude: 500, maxSSE: 4}, {upToAltitude: 10_000, maxSSE: 12}], 32)`
+ *  - [0, 500]       : 4
+ *  - (500, 10_000]  : 12
+ *  - (10_000, inf)  : 32
+ */
+class StepwiseSSEBudget {
+    constructor(steps, aboveLastMaxSSE) {
+        this.steps = steps.slice().sort((a, b) => a.upToAltitude - b.upToAltitude);
+        this.aboveLastMaxSSE = aboveLastMaxSSE;
+    }
+    getMaxSSE(altitude) {
+        for (const step of this.steps) {
+            if (altitude <= step.upToAltitude)
+                return step.maxSSE;
+        }
+        return this.aboveLastMaxSSE;
+    }
+}
+/**
+ * Piecewise-linear interpolation between anchor points in altitude. Edges are
+ * clamped (no extrapolation) : altitudes below the first point use the first
+ * value, above the last point use the last value.
+ *
+ * Example : `new PiecewiseLinearSSEBudget([{altitude: 0, maxSSE: 4}, {altitude: 1_000, maxSSE: 16}, {altitude: 1_000_000, maxSSE: 32}])`
+ *  - ground (0)       : 4
+ *  - 500 m            : 10 (linear interp between 4 and 16)
+ *  - 1 km             : 16
+ *  - 500 km           : ~24 (interp between 16 and 32)
+ *  - 1 000 km and up  : 32
+ */
+class PiecewiseLinearSSEBudget {
+    constructor(points) {
+        if (points.length === 0) {
+            throw new Error("PiecewiseLinearSSEBudget requires at least one point.");
+        }
+        this.points = points.slice().sort((a, b) => a.altitude - b.altitude);
+    }
+    getMaxSSE(altitude) {
+        const pts = this.points;
+        const first = pts[0];
+        const last = pts[pts.length - 1];
+        if (altitude <= first.altitude)
+            return first.maxSSE;
+        if (altitude >= last.altitude)
+            return last.maxSSE;
+        for (let i = 0; i < pts.length - 1; i++) {
+            const a = pts[i];
+            const b = pts[i + 1];
+            if (altitude >= a.altitude && altitude <= b.altitude) {
+                const span = b.altitude - a.altitude;
+                const t = span > 0 ? (altitude - a.altitude) / span : 0;
+                return a.maxSSE + t * (b.maxSSE - a.maxSSE);
+            }
+        }
+        return last.maxSSE;
+    }
+}
+/**
+ * Narrows any value to an IScreenSpaceErrorBudget : forwards an existing budget,
+ * wraps a plain number as a ConstantSSEBudget.
+ */
+function ResolveSSEBudget(budgetOrNumber) {
+    return typeof budgetOrNumber === "number" ? new ConstantSSEBudget(budgetOrNumber) : budgetOrNumber;
+}
+//# sourceMappingURL=streaming.visibility.budget.js.map
 
 /***/ },
 
-/***/ "../core/dist/streaming/streaming.view.js"
-/*!************************************************!*\
-  !*** ../core/dist/streaming/streaming.view.js ***!
-  \************************************************/
+/***/ "../core/dist/streaming/streaming.visibility.overflight.js"
+/*!*****************************************************************!*\
+  !*** ../core/dist/streaming/streaming.visibility.overflight.js ***!
+  \*****************************************************************/
 (__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   IsStreamingViewTarget: () => (/* binding */ IsStreamingViewTarget),
-/* harmony export */   StreamingView: () => (/* binding */ StreamingView)
+/* harmony export */   ClosestDistanceToAABB: () => (/* binding */ ClosestDistanceToAABB),
+/* harmony export */   DefaultScreenSpaceErrorFn: () => (/* binding */ DefaultScreenSpaceErrorFn),
+/* harmony export */   IsBeyondHorizon: () => (/* binding */ IsBeyondHorizon),
+/* harmony export */   MapOverflightVisibilityPolicy: () => (/* binding */ MapOverflightVisibilityPolicy)
 /* harmony export */ });
-/* harmony import */ var _tiles_pipeline_tiles_pipeline_sourceblock__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../tiles/pipeline/tiles.pipeline.sourceblock */ "../core/dist/tiles/pipeline/tiles.pipeline.sourceblock.js");
+/* harmony import */ var _streaming_visibility_budget__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./streaming.visibility.budget */ "../core/dist/streaming/streaming.visibility.budget.js");
 
 /**
- * Per-camera routing block.
- *
- * Target side (ITargetBlock<IStreamSourceActivation>): receives activations from the
- * StreamingEngine. The view resolves datasource links (replace / add / modify),
- * groups activations by `contentType`, and forwards them to the registered producers.
- *
- * Source side (ISourceBlock<IStreamSource>): aggregates the outputs of all producers
- * so the downstream scene can link once to the view and see the union of datasources
- * (with their evolving status) across producers.
- *
- * The view holds the "visible/active" set for its camera implicitly, derived from
- * what the engine emits and what producers acknowledge.
+ * Default SSE : standard perspective projection of geometric error on the image plane.
+ *   sse = (geometricError * viewportHeight) / (distance * 2 * tan(fov/2))
  */
-class StreamingView extends _tiles_pipeline_tiles_pipeline_sourceblock__WEBPACK_IMPORTED_MODULE_0__.SourceBlock {
+const DefaultScreenSpaceErrorFn = (geometricError, distance, viewportHeight, tanFov2) => (geometricError * viewportHeight) / (Math.max(distance, 1e-6) * 2 * Math.max(tanFov2, 1e-6));
+/**
+ * Visibility policy tailored for the "camera overflight" case : the map is
+ * either a flat plane or a sphere (any planet via Ellipsoid), and the decision
+ * whether to load or refine a cell depends on
+ *  - frustum culling (via `camera.isInFrustum` when provided),
+ *  - horizon culling when flying over a sphere,
+ *  - altitude-dependent max screen-space error (via IScreenSpaceErrorBudget),
+ *  - hysteresis around the budget to prevent flicker.
+ *
+ * Stateful : keeps the last decision per node in a WeakMap so the hysteresis
+ * can kick in. Safe to reuse across engines and views.
+ */
+class MapOverflightVisibilityPolicy {
     constructor(options) {
-        super();
-        this._byContentType = new Map();
-        this._producerObservers = [];
-        this.added = (batch, es) => this._route(batch, es, "added");
-        this.removed = (batch, es) => this._route(batch, es, "removed");
-        this.updated = (batch, es) => this._route(batch, es, "updated");
-        this._viewId = options.viewId;
-        if (options.producers) {
-            for (const p of options.producers)
-                this.registerProducer(p);
-        }
+        this._lastDecision = new WeakMap();
+        this._mode = options.mode;
+        this._budget = (0,_streaming_visibility_budget__WEBPACK_IMPORTED_MODULE_0__.ResolveSSEBudget)(options.budget);
+        this._planePoint = options.planePoint ?? { x: 0, y: 0, z: 0 };
+        const n = options.planeNormal ?? { x: 0, y: 0, z: 1 };
+        const nl = Math.hypot(n.x, n.y, n.z) || 1;
+        this._planeNormal = { x: n.x / nl, y: n.y / nl, z: n.z / nl };
+        this._sphereCenter = options.sphereCenter ?? { x: 0, y: 0, z: 0 };
+        this._sphereRadius = options.ellipsoid ? options.ellipsoid.semiMajorAxis : options.sphereRadius ?? 6378137;
+        this._horizonCull = options.horizonCull ?? options.mode === "sphere";
+        this._hysteresisOffset = options.hysteresisOffset;
+        this._hysteresisPercent = options.hysteresisPercent;
+        this._sseFn = options.sseFn ?? DefaultScreenSpaceErrorFn;
+        this._defaultVH = options.defaultViewportHeight ?? MapOverflightVisibilityPolicy.DefaultViewportHeight;
     }
-    get viewId() {
-        return this._viewId;
-    }
-    /**
-     * Register a producer. Its outputs (activatedObservable/deactivatedObservable/
-     * updatedObservable) are forwarded through the view's own SourceBlock.
-     * A producer can only be registered once per contentType.
-     */
-    registerProducer(producer) {
-        if (this._byContentType.has(producer.contentType))
-            return;
-        this._byContentType.set(producer.contentType, producer);
-        const onAdded = producer.addedObservable.add((batch) => this.notifyAdded(batch));
-        const onRemoved = producer.removedObservable.add((batch) => this.notifyRemoved(batch));
-        const onUpdated = producer.updatedObservable.add((batch) => this.notifyUpdated(batch));
-        if (onAdded)
-            this._producerObservers.push(onAdded);
-        if (onRemoved)
-            this._producerObservers.push(onRemoved);
-        if (onUpdated)
-            this._producerObservers.push(onUpdated);
-    }
-    getProducer(contentType) {
-        return this._byContentType.get(contentType) ?? null;
-    }
-    dispose() {
-        for (const o of this._producerObservers)
-            o.disconnect();
-        this._producerObservers.length = 0;
-        this._byContentType.clear();
-        super.dispose();
-    }
-    _route(batch, es, channel) {
-        const resolved = this._resolveLinks(batch);
-        const byType = new Map();
-        for (const a of resolved) {
-            let arr = byType.get(a.source.contentType);
-            if (!arr) {
-                arr = [];
-                byType.set(a.source.contentType, arr);
+    evaluate(node, camera) {
+        const bounds = node.boundingBox;
+        if (!bounds)
+            return { kind: "cull" };
+        // Frustum
+        if (camera.isInFrustum && !camera.isInFrustum(bounds))
+            return { kind: "cull" };
+        // Horizon (sphere mode only)
+        if (this._mode === "sphere" && this._horizonCull) {
+            if (IsBeyondHorizon(bounds.center, camera.worldPosition, this._sphereCenter, this._sphereRadius)) {
+                return { kind: "cull" };
             }
-            arr.push(a);
         }
-        for (const [contentType, acts] of byType) {
-            const producer = this._byContentType.get(contentType);
-            if (!producer)
-                continue;
-            const cb = producer[channel];
-            if (cb)
-                cb.call(producer, acts, es);
+        // Altitude for the budget
+        const altitude = this._altitude(camera.worldPosition);
+        // Distance to closest point on the AABB
+        const distance = ClosestDistanceToAABB(camera.worldPosition, bounds);
+        const gErr = node.geometricError;
+        if (gErr === undefined || gErr <= 0) {
+            // no geometric error : keep the cell as load (leaf-like semantics)
+            this._lastDecision.set(node, "load");
+            return { kind: "load", priority: 1 / Math.max(distance, 1e-6) };
         }
+        const vh = camera.viewportHeight && camera.viewportHeight > 0 ? camera.viewportHeight : this._defaultVH;
+        const tan = camera.tanFov2 > 0 ? camera.tanFov2 : Math.tan((camera.fovY || 0) * 0.5);
+        const sse = this._sseFn(gErr, distance, vh, tan);
+        const budgetMax = this._budget.getMaxSSE(altitude);
+        // Hysteresis : asymmetric threshold depending on the previous decision.
+        let effectiveMax = budgetMax;
+        const hys = this._hysteresisAmount(budgetMax);
+        if (hys > 0) {
+            const prev = this._lastDecision.get(node);
+            if (prev === "load") {
+                effectiveMax = budgetMax + hys;
+            }
+            else if (prev === "refine") {
+                effectiveMax = budgetMax - hys;
+            }
+        }
+        const noChildren = !node.children || node.children.length === 0;
+        if (sse <= effectiveMax || noChildren) {
+            this._lastDecision.set(node, "load");
+            return { kind: "load", priority: sse };
+        }
+        this._lastDecision.set(node, "refine");
+        return { kind: "refine", priority: sse };
     }
-    /**
-     * Resolves datasource links before dispatch. v1 is a pass-through.
-     *
-     * TODO: implement link semantics:
-     *  - replace(target) : when this source activates, emit deactivate for target first
-     *  - add(target)     : emit both (no conflict)
-     *  - modify(target)  : emit an update on target carrying this source as overlay
-     *
-     * Resolution needs the view's current active set plus the datasource registry;
-     * deferring until we have a concrete use case that stresses it.
-     */
-    _resolveLinks(batch) {
-        return batch;
+    /** Camera altitude above the map surface (>=0 in sphere mode, signed in plane mode). */
+    _altitude(position) {
+        if (this._mode === "plane") {
+            const dx = position.x - this._planePoint.x;
+            const dy = position.y - this._planePoint.y;
+            const dz = position.z - this._planePoint.z;
+            return dx * this._planeNormal.x + dy * this._planeNormal.y + dz * this._planeNormal.z;
+        }
+        const dx = position.x - this._sphereCenter.x;
+        const dy = position.y - this._sphereCenter.y;
+        const dz = position.z - this._sphereCenter.z;
+        return Math.max(Math.hypot(dx, dy, dz) - this._sphereRadius, 0);
     }
+    _hysteresisAmount(budgetMax) {
+        if (this._hysteresisOffset !== undefined)
+            return this._hysteresisOffset;
+        if (this._hysteresisPercent !== undefined)
+            return budgetMax * this._hysteresisPercent;
+        return 0;
+    }
+}
+MapOverflightVisibilityPolicy.DefaultViewportHeight = 1080;
+// ─────────────────────────────────────────────────────────────────────────
+// Shared math helpers (exported for reuse by other policies / sub-engines).
+// ─────────────────────────────────────────────────────────────────────────
+/**
+ * Closest distance from `point` to the axis-aligned bounding box. Returns 0
+ * when the point is inside the box.
+ */
+function ClosestDistanceToAABB(point, bounds) {
+    const cx = point.x < bounds.minimum.x ? bounds.minimum.x : point.x > bounds.maximum.x ? bounds.maximum.x : point.x;
+    const cy = point.y < bounds.minimum.y ? bounds.minimum.y : point.y > bounds.maximum.y ? bounds.maximum.y : point.y;
+    const cz = point.z < bounds.minimum.z ? bounds.minimum.z : point.z > bounds.maximum.z ? bounds.maximum.z : point.z;
+    return Math.hypot(point.x - cx, point.y - cy, point.z - cz);
 }
 /**
- * Type guard for ITargetBlock<IStreamSourceActivation> so an engine can link to a view.
- * (Mostly useful for external callers that want to verify a view shape at runtime.)
+ * True when `point` is occluded by the sphere as seen from `cameraPosition`.
+ *
+ * Uses the horizon-plane test :
+ *   dot(point - center, cameraPos - center) < R²
+ * which is exact for points on the sphere surface and mildly over-culls for
+ * points well above the surface (acceptable for tile-pyramid cells). Cheap :
+ * one dot product and one comparison.
  */
-function IsStreamingViewTarget(b) {
-    if (b === null || typeof b !== "object")
-        return false;
-    const t = b;
-    return t.added !== undefined || t.removed !== undefined || t.updated !== undefined;
+function IsBeyondHorizon(point, cameraPosition, sphereCenter, sphereRadius) {
+    const ux = cameraPosition.x - sphereCenter.x;
+    const uy = cameraPosition.y - sphereCenter.y;
+    const uz = cameraPosition.z - sphereCenter.z;
+    const vx = point.x - sphereCenter.x;
+    const vy = point.y - sphereCenter.y;
+    const vz = point.z - sphereCenter.z;
+    return ux * vx + uy * vy + uz * vz < sphereRadius * sphereRadius;
 }
-//# sourceMappingURL=streaming.view.js.map
+//# sourceMappingURL=streaming.visibility.overflight.js.map
 
 /***/ },
 
@@ -9941,13 +10382,361 @@ ScreenSpaceErrorPolicy.DefaultMaxScreenSpaceError = 16;
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   EmptyTileBounds: () => (/* reexport safe */ _tile_stream_source__WEBPACK_IMPORTED_MODULE_0__.EmptyTileBounds),
+/* harmony export */   TILE_PYRAMID_CONTENT_TYPE: () => (/* reexport safe */ _tile_pyramid_stream_source__WEBPACK_IMPORTED_MODULE_1__.TILE_PYRAMID_CONTENT_TYPE),
 /* harmony export */   TILE_STREAM_CONTENT_TYPE: () => (/* reexport safe */ _tile_stream_source__WEBPACK_IMPORTED_MODULE_0__.TILE_STREAM_CONTENT_TYPE),
-/* harmony export */   TileStreamSource: () => (/* reexport safe */ _tile_stream_source__WEBPACK_IMPORTED_MODULE_0__.TileStreamSource),
-/* harmony export */   TileStreamSourceProducer: () => (/* reexport safe */ _tile_stream_source__WEBPACK_IMPORTED_MODULE_0__.TileStreamSourceProducer)
+/* harmony export */   TileLoaderAdapter: () => (/* reexport safe */ _tile_loader_adapter__WEBPACK_IMPORTED_MODULE_2__.TileLoaderAdapter),
+/* harmony export */   TilePyramidStreamSource: () => (/* reexport safe */ _tile_pyramid_stream_source__WEBPACK_IMPORTED_MODULE_1__.TilePyramidStreamSource),
+/* harmony export */   TileStreamSource: () => (/* reexport safe */ _tile_stream_source__WEBPACK_IMPORTED_MODULE_0__.TileStreamSource)
 /* harmony export */ });
 /* harmony import */ var _tile_stream_source__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tile.stream.source */ "../core/dist/streaming/tile/tile.stream.source.js");
+/* harmony import */ var _tile_pyramid_stream_source__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tile.pyramid.stream.source */ "../core/dist/streaming/tile/tile.pyramid.stream.source.js");
+/* harmony import */ var _tile_loader_adapter__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tile.loader.adapter */ "../core/dist/streaming/tile/tile.loader.adapter.js");
+
+
 
 //# sourceMappingURL=index.js.map
+
+/***/ },
+
+/***/ "../core/dist/streaming/tile/tile.loader.adapter.js"
+/*!**********************************************************!*\
+  !*** ../core/dist/streaming/tile/tile.loader.adapter.js ***!
+  \**********************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   TileLoaderAdapter: () => (/* binding */ TileLoaderAdapter)
+/* harmony export */ });
+/* harmony import */ var _tiles_pipeline_tiles_pipeline_sourceblock__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../tiles/pipeline/tiles.pipeline.sourceblock */ "../core/dist/tiles/pipeline/tiles.pipeline.sourceblock.js");
+/* harmony import */ var _tile_stream_source__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tile.stream.source */ "../core/dist/streaming/tile/tile.stream.source.js");
+
+
+/**
+ * Bridges a TilePyramidStreamSource (or any source emitting IStreamSource<ITile2DAddress>)
+ * to an existing ITileLoader. The adapter :
+ *
+ *  - unwraps the address from each incoming stream source and forwards it to
+ *    the loader (so the loader resolves content in its usual way),
+ *  - subscribes to the loader's added / updated / removed observables and
+ *    writes back on the matching stream sources : flips `status` to
+ *    `"downloading"` → `"ready"` and attaches the fetched `ITile<T>` on
+ *    `TileStreamSource.tile`,
+ *  - re-emits each status transition through its own `updated` / `removed`
+ *    observables, so downstream scene consumers keep a single uniform stream.
+ *
+ * Wiring :
+ *     pyramid.linkTo(adapter);
+ *     adapter.linkTo(sceneTarget);
+ *
+ * Multi-view caveat : when the same quadkey is emitted twice (one per view)
+ * the adapter keeps the last reference per quadkey. Loader-level dedup is
+ * already enforced by TileCollection, so this is safe.
+ */
+class TileLoaderAdapter extends _tiles_pipeline_tiles_pipeline_sourceblock__WEBPACK_IMPORTED_MODULE_0__.SourceBlock {
+    constructor(loader) {
+        super();
+        this._entries = new Map();
+        this._loaderObservers = [];
+        // ───────── ITargetBlock ─────────
+        this.added = (batch, _es) => {
+            const addresses = [];
+            const updatedStatus = [];
+            for (const src of batch) {
+                const addr = src.content;
+                if (!addr)
+                    continue;
+                this._entries.set(addr.quadkey, src);
+                if (src.status === "pending") {
+                    src.status = "downloading";
+                    updatedStatus.push(src);
+                }
+                addresses.push(addr);
+            }
+            if (addresses.length > 0) {
+                this._addressForwarder.notifyAdded(addresses);
+            }
+            if (updatedStatus.length > 0) {
+                this.notifyUpdated(updatedStatus);
+            }
+        };
+        this.removed = (batch, _es) => {
+            const addresses = [];
+            const out = [];
+            for (const src of batch) {
+                const addr = src.content;
+                if (!addr)
+                    continue;
+                this._entries.delete(addr.quadkey);
+                // Leave `status` untouched : the removed event is the authoritative
+                // signal. Drop the attached tile ref so consumers do not hold stale data.
+                if (src instanceof _tile_stream_source__WEBPACK_IMPORTED_MODULE_1__.TileStreamSource)
+                    src.tile = null;
+                addresses.push(addr);
+                out.push(src);
+            }
+            if (addresses.length > 0) {
+                this._addressForwarder.notifyRemoved(addresses);
+            }
+            if (out.length > 0) {
+                this.notifyRemoved(out);
+            }
+        };
+        this.updated = (batch, _es) => {
+            // Pass-through : address-level update is rare (pyramid addresses are
+            // immutable) but we forward in case a caller injects synthetic updates.
+            if (batch.length > 0)
+                this.notifyUpdated(batch);
+        };
+        this._loader = loader;
+        // Proxy SourceBlock used to forward addresses through the existing
+        // pipeline machinery (so we honour any ILinkOptions the caller may set).
+        this._addressForwarder = new _tiles_pipeline_tiles_pipeline_sourceblock__WEBPACK_IMPORTED_MODULE_0__.SourceBlock();
+        this._addressForwarder.linkTo(loader);
+        const onAdded = loader.addedObservable.add((batch) => this._onLoaderAdded(batch));
+        const onUpdated = loader.updatedObservable.add((batch) => this._onLoaderUpdated(batch));
+        const onRemoved = loader.removedObservable.add((batch) => this._onLoaderRemoved(batch));
+        if (onAdded)
+            this._loaderObservers.push(onAdded);
+        if (onUpdated)
+            this._loaderObservers.push(onUpdated);
+        if (onRemoved)
+            this._loaderObservers.push(onRemoved);
+    }
+    get loader() {
+        return this._loader;
+    }
+    dispose() {
+        for (const o of this._loaderObservers)
+            o.disconnect();
+        this._loaderObservers.length = 0;
+        this._addressForwarder.unlinkFrom(this._loader);
+        this._addressForwarder.dispose();
+        this._entries.clear();
+        super.dispose();
+    }
+    // ───────── loader callbacks ─────────
+    _onLoaderAdded(batch) {
+        // The loader's addedObservable fires when a tile object is created
+        // (content may still be null, fetch is async). Keep status downloading
+        // but attach the tile ref right away so downstream sees a live object.
+        this._applyLoaderBatch(batch, /*ready=*/ false);
+    }
+    _onLoaderUpdated(batch) {
+        // Fires when the async content arrives. Flip status to ready.
+        this._applyLoaderBatch(batch, /*ready=*/ true);
+    }
+    _onLoaderRemoved(batch) {
+        const out = [];
+        for (const tile of batch) {
+            const entry = this._entries.get(tile.address.quadkey);
+            if (!entry)
+                continue;
+            this._entries.delete(tile.address.quadkey);
+            // Leave `status` untouched ; the removed event conveys the drop.
+            if (entry instanceof _tile_stream_source__WEBPACK_IMPORTED_MODULE_1__.TileStreamSource)
+                entry.tile = null;
+            out.push(entry);
+        }
+        if (out.length > 0)
+            this.notifyRemoved(out);
+    }
+    _applyLoaderBatch(batch, ready) {
+        const out = [];
+        for (const tile of batch) {
+            const entry = this._entries.get(tile.address.quadkey);
+            if (!entry)
+                continue;
+            if (entry instanceof _tile_stream_source__WEBPACK_IMPORTED_MODULE_1__.TileStreamSource)
+                entry.tile = tile;
+            if (ready && tile.content != null) {
+                entry.status = "ready";
+            }
+            else if (entry.status === "pending") {
+                entry.status = "downloading";
+            }
+            out.push(entry);
+        }
+        if (out.length > 0)
+            this.notifyUpdated(out);
+    }
+}
+//# sourceMappingURL=tile.loader.adapter.js.map
+
+/***/ },
+
+/***/ "../core/dist/streaming/tile/tile.pyramid.stream.source.js"
+/*!*****************************************************************!*\
+  !*** ../core/dist/streaming/tile/tile.pyramid.stream.source.js ***!
+  \*****************************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   TILE_PYRAMID_CONTENT_TYPE: () => (/* binding */ TILE_PYRAMID_CONTENT_TYPE),
+/* harmony export */   TilePyramidStreamSource: () => (/* binding */ TilePyramidStreamSource)
+/* harmony export */ });
+/* harmony import */ var _geodesy_geodesy_system__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../geodesy/geodesy.system */ "../core/dist/geodesy/geodesy.system.js");
+/* harmony import */ var _geometry_geometry_bounds__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../geometry/geometry.bounds */ "../core/dist/geometry/geometry.bounds.js");
+/* harmony import */ var _geometry_geometry_interfaces__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../geometry/geometry.interfaces */ "../core/dist/geometry/geometry.interfaces.js");
+/* harmony import */ var _tiles_address_tiles_address__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../tiles/address/tiles.address */ "../core/dist/tiles/address/tiles.address.js");
+/* harmony import */ var _streaming_engine__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../streaming.engine */ "../core/dist/streaming/streaming.engine.js");
+/* harmony import */ var _streaming_visibility_budget__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../streaming.visibility.budget */ "../core/dist/streaming/streaming.visibility.budget.js");
+/* harmony import */ var _streaming_visibility_overflight__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../streaming.visibility.overflight */ "../core/dist/streaming/streaming.visibility.overflight.js");
+/* harmony import */ var _tile_stream_source__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./tile.stream.source */ "../core/dist/streaming/tile/tile.stream.source.js");
+
+
+
+
+
+
+
+
+/**
+ * contentType for stream sources wrapping a 2D tile pyramid.
+ */
+const TILE_PYRAMID_CONTENT_TYPE = "tile-pyramid";
+/**
+ * A tile pyramid modelled as a nested StreamingEngine: it traverses its own
+ * implicit quadtree from the root using frustum + screen-space error tests
+ * (via `core/geodesy.Ellipsoid` when a planet is specified, flat point-XY
+ * otherwise) and emits `TileStreamSource` children through the inherited
+ * SourceBlock.
+ *
+ * Being an IStreamSubEngine AND a StreamingEngine, it plays two roles at once:
+ *  - As an IStreamSource inside an octree, it is activated / deactivated by
+ *    the parent StreamingEngine when the octree cell becomes (in)visible.
+ *  - As an IStreamEngine itself, it manages per-view state and forwards
+ *    `setContext` from the parent to its own traversal.
+ *
+ * Hosts wire it to a downstream consumer (typically an adapter over the
+ * existing ITileLoader) via `pyramid.linkTo(tileLoader)`.
+ */
+class TilePyramidStreamSource extends _streaming_engine__WEBPACK_IMPORTED_MODULE_4__.StreamingEngine {
+    constructor(options) {
+        super({}); // no octrees: pyramid's _traverse walks its own quadtree
+        this.kind = "provider";
+        this.status = "ready";
+        /** The pyramid is an aggregate, not a single tile; content is always null. */
+        this.content = null;
+        this.id = options.id;
+        this.contentType = options.contentType ?? TILE_PYRAMID_CONTENT_TYPE;
+        this.encumbrance = options.encumbrance;
+        this.dependencies = options.dependencies;
+        this._metrics = options.metrics;
+        this._ellipsoid = options.ellipsoid;
+        this._geodetic = options.ellipsoid ? new _geodesy_geodesy_system__WEBPACK_IMPORTED_MODULE_0__.GeodeticSystem(options.ellipsoid) : undefined;
+        this._sphereCenter = options.sphereCenter ?? { x: 0, y: 0, z: 0 };
+        this._sphereRadius = options.ellipsoid?.semiMajorAxis ?? 0;
+        this._horizonCull = options.horizonCull ?? !!options.ellipsoid;
+        this._budget = (0,_streaming_visibility_budget__WEBPACK_IMPORTED_MODULE_5__.ResolveSSEBudget)(options.maxScreenSpaceError ?? TilePyramidStreamSource.DefaultMaxScreenSpaceError);
+        this._childContentType = options.childContentType ?? "tile-address";
+        this.boundingBox = options.boundingBox ?? TilePyramidStreamSource._deriveBounds(options.encumbrance);
+        if (!(0,_geometry_geometry_interfaces__WEBPACK_IMPORTED_MODULE_2__.IsBounds)(options.encumbrance)) {
+            this.boundingSphere = options.encumbrance;
+        }
+    }
+    get metrics() {
+        return this._metrics;
+    }
+    get ellipsoid() {
+        return this._ellipsoid;
+    }
+    _traverse(camera, ctx, _parentsOut, _frontierOut, entriesOut) {
+        const maxSSE = this._budget.getMaxSSE(this._cameraAltitude(camera));
+        this._walk(new _tiles_address_tiles_address__WEBPACK_IMPORTED_MODULE_3__.TileAddress(0, 0, this._metrics.minLOD), camera, ctx.clipBounds, maxSSE, entriesOut);
+    }
+    _walk(address, camera, clipBounds, maxSSE, out) {
+        if (address.levelOfDetail > this._metrics.maxLOD)
+            return;
+        const bounds = this._computeBounds(address);
+        if (!bounds)
+            return;
+        // Spatial clip : skip sub-trees outside the requested box.
+        if (clipBounds && !(0,_streaming_engine__WEBPACK_IMPORTED_MODULE_4__.IntersectsBoundingBox)(bounds, clipBounds))
+            return;
+        // Horizon cull when flying a planet : tile is on the far side of the
+        // sphere, invisible whatever the frustum says.
+        if (this._horizonCull && this._sphereRadius > 0) {
+            if ((0,_streaming_visibility_overflight__WEBPACK_IMPORTED_MODULE_6__.IsBeyondHorizon)(bounds.center, camera.worldPosition, this._sphereCenter, this._sphereRadius))
+                return;
+        }
+        if (camera.isInFrustum && !camera.isInFrustum(bounds))
+            return;
+        const geometricError = _tiles_address_tiles_address__WEBPACK_IMPORTED_MODULE_3__.TileAddress.GeometricError(address, this._metrics);
+        const sse = this._computeSSE(bounds, geometricError, camera);
+        if (sse <= maxSSE || address.levelOfDetail >= this._metrics.maxLOD) {
+            const tile = new _tile_stream_source__WEBPACK_IMPORTED_MODULE_7__.TileStreamSource({
+                address,
+                boundingBox: bounds,
+                geometricError,
+                namespace: this.id,
+                contentType: this._childContentType,
+            });
+            // activatedFrame / lastSeenFrame are stamped by the engine on actual
+            // promotion to the cut ; seed them to -1 so the aging check treats
+            // this tile as a fresh candidate.
+            out.set(tile.id, { source: tile, priority: sse, activatedFrame: -1, lastSeenFrame: -1 });
+            return;
+        }
+        const lod = address.levelOfDetail + 1;
+        const x2 = address.x * 2;
+        const y2 = address.y * 2;
+        this._walk(new _tiles_address_tiles_address__WEBPACK_IMPORTED_MODULE_3__.TileAddress(x2, y2, lod), camera, clipBounds, maxSSE, out);
+        this._walk(new _tiles_address_tiles_address__WEBPACK_IMPORTED_MODULE_3__.TileAddress(x2 + 1, y2, lod), camera, clipBounds, maxSSE, out);
+        this._walk(new _tiles_address_tiles_address__WEBPACK_IMPORTED_MODULE_3__.TileAddress(x2, y2 + 1, lod), camera, clipBounds, maxSSE, out);
+        this._walk(new _tiles_address_tiles_address__WEBPACK_IMPORTED_MODULE_3__.TileAddress(x2 + 1, y2 + 1, lod), camera, clipBounds, maxSSE, out);
+    }
+    /** Camera altitude above the map surface. Flat : Z of worldPosition. Sphere : |cam − center| − R. */
+    _cameraAltitude(camera) {
+        if (this._sphereRadius > 0) {
+            const dx = camera.worldPosition.x - this._sphereCenter.x;
+            const dy = camera.worldPosition.y - this._sphereCenter.y;
+            const dz = camera.worldPosition.z - this._sphereCenter.z;
+            return Math.max(Math.hypot(dx, dy, dz) - this._sphereRadius, 0);
+        }
+        return camera.worldPosition.z;
+    }
+    _computeBounds(address) {
+        if (this._ellipsoid && this._geodetic) {
+            return _tiles_address_tiles_address__WEBPACK_IMPORTED_MODULE_3__.TileAddress.ToBoundsECEF(address, this._metrics, this._ellipsoid, this._geodetic);
+        }
+        return _tiles_address_tiles_address__WEBPACK_IMPORTED_MODULE_3__.TileAddress.ToBounds(address, this._metrics);
+    }
+    _computeSSE(bounds, geometricError, camera) {
+        const cx = bounds.center.x - camera.worldPosition.x;
+        const cy = bounds.center.y - camera.worldPosition.y;
+        const cz = bounds.center.z - camera.worldPosition.z;
+        const radius = Math.max(bounds.extendSize.x, bounds.extendSize.y, bounds.extendSize.z);
+        const distance = Math.max(Math.hypot(cx, cy, cz) - radius, 1e-6);
+        const tan = camera.tanFov2 > 0 ? camera.tanFov2 : Math.tan((camera.fovY || 0) * 0.5);
+        const vh = camera.viewportHeight && camera.viewportHeight > 0 ? camera.viewportHeight : 1080;
+        if (tan <= 0 || vh <= 0)
+            return 0;
+        return (geometricError * vh) / (distance * 2 * tan);
+    }
+    // ───────── bounds helper ─────────
+    static _deriveBounds(enc) {
+        if ((0,_geometry_geometry_interfaces__WEBPACK_IMPORTED_MODULE_2__.IsBounds)(enc))
+            return enc;
+        const box = enc;
+        if (box.minimum && box.maximum) {
+            const w = box.maximum.x - box.minimum.x;
+            const h = box.maximum.y - box.minimum.y;
+            const d = box.maximum.z - box.minimum.z;
+            return new _geometry_geometry_bounds__WEBPACK_IMPORTED_MODULE_1__.Bounds(box.minimum.x, box.minimum.y, w, h, box.minimum.z, d);
+        }
+        const sphere = enc;
+        if (sphere.center && typeof sphere.radius === "number") {
+            const r = sphere.radius;
+            return new _geometry_geometry_bounds__WEBPACK_IMPORTED_MODULE_1__.Bounds(sphere.center.x - r, sphere.center.y - r, 2 * r, 2 * r, sphere.center.z - r, 2 * r);
+        }
+        return undefined;
+    }
+}
+TilePyramidStreamSource.DefaultMaxScreenSpaceError = 16;
+//# sourceMappingURL=tile.pyramid.stream.source.js.map
 
 /***/ },
 
@@ -9959,92 +10748,67 @@ __webpack_require__.r(__webpack_exports__);
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   EmptyTileBounds: () => (/* binding */ EmptyTileBounds),
 /* harmony export */   TILE_STREAM_CONTENT_TYPE: () => (/* binding */ TILE_STREAM_CONTENT_TYPE),
-/* harmony export */   TileStreamSource: () => (/* binding */ TileStreamSource),
-/* harmony export */   TileStreamSourceProducer: () => (/* binding */ TileStreamSourceProducer)
+/* harmony export */   TileStreamSource: () => (/* binding */ TileStreamSource)
 /* harmony export */ });
 /* harmony import */ var _geometry_geometry_bounds__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../geometry/geometry.bounds */ "../core/dist/geometry/geometry.bounds.js");
-/* harmony import */ var _geometry_geometry_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../geometry/geometry.interfaces */ "../core/dist/geometry/geometry.interfaces.js");
-/* harmony import */ var _streaming_producer_abstract__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../streaming.producer.abstract */ "../core/dist/streaming/streaming.producer.abstract.js");
-
-
 
 /**
- * Default contentType for provider-backed datasources. Customize per concrete
- * tile content (e.g. "tile-provider:imagery") when the scene needs to route
- * different providers through different producers.
+ * Default contentType for individual tile stream sources. Customize per layer
+ * (e.g. "tile-address:imagery" / ":elevation") to route different layers to
+ * different downstream consumers.
  */
-const TILE_STREAM_CONTENT_TYPE = "tile-provider";
+const TILE_STREAM_CONTENT_TYPE = "tile-address";
 /**
- * IStreamSource wrapper around an existing AbstractTileLoader.
+ * IStreamSource<ITile2DAddress> : a single tile, tracked as a first-class
+ * streaming entity with its own lifecycle (status).
  *
- * Design note: one provider maps to ONE datasource sitting in ONE octree cell.
- * The 2D tile pyramid is never materialized inside the octree; it stays implicit,
- * driven by tile addresses and the existing ITileView → AbstractTileLoader pipeline.
- *
- * Two independent LOD systems coexist and do not conflict:
- *  - Octree LOD (this module): decides when the whole provider region is relevant
- *    for a given camera. It toggles the provider ON / OFF via activate / deactivate.
- *  - Tile pyramid LOD (tiles/pipeline): runs only while the provider is active and
- *    selects the right zoom level / tile addresses based on navigation state.
- *
- * This keeps the octree small (one cell per provider, not millions of tile cells)
- * and reuses the entire tiles/loaders + tiles/pipeline machinery as-is.
+ * Emitted by `TilePyramidStreamSource` on camera-driven visibility changes.
+ * Consumers (TileLoader adapters, scene renderers, diagnostics) can:
+ *  - read `content` for the address
+ *  - watch `status` transitions pending → downloading → ready / failed
+ *  - use `boundingBox` for culling / placement (already in world frame)
+ *  - read `geometricError` for priority / LOD decisions downstream
+ *  - follow `dependencies` (parent quadkey) to resolve cross-tile replacement
+ *  - read `tile` once `status === "ready"` to access the fetched `ITile<T>`
+ *    (populated by `TileLoaderAdapter` when the fetch completes)
  */
 class TileStreamSource {
-    static _deriveBounds(enc) {
-        if ((0,_geometry_geometry_interfaces__WEBPACK_IMPORTED_MODULE_1__.IsBounds)(enc))
-            return enc;
-        const box = enc;
-        if (box.minimum && box.maximum) {
-            const w = box.maximum.x - box.minimum.x;
-            const h = box.maximum.y - box.minimum.y;
-            const d = box.maximum.z - box.minimum.z;
-            return new _geometry_geometry_bounds__WEBPACK_IMPORTED_MODULE_0__.Bounds(box.minimum.x, box.minimum.y, w, h, box.minimum.z, d);
-        }
-        const sphere = enc;
-        if (sphere.center && typeof sphere.radius === "number") {
-            const r = sphere.radius;
-            return new _geometry_geometry_bounds__WEBPACK_IMPORTED_MODULE_0__.Bounds(sphere.center.x - r, sphere.center.y - r, 2 * r, 2 * r, sphere.center.z - r, 2 * r);
-        }
-        return undefined;
-    }
     constructor(options) {
-        this.kind = "provider";
-        this.status = "pending";
-        this.content = null;
-        this.id = options.id;
-        this.provider = options.provider;
-        this.encumbrance = options.encumbrance;
-        this.links = options.links;
+        this.kind = "static";
         this.contentType = options.contentType ?? TILE_STREAM_CONTENT_TYPE;
-        this.boundingBox = options.boundingBox ?? TileStreamSource._deriveBounds(options.encumbrance);
-        if (!(0,_geometry_geometry_interfaces__WEBPACK_IMPORTED_MODULE_1__.IsBounds)(options.encumbrance)) {
-            this.boundingSphere = options.encumbrance;
+        this.namespace = options.namespace;
+        this.content = options.address;
+        this.boundingBox = options.boundingBox;
+        this.encumbrance = options.boundingBox;
+        this.geometricError = options.geometricError;
+        this.boundingSphere = options.boundingSphere;
+        this.status = options.status ?? "pending";
+        // Cross-tile dep: coarser parent replaces at refinement boundary.
+        const q = options.address.quadkey;
+        if (q && q.length > 0) {
+            const parent = q.slice(0, -1);
+            const parentId = options.namespace ? `${options.namespace}:${parent}` : parent;
+            this.dependencies = [{ op: "replace", target: parentId }];
         }
+    }
+    /** `<namespace>:<quadkey>` when namespace is set, else the quadkey alone. */
+    get id() {
+        const q = this.content?.quadkey ?? "";
+        return this.namespace ? `${this.namespace}:${q}` : q;
+    }
+    /** Convenience alias for `content`. */
+    get address() {
+        return this.content ?? null;
     }
 }
 /**
- * Placeholder 1:1 producer for TileStreamSource.
- *
- * This version emits the provider as the `content` of the TileStreamSource
- * itself (status: pending → downloading → ready). Scenes can listen to the
- * activation and wire the provider into their own tile consumer via the existing
- * tiles/pipeline machinery.
- *
- * TODO (phase 3): replace with a proper spawner that instantiates an ITileView
- * per (viewId, provider) and emits Tile2DDataSource children as addresses flow.
- * See streaming.tile2d.ts (to be added).
+ * Builds a zero-bounds placeholder. Useful when a caller needs a TileStreamSource
+ * reference before the 3D bounds have been computed.
  */
-class TileStreamSourceProducer extends _streaming_producer_abstract__WEBPACK_IMPORTED_MODULE_2__.AbstractStreamSourceProducer {
-    constructor(contentType = TILE_STREAM_CONTENT_TYPE) {
-        super();
-        this.contentType = contentType;
-    }
-    _load(source) {
-        const provider = source.provider;
-        return Promise.resolve(provider);
-    }
+function EmptyTileBounds() {
+    return _geometry_geometry_bounds__WEBPACK_IMPORTED_MODULE_0__.Bounds.Zero();
 }
 //# sourceMappingURL=tile.stream.source.js.map
 
@@ -10965,6 +11729,1164 @@ LocalString.DefaultCode = "en";
 
 /***/ },
 
+/***/ "../core/dist/tiles/3d/codecs/tile3d.codec.tileset.js"
+/*!************************************************************!*\
+  !*** ../core/dist/tiles/3d/codecs/tile3d.codec.tileset.js ***!
+  \************************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   TilesetCodec: () => (/* binding */ TilesetCodec)
+/* harmony export */ });
+class TilesetCodec {
+    async decodeAsync(r) {
+        if (r instanceof Response) {
+            const b = await r.json();
+            return b;
+        }
+        return null;
+    }
+}
+TilesetCodec.Shared = new TilesetCodec();
+//# sourceMappingURL=tile3d.codec.tileset.js.map
+
+/***/ },
+
+/***/ "../core/dist/tiles/3d/engine/tile3d.stream.client.js"
+/*!************************************************************!*\
+  !*** ../core/dist/tiles/3d/engine/tile3d.stream.client.js ***!
+  \************************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   TilesetClient: () => (/* binding */ TilesetClient)
+/* harmony export */ });
+/* harmony import */ var _codecs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../codecs */ "../core/dist/tiles/3d/codecs/tile3d.codec.tileset.js");
+/* harmony import */ var _io__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../io */ "../core/dist/io/webClient.js");
+
+
+class TilesetClient extends _io__WEBPACK_IMPORTED_MODULE_1__.WebClient {
+    constructor(name, options) {
+        super(name, _codecs__WEBPACK_IMPORTED_MODULE_0__.TilesetCodec.Shared, undefined, options);
+    }
+}
+//# sourceMappingURL=tile3d.stream.client.js.map
+
+/***/ },
+
+/***/ "../core/dist/tiles/3d/engine/tile3d.stream.engine.js"
+/*!************************************************************!*\
+  !*** ../core/dist/tiles/3d/engine/tile3d.stream.engine.js ***!
+  \************************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   ActiveContext: () => (/* binding */ ActiveContext),
+/* harmony export */   DefaultScreenSpaceError: () => (/* binding */ DefaultScreenSpaceError),
+/* harmony export */   Tile3dMaxPriority: () => (/* binding */ Tile3dMaxPriority),
+/* harmony export */   Tile3dMinPriority: () => (/* binding */ Tile3dMinPriority),
+/* harmony export */   Tile3dNormalPriority: () => (/* binding */ Tile3dNormalPriority),
+/* harmony export */   Tile3dRefineType: () => (/* binding */ Tile3dRefineType),
+/* harmony export */   Tile3dStreamEngine: () => (/* binding */ Tile3dStreamEngine),
+/* harmony export */   TileContentStatus: () => (/* binding */ TileContentStatus)
+/* harmony export */ });
+/* harmony import */ var _interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../interfaces */ "../core/dist/tiles/3d/interfaces/boundingVolume.js");
+/* harmony import */ var _interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../interfaces */ "../core/dist/tiles/3d/interfaces/tile3d.js");
+/* harmony import */ var _interfaces__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../interfaces */ "../core/dist/tiles/3d/interfaces/tileset.js");
+/* harmony import */ var _interfaces_math_math__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../interfaces/math/math */ "../core/dist/tiles/3d/interfaces/math/math.js");
+/* harmony import */ var _pipeline__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../pipeline */ "../core/dist/tiles/pipeline/tiles.pipeline.sourceblock.js");
+/* harmony import */ var _collections__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../../collections */ "../core/dist/collections/priorityQueue.js");
+/* harmony import */ var _geodesy__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../../geodesy */ "../core/dist/geodesy/geodesy.ellipsoid.js");
+/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../../../events */ "../core/dist/events/events.observable.js");
+/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../../../geometry */ "../core/dist/geometry/geometry.cartesian.js");
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../../../utils */ "../core/dist/utils/path.js");
+
+
+
+
+
+
+
+
+const Tile3dMinPriority = 0;
+const Tile3dNormalPriority = 30;
+const Tile3dMaxPriority = 100;
+/**
+ * Enumeration for the refinement strategy used when traversing the object hierarchy for rendering.
+ * - `add`: Children are added to the current set of rendered objects (additive refinement).
+ * - `replace`: Children replace the current object (replacement refinement).
+ * - `unknown`: The refinement strategy is not specified or is implementation dependent.
+ */
+var Tile3dRefineType;
+(function (Tile3dRefineType) {
+    Tile3dRefineType[Tile3dRefineType["add"] = 0] = "add";
+    Tile3dRefineType[Tile3dRefineType["replace"] = 1] = "replace";
+    Tile3dRefineType[Tile3dRefineType["unknown"] = 999] = "unknown";
+})(Tile3dRefineType || (Tile3dRefineType = {}));
+/**
+ * Computes the screen space error (SSE) for an object based on its geometric error,
+ * the distance to the camera, the viewport height, and the tangent of half the field of view.
+ *
+ * @param tileGeometricError - The geometric error of the object (in meters).
+ * @param distanceToCamera - The distance from the object to the camera (in meters).
+ * @param viewportHeight - The height of the viewport (in pixels).
+ * @param tanfov2 - The tangent of half the field of view (unitless).
+ * @returns The screen space error, typically in pixels.
+ */
+const DefaultScreenSpaceError = (tileGeometricError, distanceToCamera, viewportHeight, tanfov2) => (tileGeometricError * viewportHeight) / (2 * distanceToCamera * tanfov2);
+var TileContentStatus;
+(function (TileContentStatus) {
+    TileContentStatus[TileContentStatus["idle"] = 0] = "idle";
+    TileContentStatus[TileContentStatus["pending"] = 1] = "pending";
+    TileContentStatus[TileContentStatus["loading"] = 2] = "loading";
+    TileContentStatus[TileContentStatus["ready"] = 3] = "ready";
+    TileContentStatus[TileContentStatus["error"] = 4] = "error";
+    TileContentStatus[TileContentStatus["unkknown"] = 999] = "unkknown";
+})(TileContentStatus || (TileContentStatus = {}));
+class ActiveContext {
+    constructor(data) {
+        if (!data) {
+            this.cut = new Set();
+        }
+        else if (Array.isArray(data)) {
+            this.cut = new Set(data);
+        }
+        else if (typeof data[Symbol.iterator] === "function") {
+            // generic iterable (e.g. Set, Map keys, etc.)
+            this.cut = new Set(data);
+        }
+        else {
+            // single ITile3d
+            this.cut = new Set([data]);
+        }
+        this.parents = new Set();
+        this.frontier = new Set();
+        this.refinePQ = _collections__WEBPACK_IMPORTED_MODULE_5__.PriorityQueue.fromMax((t) => t.sse);
+        this.coarsenPQ = _collections__WEBPACK_IMPORTED_MODULE_5__.PriorityQueue.fromMin((t) => t.sse);
+    }
+}
+class Tile3dStreamEngine extends _pipeline__WEBPACK_IMPORTED_MODULE_4__.SourceBlock {
+    constructor(uri, display, contentLoader, contentOptions, navOptions) {
+        super();
+        this._views = [null, null];
+        this._root = null;
+        this._visited = [];
+        // Keep latest view-state to re-process after async loads
+        this._pendingState = null;
+        this._isProcessing = false;
+        this._cartesianCache = [_geometry__WEBPACK_IMPORTED_MODULE_8__.Cartesian3.Zero()];
+        this._uri = uri;
+        this._baseUri = _utils__WEBPACK_IMPORTED_MODULE_9__.PathUtils.GetBaseUrl(uri);
+        this._display = display;
+        this._tileContentLoader = contentLoader;
+        this._tileContentLoader.linkTo(this);
+        this._options = navOptions ?? Tile3dStreamEngine.DEFAULT_NAV_OPTIONS;
+        this._contentOptions = contentOptions ?? Tile3dStreamEngine.DEFAULT_CONTENT_OPTIONS;
+    }
+    get rootReadyObservable() {
+        if (!this._rootReadyObservable) {
+            this._rootReadyObservable = new _events__WEBPACK_IMPORTED_MODULE_7__.Observable();
+        }
+        return this._rootReadyObservable;
+    }
+    get options() {
+        return this._options;
+    }
+    get contentOptions() {
+        return this._contentOptions;
+    }
+    get display() {
+        return this._display;
+    }
+    get activeView() {
+        return this._views[0];
+    }
+    setContext(state) {
+        this._pendingState = state ?? null;
+        this._visited = [];
+        void this._process();
+    }
+    async _process() {
+        if (this._isProcessing)
+            return;
+        this._isProcessing = true;
+        try {
+            // Ensure root tileset is loaded once
+            if (!this._root) {
+                await this._initializeRootAsync();
+                // fallthrough: after load, we’ll consume latest pending state
+            }
+            const camState = this._pendingState;
+            if (!camState)
+                return; // nothing to do
+            this._pendingState = null;
+            // build the current view
+            const lastView = this._views[0]; // the view from last frame
+            let currentView; // the one to build.
+            if (!lastView || (lastView.cut.size ?? 0) === 0) {
+                if (!this._root) {
+                    return;
+                }
+                currentView = new ActiveContext(this._root?.root);
+            }
+            else {
+                currentView = new ActiveContext(lastView.cut);
+            }
+            this._views[1] = lastView;
+            this._views[0] = currentView;
+            // main stream logic
+            // -----------------
+            // the tile to remove
+            const toRemove = [];
+            const fn = this._options.screenSpaceError ?? DefaultScreenSpaceError;
+            let mse = this._contentOptions.maxScreenSpaceError ?? Tile3dStreamEngine.DEFAULT_MAX_SCREEN_SPACE_ERROR;
+            const ellipsoid = this._contentOptions.ellipsoid ?? _geodesy__WEBPACK_IMPORTED_MODULE_6__.Ellipsoid.WGS84;
+            const planetRadius = ellipsoid.semiMajorAxis;
+            let refineBudget = this._options.maxRefinePerFrame ?? Number.MAX_VALUE;
+            let coarsenBudget = this._options.maxCoarsenPerFrame ?? Number.MAX_VALUE;
+            for (const leaf of currentView.cut) {
+                this._visited.push(leaf);
+                if (leaf.geometricError === undefined || !leaf.worldBoundingVolume?.sphere) {
+                    // we can not process the tile due to a severe lack of informations
+                    // Not supposed to happen because we iterate over already checked tiles.
+                    continue;
+                }
+                const visibleNow = this._isVisible(leaf, camState, planetRadius);
+                if (!visibleNow) {
+                    if (leaf.visible) {
+                        leaf.visible = visibleNow;
+                        this._freeze(leaf);
+                    }
+                    continue;
+                }
+                // here it's visible.
+                if (!leaf.visible) {
+                    leaf.visible = visibleNow;
+                    this._unfreeze(leaf);
+                }
+                const tileCenter = this._cartesianCache[0];
+                _geometry__WEBPACK_IMPORTED_MODULE_8__.Cartesian3.ResetFromArray(tileCenter, leaf.worldBoundingVolume.sphere);
+                // we compute the distance from the camera, using the center of the bounding volume
+                const distanceToCamera = _geometry__WEBPACK_IMPORTED_MODULE_8__.Cartesian3.Distance(camState.worldPosition, tileCenter);
+                leaf.sse = fn(leaf.geometricError, distanceToCamera, this._display.resolution.height, camState.tanFov2);
+            }
+            //Build refine/coarsen queues from *visible leaves only*
+            for (const leaf of currentView.cut) {
+                if (leaf.visible) {
+                    mse = this._contentOptions.maxScreenSpaceErrorFn?.(leaf.depth) ?? Tile3dStreamEngine.DEFAULT_MAX_SCREEN_SPACE_ERROR;
+                    if (leaf.hasExternal || leaf.sse > mse) {
+                        currentView.refinePQ.enqueue(leaf);
+                    }
+                }
+            }
+            const toLoad = [];
+            if (refineBudget !== 0 && !currentView.refinePQ.isEmpty()) {
+                do {
+                    const leaf = currentView.refinePQ.dequeue();
+                    refineBudget--;
+                    if (!leaf) {
+                        continue;
+                    }
+                    if (leaf.children) {
+                        switch (leaf.refineType) {
+                            case Tile3dRefineType.add: {
+                                for (const child of leaf.children) {
+                                    if (this._isVisible(child, camState, planetRadius)) {
+                                        child.visible = true;
+                                        if (child.contentStatus === TileContentStatus.idle) {
+                                            toLoad.push(child);
+                                        }
+                                    }
+                                }
+                                break;
+                            }
+                            case Tile3dRefineType.replace:
+                            default: {
+                                if (!leaf.contents?.length || leaf.contentStatus === TileContentStatus.ready) {
+                                    for (const child of leaf.children) {
+                                        if (this._isVisible(child, camState, planetRadius)) {
+                                            child.visible = true;
+                                            if (child.contentStatus === TileContentStatus.idle) {
+                                                toLoad.push(child);
+                                            }
+                                        }
+                                    }
+                                    toRemove.push(leaf);
+                                    currentView.cut.delete(leaf);
+                                }
+                                break;
+                            }
+                        }
+                    }
+                    else {
+                        // thanks to the specification, it might be a tile with external reference set
+                        //if (leaf.status == TileContentStatus.idle) {
+                        //    leaf.status = TileContentStatus.pending;
+                        //    this._loadExternalSet(leaf);
+                        //}
+                    }
+                } while (refineBudget !== 0 && !currentView.refinePQ.isEmpty());
+            }
+            if (coarsenBudget !== 0 && !currentView.coarsenPQ.isEmpty()) {
+                do {
+                    coarsenBudget--;
+                } while (coarsenBudget !== 0 && !currentView.coarsenPQ.isEmpty());
+            }
+            if (toRemove.length) {
+                for (const item of toRemove) {
+                    switch (item.contentStatus) {
+                        case TileContentStatus.pending: {
+                            this._tileContentLoader.cancel(item);
+                            break;
+                        }
+                        case TileContentStatus.ready: {
+                            break;
+                        }
+                    }
+                    if (item.visible) {
+                        currentView.cut.delete(item);
+                    }
+                }
+                this.notifyRemoved(toRemove, -1, this, this);
+            }
+            // the remain tiles
+            //const remains: ITile3d[] = Array.from(currentView.cut);
+            if (toLoad.length) {
+                for (const leaf of toLoad) {
+                    if (leaf.visible) {
+                        this._tileContentLoader.load(leaf);
+                    }
+                }
+            }
+        }
+        finally {
+            this._isProcessing = false;
+            // If state changed during async work, process again
+            if (this._pendingState) {
+                const again = this._pendingState;
+                this._pendingState = null; // avoid infinite loop; _process will set if new input arrives
+                if (again)
+                    this.setContext(again);
+            }
+        }
+    }
+    _isVisible(leaf, camState, radius) {
+        if (!leaf.worldBoundingVolume?.sphere) {
+            return true;
+        }
+        if ((0,_interfaces_math_math__WEBPACK_IMPORTED_MODULE_3__.IsTileSphereBeyondHorizon)(leaf.worldBoundingVolume.sphere, camState.worldPosition, radius)) {
+            return false;
+        }
+        return (0,_interfaces_math_math__WEBPACK_IMPORTED_MODULE_3__.IsSphereInFrustum)(leaf.worldBoundingVolume.sphere, camState.frustumPlanes);
+    }
+    _freeze(_leaf) { }
+    _unfreeze(_leaf) { }
+    _internalResolveUri(uri) {
+        return this._contentOptions.uriResolver?.resolve(uri) ?? uri;
+    }
+    async _initializeRootAsync() {
+        const ts = await this._tileContentLoader.loadTileSetAsync(this._uri);
+        if (ts) {
+            this._root = ts;
+            if (ts.root) {
+                this._initializeSet(ts); // this is where we link the nodes and set the worldTransform
+                this._views[0] = new ActiveContext(ts.root);
+            }
+            this._rootReadyObservable?.notifyObservers(ts, -1, this, this);
+        }
+    }
+    _initializeSet(tileset, from) {
+        if (tileset.root) {
+            this._initializeTile(tileset.root, from);
+        }
+    }
+    _initializeTile(tile, parent) {
+        tile.parent = parent;
+        tile.contentStatus = TileContentStatus.idle;
+        // every tile start with a average priority of 50. Priority is set from 0 to 100 with zero is the lowest priority.
+        // priority will be used by loader which load the tile using a maximum batch size
+        tile.priority = Tile3dNormalPriority;
+        if (parent?.worldTransform || tile.transform) {
+            const parentTransform = parent?.worldTransform ?? _interfaces_math_math__WEBPACK_IMPORTED_MODULE_3__.IDENTITY44;
+            const localTransform = tile.transform ?? _interfaces_math_math__WEBPACK_IMPORTED_MODULE_3__.IDENTITY44;
+            tile.worldTransform = new Float64Array(16);
+            (0,_interfaces_math_math__WEBPACK_IMPORTED_MODULE_3__.Mat44MultToRef)(parentTransform, localTransform, tile.worldTransform);
+        }
+        tile.depth = parent !== undefined ? parent.depth + 1 : 0;
+        const refine = tile.refine ?? "REPLACE";
+        switch (refine) {
+            case "ADD": {
+                tile.refineType = Tile3dRefineType.add;
+                break;
+            }
+            case "REPLACE":
+            default: {
+                tile.refineType = Tile3dRefineType.replace;
+                break;
+            }
+        }
+        if (tile.boundingVolume) {
+            if (!tile.boundingVolume.box) {
+                if (tile.boundingVolume.region) {
+                    /* empty */
+                }
+            }
+            if (tile.boundingVolume.box) {
+                if (!tile.boundingVolume.sphere) {
+                    tile.boundingVolume.sphere = (0,_interfaces__WEBPACK_IMPORTED_MODULE_0__.CreateTileSphereFromBox)(tile.boundingVolume.box);
+                }
+            }
+            tile.worldBoundingVolume = {
+                sphere: tile.boundingVolume.sphere?.slice(0, 4),
+                box: tile.boundingVolume.box?.slice(0, 12),
+            };
+            (0,_interfaces_math_math__WEBPACK_IMPORTED_MODULE_3__.EcefBoxToBjsInPlace)(tile.worldBoundingVolume.box);
+            (0,_interfaces_math_math__WEBPACK_IMPORTED_MODULE_3__.EcefSphereToBjsInPlace)(tile.worldBoundingVolume.sphere);
+        }
+        // compute and set absolute paths for every content uri.
+        if (tile.content) {
+            // transfert everything to contents..
+            tile.contents = tile.contents ?? [];
+            tile.contents.push(tile.content);
+            tile.content = undefined;
+        }
+        if (tile.contents) {
+            tile.hasExternal = false;
+            for (const c of tile.contents) {
+                const uri = _utils__WEBPACK_IMPORTED_MODULE_9__.PathUtils.IsRelativeUrl(c.uri) ? _utils__WEBPACK_IMPORTED_MODULE_9__.PathUtils.ResolveUri(this._baseUri, c.uri) : c.uri;
+                c.uri = uri;
+                if (c.uri && _utils__WEBPACK_IMPORTED_MODULE_9__.PathUtils.EndsWith(c.uri, ".json")) {
+                    tile.hasExternal = true;
+                }
+            }
+        }
+        if (tile.children) {
+            for (const t of tile.children) {
+                this._initializeTile(t, tile);
+            }
+        }
+    }
+    updated(eventData, _eventState) {
+        const ctx = this.activeView;
+        if (ctx) {
+            for (const t of eventData) {
+                const contents = (0,_interfaces__WEBPACK_IMPORTED_MODULE_1__.GetTile3dContents)(t);
+                if (contents) {
+                    let hasExternalOnly = true;
+                    for (const c of contents) {
+                        if (c.container) {
+                            if ((0,_interfaces__WEBPACK_IMPORTED_MODULE_2__.IsITileset)(c.container)) {
+                                this._initializeSet(c.container, t);
+                                if (!t.children) {
+                                    t.children = [c.container.root];
+                                }
+                                else {
+                                    // may happen if several external set linked to one tile.
+                                    t.children.push(c.container.root);
+                                }
+                                continue;
+                            }
+                            hasExternalOnly = false;
+                        }
+                    }
+                    if (!hasExternalOnly) {
+                        this.notifyUpdated([t], -1, this, this);
+                    }
+                }
+                ctx.cut.add(t);
+            }
+        }
+    }
+}
+Tile3dStreamEngine.DEFAULT_MAX_SCREEN_SPACE_ERROR = 16;
+Tile3dStreamEngine.DEFAULT_HYSTERESIS_PERCENT = 0.1;
+Tile3dStreamEngine.DEFAULT_NAV_OPTIONS = {
+    hysteresisPercent: Tile3dStreamEngine.DEFAULT_HYSTERESIS_PERCENT,
+};
+Tile3dStreamEngine.DEFAULT_CONTENT_OPTIONS = {
+    maxScreenSpaceError: Tile3dStreamEngine.DEFAULT_MAX_SCREEN_SPACE_ERROR,
+};
+//# sourceMappingURL=tile3d.stream.engine.js.map
+
+/***/ },
+
+/***/ "../core/dist/tiles/3d/interfaces/boundingVolume.js"
+/*!**********************************************************!*\
+  !*** ../core/dist/tiles/3d/interfaces/boundingVolume.js ***!
+  \**********************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   AreBoxIntersect: () => (/* binding */ AreBoxIntersect),
+/* harmony export */   CreateTileSphereFromBox: () => (/* binding */ CreateTileSphereFromBox)
+/* harmony export */ });
+function AreBoxIntersect(a, b) {
+    for (let i = 0; i < 3; ++i) {
+        const ai = 3 + i * 3;
+        const aj = ai + 1;
+        const ak = ai + 2;
+        const aHalf = Math.sqrt(a[ai] ** 2 + a[aj] ** 2 + a[ak] ** 2);
+        const bHalf = Math.sqrt(b[ai] ** 2 + b[aj] ** 2 + b[ak] ** 2);
+        const aMin = a[i] - aHalf;
+        const aMax = a[i] + aHalf;
+        const bMin = b[i] - bHalf;
+        const bMax = b[i] + bHalf;
+        // Sort early if separated on this axis
+        if (aMax < bMin || aMin > bMax) {
+            return false;
+        }
+    }
+    return true;
+}
+/**
+ * Create a tight bounding sphere from a 3D Tiles oriented box.
+ * Works in any coordinate system (ECEF, local, Babylon LH…) as long as
+ * the box and desired sphere are in the same space.
+ */
+function CreateTileSphereFromBox(box) {
+    if (!box || box.length !== 12) {
+        throw new Error("ITileBox must be number[12]: [C(3), U(3), V(3), W(3)].");
+    }
+    const Cx = box[0], Cy = box[1], Cz = box[2];
+    const Ux = box[3], Uy = box[4], Uz = box[5];
+    const Vx = box[6], Vy = box[7], Vz = box[8];
+    const Wx = box[9], Wy = box[10], Wz = box[11];
+    // Corner offsets relative to C: ±U ±V ±W
+    const offsets = [
+        [-Ux - Vx - Wx, -Uy - Vy - Wy, -Uz - Vz - Wz],
+        [Ux - Vx - Wx, Uy - Vy - Wy, Uz - Vz - Wz],
+        [-Ux + Vx - Wx, -Uy + Vy - Wy, -Uz + Vz - Wz],
+        [Ux + Vx - Wx, Uy + Vy - Wy, Uz + Vz - Wz],
+        [-Ux - Vx + Wx, -Uy - Vy + Wy, -Uz - Vz + Wz],
+        [Ux - Vx + Wx, Uy - Vy + Wy, Uz - Vz + Wz],
+        [-Ux + Vx + Wx, -Uy + Vy + Wy, -Uz + Vz + Wz],
+        [Ux + Vx + Wx, Uy + Vy + Wy, Uz + Vz + Wz],
+    ];
+    // Max distance from center among the 8 corners
+    let maxRSq = 0;
+    for (const [dx, dy, dz] of offsets) {
+        const r2 = dx * dx + dy * dy + dz * dz;
+        if (r2 > maxRSq)
+            maxRSq = r2;
+    }
+    return [Cx, Cy, Cz, Math.sqrt(maxRSq)];
+}
+//# sourceMappingURL=boundingVolume.js.map
+
+/***/ },
+
+/***/ "../core/dist/tiles/3d/interfaces/math/math.js"
+/*!*****************************************************!*\
+  !*** ../core/dist/tiles/3d/interfaces/math/math.js ***!
+  \*****************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   A: () => (/* binding */ A),
+/* harmony export */   Ainv: () => (/* binding */ Ainv),
+/* harmony export */   BjsToEcefCartInPlace: () => (/* binding */ BjsToEcefCartInPlace),
+/* harmony export */   DistanceFromPlane: () => (/* binding */ DistanceFromPlane),
+/* harmony export */   Dot3: () => (/* binding */ Dot3),
+/* harmony export */   EcefBoxToBjsInPlace: () => (/* binding */ EcefBoxToBjsInPlace),
+/* harmony export */   EcefBoxToRHInPlace: () => (/* binding */ EcefBoxToRHInPlace),
+/* harmony export */   EcefMatToBjsToRef: () => (/* binding */ EcefMatToBjsToRef),
+/* harmony export */   EcefSphereToBjsInPlace: () => (/* binding */ EcefSphereToBjsInPlace),
+/* harmony export */   EcefSphereToRYInPlace: () => (/* binding */ EcefSphereToRYInPlace),
+/* harmony export */   EcefToBjs: () => (/* binding */ EcefToBjs),
+/* harmony export */   EcefToBjsBufferInPlace: () => (/* binding */ EcefToBjsBufferInPlace),
+/* harmony export */   EcefToBjsCartInPlace: () => (/* binding */ EcefToBjsCartInPlace),
+/* harmony export */   EcefToBjsInPlace: () => (/* binding */ EcefToBjsInPlace),
+/* harmony export */   EcefToRH: () => (/* binding */ EcefToRH),
+/* harmony export */   EcefToRHBufferInPlace: () => (/* binding */ EcefToRHBufferInPlace),
+/* harmony export */   EcefToRHInPlace: () => (/* binding */ EcefToRHInPlace),
+/* harmony export */   IDENTITY44: () => (/* binding */ IDENTITY44),
+/* harmony export */   IsBoxInFrustum: () => (/* binding */ IsBoxInFrustum),
+/* harmony export */   IsPointInBox: () => (/* binding */ IsPointInBox),
+/* harmony export */   IsPointInSphere: () => (/* binding */ IsPointInSphere),
+/* harmony export */   IsSphereInFrustum: () => (/* binding */ IsSphereInFrustum),
+/* harmony export */   IsTileCenterBeyondHorizon: () => (/* binding */ IsTileCenterBeyondHorizon),
+/* harmony export */   IsTileSphereBeyondHorizon: () => (/* binding */ IsTileSphereBeyondHorizon),
+/* harmony export */   Mat44MultToRef: () => (/* binding */ Mat44MultToRef),
+/* harmony export */   R_YupToZup: () => (/* binding */ R_YupToZup),
+/* harmony export */   R_ZupToYup: () => (/* binding */ R_ZupToYup),
+/* harmony export */   TransformBoxToRef: () => (/* binding */ TransformBoxToRef),
+/* harmony export */   TransformPointToRef: () => (/* binding */ TransformPointToRef),
+/* harmony export */   TransformSphereToRef: () => (/* binding */ TransformSphereToRef),
+/* harmony export */   TransformVectorToRef: () => (/* binding */ TransformVectorToRef)
+/* harmony export */ });
+/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../../geometry */ "../core/dist/geometry/geometry.cartesian.js");
+/* harmony import */ var _math__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../../math */ "../core/dist/math/math.js");
+
+
+// Column-major identity
+const IDENTITY44 = new Float64Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
+// A for (xb, yb, zb) = (x, z, y)
+const A = new Float64Array([-1, 0, 0, 0, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 1]);
+const Ainv = new Float64Array([-1, 0, 0, 0, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 1]);
+// +90° about X (Y-up -> Z-up), row-major
+const R_YupToZup = new Float64Array([1, 0, 0, 0, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 1]);
+// -90° about X (Z-up -> Y-up), row-major
+const R_ZupToYup = new Float64Array([1, 0, 0, 0, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 1]);
+/// <summary>
+/// Why `M_bjs = A * M_ecef * A^{-1}` ?  (change of basis)
+///
+/// We have two coordinate systems:
+///   - ECEF (right-handed), where tiles/boxes/transforms are defined
+///   - Babylon (left-handed, Y up), where we render
+///
+/// Let A be the fixed 4×4 matrix that converts a vector from ECEF to Babylon:
+///     p_bjs = A * p_ecef
+/// Then its inverse converts back:
+///     p_ecef = A^{-1} * p_bjs
+///
+/// If a child point transforms in ECEF as:
+///     p_parent_ecef = M_ecef * p_child_ecef
+/// substitute p_ecef = A^{-1} * p_bjs:
+///     p_parent_bjs = A * p_parent_ecef
+///                   = A * M_ecef * p_child_ecef
+///                   = A * M_ecef * (A^{-1} * p_child_bjs)
+///                   = (A * M_ecef * A^{-1}) * p_child_bjs
+///
+/// Therefore the same hierarchical relation holds in Babylon with:
+///     M_bjs = A * M_ecef * A^{-1}
+///
+/// Reading order (column-vector convention): right → left.
+/// So when applied to a point, A^{-1} acts first (go to ECEF),
+/// then M_ecef, then A (return to Babylon).
+///
+/// With your axis mapping (xb, yb, zb) = (-x, +z, -y), the matrices are:
+///   A =
+///     [ -1  0  0  0
+///       0   0  1  0
+///       0  -1  0  0
+///       0   0  0  1 ]
+///   A^{-1} = Aᵀ =
+///     [ -1  0   0  0
+///       0   0  -1  0
+///       0   1   0  0
+///       0   0   0  1 ]
+///
+/// Practical split for affine M = [R t; 0 1]:
+///   R_bjs = A * R_ecef * A^{-1}
+///   t_bjs = A * t_ecef      // just transform the translation as a vector
+///
+/// Sanity checks:
+///   - Pure translation t maps to the same component-wise mapping as points.
+///   - Rotation about ECEF-Z becomes rotation about Babylon-Y (since z→y).
+/// </summary>
+function EcefMatToBjsToRef(M_ecef, ref) {
+    const tmp = new Float32Array(16);
+    Mat44MultToRef(A, M_ecef, tmp); // t = A * M
+    Mat44MultToRef(tmp, Ainv, ref); // M_bjs = t * Ainv
+}
+/// <summary>
+/// Column-major 4x4 multiply: ref = a * b
+/// Safe if ref === a or ref === b.
+/// </summary>
+function Mat44MultToRef(a, b, ref) {
+    // cache inputs (handles aliasing)
+    const a00 = a[0], a01 = a[1], a02 = a[2], a03 = a[3];
+    const a10 = a[4], a11 = a[5], a12 = a[6], a13 = a[7];
+    const a20 = a[8], a21 = a[9], a22 = a[10], a23 = a[11];
+    const a30 = a[12], a31 = a[13], a32 = a[14], a33 = a[15];
+    const b00 = b[0], b01 = b[1], b02 = b[2], b03 = b[3];
+    const b10 = b[4], b11 = b[5], b12 = b[6], b13 = b[7];
+    const b20 = b[8], b21 = b[9], b22 = b[10], b23 = b[11];
+    const b30 = b[12], b31 = b[13], b32 = b[14], b33 = b[15];
+    // column 0
+    ref[0] = a00 * b00 + a10 * b01 + a20 * b02 + a30 * b03;
+    ref[1] = a01 * b00 + a11 * b01 + a21 * b02 + a31 * b03;
+    ref[2] = a02 * b00 + a12 * b01 + a22 * b02 + a32 * b03;
+    ref[3] = a03 * b00 + a13 * b01 + a23 * b02 + a33 * b03;
+    // column 1
+    ref[4] = a00 * b10 + a10 * b11 + a20 * b12 + a30 * b13;
+    ref[5] = a01 * b10 + a11 * b11 + a21 * b12 + a31 * b13;
+    ref[6] = a02 * b10 + a12 * b11 + a22 * b12 + a32 * b13;
+    ref[7] = a03 * b10 + a13 * b11 + a23 * b12 + a33 * b13;
+    // column 2
+    ref[8] = a00 * b20 + a10 * b21 + a20 * b22 + a30 * b23;
+    ref[9] = a01 * b20 + a11 * b21 + a21 * b22 + a31 * b23;
+    ref[10] = a02 * b20 + a12 * b21 + a22 * b22 + a32 * b23;
+    ref[11] = a03 * b20 + a13 * b21 + a23 * b22 + a33 * b23;
+    // column 3 (translation column)
+    ref[12] = a00 * b30 + a10 * b31 + a20 * b32 + a30 * b33;
+    ref[13] = a01 * b30 + a11 * b31 + a21 * b32 + a31 * b33;
+    ref[14] = a02 * b30 + a12 * b31 + a22 * b32 + a32 * b33;
+    ref[15] = a03 * b30 + a13 * b31 + a23 * b32 + a33 * b33;
+}
+/**
+ * Computes the dot product between a vector `n`
+ * and a 3D point/vector stored in a flat array starting at `offset`.
+ *
+ * @param n           3D vector
+ * @param coordinates Flat array containing the point/vector components
+ * @param offset      Index of the x-component in the array
+ * @returns           Dot product result
+ */
+function Dot3(n, coordinates, offset) {
+    return n.x * coordinates[offset] + n.y * coordinates[offset + 1] + n.z * coordinates[offset + 2];
+}
+/**
+ * Computes the signed distance from a 3D point to a plane.
+ *
+ * Plane equation convention: dot(normal, x) + d = 0
+ *
+ * @param p           Plane (normal vector + constant d)
+ * @param coordinates Flat array containing the point coordinates
+ * @param offset      Index of the x-component in the array
+ * @returns           Signed distance (positive = in front of plane, negative = behind)
+ */
+function DistanceFromPlane(p, coordinates, offset) {
+    return Dot3(p.normal, coordinates, offset) + p.d;
+}
+/** Transforms a point by a column-major 4x4 affine matrix (includes translation). */
+function TransformPointToRef(transform, v, offset, ref, refOffset) {
+    const a = v[offset++];
+    const b = v[offset++];
+    const c = v[offset];
+    ref[refOffset++] = transform[0] * a + transform[4] * b + transform[8] * c + transform[12];
+    ref[refOffset++] = transform[1] * a + transform[5] * b + transform[9] * c + transform[13];
+    ref[refOffset] = transform[2] * a + transform[6] * b + transform[10] * c + transform[14];
+}
+/** Transforms a direction/half-axis by the linear (3x3) part only (no translation). */
+function TransformVectorToRef(m, v, offset, ref, refOffset) {
+    const a = v[offset++];
+    const b = v[offset++];
+    const c = v[offset];
+    ref[refOffset++] = m[0] * a + m[4] * b + m[8] * c;
+    ref[refOffset++] = m[1] * a + m[5] * b + m[9] * c;
+    ref[refOffset] = m[2] * a + m[6] * b + m[10] * c;
+}
+/**
+ * Transforms a 3D Tiles box (center + 3 half-axis vectors) by a world matrix.
+ * Uses your in-place helpers to avoid temporary object allocations.
+ *
+ * @param box  [cx,cy,cz, ex.x,ex.y,ex.z, ey.x,ey.y,ey.z, ez.x,ez.y,ez.z]
+ * @param m    Column-major 4x4 affine transform
+ * @param out  Destination array of length >= 12
+ */
+function TransformBoxToRef(box, m, out) {
+    // center (uses full affine: rotate/scale + translate)
+    TransformPointToRef(m, box, 0, out, 0);
+    // half-axes (use only linear part: rotate/scale/shear, no translation)
+    TransformVectorToRef(m, box, 3, out, 3);
+    TransformVectorToRef(m, box, 6, out, 6);
+    TransformVectorToRef(m, box, 9, out, 9);
+}
+/**
+ * Transforms a sphere by a world matrix.
+ * Center uses full affine transform; radius scales by the max column length
+ * of the 3x3 linear part (conservative under non-uniform scale/shear).
+ *
+ * @param sphere [cx,cy,cz,r]
+ * @param m      Column-major 4x4 affine transform
+ * @param out    Destination array length >= 4
+ */
+function TransformSphereToRef(sphere, m, out) {
+    // Transform center (includes translation)
+    TransformPointToRef(m, sphere, 0, out, 0);
+    // Compute conservative scale factor = max column length of the upper-left 3x3
+    const c0x = m[0], c0y = m[1], c0z = m[2];
+    const c1x = m[4], c1y = m[5], c1z = m[6];
+    const c2x = m[8], c2y = m[9], c2z = m[10];
+    const s0 = Math.hypot(c0x, c0y, c0z);
+    const s1 = Math.hypot(c1x, c1y, c1z);
+    const s2 = Math.hypot(c2x, c2y, c2z);
+    const sMax = Math.max(s0, s1, s2);
+    // Scale radius
+    out[3] = sphere[3] * sMax;
+}
+/**
+ * Frustum test for a 3D Tiles box using SAT-style projection.
+ * Works directly on the 12-number `box` array without creating temporaries.
+ *
+ * @param box      [cx,cy,cz, ex.x,ex.y,ex.z, ey.x,ey.y,ey.z, ez.x,ez.y,ez.z]
+ * @param frustum  Array of planes with convention: inside ⇔ dot(n, x) + d >= 0
+ */
+function IsBoxInFrustum(box, frustum) {
+    // Offsets in the 12-tuple
+    const CENTER = 0, EX = 3, EY = 6, EZ = 9;
+    for (const pl of frustum) {
+        // Project OBB half-axes onto plane normal to get projected radius
+        const r = Math.abs(Dot3(pl.normal, box, EX)) + Math.abs(Dot3(pl.normal, box, EY)) + Math.abs(Dot3(pl.normal, box, EZ));
+        // Signed distance of box center to plane
+        const s = DistanceFromPlane(pl, box, CENTER);
+        // If the center is farther behind the plane than its projected radius,
+        // the box is entirely outside this plane -> outside the frustum
+        if (s < -r)
+            return false;
+    }
+    return true;
+}
+/**
+ * Tests whether a sphere is inside (or intersects) a frustum.
+ *
+ * @param sphere [cx,cy,cz,r]
+ * @param frustum Array of planes with convention: inside ⇔ dot(n, x) + d >= 0
+ */
+function IsSphereInFrustum(sphere, frustum) {
+    if (frustum === undefined) {
+        return true;
+    }
+    const CENTER = 0; // offset for sphere center (x,y,z)
+    const r = sphere[3];
+    for (const pl of frustum) {
+        const s = DistanceFromPlane(pl, sphere, CENTER);
+        // If the sphere center is farther behind the plane than its radius,
+        // the sphere is completely outside this plane → outside frustum
+        if (s < -r)
+            return false;
+    }
+    return true;
+}
+/**
+ * Tests whether a point lies inside or on the surface of a sphere.
+ *
+ * @param sphere [cx, cy, cz, r] — center coordinates and radius
+ * @param point  Point to test
+ * @returns      True if the point is inside or on the sphere, false otherwise
+ */
+function IsPointInSphere(sphere, point) {
+    const dx = point.x - sphere[0];
+    const dy = point.y - sphere[1];
+    const dz = point.z - sphere[2];
+    const r = sphere[3];
+    return dx * dx + dy * dy + dz * dz <= r * r;
+}
+/**
+ * Tests whether a point lies inside or on the surface of a 3D Tiles box.
+ *
+ * A 3D Tiles box is defined as:
+ *   [ cx, cy, cz,
+ *     ex.x, ex.y, ex.z,
+ *     ey.x, ey.y, ey.z,
+ *     ez.x, ez.y, ez.z ]
+ * where (cx,cy,cz) is the center and ex/ey/ez are the half-axis vectors.
+ *
+ * @param box   12-tuple describing the oriented bounding box
+ * @param point Point to test
+ * @returns     True if the point is inside or on the box, false otherwise
+ */
+function IsPointInBox(box, point) {
+    const cx = box[0], cy = box[1], cz = box[2];
+    const exx = box[3], exy = box[4], exz = box[5];
+    const eyx = box[6], eyy = box[7], eyz = box[8];
+    const ezx = box[9], ezy = box[10], ezz = box[11];
+    // Vector from box center to point
+    const dx = point.x - cx;
+    const dy = point.y - cy;
+    const dz = point.z - cz;
+    // Project onto each half-axis and check extent
+    const projX = dx * exx + dy * exy + dz * exz;
+    const projY = dx * eyx + dy * eyy + dz * eyz;
+    const projZ = dx * ezx + dy * ezy + dz * ezz;
+    const lenX2 = exx * exx + exy * exy + exz * exz;
+    const lenY2 = eyx * eyx + eyy * eyy + eyz * eyz;
+    const lenZ2 = ezx * ezx + ezy * ezy + ezz * ezz;
+    // Inside if absolute projection ≤ squared length of each half-axis
+    return projX * projX <= lenX2 && projY * projY <= lenY2 && projZ * projZ <= lenZ2;
+}
+/// <summary>
+/// In-place ECEF → Babylon (LH, Y up) for a single vec3 stored in a strided array.
+/// Mapping: (xb, yb, zb) = (-x, +z, -y)
+/// </summary>
+function EcefToBjsInPlace(v, offset = 0, stride = 1) {
+    // x' = -x
+    v[offset] = -v[offset];
+    // swap/sign for y' and z'  (y' =  z,  z' = -y)
+    const yIdx = offset + stride;
+    const zIdx = yIdx + stride;
+    const y = v[yIdx];
+    v[yIdx] = v[zIdx];
+    v[zIdx] = -y;
+}
+function EcefToRHInPlace(v, offset = 0, stride = 1) {
+    // swap/sign for y' and z'  (y' =  z,  z' = -y)
+    const yIdx = offset + stride;
+    const zIdx = yIdx + stride;
+    const y = v[yIdx];
+    v[yIdx] = v[zIdx];
+    v[zIdx] = -y;
+}
+/// <summary>
+/// Non-in-place version returning a tuple [x', y', z'].
+/// </summary>
+function EcefToBjs(x, y, z) {
+    // (-x, +z, -y)
+    return [-x, z, -y];
+}
+/// <summary>
+/// Convert GLTF ECEF like (right-handed, Z-up)  to Babylon (left-handed, Y-up) in-place.
+/// Mapping here: (X, Y, Z) -> (-X, Z, -Y).
+/// </summary>
+function EcefToBjsCartInPlace(ref) {
+    // (-x, +z, -y)
+    ref.x = -ref.x;
+    const tmp = ref.y;
+    ref.y = ref.z;
+    ref.z = -tmp;
+}
+/// <summary>
+/// Convert Babylon (left-handed, Y-up) Cartesian to GLTF ECEF like (right-handed, Z-up) in-place.
+/// Inverse of EcefToBjsCartInPlace (which does: (-x, +z, -y)).
+/// Mapping here: (X, Y, Z) -> (-X, -Z, +Y).
+/// </summary>
+function BjsToEcefCartInPlace(ref) {
+    ref.x = -ref.x;
+    const tmp = ref.y;
+    ref.y = -ref.z;
+    ref.z = tmp;
+}
+/// <summary>
+/// Non-in-place version returning a tuple [x', y', z'].
+/// </summary>
+function EcefToRH(x, y, z) {
+    return [x, z, -y];
+}
+/// <summary>
+/// In-place transform of N consecutive vec3 in a buffer (with stride).
+/// If count is omitted, it is inferred from length.
+/// </summary>
+function EcefToBjsBufferInPlace(data, startOffset = 0, stride = 1, count) {
+    const step = 3 * stride;
+    const maxCount = Math.floor((data.length - startOffset) / step);
+    const n = Math.min(count ?? maxCount, maxCount);
+    let off = startOffset;
+    for (let i = 0; i < n; i++, off += step) {
+        EcefToBjsInPlace(data, off, stride);
+    }
+}
+function EcefToRHBufferInPlace(data, startOffset = 0, stride = 1, count) {
+    const step = 3 * stride;
+    const maxCount = Math.floor((data.length - startOffset) / step);
+    const n = Math.min(count ?? maxCount, maxCount);
+    let off = startOffset;
+    for (let i = 0; i < n; i++, off += step) {
+        EcefToRHInPlace(data, off, stride);
+    }
+}
+/// <summary>
+/// 3D Tiles boundingVolume.box (12 numbers) ECEF → Babylon (LH, Y up).
+/// Applies the same mapping to center and the 3 half-axes.
+/// Orientation fix is intentionally omitted (not needed for your frustum checks).
+/// </summary>
+function EcefBoxToBjsInPlace(box) {
+    // box = [ Cx,Cy,Cz,  Ux,Uy,Uz,  Vx,Vy,Vz,  Wx,Wy,Wz ]
+    // convert each triplet in place
+    EcefToBjsInPlace(box, 0, 1); // C
+    EcefToBjsInPlace(box, 3, 1); // U
+    EcefToBjsInPlace(box, 6, 1); // V
+    EcefToBjsInPlace(box, 9, 1); // W
+}
+function EcefBoxToRHInPlace(box) {
+    // box = [ Cx,Cy,Cz,  Ux,Uy,Uz,  Vx,Vy,Vz,  Wx,Wy,Wz ]
+    // convert each triplet in place
+    EcefToRHInPlace(box, 0, 1); // C
+    EcefToRHInPlace(box, 3, 1); // U
+    EcefToRHInPlace(box, 6, 1); // V
+    EcefToRHInPlace(box, 9, 1); // W
+}
+/// <summary>
+/// In-place ECEF → Babylon (LH, Y up) for a 3D Tiles sphere [cx,cy,cz,r].
+/// Mapping: (xb, yb, zb) = (-x, +z, -y). Radius unchanged.
+/// </summary>
+function EcefSphereToBjsInPlace(v) {
+    EcefToBjsInPlace(v);
+}
+function EcefSphereToRYInPlace(v) {
+    EcefToRHInPlace(v);
+}
+/**
+ * Compute whether a direction to a point on the globe is beyond the geometric horizon.
+ * Uses the spherical Earth test: a point direction `v` is visible iff
+ * dot(u, v) >= R / |C|, where u = normalize(camera), v = normalize(point).
+ *
+ * This is a conservative FAST test for tiles near the surface.
+ * Returns true if the tile center is beyond horizon (i.e., can be culled).
+ *
+ * @param tileCenter  Tile center (e.g., ECEF or your LH world with Earth at origin).
+ * @param camera      Camera position in the same frame.
+ * @param planetRadius    Planet radius (meters). Earth ≈ 6_371_000.
+ * @param safetyDeg       Extra angular safety margin (deg). Positive => less popping (culls a bit later).
+ */
+function IsTileCenterBeyondHorizon(tileCenter, camera, planetRadius, safetyDeg = 0) {
+    const rCam = _geometry__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.Magnitude(camera);
+    if (rCam <= planetRadius) {
+        // On/inside planet: geometric horizon test not meaningful -> don't cull.
+        return false;
+    }
+    const rCenter = _geometry__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.Magnitude(tileCenter);
+    if (_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.WithinEpsilon(rCenter)) {
+        // Degenerate center (e.g. root at origin). Treat as visible.
+        return false;
+    }
+    // Unit vectors
+    const u = _geometry__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.Normalize(camera, rCam); // we already computed the length...
+    const v = _geometry__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.Normalize(tileCenter, rCenter);
+    // cos θ between camera dir and point dir
+    const cosTheta = _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.Clamp(_geometry__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.Dot(u, v), -1, 1);
+    // Quick sure-cull: strict back hemisphere
+    if (cosTheta < 0)
+        return true;
+    // Horizon threshold with optional safety angle s (radians)
+    //const cosH = Scalar.Clamp(planetRadius / rCam, 0, 1);
+    if (safetyDeg === 0) {
+        //return cosTheta < cosH;
+    }
+    else {
+        //const s = safetyDeg * Scalar.DEG2RAD;
+        //const coss = Math.cos(s);
+        //const sins = Math.sin(s);
+        //const sinH = Math.sqrt(Math.max(0, 1 - cosH * cosH));
+        //const cosHWithSafety = cosH * coss - sinH * sins; // cos(θ_h + s)
+        //return cosTheta < cosHWithSafety;
+    }
+    return false;
+}
+/**
+ * Robust test: a whole tile sphere (center S, radius rs) is fully beyond the horizon if
+ * (θ_s - δ) > θ_h, where:
+ *  - θ_s = angle between camera direction u and sphere center direction ŝ
+ *  - δ   = angular radius of the sphere as seen from the planet center = asin(rs / |S|)
+ *  - θ_h = horizon angle = acos(R / |C|)
+ * We cull only when the *entire* sphere is beyond the horizon (no popping).
+ *
+ * @param tileSphere      Tile bounding sphere. (e.g., ECEF or your LH world with Earth at origin)
+ * @param camera          Camera position in same frame.
+ * @param planetRadius    Planet radius.
+ * @param extraMeters     Extra radial padding (grow rs) to be conservative.
+ */
+function IsTileSphereBeyondHorizon(tileSphere, camera, planetRadius, extraMeters = 0) {
+    const C = camera;
+    const rCam = _geometry__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.Magnitude(C);
+    if (rCam <= planetRadius) {
+        return false;
+    }
+    const S = new _geometry__WEBPACK_IMPORTED_MODULE_0__.Cartesian3(tileSphere[0], tileSphere[1], tileSphere[2]);
+    const rS = _geometry__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.Magnitude(S);
+    if (rCam <= planetRadius || _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.WithinEpsilon(rS)) {
+        return false;
+    }
+    const sphereRadius = Math.max(0, tileSphere[3] + extraMeters);
+    const u = _geometry__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.Normalize(C, rCam);
+    const shat = _geometry__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.Normalize(S, rS);
+    const cosThetaS = _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.Clamp(_geometry__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.Dot(u, shat), -1, 1);
+    const thetaS = Math.acos(cosThetaS);
+    const sinDelta = _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.Clamp(sphereRadius / rS, -1, 1);
+    const delta = Math.asin(sinDelta);
+    const cosH = _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.Clamp(planetRadius / rCam, -1, 1);
+    const thetaH = Math.acos(cosH);
+    // Fully beyond horizon?
+    return thetaS - delta > thetaH;
+}
+//# sourceMappingURL=math.js.map
+
+/***/ },
+
+/***/ "../core/dist/tiles/3d/interfaces/tile3d.js"
+/*!**************************************************!*\
+  !*** ../core/dist/tiles/3d/interfaces/tile3d.js ***!
+  \**************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   GetTile3dContents: () => (/* binding */ GetTile3dContents),
+/* harmony export */   IsTile3d: () => (/* binding */ IsTile3d)
+/* harmony export */ });
+function GetTile3dContents(tile) {
+    return tile.contents ?? (tile.content ? [tile.content] : undefined);
+}
+/**
+ * Type guard to check if an object is a valid ITile3d
+ */
+function IsTile3d(obj) {
+    if (typeof obj !== "object" || obj === null) {
+        return false;
+    }
+    const t = obj;
+    // Required property
+    if (typeof t.geometricError !== "number")
+        return false;
+    if (!t.boundingVolume || typeof t.boundingVolume !== "object")
+        return false;
+    // Optional checks (lightweight, only structure)
+    if (t.viewerRequestVolume && typeof t.viewerRequestVolume !== "object")
+        return false;
+    if (t.refine && typeof t.refine !== "string")
+        return false;
+    if (t.transform && (!Array.isArray(t.transform) || t.transform.length !== 16))
+        return false;
+    if (t.content && typeof t.content !== "object")
+        return false;
+    if (t.contents && !Array.isArray(t.contents))
+        return false;
+    if (t.children && !Array.isArray(t.children))
+        return false;
+    return true;
+}
+//# sourceMappingURL=tile3d.js.map
+
+/***/ },
+
+/***/ "../core/dist/tiles/3d/interfaces/tileset.js"
+/*!***************************************************!*\
+  !*** ../core/dist/tiles/3d/interfaces/tileset.js ***!
+  \***************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   IsITileset: () => (/* binding */ IsITileset)
+/* harmony export */ });
+function IsITileset(obj) {
+    if (typeof obj !== "object" || obj === null)
+        return false;
+    // required
+    if (typeof obj.geometricError !== "number")
+        return false;
+    if (!obj.asset || typeof obj.asset !== "object")
+        return false;
+    if (!obj.root || typeof obj.root !== "object")
+        return false;
+    // optional
+    if (obj.properties && typeof obj.properties !== "object")
+        return false;
+    if (obj.schema && typeof obj.schema !== "object")
+        return false;
+    if (obj.schemaUri && typeof obj.schemaUri !== "string")
+        return false;
+    if (obj.statistics && typeof obj.statistics !== "object")
+        return false;
+    if (obj.groups) {
+        if (!Array.isArray(obj.groups) || obj.groups.length < 1)
+            return false;
+    }
+    if (obj.metadata && typeof obj.metadata !== "object")
+        return false;
+    if (obj.extensionsUsed) {
+        if (!Array.isArray(obj.extensionsUsed) || obj.extensionsUsed.length < 1)
+            return false;
+        if (!obj.extensionsUsed.every((e) => typeof e === "string"))
+            return false;
+    }
+    if (obj.extensionsRequired) {
+        if (!Array.isArray(obj.extensionsRequired) || obj.extensionsRequired.length < 1)
+            return false;
+        if (!obj.extensionsRequired.every((e) => typeof e === "string"))
+            return false;
+    }
+    return true;
+}
+//# sourceMappingURL=tileset.js.map
+
+/***/ },
+
 /***/ "../core/dist/tiles/address/index.js"
 /*!*******************************************!*\
   !*** ../core/dist/tiles/address/index.js ***!
@@ -10994,7 +12916,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   TileAddress: () => (/* binding */ TileAddress)
 /* harmony export */ });
 /* harmony import */ var _math_math__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../math/math */ "../core/dist/math/math.js");
-/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../geometry */ "../core/dist/geometry/geometry.bounds.js");
+/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../geometry */ "../core/dist/geometry/geometry.cartesian.js");
+/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../geometry */ "../core/dist/geometry/geometry.bounds.js");
+/* harmony import */ var _geodesy_geodesy_system__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../geodesy/geodesy.system */ "../core/dist/geodesy/geodesy.system.js");
+
 
 
 var NeighborsIndex;
@@ -11011,7 +12936,7 @@ var NeighborsIndex;
 })(NeighborsIndex || (NeighborsIndex = {}));
 class TileAddress {
     static Split(a, metrics) {
-        if (a.levelOfDetail == metrics.maxLOD) {
+        if (a.levelOfDetail === metrics.maxLOD) {
             return null;
         }
         const baseX = a.x * 2;
@@ -11086,7 +13011,57 @@ class TileAddress {
     }
     static ToBounds(a, metrics) {
         const points = [metrics.getTileXYToPointXY(a.x, a.y), metrics.getTileXYToPointXY(a.x + 1, a.y + 1)];
-        return _geometry__WEBPACK_IMPORTED_MODULE_1__.Bounds.FromPoints2(...points);
+        return _geometry__WEBPACK_IMPORTED_MODULE_2__.Bounds.FromPoints2(...points);
+    }
+    /**
+     * 3D bounding box of the tile projected on an ellipsoid (ECEF). Uses the
+     * four tile corners in geodetic coordinates (altitude 0) and builds the
+     * axis-aligned box enclosing them in cartesian space. Suitable for frustum
+     * tests in a planet-scale setup.
+     *
+     * A single GeodeticSystem instance can be reused across calls to avoid
+     * rebuilding it every time.
+     */
+    static ToBoundsECEF(a, metrics, ellipsoid, system) {
+        const sys = system ?? new _geodesy_geodesy_system__WEBPACK_IMPORTED_MODULE_3__.GeodeticSystem(ellipsoid);
+        const deltas = [
+            [0, 0],
+            [1, 0],
+            [1, 1],
+            [0, 1],
+        ];
+        const tmp = _geometry__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Zero();
+        let xmin = Infinity;
+        let ymin = Infinity;
+        let zmin = Infinity;
+        let xmax = -Infinity;
+        let ymax = -Infinity;
+        let zmax = -Infinity;
+        for (const [dx, dy] of deltas) {
+            const ll = metrics.getTileXYToLatLon(a.x + dx, a.y + dy, a.levelOfDetail);
+            sys.geodeticFloatToCartesianToRef(ll.lat, ll.lon, 0, tmp);
+            if (tmp.x < xmin)
+                xmin = tmp.x;
+            if (tmp.y < ymin)
+                ymin = tmp.y;
+            if (tmp.z < zmin)
+                zmin = tmp.z;
+            if (tmp.x > xmax)
+                xmax = tmp.x;
+            if (tmp.y > ymax)
+                ymax = tmp.y;
+            if (tmp.z > zmax)
+                zmax = tmp.z;
+        }
+        return new _geometry__WEBPACK_IMPORTED_MODULE_2__.Bounds(xmin, ymin, xmax - xmin, ymax - ymin, zmin, zmax - zmin);
+    }
+    /**
+     * Geometric error of the tile in world meters, defined as the tile side at
+     * the equator for this LOD (groundResolution * tileSize). Used as the
+     * reference error for screen-space-error computations.
+     */
+    static GeometricError(a, metrics) {
+        return metrics.groundResolution(0, a.levelOfDetail) * metrics.tileSize;
     }
     static IsEquals(a, b) {
         return a.x === b.x && a.y === b.y && a.levelOfDetail === b.levelOfDetail;
@@ -16838,6 +18813,33 @@ ValidableBase.VALID_PROPERTY_NAME = "valid";
 
 /***/ },
 
+/***/ "./dist/camera/camera.Geodetic.interfaces.js"
+/*!***************************************************!*\
+  !*** ./dist/camera/camera.Geodetic.interfaces.js ***!
+  \***************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   IsGeodeticCamera: () => (/* binding */ IsGeodeticCamera)
+/* harmony export */ });
+/** Runtime type guard for {@link IGeodeticCamera}. */
+function IsGeodeticCamera(b) {
+    if (typeof b !== "object" || b === null) {
+        return false;
+    }
+    const c = b;
+    return (typeof c.lat === "number" &&
+        typeof c.lon === "number" &&
+        typeof c.setGeodeticPosition === "function" &&
+        typeof c.flyToGeodeticAsync === "function" &&
+        c.system !== undefined &&
+        c.ellipsoid !== undefined);
+}
+//# sourceMappingURL=camera.Geodetic.interfaces.js.map
+
+/***/ },
+
 /***/ "./dist/camera/camera.Geodetic.js"
 /*!****************************************!*\
   !*** ./dist/camera/camera.Geodetic.js ***!
@@ -16850,27 +18852,118 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
 /* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var core_geodesy__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/geodesy */ "../core/dist/geodesy/geodesy.system.js");
+/* harmony import */ var core_geometry__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/geometry */ "../core/dist/geometry/geometry.cartesian.js");
+/* harmony import */ var core_geography__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core/geography */ "../core/dist/geography/geography.position.js");
 
 
-class GeodeticCamera extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ArcRotateCamera {
-    constructor(name, scene, ellipsoid) {
-        const globeRadius = ellipsoid.semiMajorAxis; // in meter
-        const alpha = 0; // heading (longitude)
-        const beta = 0; // pitch (latitude)
-        const radius = globeRadius * 2.5;
-        const target = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3.Zero();
-        super(name, alpha, beta, radius, target, scene);
-        this._system = new core_geodesy__WEBPACK_IMPORTED_MODULE_1__.GeodeticSystem(ellipsoid);
-        this.lowerRadiusLimit = globeRadius * 0.5;
-        this.upperRadiusLimit = globeRadius * 10;
-        this.allowUpsideDown = false;
-        this.wheelPrecision = 1000;
-        this.panningSensibility = 0;
-        this.inertia = 0.8;
+
+/**
+ * Babylon geospatial camera augmented with a {@link GeodeticSystem} for lat/lon/altitude
+ * navigation on an arbitrary {@link Ellipsoid}.
+ *
+ * The base BABYLON.GeospatialCamera reasons in terms of an ECEF "center" anchor on the
+ * globe plus yaw/pitch/radius. This class layers geodetic helpers on top so callers can
+ * drive the camera using (lat, lon, alt) tuples without having to juggle ECEF math.
+ */
+class GeodeticCamera extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.GeospatialCamera {
+    constructor(name, scene, system, options) {
+        super(name, scene, {
+            planetRadius: system.ellipsoid.semiMajorAxis,
+            pickPredicate: options?.pickPredicate,
+        });
+        // Scratch buffers to avoid allocation on hot paths (setGeodeticPosition, getters).
+        this._ecefScratch = core_geometry__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Zero();
+        this._geoScratch = core_geography__WEBPACK_IMPORTED_MODULE_2__.Geo3.Zero();
+        this._eyeScratch = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3.Zero();
+        this._centerScratch = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3.Zero();
+        this._system = system;
     }
+    /** Reference ellipsoid used for geodetic conversions. */
+    get ellipsoid() {
+        return this.system._ellipsoid;
+    }
+    /** Geodetic system wrapping the ellipsoid (and optional ENU anchor). */
     get system() {
         return this._system;
+    }
+    get lat() {
+        return this.geodeticPosition.lat;
+    }
+    get lon() {
+        return this.geodeticPosition.lon;
+    }
+    get alt() {
+        return this.geodeticPosition.alt;
+    }
+    get hasAltitude() {
+        return this.geodeticPosition.hasAltitude;
+    }
+    equals(other) {
+        return other !== undefined && this.geodeticPosition.equals(other);
+    }
+    clone(name, newParent) {
+        const copy = new GeodeticCamera(name ?? this.name, this.getScene(), this._system, {
+            pickPredicate: this.movement.pickPredicate,
+        });
+        if (newParent !== undefined) {
+            copy.parent = newParent;
+        }
+        copy.center = this.center;
+        copy.yaw = this.yaw;
+        copy.pitch = this.pitch;
+        copy.radius = this.radius;
+        return copy;
+    }
+    /**
+     * Current geodetic position of the camera eye, recomputed on each access from
+     * the camera world matrix. Note: the returned IGeo3 is a shared scratch object;
+     * clone it if you need to retain the value.
+     */
+    get geodeticPosition() {
+        // Derive the actual eye position from center + radius * (-lookAt) so that the
+        // geodetic coordinates reflect the eye, not just the anchor point.
+        this.getEyePositionToRef(this._eyeScratch);
+        this._ecefScratch.x = this._eyeScratch.x;
+        this._ecefScratch.y = this._eyeScratch.y;
+        this._ecefScratch.z = this._eyeScratch.z;
+        this._system.cartesianToGeodetic(this._ecefScratch, this._geoScratch);
+        return this._geoScratch;
+    }
+    /**
+     * Teleport the camera so that its anchor sits on the ellipsoid at (lat, lon) and
+     * its eye sits altitude units above that anchor along the geocentric normal.
+     */
+    setGeodeticPosition(lat, lon, altitude, yaw = this.yaw, pitch = this.pitch) {
+        this._system.geodeticFloatToCartesianToRef(lat, lon, 0, this._ecefScratch);
+        this._centerScratch.set(this._ecefScratch.x, this._ecefScratch.y, this._ecefScratch.z);
+        this.center = this._centerScratch;
+        this.radius = altitude;
+        this.yaw = yaw;
+        this.pitch = pitch;
+    }
+    /**
+     * Smoothly animate the camera to the given geodetic destination using the
+     * underlying BABYLON.GeospatialCamera flyTo machinery.
+     */
+    flyToGeodeticAsync(lat, lon, altitude, yaw = this.yaw, pitch = this.pitch, durationMs = 1000, easing) {
+        this._system.geodeticFloatToCartesianToRef(lat, lon, 0, this._ecefScratch);
+        const targetCenter = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Vector3(this._ecefScratch.x, this._ecefScratch.y, this._ecefScratch.z);
+        return this.flyToAsync(yaw, pitch, altitude, targetCenter, durationMs, easing);
+    }
+    /**
+     * Writes the current eye world-space position into the supplied ref vector. The
+     * base GeospatialCamera keeps this.position in sync with center/yaw/pitch/radius
+     * via _getViewMatrix, so we force a view-matrix refresh to stay accurate even on
+     * first access (before the first render tick).
+     */
+    getEyePositionToRef(ref) {
+        this.getViewMatrix(true);
+        ref.copyFrom(this.position);
+        return ref;
+    }
+    /** @internal */
+    getClassName() {
+        return "GeodeticCamera";
     }
 }
 //# sourceMappingURL=camera.Geodetic.js.map
@@ -16885,9 +18978,12 @@ class GeodeticCamera extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ArcRot
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   GeodeticCamera: () => (/* reexport safe */ _camera_Geodetic__WEBPACK_IMPORTED_MODULE_0__.GeodeticCamera)
+/* harmony export */   GeodeticCamera: () => (/* reexport safe */ _camera_Geodetic__WEBPACK_IMPORTED_MODULE_1__.GeodeticCamera),
+/* harmony export */   IsGeodeticCamera: () => (/* reexport safe */ _camera_Geodetic_interfaces__WEBPACK_IMPORTED_MODULE_0__.IsGeodeticCamera)
 /* harmony export */ });
-/* harmony import */ var _camera_Geodetic__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./camera.Geodetic */ "./dist/camera/camera.Geodetic.js");
+/* harmony import */ var _camera_Geodetic_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./camera.Geodetic.interfaces */ "./dist/camera/camera.Geodetic.interfaces.js");
+/* harmony import */ var _camera_Geodetic__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./camera.Geodetic */ "./dist/camera/camera.Geodetic.js");
+
 
 //# sourceMappingURL=index.js.map
 
@@ -22875,6 +24971,512 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ },
 
+/***/ "./dist/tiles/3d/index.js"
+/*!********************************!*\
+  !*** ./dist/tiles/3d/index.js ***!
+  \********************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   GoogleTile3dErrorFn: () => (/* reexport safe */ _vendors__WEBPACK_IMPORTED_MODULE_3__.GoogleTile3dErrorFn),
+/* harmony export */   GoogleTiles3dUriResolver: () => (/* reexport safe */ _vendors__WEBPACK_IMPORTED_MODULE_3__.GoogleTiles3dUriResolver),
+/* harmony export */   Map3DViewer: () => (/* reexport safe */ _tile3d_viewer__WEBPACK_IMPORTED_MODULE_2__.Map3DViewer),
+/* harmony export */   Tile3dContentLoader: () => (/* reexport safe */ _tile3d_loader__WEBPACK_IMPORTED_MODULE_1__.Tile3dContentLoader),
+/* harmony export */   Tile3dScene: () => (/* reexport safe */ _tile3d_scene__WEBPACK_IMPORTED_MODULE_0__.Tile3dScene)
+/* harmony export */ });
+/* harmony import */ var _tile3d_scene__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tile3d.scene */ "./dist/tiles/3d/tile3d.scene.js");
+/* harmony import */ var _tile3d_loader__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tile3d.loader */ "./dist/tiles/3d/tile3d.loader.js");
+/* harmony import */ var _tile3d_viewer__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tile3d.viewer */ "./dist/tiles/3d/tile3d.viewer.js");
+/* harmony import */ var _vendors__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./vendors */ "./dist/tiles/3d/vendors/index.js");
+
+
+
+
+//# sourceMappingURL=index.js.map
+
+/***/ },
+
+/***/ "./dist/tiles/3d/tile3d.loader.js"
+/*!****************************************!*\
+  !*** ./dist/tiles/3d/tile3d.loader.js ***!
+  \****************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   Tile3dContentLoader: () => (/* binding */ Tile3dContentLoader)
+/* harmony export */ });
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/pipeline/tiles.pipeline.sourceblock.js");
+/* harmony import */ var core_utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core/utils */ "../core/dist/utils/path.js");
+/* harmony import */ var core_collections_concurrentQueue__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core/collections/concurrentQueue */ "../core/dist/collections/concurrentQueue.js");
+/* harmony import */ var core_tiles_3d_engine__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! core/tiles/3d/engine */ "../core/dist/tiles/3d/engine/tile3d.stream.engine.js");
+/* harmony import */ var core_tiles_3d_engine__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! core/tiles/3d/engine */ "../core/dist/tiles/3d/engine/tile3d.stream.client.js");
+
+
+
+
+
+class Tile3dContentLoader extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.SourceBlock {
+    constructor(scene, resolver, extensions) {
+        super();
+        this._scene = scene;
+        this._resolver = resolver;
+        this._tilesetClient = new core_tiles_3d_engine__WEBPACK_IMPORTED_MODULE_5__.TilesetClient("tileSetClient");
+        this._extensions = extensions ?? Tile3dContentLoader.DefaultExtensions;
+        this._loader = new core_collections_concurrentQueue__WEBPACK_IMPORTED_MODULE_3__.ConcurrentActionQueue(this._loadTile3dAsync.bind(this), 4);
+        this._resolver = resolver;
+    }
+    load(tile) {
+        if (tile.contentStatus === core_tiles_3d_engine__WEBPACK_IMPORTED_MODULE_4__.TileContentStatus.idle) {
+            tile.contentStatus = core_tiles_3d_engine__WEBPACK_IMPORTED_MODULE_4__.TileContentStatus.pending;
+            this._loader.enqueue(tile, { priority: tile.priority, onSettled: this._onSettled.bind(this) });
+        }
+    }
+    cancel(tile) {
+        if (tile.contentStatus === core_tiles_3d_engine__WEBPACK_IMPORTED_MODULE_4__.TileContentStatus.pending) {
+            this._loader.cancelPending(tile);
+            tile.contentStatus = core_tiles_3d_engine__WEBPACK_IMPORTED_MODULE_4__.TileContentStatus.idle;
+        }
+    }
+    async loadTileSetAsync(uri) {
+        /// Here we need the resolver because we want to avoid exposing the credentials whenever possible.
+        /// The resolver is typically used for credential injection.
+        const resolvedUri = this._resolver?.resolve(uri) ?? uri;
+        const result = await this._tilesetClient.fetchAsync(resolvedUri);
+        return result.content;
+    }
+    async _loadTile3dAsync(tile) {
+        const contents = tile.contents ?? [tile.content];
+        const toload = contents.filter((c) => !!(c && c.uri && core_utils__WEBPACK_IMPORTED_MODULE_2__.PathUtils.EndsWith(c.uri, ...this._extensions)));
+        if (toload.length) {
+            for (const c of toload) {
+                const currentContent = c;
+                tile.contentStatus = core_tiles_3d_engine__WEBPACK_IMPORTED_MODULE_4__.TileContentStatus.loading;
+                if (core_utils__WEBPACK_IMPORTED_MODULE_2__.PathUtils.EndsWith(c.uri, ".json")) {
+                    currentContent.container = await this.loadTileSetAsync(c.uri);
+                }
+                else {
+                    /// Here we need the resolver because we want to avoid exposing the credentials whenever possible.
+                    /// The resolver is typically used for credential injection.
+                    const resolvedUri = this._resolver?.resolve(c.uri) ?? c.uri;
+                    const { rootUrl, fileName } = core_utils__WEBPACK_IMPORTED_MODULE_2__.PathUtils.SplitRootAndFile(resolvedUri);
+                    currentContent.container = await _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.SceneLoader.LoadAssetContainerAsync(rootUrl, fileName, this._scene, undefined);
+                }
+            }
+        }
+        return tile;
+    }
+    _onSettled(e) {
+        switch (e.status) {
+            case core_collections_concurrentQueue__WEBPACK_IMPORTED_MODULE_3__.ActionQueueStatus.fulfilled: {
+                e.data.contentStatus = core_tiles_3d_engine__WEBPACK_IMPORTED_MODULE_4__.TileContentStatus.ready;
+                this.notifyUpdated([e.data], -1, this, this);
+                break;
+            }
+            case core_collections_concurrentQueue__WEBPACK_IMPORTED_MODULE_3__.ActionQueueStatus.rejected: {
+                e.data.contentStatus = core_tiles_3d_engine__WEBPACK_IMPORTED_MODULE_4__.TileContentStatus.error;
+                this.notifyUpdated([e.data], -1, this, this);
+                break;
+            }
+            case core_collections_concurrentQueue__WEBPACK_IMPORTED_MODULE_3__.ActionQueueStatus.cancelled: {
+                break;
+            }
+        }
+    }
+}
+Tile3dContentLoader.DefaultExtensions = [".gltf", ".glb", ".json"];
+//# sourceMappingURL=tile3d.loader.js.map
+
+/***/ },
+
+/***/ "./dist/tiles/3d/tile3d.scene.js"
+/*!***************************************!*\
+  !*** ./dist/tiles/3d/tile3d.scene.js ***!
+  \***************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   Tile3dScene: () => (/* binding */ Tile3dScene)
+/* harmony export */ });
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var core_tiles_3d_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/tiles/3d/interfaces */ "../core/dist/tiles/3d/interfaces/tile3d.js");
+
+
+class Tile3dScene extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.TransformNode {
+    constructor(name, scene) {
+        super(name, scene);
+    }
+    getClassName() {
+        return "Tile3dScene";
+    }
+    added(eventData, _eventState) {
+        if (eventData && eventData.length) {
+            for (const t of eventData) {
+                if (t) {
+                    this._addAllToScene(t);
+                }
+            }
+        }
+    }
+    removed(eventData, _eventState) {
+        if (eventData && eventData.length) {
+            for (const t of eventData) {
+                if (t) {
+                    this._removeAllFromScene(t);
+                }
+            }
+        }
+    }
+    updated(eventData, _eventState) {
+        if (eventData && eventData.length) {
+            for (const t of eventData) {
+                if (t) {
+                    this._updateContents(t);
+                }
+            }
+        }
+    }
+    _updateContents(tile) {
+        if (tile.visible) {
+            this._addAllToScene(tile);
+        }
+        else {
+            this._removeAllFromScene(tile);
+        }
+    }
+    _addAllToScene(tile) {
+        const contents = (0,core_tiles_3d_interfaces__WEBPACK_IMPORTED_MODULE_1__.GetTile3dContents)(tile);
+        if (contents) {
+            for (const c of contents) {
+                const container = c?.container;
+                if (container && container instanceof _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.AssetContainer) {
+                    const l = c.loadedInSceneCount ?? 0;
+                    try {
+                        if (l === 0) {
+                            this._initializeContainer(tile, container);
+                        }
+                        // there is an internal flag it check if the container is already added to the scene.
+                        container.addAllToScene();
+                    }
+                    finally {
+                        c.loadedInSceneCount = l + 1;
+                    }
+                }
+            }
+        }
+    }
+    _initializeContainer(tile, container) {
+        for (const m of container.getNodes().filter((n) => n.parent === null)) {
+            m.name = `tile ${tile.depth}`;
+        }
+        for (const mat of container.materials) {
+            // this is a trick to keep precision into the z-buffer along large dimension.
+            // instead of that, we might want to scale the scene at reasonable size...
+            mat.useLogarithmicDepth = true;
+            //mat.wireframe = true;
+        }
+    }
+    _removeAllFromScene(tile) {
+        const contents = (0,core_tiles_3d_interfaces__WEBPACK_IMPORTED_MODULE_1__.GetTile3dContents)(tile);
+        if (contents) {
+            for (const c of contents) {
+                const container = c?.container;
+                if (container && container instanceof _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.AssetContainer) {
+                    container.removeAllFromScene();
+                }
+            }
+        }
+    }
+}
+//# sourceMappingURL=tile3d.scene.js.map
+
+/***/ },
+
+/***/ "./dist/tiles/3d/tile3d.viewer.js"
+/*!****************************************!*\
+  !*** ./dist/tiles/3d/tile3d.viewer.js ***!
+  \****************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   Map3DViewer: () => (/* binding */ Map3DViewer)
+/* harmony export */ });
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var core_tiles_3d_engine__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/tiles/3d/engine */ "../core/dist/tiles/3d/engine/tile3d.stream.engine.js");
+/* harmony import */ var core_map__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core/map */ "../core/dist/map/canvas/map.canvas.display.js");
+/* harmony import */ var _tile3d_scene__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./tile3d.scene */ "./dist/tiles/3d/tile3d.scene.js");
+/* harmony import */ var _tile3d_loader__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./tile3d.loader */ "./dist/tiles/3d/tile3d.loader.js");
+/* harmony import */ var core_geography__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! core/geography */ "../core/dist/geography/geography.position.js");
+/* harmony import */ var core_geodesy__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! core/geodesy */ "../core/dist/geodesy/geodesy.ellipsoid.js");
+/* harmony import */ var core_geodesy__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! core/geodesy */ "../core/dist/geodesy/geodesy.system.js");
+/* harmony import */ var _camera__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../../camera */ "./dist/camera/camera.Geodetic.js");
+/* harmony import */ var _vendors_google__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./vendors/google */ "./dist/tiles/3d/vendors/google/google.uri.js");
+
+
+
+
+
+
+
+
+
+class Map3DViewer {
+    constructor(targetId, options) {
+        this._target = null;
+        this._canvas = null;
+        this._engine = null;
+        this._scene = null;
+        this._camera = null;
+        this._display = null;
+        this._streamEngine = null;
+        this._map = null;
+        this._cameraSync = null;
+        this._cameraNav = null;
+        this._options = options;
+        const target = document.getElementById(targetId);
+        if (!target) {
+            throw new Error(`Element "${targetId}" not found.`);
+        }
+        this._target = target;
+        // existing canvas or create a new one.
+        let canvas = target.querySelector(Map3DViewer.CanvasKeyword);
+        if (!canvas) {
+            canvas = this._createCanvas(Map3DViewer.DefaultCanvasId);
+            if (canvas) {
+                target.appendChild(canvas);
+            }
+        }
+        this._canvas = canvas;
+        if (this._canvas) {
+            this._engine = this._createEngine(this._canvas);
+            if (this._engine) {
+                this._scene = this._createScene(this._engine);
+                if (this._scene) {
+                    this._display = new core_map__WEBPACK_IMPORTED_MODULE_2__.CanvasDisplay(this._canvas);
+                    this._streamEngine = new core_tiles_3d_engine__WEBPACK_IMPORTED_MODULE_1__.Tile3dStreamEngine(options.uri, this._display, new _tile3d_loader__WEBPACK_IMPORTED_MODULE_4__.Tile3dContentLoader(this._scene, options.resolver));
+                    if (options.resolver) {
+                        this._streamEngine.contentOptions.uriResolver = options.resolver;
+                    }
+                    this._streamEngine.contentOptions.maxScreenSpaceErrorFn = _vendors_google__WEBPACK_IMPORTED_MODULE_9__.GoogleTile3dErrorFn;
+                    this._map = new _tile3d_scene__WEBPACK_IMPORTED_MODULE_3__.Tile3dScene(options.names?.map ?? "map", this._scene);
+                    this._streamEngine.linkTo(this._map);
+                    this._streamEngine.rootReadyObservable.addOnce(this._onRootReady.bind(this));
+                    this._streamEngine.setContext(); // start the root loading.
+                    /*this._scene.useRightHandedSystem = true;
+                    BABYLON.SceneLoader.OnPluginActivatedObservable.add((p) => {
+                        if ((p as any).name === "gltf") {
+                            (p as any).useRightHandedSystem = true; // glTF loader matches scene
+                        }
+                    });*/
+                    /*this._streamEngine.retreiveMetasAsync().then((m) => {
+                        console.log(`Meta = ${JSON.stringify(m)}`);
+                    });*/
+                }
+            }
+        }
+    }
+    getScene() {
+        return this._scene;
+    }
+    _onRootReady(eventData, _eventState) {
+        if (this._engine && this._scene) {
+            const engine = this._engine;
+            const scene = this._scene;
+            this._camera = this._createCamera(this._getCameraName(), eventData, scene, this._options);
+            if (this._camera) {
+                //this._cameraNav = SetupAdaptiveUniversalCamera(this._camera, scene);
+                // This attaches the camera to the canvas
+                this._camera.attachControl(this._canvas, true);
+                scene.onAfterCameraRenderObservable.addOnce((_c, _s) => {
+                    this._cameraSync = null; //SetupCameraStateSync(c, this.onCameraStateUpdate.bind(this));
+                });
+            }
+            engine.runRenderLoop(() => {
+                scene.render();
+            });
+            window.addEventListener("resize", () => {
+                engine.resize();
+            });
+        }
+    }
+    get canvas() {
+        return this._canvas;
+    }
+    get camera() {
+        return this._camera;
+    }
+    _createCanvas(id) {
+        const canvas = document.createElement(Map3DViewer.CanvasKeyword);
+        if (canvas) {
+            canvas.id = id;
+            canvas.style.width = "100%";
+            canvas.style.height = "100%";
+            return canvas;
+        }
+        return null;
+    }
+    _createEngine(canvas) {
+        const engine = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Engine(canvas, true);
+        return engine;
+    }
+    _createScene(engine) {
+        const scene = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Scene(engine);
+        return scene;
+    }
+    _createCamera(name, root, _scene, _options) {
+        if (root.root.boundingVolume) {
+            if (this._scene && this._display && root.root.boundingVolume.box) {
+                return this._setupArcRotateCamera(root.root.boundingVolume.box, this._scene);
+                //return this._setupUniversalCameraForTilesetRoot(root.root.boundingVolume.box, this._scene, this._display.resolution.width, this._display.resolution.height);
+            }
+        }
+        return null;
+    }
+    onCameraStateUpdate(state) {
+        this._streamEngine?.setContext(state);
+    }
+    _getCameraName() {
+        return this._options.names?.camera ?? "camera";
+    }
+    _setupArcRotateCamera(box, scene, margin = 1.5) {
+        const ellipsoid = this._options.ellipsoid ?? core_geodesy__WEBPACK_IMPORTED_MODULE_6__.Ellipsoid.WGS84;
+        const camera = new _camera__WEBPACK_IMPORTED_MODULE_8__.GeodeticCamera("Camera", scene, new core_geodesy__WEBPACK_IMPORTED_MODULE_7__.GeodeticSystem(ellipsoid));
+        // Set camera near and far planes based on bounding size
+        camera.minZ = 0;
+        camera.maxZ = ellipsoid.semiMajorAxis * margin;
+        return camera;
+    }
+}
+Map3DViewer.DefaultCanvasId = "";
+Map3DViewer.CanvasKeyword = "canvas";
+Map3DViewer.DefaultInitialPosition = new core_geography__WEBPACK_IMPORTED_MODULE_5__.Geo3(37.7749, -122.4194, 10_000_000);
+//# sourceMappingURL=tile3d.viewer.js.map
+
+/***/ },
+
+/***/ "./dist/tiles/3d/vendors/google/google.uri.js"
+/*!****************************************************!*\
+  !*** ./dist/tiles/3d/vendors/google/google.uri.js ***!
+  \****************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   GoogleTile3dErrorFn: () => (/* binding */ GoogleTile3dErrorFn),
+/* harmony export */   GoogleTiles3dUriResolver: () => (/* binding */ GoogleTiles3dUriResolver)
+/* harmony export */ });
+const __errorGoggle__ = [128, 96, 64, 64, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 16];
+function GoogleTile3dErrorFn(depth) {
+    const i = Math.min(depth, __errorGoggle__.length - 1);
+    return __errorGoggle__[i];
+}
+/**
+ * GoogleTiles3dUriResolver
+ *
+ * This class ensures that all URIs used to fetch 3D Tiles from the Google Maps Tile API
+ * include the required `key` and `session` query parameters.
+ *
+ * Why this is necessary:
+ * - The Google Maps Tile API sometimes omits the `session` token in nested tile URIs,
+ *   especially when loading sub-tilesets or content files (e.g., `.glb`, `.json`).
+ * - Missing session tokens can lead to HTTP 403 or 400 errors, breaking tile loading.
+ * - This resolver captures the session token from the first URI that includes it,
+ *   and ensures it is consistently appended to all subsequent requests.
+ * - It also replaces any existing `key` or `session` parameters to avoid duplication or conflicts.
+ *
+ * Usage:
+ * - Instantiate with your API key.
+ * - Optionally provide a session token, or let the resolver extract it from the first valid URI.
+ * - Use `resolve(uri)` to safely rewrite tile URIs before loading.
+ */
+class GoogleTiles3dUriResolver {
+    constructor(apiKey, sessionToken = null) {
+        this.apiKey = apiKey;
+        this.sessionToken = sessionToken;
+    }
+    resolve(uri) {
+        // Normalize HTML-encoded ampersands
+        const normalizedUri = uri.replace(/&amp;amp;/g, "&").replace(/&amp;/g, "&");
+        const url = new URL(normalizedUri);
+        const incomingSession = url.searchParams.get("session");
+        // If URI has a session and we don't yet have one, store it
+        if (incomingSession && !this.sessionToken) {
+            this.sessionToken = incomingSession;
+        }
+        // Always set or replace the session if we have one
+        if (this.sessionToken) {
+            url.searchParams.set("session", this.sessionToken);
+        }
+        // Always set or replace the API key
+        url.searchParams.set("key", this.apiKey);
+        return url.toString();
+    }
+}
+//# sourceMappingURL=google.uri.js.map
+
+/***/ },
+
+/***/ "./dist/tiles/3d/vendors/google/index.js"
+/*!***********************************************!*\
+  !*** ./dist/tiles/3d/vendors/google/index.js ***!
+  \***********************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   GoogleTile3dErrorFn: () => (/* reexport safe */ _google_uri__WEBPACK_IMPORTED_MODULE_0__.GoogleTile3dErrorFn),
+/* harmony export */   GoogleTiles3dUriResolver: () => (/* reexport safe */ _google_uri__WEBPACK_IMPORTED_MODULE_0__.GoogleTiles3dUriResolver)
+/* harmony export */ });
+/* harmony import */ var _google_uri__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./google.uri */ "./dist/tiles/3d/vendors/google/google.uri.js");
+
+//# sourceMappingURL=index.js.map
+
+/***/ },
+
+/***/ "./dist/tiles/3d/vendors/index.js"
+/*!****************************************!*\
+  !*** ./dist/tiles/3d/vendors/index.js ***!
+  \****************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   GoogleTile3dErrorFn: () => (/* reexport safe */ _google__WEBPACK_IMPORTED_MODULE_0__.GoogleTile3dErrorFn),
+/* harmony export */   GoogleTiles3dUriResolver: () => (/* reexport safe */ _google__WEBPACK_IMPORTED_MODULE_0__.GoogleTiles3dUriResolver)
+/* harmony export */ });
+/* harmony import */ var _google__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./google */ "./dist/tiles/3d/vendors/google/index.js");
+
+//# sourceMappingURL=index.js.map
+
+/***/ },
+
+/***/ "./dist/tiles/index.js"
+/*!*****************************!*\
+  !*** ./dist/tiles/index.js ***!
+  \*****************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   GoogleTile3dErrorFn: () => (/* reexport safe */ _3d_index__WEBPACK_IMPORTED_MODULE_0__.GoogleTile3dErrorFn),
+/* harmony export */   GoogleTiles3dUriResolver: () => (/* reexport safe */ _3d_index__WEBPACK_IMPORTED_MODULE_0__.GoogleTiles3dUriResolver),
+/* harmony export */   Map3DViewer: () => (/* reexport safe */ _3d_index__WEBPACK_IMPORTED_MODULE_0__.Map3DViewer),
+/* harmony export */   Tile3dContentLoader: () => (/* reexport safe */ _3d_index__WEBPACK_IMPORTED_MODULE_0__.Tile3dContentLoader),
+/* harmony export */   Tile3dScene: () => (/* reexport safe */ _3d_index__WEBPACK_IMPORTED_MODULE_0__.Tile3dScene)
+/* harmony export */ });
+/* harmony import */ var _3d_index__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./3d/index */ "./dist/tiles/3d/index.js");
+
+//# sourceMappingURL=index.js.map
+
+/***/ },
+
 /***/ "@babylonjs/core"
 /*!**************************!*\
   !*** external "BABYLON" ***!
@@ -23424,7 +26026,7 @@ __webpack_require__.r(__webpack_exports__);
 // We strongly advise against editing this file directly, as it may cause unintended consequences and affect the final product.
 
 const name = "glowPixelShader";
-const shader = `precision highp float;varying vec2 vUV;uniform float time;void main(void) {float glow=sin(vUV.x*20.0+time)*0.5+0.5;vec3 neonColor=vec3(0.0,0.5,1.0);float distToCenter=abs(vUV.y-0.5);float edgeFade=1.0-smoothstep(0.0,0.5,distToCenter);gl_FragColor=vec4(neonColor*glow,edgeFade);}`;
+const shader = `precision highp float;varying vec2 vUV;uniform float time;void main(void) {float glow=sin(vUV.x*20.0+time)*0.5+0.5;vec3 neonColor=vec3(0.0,0.5,1.0);float distToCenter=abs(vUV.y-0.5);float edgeFade=1.0-smoothstep(0.0,0.5,distToCenter);gl_FragColor=vec4(neonColor*glow,edgeFade);}`;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.ShadersStore[name] = shader;
 /** @internal */ const glowPixelShader = { name, shader };
 //# sourceMappingURL=glow.fragment.js.map
@@ -23447,7 +26049,7 @@ __webpack_require__.r(__webpack_exports__);
 // We strongly advise against editing this file directly, as it may cause unintended consequences and affect the final product.
 
 const name = "glowVertexShader";
-const shader = `precision highp float;attribute vec3 position;attribute vec2 uv;uniform mat4 worldViewProjection;varying vec2 vUV;void main(void) {vUV=uv;gl_Position=worldViewProjection*vec4(position,1.0);}`;
+const shader = `precision highp float;attribute vec3 position;attribute vec2 uv;uniform mat4 worldViewProjection;varying vec2 vUV;void main(void) {vUV=uv;gl_Position=worldViewProjection*vec4(position,1.0);}`;
 _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.ShadersStore[name] = shader;
 /** @internal */ const glowVertexShader = { name, shader };
 //# sourceMappingURL=glow.vertex.js.map
@@ -24004,343 +26606,361 @@ _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.ShaderStore.ShadersStore[name] = sh
   \***********************/
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   AbstractRange: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.AbstractRange),
-/* harmony export */   AbstractShape: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.AbstractShape),
-/* harmony export */   AbstractStreamSourceProducer: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.AbstractStreamSourceProducer),
-/* harmony export */   AbstractThreeMfSerializer: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.AbstractThreeMfSerializer),
-/* harmony export */   AbstractTileLoader: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.AbstractTileLoader),
-/* harmony export */   AbstractTileMetrics: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.AbstractTileMetrics),
-/* harmony export */   Angle: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Angle),
-/* harmony export */   ArcGISGrayscaleElevationDecoder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.ArcGISGrayscaleElevationDecoder),
-/* harmony export */   ArcGISImageServerUrlBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.ArcGISImageServerUrlBuilder),
-/* harmony export */   Assert: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Assert),
-/* harmony export */   Bearing: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Bearing),
-/* harmony export */   BjsThreeMfSerializer: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.BjsThreeMfSerializer),
-/* harmony export */   BlobTileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.BlobTileCodec),
-/* harmony export */   Bounded: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Bounded),
-/* harmony export */   BoundedCollection: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.BoundedCollection),
-/* harmony export */   Bounds: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Bounds),
-/* harmony export */   CacheEntry: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.CacheEntry),
-/* harmony export */   CacheEntryOptions: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.CacheEntryOptions),
-/* harmony export */   CacheEntryOptionsBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.CacheEntryOptionsBuilder),
-/* harmony export */   CachePolicy: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.CachePolicy),
-/* harmony export */   CachePolicyBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.CachePolicyBuilder),
-/* harmony export */   CalculatorBase: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.CalculatorBase),
-/* harmony export */   CanvasDisplay: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.CanvasDisplay),
-/* harmony export */   CanvasMap: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.CanvasMap),
-/* harmony export */   CanvasTileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.CanvasTileCodec),
-/* harmony export */   Cartesian2: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Cartesian2),
-/* harmony export */   Cartesian3: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Cartesian3),
-/* harmony export */   Cartesian4: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Cartesian4),
-/* harmony export */   Cartesian4TileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Cartesian4TileCodec),
-/* harmony export */   Cartesian4TileCodecOptions: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Cartesian4TileCodecOptions),
-/* harmony export */   CartesianMode: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.CartesianMode),
-/* harmony export */   CellCoordinateReference: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.CellCoordinateReference),
-/* harmony export */   Circle: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Circle),
+/* harmony export */   AbstractRange: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.AbstractRange),
+/* harmony export */   AbstractShape: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.AbstractShape),
+/* harmony export */   AbstractThreeMfSerializer: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.AbstractThreeMfSerializer),
+/* harmony export */   AbstractTileLoader: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.AbstractTileLoader),
+/* harmony export */   AbstractTileMetrics: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.AbstractTileMetrics),
+/* harmony export */   Angle: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Angle),
+/* harmony export */   ArcGISGrayscaleElevationDecoder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.ArcGISGrayscaleElevationDecoder),
+/* harmony export */   ArcGISImageServerUrlBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.ArcGISImageServerUrlBuilder),
+/* harmony export */   Assert: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Assert),
+/* harmony export */   Bearing: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Bearing),
+/* harmony export */   BjsThreeMfSerializer: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.BjsThreeMfSerializer),
+/* harmony export */   BlobTileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.BlobTileCodec),
+/* harmony export */   Bounded: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Bounded),
+/* harmony export */   BoundedCollection: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.BoundedCollection),
+/* harmony export */   Bounds: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Bounds),
+/* harmony export */   CacheEntry: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.CacheEntry),
+/* harmony export */   CacheEntryOptions: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.CacheEntryOptions),
+/* harmony export */   CacheEntryOptionsBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.CacheEntryOptionsBuilder),
+/* harmony export */   CachePolicy: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.CachePolicy),
+/* harmony export */   CachePolicyBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.CachePolicyBuilder),
+/* harmony export */   CalculatorBase: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.CalculatorBase),
+/* harmony export */   CanvasDisplay: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.CanvasDisplay),
+/* harmony export */   CanvasMap: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.CanvasMap),
+/* harmony export */   CanvasTileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.CanvasTileCodec),
+/* harmony export */   Cartesian2: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Cartesian2),
+/* harmony export */   Cartesian3: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Cartesian3),
+/* harmony export */   Cartesian4: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Cartesian4),
+/* harmony export */   Cartesian4TileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Cartesian4TileCodec),
+/* harmony export */   Cartesian4TileCodecOptions: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Cartesian4TileCodecOptions),
+/* harmony export */   CartesianMode: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.CartesianMode),
+/* harmony export */   CellCoordinateReference: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.CellCoordinateReference),
+/* harmony export */   Circle: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Circle),
 /* harmony export */   ClipIndex: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_1__.ClipIndex),
 /* harmony export */   ClipPlaneDefinition: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_1__.ClipPlaneDefinition),
-/* harmony export */   ContentTypeFileName: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.ContentTypeFileName),
-/* harmony export */   Context2DTileMap: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Context2DTileMap),
+/* harmony export */   ClosestDistanceToAABB: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.ClosestDistanceToAABB),
+/* harmony export */   ConstantSSEBudget: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.ConstantSSEBudget),
+/* harmony export */   ContentTypeFileName: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.ContentTypeFileName),
+/* harmony export */   Context2DTileMap: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Context2DTileMap),
 /* harmony export */   CreateQuickHull: () => (/* reexport safe */ _meshes__WEBPACK_IMPORTED_MODULE_5__.CreateQuickHull),
-/* harmony export */   Current: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Current),
-/* harmony export */   DebugTouchConsole: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.DebugTouchConsole),
-/* harmony export */   DefaultXmlSerializerFormatOptions: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.DefaultXmlSerializerFormatOptions),
-/* harmony export */   DefaultXmlSerializerNumberOptions: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.DefaultXmlSerializerNumberOptions),
-/* harmony export */   DemInfos: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.DemInfos),
-/* harmony export */   DemTileWebClient: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.DemTileWebClient),
-/* harmony export */   DeserializeLocalizableString: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.DeserializeLocalizableString),
-/* harmony export */   Display: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Display),
-/* harmony export */   EPSG3857: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.EPSG3857),
+/* harmony export */   Current: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Current),
+/* harmony export */   DebugTouchConsole: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.DebugTouchConsole),
+/* harmony export */   DefaultScreenSpaceErrorFn: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.DefaultScreenSpaceErrorFn),
+/* harmony export */   DefaultXmlSerializerFormatOptions: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.DefaultXmlSerializerFormatOptions),
+/* harmony export */   DefaultXmlSerializerNumberOptions: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.DefaultXmlSerializerNumberOptions),
+/* harmony export */   DemInfos: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.DemInfos),
+/* harmony export */   DemTileWebClient: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.DemTileWebClient),
+/* harmony export */   DeserializeLocalizableString: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.DeserializeLocalizableString),
+/* harmony export */   Display: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Display),
+/* harmony export */   EPSG3857: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.EPSG3857),
 /* harmony export */   ElevationGridFactory: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_2__.ElevationGridFactory),
-/* harmony export */   ElevationHelpers: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.ElevationHelpers),
+/* harmony export */   ElevationHelpers: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.ElevationHelpers),
 /* harmony export */   ElevationLayer: () => (/* reexport safe */ _dem__WEBPACK_IMPORTED_MODULE_3__.ElevationLayer),
 /* harmony export */   ElevationLayerView: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_2__.ElevationLayerView),
-/* harmony export */   Ellipsoid: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Ellipsoid),
+/* harmony export */   Ellipsoid: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Ellipsoid),
 /* harmony export */   EllipsoidalMapMaterial: () => (/* reexport safe */ _materials__WEBPACK_IMPORTED_MODULE_0__.EllipsoidalMapMaterial),
-/* harmony export */   Envelope: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Envelope),
-/* harmony export */   EventArgs: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.EventArgs),
-/* harmony export */   EventEmitter: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.EventEmitter),
-/* harmony export */   EventState: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.EventState),
-/* harmony export */   EvictionReason: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.EvictionReason),
-/* harmony export */   Float32Layer: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Float32Layer),
-/* harmony export */   Float32TileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Float32TileCodec),
-/* harmony export */   Float32TileCodecOptions: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Float32TileCodecOptions),
-/* harmony export */   Float32TileCodecOptionsBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Float32TileCodecOptionsBuilder),
-/* harmony export */   Geo2: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Geo2),
-/* harmony export */   Geo3: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Geo3),
-/* harmony export */   GeoBounded: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.GeoBounded),
-/* harmony export */   GeoBoundedCollection: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.GeoBoundedCollection),
-/* harmony export */   GeoLine: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.GeoLine),
-/* harmony export */   GeoPolygon: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.GeoPolygon),
-/* harmony export */   GeoPolyline: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.GeoPolyline),
-/* harmony export */   GeoShape: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.GeoShape),
-/* harmony export */   GeoShapeType: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.GeoShapeType),
+/* harmony export */   EmptyTileBounds: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.EmptyTileBounds),
+/* harmony export */   Envelope: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Envelope),
+/* harmony export */   EventArgs: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.EventArgs),
+/* harmony export */   EventEmitter: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.EventEmitter),
+/* harmony export */   EventState: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.EventState),
+/* harmony export */   EvictionReason: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.EvictionReason),
+/* harmony export */   Float32Layer: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Float32Layer),
+/* harmony export */   Float32TileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Float32TileCodec),
+/* harmony export */   Float32TileCodecOptions: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Float32TileCodecOptions),
+/* harmony export */   Float32TileCodecOptionsBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Float32TileCodecOptionsBuilder),
+/* harmony export */   Geo2: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Geo2),
+/* harmony export */   Geo3: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Geo3),
+/* harmony export */   GeoBounded: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.GeoBounded),
+/* harmony export */   GeoBoundedCollection: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.GeoBoundedCollection),
+/* harmony export */   GeoLine: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.GeoLine),
+/* harmony export */   GeoPolygon: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.GeoPolygon),
+/* harmony export */   GeoPolyline: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.GeoPolyline),
+/* harmony export */   GeoShape: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.GeoShape),
+/* harmony export */   GeoShapeType: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.GeoShapeType),
 /* harmony export */   GeodeticCamera: () => (/* reexport safe */ _camera__WEBPACK_IMPORTED_MODULE_6__.GeodeticCamera),
-/* harmony export */   GeodeticSystem: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.GeodeticSystem),
-/* harmony export */   GetLocalizableStringValue: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.GetLocalizableStringValue),
-/* harmony export */   GetXmlFieldMeta: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.GetXmlFieldMeta),
-/* harmony export */   GetXmlName: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.GetXmlName),
-/* harmony export */   Google: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Google),
-/* harmony export */   GoogleMap2DLayerCode: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.GoogleMap2DLayerCode),
-/* harmony export */   GoogleMap2DUrlBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.GoogleMap2DUrlBuilder),
-/* harmony export */   HSLColor: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.HSLColor),
+/* harmony export */   GeodeticSystem: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.GeodeticSystem),
+/* harmony export */   GetLocalizableStringValue: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.GetLocalizableStringValue),
+/* harmony export */   GetXmlFieldMeta: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.GetXmlFieldMeta),
+/* harmony export */   GetXmlName: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.GetXmlName),
+/* harmony export */   Google: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Google),
+/* harmony export */   GoogleMap2DLayerCode: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.GoogleMap2DLayerCode),
+/* harmony export */   GoogleMap2DUrlBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.GoogleMap2DUrlBuilder),
+/* harmony export */   GoogleTile3dErrorFn: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_7__.GoogleTile3dErrorFn),
+/* harmony export */   GoogleTiles3dUriResolver: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_7__.GoogleTiles3dUriResolver),
+/* harmony export */   HSLColor: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.HSLColor),
 /* harmony export */   HasHolographicBounds: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_1__.HasHolographicBounds),
-/* harmony export */   HasNavigationApi: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.HasNavigationApi),
-/* harmony export */   HasNavigationState: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.HasNavigationState),
-/* harmony export */   HasToString: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.HasToString),
+/* harmony export */   HasNavigationApi: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.HasNavigationApi),
+/* harmony export */   HasNavigationState: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.HasNavigationState),
+/* harmony export */   HasToString: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.HasToString),
 /* harmony export */   HolographicBoundsType: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_1__.HolographicBoundsType),
 /* harmony export */   HolographicDisplay: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_1__.HolographicDisplay),
-/* harmony export */   ISO6391: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.ISO6391),
-/* harmony export */   ImageDataTileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.ImageDataTileCodec),
-/* harmony export */   ImageDataTileCodecOptions: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.ImageDataTileCodecOptions),
-/* harmony export */   ImageDataTileCodecOptionsBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.ImageDataTileCodecOptionsBuilder),
-/* harmony export */   ImageLayer: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.ImageLayer),
-/* harmony export */   ImageTileClient: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.ImageTileClient),
-/* harmony export */   ImageTileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.ImageTileCodec),
-/* harmony export */   InpustNavigationControllerOptions: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.InpustNavigationControllerOptions),
-/* harmony export */   InputController: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.InputController),
-/* harmony export */   InputsNavigationController: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.InputsNavigationController),
-/* harmony export */   IsArrayOfTile: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsArrayOfTile),
-/* harmony export */   IsBounded: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsBounded),
-/* harmony export */   IsBounds: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsBounds),
-/* harmony export */   IsDemInfos: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsDemInfos),
-/* harmony export */   IsDisposable: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsDisposable),
-/* harmony export */   IsDrawableTileMapLayer: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsDrawableTileMapLayer),
+/* harmony export */   ISO6391: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.ISO6391),
+/* harmony export */   ImageDataTileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.ImageDataTileCodec),
+/* harmony export */   ImageDataTileCodecOptions: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.ImageDataTileCodecOptions),
+/* harmony export */   ImageDataTileCodecOptionsBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.ImageDataTileCodecOptionsBuilder),
+/* harmony export */   ImageLayer: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.ImageLayer),
+/* harmony export */   ImageTileClient: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.ImageTileClient),
+/* harmony export */   ImageTileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.ImageTileCodec),
+/* harmony export */   InpustNavigationControllerOptions: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.InpustNavigationControllerOptions),
+/* harmony export */   InputController: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.InputController),
+/* harmony export */   InputsNavigationController: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.InputsNavigationController),
+/* harmony export */   IntersectsBoundingBox: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IntersectsBoundingBox),
+/* harmony export */   IsArrayOfTile: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsArrayOfTile),
+/* harmony export */   IsBeyondHorizon: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsBeyondHorizon),
+/* harmony export */   IsBounded: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsBounded),
+/* harmony export */   IsBounds: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsBounds),
+/* harmony export */   IsDemInfos: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsDemInfos),
+/* harmony export */   IsDisposable: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsDisposable),
+/* harmony export */   IsDrawableTileMapLayer: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsDrawableTileMapLayer),
 /* harmony export */   IsElevationLayer: () => (/* reexport safe */ _dem__WEBPACK_IMPORTED_MODULE_3__.IsElevationLayer),
 /* harmony export */   IsElevationLayerOptions: () => (/* reexport safe */ _dem__WEBPACK_IMPORTED_MODULE_3__.IsElevationLayerOptions),
-/* harmony export */   IsEnvelope: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsEnvelope),
-/* harmony export */   IsGeoBounded: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsGeoBounded),
-/* harmony export */   IsHasTileMetrics: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsHasTileMetrics),
+/* harmony export */   IsEnvelope: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsEnvelope),
+/* harmony export */   IsGeoBounded: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsGeoBounded),
+/* harmony export */   IsGeodeticCamera: () => (/* reexport safe */ _camera__WEBPACK_IMPORTED_MODULE_6__.IsGeodeticCamera),
+/* harmony export */   IsHasTileMetrics: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsHasTileMetrics),
 /* harmony export */   IsHolographicBounds: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_1__.IsHolographicBounds),
 /* harmony export */   IsHolographicBox: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_1__.IsHolographicBox),
 /* harmony export */   IsHolographicCylinder: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_1__.IsHolographicCylinder),
 /* harmony export */   IsHolographicSphere: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_1__.IsHolographicSphere),
-/* harmony export */   IsKDTreeSplitter: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsKDTreeSplitter),
-/* harmony export */   IsLocalizable: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsLocalizable),
-/* harmony export */   IsLocation: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsLocation),
-/* harmony export */   IsNumber: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsNumber),
-/* harmony export */   IsOctreeNode: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsOctreeNode),
-/* harmony export */   IsPhysicalDisplay: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsPhysicalDisplay),
-/* harmony export */   IsQualifiedName: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.IsQualifiedName),
-/* harmony export */   IsReferenceFrame: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsReferenceFrame),
-/* harmony export */   IsSize: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsSize),
-/* harmony export */   IsSize3: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsSize3),
-/* harmony export */   IsStreamSource: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsStreamSource),
-/* harmony export */   IsStreamingViewTarget: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsStreamingViewTarget),
-/* harmony export */   IsString: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsString),
-/* harmony export */   IsTargetBlock: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsTargetBlock),
-/* harmony export */   IsTile: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsTile),
-/* harmony export */   IsTile2DAddress: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsTile2DAddress),
-/* harmony export */   IsTileCollection: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsTileCollection),
-/* harmony export */   IsTileConstructor: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsTileConstructor),
-/* harmony export */   IsTileDatasource: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsTileDatasource),
-/* harmony export */   IsTileMapLayer: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsTileMapLayer),
-/* harmony export */   IsTileMapLayerContainerProxy: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsTileMapLayerContainerProxy),
-/* harmony export */   IsTileMapLayerProxy: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsTileMapLayerProxy),
-/* harmony export */   IsTileNavigationApi: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsTileNavigationApi),
-/* harmony export */   IsTileNavigationState: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsTileNavigationState),
-/* harmony export */   IsTileSystemBounds: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsTileSystemBounds),
+/* harmony export */   IsKDTreeSplitter: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsKDTreeSplitter),
+/* harmony export */   IsLocalizable: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsLocalizable),
+/* harmony export */   IsLocation: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsLocation),
+/* harmony export */   IsNumber: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsNumber),
+/* harmony export */   IsOctreeNode: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsOctreeNode),
+/* harmony export */   IsPhysicalDisplay: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsPhysicalDisplay),
+/* harmony export */   IsQualifiedName: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.IsQualifiedName),
+/* harmony export */   IsReferenceFrame: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsReferenceFrame),
+/* harmony export */   IsSize: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsSize),
+/* harmony export */   IsSize3: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsSize3),
+/* harmony export */   IsStreamSource: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsStreamSource),
+/* harmony export */   IsStreamSubEngine: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsStreamSubEngine),
+/* harmony export */   IsString: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsString),
+/* harmony export */   IsTargetBlock: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsTargetBlock),
+/* harmony export */   IsTile: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsTile),
+/* harmony export */   IsTile2DAddress: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsTile2DAddress),
+/* harmony export */   IsTileCollection: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsTileCollection),
+/* harmony export */   IsTileConstructor: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsTileConstructor),
+/* harmony export */   IsTileDatasource: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsTileDatasource),
+/* harmony export */   IsTileMapLayer: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsTileMapLayer),
+/* harmony export */   IsTileMapLayerContainerProxy: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsTileMapLayerContainerProxy),
+/* harmony export */   IsTileMapLayerProxy: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsTileMapLayerProxy),
+/* harmony export */   IsTileNavigationApi: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsTileNavigationApi),
+/* harmony export */   IsTileNavigationState: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsTileNavigationState),
+/* harmony export */   IsTileSystemBounds: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsTileSystemBounds),
 /* harmony export */   IsTileWithMesh: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_2__.IsTileWithMesh),
-/* harmony export */   IsTouchCapable: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.IsTouchCapable),
-/* harmony export */   JsonTileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.JsonTileCodec),
-/* harmony export */   KdtreeSplitter: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.KdtreeSplitter),
-/* harmony export */   Known3mfRelationshipTypes: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.Known3mfRelationshipTypes),
-/* harmony export */   KnownI3mfContentType: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.KnownI3mfContentType),
-/* harmony export */   KnownPlaces: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.KnownPlaces),
-/* harmony export */   Length: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Length),
-/* harmony export */   Line: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Line),
-/* harmony export */   LocalString: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.LocalString),
-/* harmony export */   Luminosity: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Luminosity),
-/* harmony export */   MakePlaneFromPointAndNormal: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.MakePlaneFromPointAndNormal),
+/* harmony export */   IsTouchCapable: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.IsTouchCapable),
+/* harmony export */   JsonTileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.JsonTileCodec),
+/* harmony export */   KdtreeSplitter: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.KdtreeSplitter),
+/* harmony export */   Known3mfRelationshipTypes: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.Known3mfRelationshipTypes),
+/* harmony export */   KnownI3mfContentType: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.KnownI3mfContentType),
+/* harmony export */   KnownPlaces: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.KnownPlaces),
+/* harmony export */   Length: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Length),
+/* harmony export */   Line: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Line),
+/* harmony export */   LocalString: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.LocalString),
+/* harmony export */   Luminosity: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Luminosity),
+/* harmony export */   MakePlaneFromPointAndNormal: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.MakePlaneFromPointAndNormal),
 /* harmony export */   Map3D: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_2__.Map3D),
 /* harmony export */   Map3DOptions: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_2__.Map3DOptions),
+/* harmony export */   Map3DViewer: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_7__.Map3DViewer),
 /* harmony export */   Map3dLayerView: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_2__.Map3dLayerView),
 /* harmony export */   Map3dMaterial: () => (/* reexport safe */ _materials__WEBPACK_IMPORTED_MODULE_0__.Map3dMaterial),
 /* harmony export */   MapDisplay: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_2__.MapDisplay),
 /* harmony export */   MapNode: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_2__.MapNode),
-/* harmony export */   MapScale: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.MapScale),
-/* harmony export */   MapZen: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.MapZen),
-/* harmony export */   MapZenDemUrlBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.MapZenDemUrlBuilder),
-/* harmony export */   MapZenNormalsDecoder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.MapZenNormalsDecoder),
-/* harmony export */   MapzenAltitudeDecoder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.MapzenAltitudeDecoder),
-/* harmony export */   Mass: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Mass),
-/* harmony export */   Matrix3d: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.Matrix3d),
-/* harmony export */   MatrixFormatter: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.MatrixFormatter),
-/* harmony export */   MedianFilter: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.MedianFilter),
-/* harmony export */   MemoryCache: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.MemoryCache),
-/* harmony export */   ModelFileName: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.ModelFileName),
-/* harmony export */   NeighborsAddress: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.NeighborsAddress),
-/* harmony export */   NeighborsIndex: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.NeighborsIndex),
-/* harmony export */   NumberFormatter: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.NumberFormatter),
-/* harmony export */   Object3dDirName: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.Object3dDirName),
-/* harmony export */   ObjectPool: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.ObjectPool),
-/* harmony export */   ObjectPoolOptions: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.ObjectPoolOptions),
-/* harmony export */   Observable: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Observable),
-/* harmony export */   Observer: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Observer),
-/* harmony export */   Octree: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Octree),
-/* harmony export */   OctreeNode: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.OctreeNode),
-/* harmony export */   OctreeSplitter: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.OctreeSplitter),
-/* harmony export */   OpenXmlContentTypesNamespace: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.OpenXmlContentTypesNamespace),
-/* harmony export */   OpenXmlRelationshipsNamespace: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.OpenXmlRelationshipsNamespace),
-/* harmony export */   PathUtils: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.PathUtils),
-/* harmony export */   PlaneCruncher: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.PlaneCruncher),
-/* harmony export */   PlaneDefinition: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.PlaneDefinition),
-/* harmony export */   Point: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Point),
-/* harmony export */   PointerToDragController: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.PointerToDragController),
-/* harmony export */   Polygon: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Polygon),
-/* harmony export */   Polyline: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Polyline),
-/* harmony export */   PolylineSimplifier: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.PolylineSimplifier),
-/* harmony export */   Power: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Power),
-/* harmony export */   Projections: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Projections),
-/* harmony export */   PropertyChangedEventArgs: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.PropertyChangedEventArgs),
-/* harmony export */   PythagoreanFlatEarthCalculator: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.PythagoreanFlatEarthCalculator),
-/* harmony export */   QuadtreeSplitter: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.QuadtreeSplitter),
-/* harmony export */   Quantity: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Quantity),
-/* harmony export */   QuantityRange: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.QuantityRange),
-/* harmony export */   QuickHull: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.QuickHull),
-/* harmony export */   RGBAColor: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.RGBAColor),
-/* harmony export */   RGBATileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.RGBATileCodec),
-/* harmony export */   RGBTileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.RGBTileCodec),
-/* harmony export */   Range: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Range),
-/* harmony export */   RegionCode: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.RegionCode),
-/* harmony export */   RelationshipDirName: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.RelationshipDirName),
-/* harmony export */   RelationshipFileName: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.RelationshipFileName),
-/* harmony export */   RgbaToHex: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.RgbaToHex),
-/* harmony export */   RibbonBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.RibbonBuilder),
-/* harmony export */   RibbonOptions: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.RibbonOptions),
-/* harmony export */   RoundRobin: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.RoundRobin),
-/* harmony export */   ST_ObjectType: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.ST_ObjectType),
-/* harmony export */   ST_Unit: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.ST_Unit),
-/* harmony export */   Scalar: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Scalar),
-/* harmony export */   ScreenSpaceErrorPolicy: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.ScreenSpaceErrorPolicy),
-/* harmony export */   ShapeCollection: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.ShapeCollection),
-/* harmony export */   ShapeCollectionEventArgs: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.ShapeCollectionEventArgs),
-/* harmony export */   ShapeType: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.ShapeType),
-/* harmony export */   Side: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Side),
-/* harmony export */   Size2: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Size2),
-/* harmony export */   Size3: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Size3),
-/* harmony export */   SourceBlock: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.SourceBlock),
-/* harmony export */   SpatialTree: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.SpatialTree),
-/* harmony export */   SpatialTreeNode: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.SpatialTreeNode),
-/* harmony export */   Speed: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Speed),
-/* harmony export */   SphericalCalculator: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.SphericalCalculator),
-/* harmony export */   StreamingEngine: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.StreamingEngine),
-/* harmony export */   StreamingView: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.StreamingView),
-/* harmony export */   StringXmlWriter: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.StringXmlWriter),
+/* harmony export */   MapOverflightVisibilityPolicy: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.MapOverflightVisibilityPolicy),
+/* harmony export */   MapScale: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.MapScale),
+/* harmony export */   MapZen: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.MapZen),
+/* harmony export */   MapZenDemUrlBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.MapZenDemUrlBuilder),
+/* harmony export */   MapZenNormalsDecoder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.MapZenNormalsDecoder),
+/* harmony export */   MapzenAltitudeDecoder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.MapzenAltitudeDecoder),
+/* harmony export */   Mass: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Mass),
+/* harmony export */   Matrix3d: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.Matrix3d),
+/* harmony export */   MatrixFormatter: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.MatrixFormatter),
+/* harmony export */   MedianFilter: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.MedianFilter),
+/* harmony export */   MemoryCache: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.MemoryCache),
+/* harmony export */   ModelFileName: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.ModelFileName),
+/* harmony export */   NeighborsAddress: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.NeighborsAddress),
+/* harmony export */   NeighborsIndex: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.NeighborsIndex),
+/* harmony export */   NumberFormatter: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.NumberFormatter),
+/* harmony export */   Object3dDirName: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.Object3dDirName),
+/* harmony export */   ObjectPool: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.ObjectPool),
+/* harmony export */   ObjectPoolOptions: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.ObjectPoolOptions),
+/* harmony export */   Observable: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Observable),
+/* harmony export */   Observer: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Observer),
+/* harmony export */   Octree: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Octree),
+/* harmony export */   OctreeNode: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.OctreeNode),
+/* harmony export */   OctreeSplitter: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.OctreeSplitter),
+/* harmony export */   OpenXmlContentTypesNamespace: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.OpenXmlContentTypesNamespace),
+/* harmony export */   OpenXmlRelationshipsNamespace: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.OpenXmlRelationshipsNamespace),
+/* harmony export */   PathUtils: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.PathUtils),
+/* harmony export */   PiecewiseLinearSSEBudget: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.PiecewiseLinearSSEBudget),
+/* harmony export */   PlaneCruncher: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.PlaneCruncher),
+/* harmony export */   PlaneDefinition: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.PlaneDefinition),
+/* harmony export */   Point: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Point),
+/* harmony export */   PointerToDragController: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.PointerToDragController),
+/* harmony export */   Polygon: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Polygon),
+/* harmony export */   Polyline: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Polyline),
+/* harmony export */   PolylineSimplifier: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.PolylineSimplifier),
+/* harmony export */   Power: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Power),
+/* harmony export */   Projections: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Projections),
+/* harmony export */   PropertyChangedEventArgs: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.PropertyChangedEventArgs),
+/* harmony export */   PythagoreanFlatEarthCalculator: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.PythagoreanFlatEarthCalculator),
+/* harmony export */   QuadtreeSplitter: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.QuadtreeSplitter),
+/* harmony export */   Quantity: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Quantity),
+/* harmony export */   QuantityRange: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.QuantityRange),
+/* harmony export */   QuickHull: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.QuickHull),
+/* harmony export */   RGBAColor: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.RGBAColor),
+/* harmony export */   RGBATileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.RGBATileCodec),
+/* harmony export */   RGBTileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.RGBTileCodec),
+/* harmony export */   Range: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Range),
+/* harmony export */   RegionCode: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.RegionCode),
+/* harmony export */   RelationshipDirName: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.RelationshipDirName),
+/* harmony export */   RelationshipFileName: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.RelationshipFileName),
+/* harmony export */   ResolveSSEBudget: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.ResolveSSEBudget),
+/* harmony export */   RgbaToHex: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.RgbaToHex),
+/* harmony export */   RibbonBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.RibbonBuilder),
+/* harmony export */   RibbonOptions: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.RibbonOptions),
+/* harmony export */   RoundRobin: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.RoundRobin),
+/* harmony export */   ST_ObjectType: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.ST_ObjectType),
+/* harmony export */   ST_Unit: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.ST_Unit),
+/* harmony export */   Scalar: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Scalar),
+/* harmony export */   ScreenSpaceErrorPolicy: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.ScreenSpaceErrorPolicy),
+/* harmony export */   ShapeCollection: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.ShapeCollection),
+/* harmony export */   ShapeCollectionEventArgs: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.ShapeCollectionEventArgs),
+/* harmony export */   ShapeType: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.ShapeType),
+/* harmony export */   Side: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Side),
+/* harmony export */   Size2: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Size2),
+/* harmony export */   Size3: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Size3),
+/* harmony export */   SourceBlock: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.SourceBlock),
+/* harmony export */   SpatialTree: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.SpatialTree),
+/* harmony export */   SpatialTreeNode: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.SpatialTreeNode),
+/* harmony export */   Speed: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Speed),
+/* harmony export */   SphericalCalculator: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.SphericalCalculator),
+/* harmony export */   StepwiseSSEBudget: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.StepwiseSSEBudget),
+/* harmony export */   StreamActiveContext: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.StreamActiveContext),
+/* harmony export */   StreamSourceContentAdapter: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.StreamSourceContentAdapter),
+/* harmony export */   StreamingEngine: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.StreamingEngine),
+/* harmony export */   StringXmlWriter: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.StringXmlWriter),
 /* harmony export */   SurfaceTexture: () => (/* reexport safe */ _materials__WEBPACK_IMPORTED_MODULE_0__.SurfaceTexture),
-/* harmony export */   TILE_STREAM_CONTENT_TYPE: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TILE_STREAM_CONTENT_TYPE),
-/* harmony export */   TargetProxy: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TargetProxy),
-/* harmony export */   Temperature: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Temperature),
-/* harmony export */   TerrainGridOptions: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TerrainGridOptions),
-/* harmony export */   TerrainGridOptionsBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TerrainGridOptionsBuilder),
-/* harmony export */   TerrainNormalizedGridBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TerrainNormalizedGridBuilder),
-/* harmony export */   TextTileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TextTileCodec),
-/* harmony export */   TextUtils: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TextUtils),
+/* harmony export */   TILE_PYRAMID_CONTENT_TYPE: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TILE_PYRAMID_CONTENT_TYPE),
+/* harmony export */   TILE_STREAM_CONTENT_TYPE: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TILE_STREAM_CONTENT_TYPE),
+/* harmony export */   TargetProxy: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TargetProxy),
+/* harmony export */   Temperature: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Temperature),
+/* harmony export */   TerrainGridOptions: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TerrainGridOptions),
+/* harmony export */   TerrainGridOptionsBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TerrainGridOptionsBuilder),
+/* harmony export */   TerrainNormalizedGridBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TerrainNormalizedGridBuilder),
+/* harmony export */   TextTileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TextTileCodec),
+/* harmony export */   TextUtils: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TextUtils),
 /* harmony export */   Texture3: () => (/* reexport safe */ _materials__WEBPACK_IMPORTED_MODULE_0__.Texture3),
 /* harmony export */   TextureLayerView: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_2__.TextureLayerView),
-/* harmony export */   ThreeDimModelNamespace: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.ThreeDimModelNamespace),
-/* harmony export */   ThreeMf: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.ThreeMf),
-/* harmony export */   ThreeMfBase: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.ThreeMfBase),
-/* harmony export */   ThreeMfBaseMaterials: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.ThreeMfBaseMaterials),
-/* harmony export */   ThreeMfBuild: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.ThreeMfBuild),
-/* harmony export */   ThreeMfComponent: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.ThreeMfComponent),
-/* harmony export */   ThreeMfComponents: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.ThreeMfComponents),
-/* harmony export */   ThreeMfComponentsBuilder: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.ThreeMfComponentsBuilder),
-/* harmony export */   ThreeMfContentType: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.ThreeMfContentType),
-/* harmony export */   ThreeMfContentTypes: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.ThreeMfContentTypes),
-/* harmony export */   ThreeMfDocument: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.ThreeMfDocument),
-/* harmony export */   ThreeMfDocumentBuilder: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.ThreeMfDocumentBuilder),
-/* harmony export */   ThreeMfItem: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.ThreeMfItem),
-/* harmony export */   ThreeMfMaterialBuilder: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.ThreeMfMaterialBuilder),
-/* harmony export */   ThreeMfMesh: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.ThreeMfMesh),
-/* harmony export */   ThreeMfMeshBuilder: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.ThreeMfMeshBuilder),
-/* harmony export */   ThreeMfMeta: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.ThreeMfMeta),
-/* harmony export */   ThreeMfMetadataGroup: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.ThreeMfMetadataGroup),
-/* harmony export */   ThreeMfModel: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.ThreeMfModel),
-/* harmony export */   ThreeMfModelBuilder: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.ThreeMfModelBuilder),
-/* harmony export */   ThreeMfObject: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.ThreeMfObject),
-/* harmony export */   ThreeMfObjectBuilder: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.ThreeMfObjectBuilder),
-/* harmony export */   ThreeMfRelationship: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.ThreeMfRelationship),
-/* harmony export */   ThreeMfRelationships: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.ThreeMfRelationships),
-/* harmony export */   ThreeMfResources: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.ThreeMfResources),
-/* harmony export */   ThreeMfTriangle: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.ThreeMfTriangle),
-/* harmony export */   ThreeMfTriangles: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.ThreeMfTriangles),
-/* harmony export */   ThreeMfVertex: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.ThreeMfVertex),
-/* harmony export */   ThreeMfVertices: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.ThreeMfVertices),
-/* harmony export */   Tile: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Tile),
-/* harmony export */   TileAddress: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TileAddress),
+/* harmony export */   ThreeDimModelNamespace: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.ThreeDimModelNamespace),
+/* harmony export */   ThreeMf: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.ThreeMf),
+/* harmony export */   ThreeMfBase: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.ThreeMfBase),
+/* harmony export */   ThreeMfBaseMaterials: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.ThreeMfBaseMaterials),
+/* harmony export */   ThreeMfBuild: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.ThreeMfBuild),
+/* harmony export */   ThreeMfComponent: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.ThreeMfComponent),
+/* harmony export */   ThreeMfComponents: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.ThreeMfComponents),
+/* harmony export */   ThreeMfComponentsBuilder: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.ThreeMfComponentsBuilder),
+/* harmony export */   ThreeMfContentType: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.ThreeMfContentType),
+/* harmony export */   ThreeMfContentTypes: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.ThreeMfContentTypes),
+/* harmony export */   ThreeMfDocument: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.ThreeMfDocument),
+/* harmony export */   ThreeMfDocumentBuilder: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.ThreeMfDocumentBuilder),
+/* harmony export */   ThreeMfItem: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.ThreeMfItem),
+/* harmony export */   ThreeMfMaterialBuilder: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.ThreeMfMaterialBuilder),
+/* harmony export */   ThreeMfMesh: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.ThreeMfMesh),
+/* harmony export */   ThreeMfMeshBuilder: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.ThreeMfMeshBuilder),
+/* harmony export */   ThreeMfMeta: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.ThreeMfMeta),
+/* harmony export */   ThreeMfMetadataGroup: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.ThreeMfMetadataGroup),
+/* harmony export */   ThreeMfModel: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.ThreeMfModel),
+/* harmony export */   ThreeMfModelBuilder: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.ThreeMfModelBuilder),
+/* harmony export */   ThreeMfObject: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.ThreeMfObject),
+/* harmony export */   ThreeMfObjectBuilder: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.ThreeMfObjectBuilder),
+/* harmony export */   ThreeMfRelationship: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.ThreeMfRelationship),
+/* harmony export */   ThreeMfRelationships: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.ThreeMfRelationships),
+/* harmony export */   ThreeMfResources: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.ThreeMfResources),
+/* harmony export */   ThreeMfTriangle: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.ThreeMfTriangle),
+/* harmony export */   ThreeMfTriangles: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.ThreeMfTriangles),
+/* harmony export */   ThreeMfVertex: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.ThreeMfVertex),
+/* harmony export */   ThreeMfVertices: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.ThreeMfVertices),
+/* harmony export */   Tile: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Tile),
+/* harmony export */   Tile3dContentLoader: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_7__.Tile3dContentLoader),
+/* harmony export */   Tile3dScene: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_7__.Tile3dScene),
+/* harmony export */   TileAddress: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TileAddress),
 /* harmony export */   TileBorder: () => (/* reexport safe */ _materials__WEBPACK_IMPORTED_MODULE_0__.TileBorder),
-/* harmony export */   TileCollection: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TileCollection),
-/* harmony export */   TileContentFetcher: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TileContentFetcher),
-/* harmony export */   TileLoader: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TileLoader),
-/* harmony export */   TileMapBase: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TileMapBase),
-/* harmony export */   TileMapLayer: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TileMapLayer),
-/* harmony export */   TileMapLayerView: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TileMapLayerView),
-/* harmony export */   TileMapVectorLayer: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TileMapVectorLayer),
-/* harmony export */   TileNavigationApi: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TileNavigationApi),
-/* harmony export */   TileNavigationState: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TileNavigationState),
-/* harmony export */   TileNavigationStateSynchronizer: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TileNavigationStateSynchronizer),
-/* harmony export */   TilePipelineLink: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TilePipelineLink),
-/* harmony export */   TileStreamSource: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TileStreamSource),
-/* harmony export */   TileStreamSourceProducer: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TileStreamSourceProducer),
-/* harmony export */   TileSystemBounds: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TileSystemBounds),
-/* harmony export */   TileVectorRenderer: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TileVectorRenderer),
-/* harmony export */   TileView: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TileView),
-/* harmony export */   TileViewBase: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TileViewBase),
-/* harmony export */   TileWebClient: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TileWebClient),
+/* harmony export */   TileCollection: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TileCollection),
+/* harmony export */   TileContentFetcher: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TileContentFetcher),
+/* harmony export */   TileLoader: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TileLoader),
+/* harmony export */   TileLoaderAdapter: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TileLoaderAdapter),
+/* harmony export */   TileMapBase: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TileMapBase),
+/* harmony export */   TileMapLayer: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TileMapLayer),
+/* harmony export */   TileMapLayerView: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TileMapLayerView),
+/* harmony export */   TileMapVectorLayer: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TileMapVectorLayer),
+/* harmony export */   TileNavigationApi: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TileNavigationApi),
+/* harmony export */   TileNavigationState: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TileNavigationState),
+/* harmony export */   TileNavigationStateSynchronizer: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TileNavigationStateSynchronizer),
+/* harmony export */   TilePipelineLink: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TilePipelineLink),
+/* harmony export */   TilePyramidStreamSource: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TilePyramidStreamSource),
+/* harmony export */   TileStreamSource: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TileStreamSource),
+/* harmony export */   TileSystemBounds: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TileSystemBounds),
+/* harmony export */   TileVectorRenderer: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TileVectorRenderer),
+/* harmony export */   TileView: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TileView),
+/* harmony export */   TileViewBase: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TileViewBase),
+/* harmony export */   TileWebClient: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TileWebClient),
 /* harmony export */   TileWithElevation: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_2__.TileWithElevation),
-/* harmony export */   Timespan: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Timespan),
-/* harmony export */   ToQualifiedString: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.ToQualifiedString),
-/* harmony export */   TokenType: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.TokenType),
-/* harmony export */   TouchGestureType: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.TouchGestureType),
+/* harmony export */   Timespan: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Timespan),
+/* harmony export */   ToQualifiedString: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.ToQualifiedString),
+/* harmony export */   TokenType: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.TokenType),
+/* harmony export */   TouchGestureType: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.TouchGestureType),
 /* harmony export */   TransformedPointerToDragController: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_1__.TransformedPointerToDragController),
 /* harmony export */   TransformedPointerToGestureController: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_1__.TransformedPointerToGestureController),
-/* harmony export */   TriangleSetsNamespace: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.TriangleSetsNamespace),
-/* harmony export */   Unit: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Unit),
-/* harmony export */   Utf8XmlWriterToBytes: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.Utf8XmlWriterToBytes),
-/* harmony export */   ValidableBase: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.ValidableBase),
-/* harmony export */   VectorTileGeomType: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.VectorTileGeomType),
+/* harmony export */   TriangleSetsNamespace: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.TriangleSetsNamespace),
+/* harmony export */   Unit: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Unit),
+/* harmony export */   Utf8XmlWriterToBytes: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.Utf8XmlWriterToBytes),
+/* harmony export */   ValidableBase: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.ValidableBase),
+/* harmony export */   VectorTileGeomType: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.VectorTileGeomType),
 /* harmony export */   VirtualDisplay: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_1__.VirtualDisplay),
 /* harmony export */   VirtualDisplayInputsSource: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_1__.VirtualDisplayInputsSource),
 /* harmony export */   VirtualDisplayOptions: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_1__.VirtualDisplayOptions),
 /* harmony export */   VirtualDisplayUVMode: () => (/* reexport safe */ _display__WEBPACK_IMPORTED_MODULE_1__.VirtualDisplayUVMode),
-/* harmony export */   Voltage: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Voltage),
-/* harmony export */   Volume: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.Volume),
+/* harmony export */   Voltage: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Voltage),
+/* harmony export */   Volume: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Volume),
 /* harmony export */   WebMapMaterial: () => (/* reexport safe */ _materials__WEBPACK_IMPORTED_MODULE_0__.WebMapMaterial),
 /* harmony export */   WebMapTexture: () => (/* reexport safe */ _materials__WEBPACK_IMPORTED_MODULE_0__.WebMapTexture),
-/* harmony export */   WebTileUrlBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.WebTileUrlBuilder),
-/* harmony export */   XRGestureType: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.XRGestureType),
-/* harmony export */   XmlAttr: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.XmlAttr),
-/* harmony export */   XmlBuilder: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.XmlBuilder),
-/* harmony export */   XmlDocumentTileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.XmlDocumentTileCodec),
-/* harmony export */   XmlElem: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.XmlElem),
-/* harmony export */   XmlIgnore: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.XmlIgnore),
-/* harmony export */   XmlName: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.XmlName),
-/* harmony export */   XmlNameToParts: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.XmlNameToParts),
-/* harmony export */   XmlSerializer: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.XmlSerializer),
+/* harmony export */   WebTileUrlBuilder: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.WebTileUrlBuilder),
+/* harmony export */   XRGestureType: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.XRGestureType),
+/* harmony export */   XmlAttr: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.XmlAttr),
+/* harmony export */   XmlBuilder: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.XmlBuilder),
+/* harmony export */   XmlDocumentTileCodec: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.XmlDocumentTileCodec),
+/* harmony export */   XmlElem: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.XmlElem),
+/* harmony export */   XmlIgnore: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.XmlIgnore),
+/* harmony export */   XmlName: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.XmlName),
+/* harmony export */   XmlNameToParts: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.XmlNameToParts),
+/* harmony export */   XmlSerializer: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.XmlSerializer),
 /* harmony export */   _makeCopyRawTextureFunction: () => (/* reexport safe */ _engines__WEBPACK_IMPORTED_MODULE_4__._makeCopyRawTextureFunction),
 /* harmony export */   _makeCreateRawTextureFunction: () => (/* reexport safe */ _engines__WEBPACK_IMPORTED_MODULE_4__._makeCreateRawTextureFunction),
 /* harmony export */   _makeUpdateSubRawTexture2DArrayFunction: () => (/* reexport safe */ _engines__WEBPACK_IMPORTED_MODULE_4__._makeUpdateSubRawTexture2DArrayFunction),
-/* harmony export */   hasTileSelectionContext: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.hasTileSelectionContext),
-/* harmony export */   isArrayOfCartesianArray: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.isArrayOfCartesianArray),
-/* harmony export */   isArrayOfFloatArray: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.isArrayOfFloatArray),
-/* harmony export */   isCartesian: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.isCartesian),
-/* harmony export */   isCartesian3: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.isCartesian3),
-/* harmony export */   isCartesian4: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.isCartesian4),
-/* harmony export */   isCartesianArray: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.isCartesianArray),
-/* harmony export */   isCircle: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.isCircle),
-/* harmony export */   isClipable: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.isClipable),
-/* harmony export */   isFilter: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.isFilter),
-/* harmony export */   isFloatArray: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.isFloatArray),
-/* harmony export */   isGeoShape: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.isGeoShape),
-/* harmony export */   isLine: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.isLine),
-/* harmony export */   isPolygon: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.isPolygon),
-/* harmony export */   isPolyline: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.isPolyline),
-/* harmony export */   isShape: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.isShape),
-/* harmony export */   isValidable: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.isValidable),
-/* harmony export */   isViewProxy: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_8__.isViewProxy),
-/* harmony export */   resolveFormatOptions: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.resolveFormatOptions),
-/* harmony export */   resolveNumberOptions: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_7__.resolveNumberOptions)
+/* harmony export */   hasTileSelectionContext: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.hasTileSelectionContext),
+/* harmony export */   isArrayOfCartesianArray: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.isArrayOfCartesianArray),
+/* harmony export */   isArrayOfFloatArray: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.isArrayOfFloatArray),
+/* harmony export */   isCartesian: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.isCartesian),
+/* harmony export */   isCartesian3: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.isCartesian3),
+/* harmony export */   isCartesian4: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.isCartesian4),
+/* harmony export */   isCartesianArray: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.isCartesianArray),
+/* harmony export */   isCircle: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.isCircle),
+/* harmony export */   isClipable: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.isClipable),
+/* harmony export */   isFilter: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.isFilter),
+/* harmony export */   isFloatArray: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.isFloatArray),
+/* harmony export */   isGeoShape: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.isGeoShape),
+/* harmony export */   isLine: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.isLine),
+/* harmony export */   isPolygon: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.isPolygon),
+/* harmony export */   isPolyline: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.isPolyline),
+/* harmony export */   isShape: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.isShape),
+/* harmony export */   isValidable: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.isValidable),
+/* harmony export */   isViewProxy: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.isViewProxy),
+/* harmony export */   resolveFormatOptions: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.resolveFormatOptions),
+/* harmony export */   resolveNumberOptions: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.resolveNumberOptions)
 /* harmony export */ });
 /* harmony import */ var _materials__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./materials */ "./dist/materials/index.js");
 /* harmony import */ var _display__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./display */ "./dist/display/index.js");
@@ -24349,8 +26969,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _engines__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./engines */ "./dist/engines/index.js");
 /* harmony import */ var _meshes__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./meshes */ "./dist/meshes/index.js");
 /* harmony import */ var _camera__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./camera */ "./dist/camera/index.js");
-/* harmony import */ var _serializers__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./serializers */ "./dist/serializers/index.js");
-/* harmony import */ var core_index__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! core/index */ "../core/dist/index.js");
+/* harmony import */ var _tiles__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./tiles */ "./dist/tiles/index.js");
+/* harmony import */ var _serializers__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./serializers */ "./dist/serializers/index.js");
+/* harmony import */ var core_index__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! core/index */ "../core/dist/index.js");
 
 
 
@@ -24360,7 +26981,12 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
- // this tells the packager to include the core package in the output
+
+// Re-export the core package so the landscape bundle carries Ellipsoid, GeodeticSystem,
+// and the other core geodesy / geography / math types. Without this, consumers of the
+// bundled SPACEXR global lose SPACEXR.Ellipsoid and SPACEXR.GeodeticSystem.
+// Path mapping only handles "core/*", so point at the explicit index module.
+
 //# sourceMappingURL=index.js.map
 })();
 

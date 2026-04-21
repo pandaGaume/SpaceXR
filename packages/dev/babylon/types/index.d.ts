@@ -6,5 +6,6 @@ export * from "./dem";
 export * from "./engines";
 export * from "./meshes";
 export * from "./camera";
+export * from "./tiles";
 export * from "./serializers";
 export * from "core/index";

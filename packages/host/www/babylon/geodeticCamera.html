@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
     <head>
         <meta charset="utf-8" />
@@ -151,6 +151,11 @@
                     scene
                 );
                 sphere.scaling.y = ellipsoid.semiMinorAxis / ellipsoid.semiMajorAxis;
+                // Babylon's CreateSphere is Y-up (poles along local +/-Y), but GeospatialCamera
+                // uses a Z-up ECEF convention (north pole = +Z). Rotate +90deg around X so
+                // the mesh's local +Y maps to world +Z, aligning the texture's north with
+                // the camera's north and the oblate squash with the real polar axis.
+                sphere.rotation.x = Math.PI / 2;
 
                 const mat = new BABYLON.StandardMaterial("globeMat", scene);
                 const tex = texturesFor(ellipsoid);
@@ -236,12 +241,18 @@
                     state.ellipsoid = ellipsoid;
                     state.system = new SPACEXR.GeodeticSystem(ellipsoid);
                     state.globe = buildGlobeMesh(scene, ellipsoid);
+                    // GeospatialCamera drives left-drag by picking the surface. Without a
+                    // pickable ground mesh + pickPredicate, drag navigation is a no-op.
+                    state.globe.isPickable = true;
 
                     state.camera = new SPACEXR.GeodeticCamera("geodeticCamera", scene, state.system);
-                    // Start over Greenwich-equator at an altitude that frames the whole globe.
-                    state.camera.setGeodeticPosition(0, 0, ellipsoid.semiMajorAxis * 2);
-                    state.camera.attachControl(canvas, true);
+                    // Babylon's GeospatialCamera reads pickPredicate as a property (not from
+                    // options) when its pointer input runs a pick on drag. Set it directly here.
+                    state.camera.pickPredicate = (mesh) => mesh === state.globe;
+                    // Auto-manages near/far clip planes at planet scale, avoids the 10 km default clip.
+                    state.camera.addBehavior(new BABYLON.GeospatialClippingBehavior());
                     scene.activeCamera = state.camera;
+                    state.camera.attachControl(canvas, true);
 
                     updateStats(ellipsoid, state.camera);
                 }

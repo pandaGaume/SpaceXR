@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>GeodeticCamera sample</title>
+        <script src="../libs/babylon.js"></script>
+        <script src="../libs/stellar_landscape_xr.1.0.0.js"></script>
+
+        <style>
+            html,
+            body {
+                background-color: rgb(8, 10, 20);
+                overflow: hidden;
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+                font-family: sans-serif;
+                color: #ddd;
+            }
+            #mapcontainer {
+                position: relative;
+                width: 100%;
+                height: 100%;
+            }
+            #mapcanvas3d {
+                width: 100%;
+                height: 100%;
+                touch-action: none;
+            }
+            .panel {
+                position: absolute;
+                top: 10px;
+                left: 10px;
+                background: rgba(0, 0, 0, 0.55);
+                padding: 12px 14px;
+                border-radius: 8px;
+                font-size: 13px;
+                line-height: 1.5;
+                z-index: 2;
+                min-width: 260px;
+            }
+            .panel h2 {
+                margin: 0 0 8px 0;
+                font-size: 14px;
+            }
+            .panel label {
+                display: block;
+                margin-top: 6px;
+                font-size: 12px;
+                color: #aaa;
+            }
+            .panel select {
+                width: 100%;
+                padding: 4px;
+                background: #1a1a22;
+                color: #ddd;
+                border: 1px solid #444;
+                border-radius: 4px;
+            }
+            .panel .stat {
+                display: flex;
+                justify-content: space-between;
+                font-family: monospace;
+                font-size: 12px;
+                color: #c9c9c9;
+            }
+            .panel .stat span:last-child {
+                color: #7fd4ff;
+            }
+            hr {
+                border: none;
+                border-top: 1px solid #333;
+                margin: 10px 0;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="mapcontainer">
+            <canvas id="mapcanvas3d"></canvas>
+            <div class="panel">
+                <h2>GeodeticCamera + real-size Sphere</h2>
+                <label for="ellipsoidSelect">Ellipsoid</label>
+                <select id="ellipsoidSelect">
+                    <optgroup label="Earth (differ by ~150 m)">
+                        <option value="WGS84" selected>WGS84</option>
+                        <option value="GRS80">GRS80</option>
+                        <option value="WGS72">WGS72</option>
+                        <option value="Clarke1858">Clarke1858</option>
+                        <option value="Clarke1880">Clarke1880</option>
+                    </optgroup>
+                    <optgroup label="Other bodies (custom)">
+                        <option value="Moon">Moon</option>
+                        <option value="Mars">Mars</option>
+                        <option value="Jupiter">Jupiter (very oblate)</option>
+                    </optgroup>
+                </select>
+                <hr />
+                <div class="stat"><span>name</span><span id="statName">-</span></div>
+                <div class="stat"><span>semiMajor (m)</span><span id="statA">-</span></div>
+                <div class="stat"><span>semiMinor (m)</span><span id="statB">-</span></div>
+                <div class="stat"><span>flattening</span><span id="statF">-</span></div>
+                <hr />
+                <div class="stat"><span>lat (deg)</span><span id="statLat">-</span></div>
+                <div class="stat"><span>lon (deg)</span><span id="statLon">-</span></div>
+                <div class="stat"><span>alt (m)</span><span id="statAlt">-</span></div>
+                <div style="font-size: 11px; color: #888; margin-top: 8px">Drag to look around, wheel to move up/down.</div>
+            </div>
+        </div>
+
+        <script>
+            function formatNumber(v, digits = 2) {
+                return v.toLocaleString("en-US", { maximumFractionDigits: digits });
+            }
+
+            // Texture sets keyed by ellipsoid name (or Earth alias for all Earth ellipsoids).
+            const TEXTURE_SETS = {
+                Earth: {
+                    diffuse: "../images/planets/earth_map.jpg",
+                    normal: "../images/planets/earth_normal_map.jpg",
+                    specular: "../images/planets/earth_specular_map.jpg",
+                },
+                Moon: {
+                    diffuse: "../images/planets/moon_map.jpg",
+                    normal: "../images/planets/moon_normal_map.jpg",
+                },
+                Mars: {
+                    diffuse: "../images/planets/mars_map.jpg",
+                    normal: "../images/planets/mars_normal_map.jpg",
+                },
+                Jupiter: {
+                    diffuse: "../images/planets/jupiter_map.jpg",
+                },
+            };
+            const EARTH_ELLIPSOIDS = new Set(["WGS84", "GRS80", "GRS67", "ANS", "WGS72", "Clarke1858", "Clarke1880"]);
+
+            function texturesFor(ellipsoid) {
+                if (EARTH_ELLIPSOIDS.has(ellipsoid.name)) return TEXTURE_SETS.Earth;
+                return TEXTURE_SETS[ellipsoid.name];
+            }
+
+            function buildGlobeMesh(scene, ellipsoid) {
+                // 1 scene unit = 1 meter. Scale Y by semiMinor/semiMajor to get the real oblate shape.
+                const sphere = BABYLON.MeshBuilder.CreateSphere(
+                    "globe",
+                    {
+                        diameter: 2 * ellipsoid.semiMajorAxis,
+                        segments: 64,
+                    },
+                    scene
+                );
+                sphere.scaling.y = ellipsoid.semiMinorAxis / ellipsoid.semiMajorAxis;
+
+                const mat = new BABYLON.StandardMaterial("globeMat", scene);
+                const tex = texturesFor(ellipsoid);
+                if (tex) {
+                    // Earth equirect: Greenwich at image U=0.5, north pole at image top.
+                    // Babylon CreateSphere: sphere U=0 at +X (increases toward +Z, which is screen LEFT
+                    // when the camera is at +X with +Y up), and V=0 at the top pole (+Y).
+                    //   - uScale=-1 so east ends up on screen right,
+                    //   - uOffset=0.5 so Greenwich lands on the front face,
+                    //   - vScale=-1, vOffset=1 so the north pole maps to +Y.
+                    const orientEquirect = (t) => {
+                        t.uScale = -1;
+                        t.uOffset = 0.5;
+                        t.vScale = -1;
+                        t.vOffset = 1;
+                    };
+                    mat.diffuseTexture = new BABYLON.Texture(tex.diffuse, scene);
+                    orientEquirect(mat.diffuseTexture);
+                    if (tex.normal) {
+                        mat.bumpTexture = new BABYLON.Texture(tex.normal, scene);
+                        mat.bumpTexture.level = 1.2;
+                        orientEquirect(mat.bumpTexture);
+                    }
+                    if (tex.specular) {
+                        mat.specularTexture = new BABYLON.Texture(tex.specular, scene);
+                        orientEquirect(mat.specularTexture);
+                    } else {
+                        mat.specularColor = new BABYLON.Color3(0.05, 0.05, 0.05);
+                    }
+                } else {
+                    mat.diffuseColor = new BABYLON.Color3(0.18, 0.38, 0.62);
+                    mat.specularColor = new BABYLON.Color3(0.1, 0.1, 0.15);
+                    mat.emissiveColor = new BABYLON.Color3(0.02, 0.04, 0.08);
+                }
+                sphere.material = mat;
+                return sphere;
+            }
+
+            function updateStats(ellipsoid, camera) {
+                document.getElementById("statName").textContent = ellipsoid.name;
+                document.getElementById("statA").textContent = formatNumber(ellipsoid.semiMajorAxis);
+                document.getElementById("statB").textContent = formatNumber(ellipsoid.semiMinorAxis);
+                document.getElementById("statF").textContent = (1 / ellipsoid.inverseFlattening).toExponential(4);
+                const p = camera.geodeticPosition;
+                document.getElementById("statLat").textContent = formatNumber(p.lat, 4);
+                document.getElementById("statLon").textContent = formatNumber(p.lon, 4);
+                document.getElementById("statAlt").textContent = formatNumber(p.alt ?? 0);
+            }
+
+            async function createScene(canvas, engine) {
+                const scene = new BABYLON.Scene(engine);
+                scene.clearColor = new BABYLON.Color4(0.03, 0.04, 0.08, 1);
+
+                // Extra ellipsoids for non-Earth bodies, built via the public factory.
+                const extraEllipsoids = {
+                    Moon: SPACEXR.Ellipsoid.FromAAndInverseF("Moon", 1737400.0, 833.33),
+                    Mars: SPACEXR.Ellipsoid.FromAAndInverseF("Mars", 3396200.0, 169.89),
+                    Jupiter: SPACEXR.Ellipsoid.FromAAndInverseF("Jupiter", 71492000.0, 15.4144),
+                };
+                const resolveEllipsoid = (key) => SPACEXR.Ellipsoid[key] || extraEllipsoids[key];
+
+                // State: the current ellipsoid, its system, globe mesh and camera. Swapping the
+                // ellipsoid rebuilds system, globe and camera since GeodeticCamera takes the system
+                // at construction time.
+                const state = {
+                    ellipsoid: SPACEXR.Ellipsoid.WGS84,
+                    system: null,
+                    globe: null,
+                    camera: null,
+                };
+
+                // Sun + faint fill so the night side isn't fully black.
+                const sun = new BABYLON.DirectionalLight("sun", new BABYLON.Vector3(-1, -0.4, -0.6).normalize(), scene);
+                sun.intensity = 1.0;
+                const fill = new BABYLON.HemisphericLight("fill", new BABYLON.Vector3(0, 1, 0), scene);
+                fill.intensity = 0.15;
+
+                function mountEllipsoid(ellipsoid) {
+                    // Dispose previous resources.
+                    if (state.camera) state.camera.dispose();
+                    if (state.globe) state.globe.dispose();
+
+                    state.ellipsoid = ellipsoid;
+                    state.system = new SPACEXR.GeodeticSystem(ellipsoid);
+                    state.globe = buildGlobeMesh(scene, ellipsoid);
+
+                    state.camera = new SPACEXR.GeodeticCamera("geodeticCamera", scene, state.system);
+                    // Start over Greenwich-equator at an altitude that frames the whole globe.
+                    state.camera.setGeodeticPosition(0, 0, ellipsoid.semiMajorAxis * 2);
+                    state.camera.attachControl(canvas, true);
+                    scene.activeCamera = state.camera;
+
+                    updateStats(ellipsoid, state.camera);
+                }
+
+                mountEllipsoid(state.ellipsoid);
+
+                const select = document.getElementById("ellipsoidSelect");
+                select.addEventListener("change", () => {
+                    const next = resolveEllipsoid(select.value);
+                    if (next) mountEllipsoid(next);
+                });
+
+                scene.onBeforeRenderObservable.add(() => {
+                    if (state.camera) updateStats(state.ellipsoid, state.camera);
+                });
+
+                return scene;
+            }
+
+            window.onload = async () => {
+                const canvas = document.getElementById("mapcanvas3d");
+                const engine = new BABYLON.Engine(canvas, true, { stencil: true });
+                const scene = await createScene(canvas, engine);
+
+                engine.runRenderLoop(() => scene.render());
+                window.addEventListener("resize", () => engine.resize());
+            };
+        </script>
+    </body>
+</html>

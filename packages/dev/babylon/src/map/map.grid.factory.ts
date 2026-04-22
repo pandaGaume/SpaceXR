@@ -40,6 +40,6 @@ export class ElevationGridFactory implements IElevationGridFactory {
                 .withColumns(s + 1) // add one column to fill the gap
                 .withRows(s + 1); // add one row to fill the gap - optional as by default the builder build a square if one of the dimension is missing. Added for clarity.
         }
-        return builder.build();
+        return builder.withEdgeRefinement(2).build();
     }
 }

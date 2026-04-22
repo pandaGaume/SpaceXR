@@ -1,11 +1,10 @@
 import { ICameraViewState } from "../../camera";
 import { Ellipsoid } from "../../geodesy/geodesy.ellipsoid";
 import { GeodeticSystem } from "../../geodesy/geodesy.system";
-import { Bounds } from "../../geometry/geometry.bounds";
-import { IBounds, IBoundingBox, IBoundingSphere, ICartesian3, IsBounds } from "../../geometry/geometry.interfaces";
+import { IBounds, IBoundingBox, IBoundingSphere, ICartesian3, IsBounds, DeriveBounds } from "../../geometry/geometry.interfaces";
 import { ITile2DAddress, ITileMetrics } from "../../tiles/tiles.interfaces";
 import { TileAddress } from "../../tiles/address/tiles.address";
-import { IStreamSource, IStreamSourceDependency, StreamSourceStatus } from "../streaming.datasource.interfaces";
+import { IStreamSource, StreamSourceStatus } from "../streaming.datasource.interfaces";
 import { IStreamActiveEntry, StreamActiveContext } from "../streaming.active.context";
 import { IntersectsBoundingBox, StreamingEngine } from "../streaming.engine";
 import { IStreamSubEngine } from "../streaming.subengine.interfaces";
@@ -50,8 +49,6 @@ export interface ITilePyramidStreamSourceOptions {
     sphereCenter?: ICartesian3;
     /** Optional explicit bounding box of the root region. Derived from `encumbrance` when absent. */
     boundingBox?: IBounds;
-    /** Optional cross-source dependencies (replace / add / modify). */
-    dependencies?: ReadonlyArray<IStreamSourceDependency>;
     /** Override the default contentType (e.g. "tile-pyramid:imagery"). */
     contentType?: string;
     /** contentType applied to each emitted TileStreamSource child. Default `"tile-address"`. */
@@ -82,14 +79,12 @@ export class TilePyramidStreamSource extends StreamingEngine implements IStreamS
     public readonly kind = "provider" as const;
     public readonly contentType: string;
     public readonly encumbrance: IBoundingBox | IBoundingSphere;
-    public readonly dependencies?: ReadonlyArray<IStreamSourceDependency>;
-    public status: StreamSourceStatus = "ready";
+    public status: StreamSourceStatus = StreamSourceStatus.ready;
     /** The pyramid is an aggregate, not a single tile; content is always null. */
     public content?: IStreamSource<unknown> | null = null;
     public boundingBox?: IBounds;
     public boundingSphere?: IBoundingSphere;
 
-    // Pyramid config ------------------------------------------------
     private readonly _metrics: ITileMetrics;
     private readonly _ellipsoid?: Ellipsoid;
     private readonly _geodetic?: GeodeticSystem;
@@ -104,7 +99,6 @@ export class TilePyramidStreamSource extends StreamingEngine implements IStreamS
         this.id = options.id;
         this.contentType = options.contentType ?? TILE_PYRAMID_CONTENT_TYPE;
         this.encumbrance = options.encumbrance;
-        this.dependencies = options.dependencies;
         this._metrics = options.metrics;
         this._ellipsoid = options.ellipsoid;
         this._geodetic = options.ellipsoid ? new GeodeticSystem(options.ellipsoid) : undefined;
@@ -114,7 +108,7 @@ export class TilePyramidStreamSource extends StreamingEngine implements IStreamS
         this._budget = ResolveSSEBudget(options.maxScreenSpaceError ?? TilePyramidStreamSource.DefaultMaxScreenSpaceError);
         this._childContentType = options.childContentType ?? "tile-address";
 
-        this.boundingBox = options.boundingBox ?? TilePyramidStreamSource._deriveBounds(options.encumbrance);
+        this.boundingBox = options.boundingBox ?? DeriveBounds(options.encumbrance);
         if (!IsBounds(options.encumbrance)) {
             this.boundingSphere = options.encumbrance as IBoundingSphere;
         }
@@ -140,12 +134,18 @@ export class TilePyramidStreamSource extends StreamingEngine implements IStreamS
     }
 
     private _walk(
-        address: ITile2DAddress,
+        address: ITile2DAddress | Array<ITile2DAddress>,
         camera: ICameraViewState,
         clipBounds: IBoundingBox | undefined,
         maxSSE: number,
         out: Map<string, IStreamActiveEntry>
     ): void {
+        if (Array.isArray(address)) {
+            for (const a of address) {
+                this._walk(a, camera, clipBounds, maxSSE, out);
+            }
+            return;
+        }
         if (address.levelOfDetail > this._metrics.maxLOD) return;
 
         const bounds = this._computeBounds(address);
@@ -180,13 +180,10 @@ export class TilePyramidStreamSource extends StreamingEngine implements IStreamS
             return;
         }
 
-        const lod = address.levelOfDetail + 1;
-        const x2 = address.x * 2;
-        const y2 = address.y * 2;
-        this._walk(new TileAddress(x2, y2, lod), camera, clipBounds, maxSSE, out);
-        this._walk(new TileAddress(x2 + 1, y2, lod), camera, clipBounds, maxSSE, out);
-        this._walk(new TileAddress(x2, y2 + 1, lod), camera, clipBounds, maxSSE, out);
-        this._walk(new TileAddress(x2 + 1, y2 + 1, lod), camera, clipBounds, maxSSE, out);
+        const child = TileAddress.Split(address, this._metrics);
+        if (child?.length) {
+            this._walk(child, camera, clipBounds, maxSSE, out);
+        }
     }
 
     /** Camera altitude above the map surface. Flat : Z of worldPosition. Sphere : |cam − center| − R. */
@@ -217,24 +214,5 @@ export class TilePyramidStreamSource extends StreamingEngine implements IStreamS
         const vh = camera.viewportHeight && camera.viewportHeight > 0 ? camera.viewportHeight : 1080;
         if (tan <= 0 || vh <= 0) return 0;
         return (geometricError * vh) / (distance * 2 * tan);
-    }
-
-    // ───────── bounds helper ─────────
-
-    private static _deriveBounds(enc: IBoundingBox | IBoundingSphere): IBounds | undefined {
-        if (IsBounds(enc)) return enc;
-        const box = enc as IBoundingBox;
-        if (box.minimum && box.maximum) {
-            const w = box.maximum.x - box.minimum.x;
-            const h = box.maximum.y - box.minimum.y;
-            const d = box.maximum.z - box.minimum.z;
-            return new Bounds(box.minimum.x, box.minimum.y, w, h, box.minimum.z, d);
-        }
-        const sphere = enc as IBoundingSphere;
-        if (sphere.center && typeof sphere.radius === "number") {
-            const r = sphere.radius;
-            return new Bounds(sphere.center.x - r, sphere.center.y - r, 2 * r, 2 * r, sphere.center.z - r, 2 * r);
-        }
-        return undefined;
     }
 }

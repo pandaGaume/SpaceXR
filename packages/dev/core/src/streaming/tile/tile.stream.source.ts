@@ -2,7 +2,7 @@ import { Bounds } from "../../geometry/geometry.bounds";
 import { IBounds, IBoundingBox, IBoundingSphere } from "../../geometry/geometry.interfaces";
 import { ITile, ITile2DAddress } from "../../tiles/tiles.interfaces";
 import { Nullable } from "../../types";
-import { IStreamSource, IStreamSourceDependency, StreamSourceStatus } from "../streaming.datasource.interfaces";
+import { IStreamSource, StreamSourceStatus } from "../streaming.datasource.interfaces";
 
 /**
  * Default contentType for individual tile stream sources. Customize per layer
@@ -48,7 +48,6 @@ export class TileStreamSource implements IStreamSource<ITile2DAddress> {
     public readonly namespace?: string;
     public readonly encumbrance: IBoundingBox | IBoundingSphere;
     public readonly geometricError: number;
-    public readonly dependencies?: ReadonlyArray<IStreamSourceDependency>;
 
     public status: StreamSourceStatus;
     public content?: ITile2DAddress | null;
@@ -70,14 +69,7 @@ export class TileStreamSource implements IStreamSource<ITile2DAddress> {
         this.encumbrance = options.boundingBox;
         this.geometricError = options.geometricError;
         this.boundingSphere = options.boundingSphere;
-        this.status = options.status ?? "pending";
-        // Cross-tile dep: coarser parent replaces at refinement boundary.
-        const q = options.address.quadkey;
-        if (q && q.length > 0) {
-            const parent = q.slice(0, -1);
-            const parentId = options.namespace ? `${options.namespace}:${parent}` : parent;
-            this.dependencies = [{ op: "replace", target: parentId }];
-        }
+        this.status = options.status ?? StreamSourceStatus.pending;
     }
 
     /** `<namespace>:<quadkey>` when namespace is set, else the quadkey alone. */

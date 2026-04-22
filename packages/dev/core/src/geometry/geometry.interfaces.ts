@@ -1,4 +1,5 @@
 import { ICloneable } from "../types";
+import { Bounds } from "./geometry.bounds";
 
 // Defining region codes
 export enum RegionCode {
@@ -81,7 +82,7 @@ export function IsSize3(size: ISize2 | ISize3): size is ISize3 {
 }
 
 /**
- * Describes a 3D bounding sphere (as in Babylon.js BoundingSphere).
+ * Describes a 3D bounding sphere.
  */
 export interface IBoundingSphere {
     /**
@@ -164,7 +165,7 @@ export interface IPlane {
     normal: ICartesian3;
 }
 
-export function MakePlaneFromPointAndNormal(point: ICartesian3, normal: ICartesian3, hull: Array<ICartesian3>): IPlane {
+export function MakePlaneFromPointAndNormal(point: ICartesian3, normal: ICartesian3): IPlane {
     // Normalize the normal
     const len = Math.hypot(normal.x, normal.y, normal.z);
     const n = len === 0 ? { x: 0, y: 0, z: 0 } : { x: normal.x / len, y: normal.y / len, z: normal.z / len };
@@ -173,4 +174,21 @@ export function MakePlaneFromPointAndNormal(point: ICartesian3, normal: ICartesi
     const d = -(n.x * point.x + n.y * point.y + n.z * point.z);
 
     return { d: d, normal: n };
+}
+
+export function DeriveBounds(enc: IBoundingBox | IBoundingSphere): IBounds | undefined {
+    if (IsBounds(enc)) return enc;
+    const box = enc as IBoundingBox;
+    if (box.minimum && box.maximum) {
+        const w = box.maximum.x - box.minimum.x;
+        const h = box.maximum.y - box.minimum.y;
+        const d = box.maximum.z - box.minimum.z;
+        return new Bounds(box.minimum.x, box.minimum.y, w, h, box.minimum.z, d);
+    }
+    const sphere = enc as IBoundingSphere;
+    if (sphere.center && typeof sphere.radius === "number") {
+        const r = sphere.radius;
+        return new Bounds(sphere.center.x - r, sphere.center.y - r, 2 * r, 2 * r, sphere.center.z - r, 2 * r);
+    }
+    return undefined;
 }

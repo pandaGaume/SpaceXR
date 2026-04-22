@@ -79,7 +79,7 @@ export class PlaneCruncher {
         this._buildGroups(this._tolerance ?? PlaneCruncher.DEFAULT_TOLERANCE);
 
         const planes: Array<PlaneDefinition> = [];
-        for (let g of this._groups) {
+        for (const g of this._groups) {
             const t = this._createTranslationMatrix(g.center);
             const r = this._createRotationMatrix(g.normal);
             const m = this._multiplyMatrices(r, t);
@@ -110,7 +110,7 @@ export class PlaneCruncher {
 
     private _buildGroups(epsilon?: number): void {
         if (this._positions === null || this._indices === null) return;
-        for (let i = 0; i != this._indices?.length; i += 3) {
+        for (let i = 0; i !== this._indices?.length; i += 3) {
             const i1 = this._indices[i];
             const i2 = this._indices[i + 1];
             const i3 = this._indices[i + 2];
@@ -142,7 +142,7 @@ export class PlaneCruncher {
             group.indices.add(i3);
         }
         // compute the centroid
-        for (let g of this._groups) {
+        for (const g of this._groups) {
             g.center = Cartesian3.Centroid(
                 Array.from(g.indices).map((i) => Cartesian3.FromArray(this._positions!, i * 3)),
                 g.center

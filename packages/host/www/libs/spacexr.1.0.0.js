@@ -4930,6 +4930,7 @@ QuickHull.EPSILON = 0.0001;
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   DeriveBounds: () => (/* binding */ DeriveBounds),
 /* harmony export */   IsBounded: () => (/* binding */ IsBounded),
 /* harmony export */   IsBounds: () => (/* binding */ IsBounds),
 /* harmony export */   IsSize: () => (/* binding */ IsSize),
@@ -4943,6 +4944,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   isCartesian4: () => (/* binding */ isCartesian4),
 /* harmony export */   isCartesianArray: () => (/* binding */ isCartesianArray)
 /* harmony export */ });
+/* harmony import */ var _geometry_bounds__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./geometry.bounds */ "./dist/geometry/geometry.bounds.js");
+
 // Defining region codes
 var RegionCode;
 (function (RegionCode) {
@@ -5006,13 +5009,30 @@ function IsBounded(b) {
         return false;
     return b.boundingBox !== undefined || b.boundingSphere !== undefined;
 }
-function MakePlaneFromPointAndNormal(point, normal, hull) {
+function MakePlaneFromPointAndNormal(point, normal) {
     // Normalize the normal
     const len = Math.hypot(normal.x, normal.y, normal.z);
     const n = len === 0 ? { x: 0, y: 0, z: 0 } : { x: normal.x / len, y: normal.y / len, z: normal.z / len };
     // Compute scalar d
     const d = -(n.x * point.x + n.y * point.y + n.z * point.z);
     return { d: d, normal: n };
+}
+function DeriveBounds(enc) {
+    if (IsBounds(enc))
+        return enc;
+    const box = enc;
+    if (box.minimum && box.maximum) {
+        const w = box.maximum.x - box.minimum.x;
+        const h = box.maximum.y - box.minimum.y;
+        const d = box.maximum.z - box.minimum.z;
+        return new _geometry_bounds__WEBPACK_IMPORTED_MODULE_0__.Bounds(box.minimum.x, box.minimum.y, w, h, box.minimum.z, d);
+    }
+    const sphere = enc;
+    if (sphere.center && typeof sphere.radius === "number") {
+        const r = sphere.radius;
+        return new _geometry_bounds__WEBPACK_IMPORTED_MODULE_0__.Bounds(sphere.center.x - r, sphere.center.y - r, 2 * r, 2 * r, sphere.center.z - r, 2 * r);
+    }
+    return undefined;
 }
 //# sourceMappingURL=geometry.interfaces.js.map
 
@@ -5089,7 +5109,7 @@ class PlaneCruncher {
         (0,_utils__WEBPACK_IMPORTED_MODULE_0__.Assert)(this._positions !== null && this._indices !== null, "Positions and indices must be set before crunching.");
         this._buildGroups(this._tolerance ?? PlaneCruncher.DEFAULT_TOLERANCE);
         const planes = [];
-        for (let g of this._groups) {
+        for (const g of this._groups) {
             const t = this._createTranslationMatrix(g.center);
             const r = this._createRotationMatrix(g.normal);
             const m = this._multiplyMatrices(r, t);
@@ -5115,7 +5135,7 @@ class PlaneCruncher {
     _buildGroups(epsilon) {
         if (this._positions === null || this._indices === null)
             return;
-        for (let i = 0; i != this._indices?.length; i += 3) {
+        for (let i = 0; i !== this._indices?.length; i += 3) {
             const i1 = this._indices[i];
             const i2 = this._indices[i + 1];
             const i3 = this._indices[i + 2];
@@ -5142,7 +5162,7 @@ class PlaneCruncher {
             group.indices.add(i3);
         }
         // compute the centroid
-        for (let g of this._groups) {
+        for (const g of this._groups) {
             g.center = _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.Centroid(Array.from(g.indices).map((i) => _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3.FromArray(this._positions, i * 3)), g.center);
         }
     }
@@ -5467,6 +5487,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Cartesian3: () => (/* reexport safe */ _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian3),
 /* harmony export */   Cartesian4: () => (/* reexport safe */ _geometry_cartesian__WEBPACK_IMPORTED_MODULE_1__.Cartesian4),
 /* harmony export */   Circle: () => (/* reexport safe */ _shapes__WEBPACK_IMPORTED_MODULE_7__.Circle),
+/* harmony export */   DeriveBounds: () => (/* reexport safe */ _geometry_interfaces__WEBPACK_IMPORTED_MODULE_0__.DeriveBounds),
 /* harmony export */   IsBounded: () => (/* reexport safe */ _geometry_interfaces__WEBPACK_IMPORTED_MODULE_0__.IsBounded),
 /* harmony export */   IsBounds: () => (/* reexport safe */ _geometry_interfaces__WEBPACK_IMPORTED_MODULE_0__.IsBounds),
 /* harmony export */   IsSize: () => (/* reexport safe */ _geometry_interfaces__WEBPACK_IMPORTED_MODULE_0__.IsSize),
@@ -5704,6 +5725,13 @@ TerrainGridOptions.Shared = new TerrainGridOptions({
     columns: TerrainGridOptions.DefaultGridSize,
 });
 class TerrainGridOptionsBuilder {
+    withEdgeRefinement(v) {
+        if (v !== undefined && v !== 1 && v !== 2) {
+            throw new Error("edgeRefinement must be 1 or 2");
+        }
+        this.edgeRefinement = v;
+        return this;
+    }
     withUvs(flag) {
         this._uvs = flag;
         return this;
@@ -5758,6 +5786,7 @@ class TerrainGridOptionsBuilder {
             invertYZ: this._invertYZ,
             zInitializer: this._zInitializer,
             uvInitializer: this._uvInitializer,
+            edgeRefinement: this.edgeRefinement,
         });
     }
 }
@@ -5786,13 +5815,164 @@ class TerrainNormalizedGridBuilder {
         const dy = 1 / (h - 1);
         const x0 = -0.5 + ox * dx;
         const y0 = 0.5 + oy * dy;
+        const refineEdges = this._o?.edgeRefinement === 2;
+        const isWEven = w % 2 === 0;
+        const id = (row, col) => row * w + col;
+        const evalZ = (col, row) => (this._o?.zInitializer ? this._o.zInitializer(col, row, w, h, ...params) : 0);
+        const evalUV = (col, row) => {
+            if (this._o?.uvInitializer) {
+                return this._o.uvInitializer(col, row, w, h, ...params);
+            }
+            const u = col === w - 1 ? 1 : col * dx;
+            const v = row === h - 1 ? 1 : row * dy;
+            return [u, v];
+        };
+        const pushTri = (a, b, c) => {
+            if (this._o?.invertIndices)
+                indices.push(a, c, b);
+            else
+                indices.push(a, b, c);
+        };
+        const pushTri2 = (t1, t2) => {
+            pushTri(...t1);
+            pushTri(...t2);
+        };
+        const pushTri3 = (t1, t2, t3) => {
+            pushTri(...t1);
+            pushTri(...t2);
+            pushTri(...t3);
+        };
+        const pushTri4 = (t1, t2, t3, t4) => {
+            pushTri(...t1);
+            pushTri(...t2);
+            pushTri(...t3);
+            pushTri(...t4);
+        };
+        const pushVertex = (x, y, z, col, row) => {
+            const index = positions.length / 3;
+            if (this._o?.invertYZ)
+                positions.push(x, z, y);
+            else
+                positions.push(x, y, z);
+            if (uvs) {
+                uvs.push(...evalUV(col, row));
+            }
+            if (normals) {
+                if (this._o?.invertYZ)
+                    normals.push(0, 1, 0);
+                else
+                    normals.push(0, 0, 1);
+            }
+            return index;
+        };
+        for (let row = 0; row < h; row++) {
+            const v = row === h - 1 ? 1 : row * dy;
+            const y = (y0 - v) * sy;
+            for (let col = 0; col < w; col++) {
+                const u = col === w - 1 ? 1 : col * dx;
+                const x = (x0 + u) * sx;
+                const z = evalZ(col, row);
+                pushVertex(x, y, z, col, row);
+            }
+        }
+        const topMid = refineEdges ? new Array(w - 1) : null;
+        const bottomMid = refineEdges ? new Array(w - 1) : null;
+        const leftMid = refineEdges ? new Array(h - 1) : null;
+        const rightMid = refineEdges ? new Array(h - 1) : null;
+        if (refineEdges) {
+            for (let col = 0; col < w - 1; col++) {
+                const u = (col + 0.5) * dx;
+                const x = (x0 + u) * sx;
+                topMid[col] = pushVertex(x, y0 * sy, 0.5 * (evalZ(col, 0) + evalZ(col + 1, 0)), col + 0.5, 0);
+                bottomMid[col] = pushVertex(x, (y0 - 1) * sy, 0.5 * (evalZ(col, h - 1) + evalZ(col + 1, h - 1)), col + 0.5, h - 1);
+            }
+            for (let row = 0; row < h - 1; row++) {
+                const v = (row + 0.5) * dy;
+                const y = (y0 - v) * sy;
+                leftMid[row] = pushVertex(x0 * sx, y, 0.5 * (evalZ(0, row) + evalZ(0, row + 1)), 0, row + 0.5);
+                rightMid[row] = pushVertex((x0 + 1) * sx, y, 0.5 * (evalZ(w - 1, row) + evalZ(w - 1, row + 1)), w - 1, row + 0.5);
+            }
+        }
+        for (let row = 0; row < h - 1; row++) {
+            const indice = isWEven ? row % 2 : 0;
+            for (let col = 0; col < w - 1; col++) {
+                const tl = id(row, col);
+                const tr = id(row, col + 1);
+                const bl = id(row + 1, col);
+                const br = id(row + 1, col + 1);
+                const top = row === 0;
+                const bottom = row === h - 2;
+                const left = col === 0;
+                const right = col === w - 2;
+                const border = refineEdges && (top || bottom || left || right);
+                if (!border) {
+                    if (tl % 2 !== indice) {
+                        pushTri2([tl, tr, bl], [bl, tr, br]);
+                    }
+                    else {
+                        pushTri2([tl, br, bl], [tl, tr, br]);
+                    }
+                    continue;
+                }
+                const tm = top ? topMid[col] : -1;
+                const bm = bottom ? bottomMid[col] : -1;
+                const lm = left ? leftMid[row] : -1;
+                const rm = right ? rightMid[row] : -1;
+                if (top && left) {
+                    pushTri4([tl, tm, br], [tm, tr, br], [tl, br, bl], [tl, bl, lm]);
+                }
+                else if (top && right) {
+                    pushTri4([tl, tm, bl], [tm, tr, rm], [tm, rm, bl], [bl, rm, br]);
+                }
+                else if (bottom && left) {
+                    pushTri4([tl, tr, br], [tl, br, bm], [tl, bm, lm], [lm, bm, bl]);
+                }
+                else if (bottom && right) {
+                    pushTri4([tl, tr, rm], [tl, rm, bm], [tl, bm, bl], [rm, br, bm]);
+                }
+                else if (top) {
+                    pushTri3([tl, tm, bl], [tm, br, bl], [tm, tr, br]);
+                }
+                else if (bottom) {
+                    pushTri3([tl, tr, bm], [tl, bm, bl], [tr, br, bm]);
+                }
+                else if (left) {
+                    pushTri3([tl, tr, br], [tl, br, lm], [lm, br, bl]);
+                }
+                else if (right) {
+                    pushTri3([tl, tr, rm], [tl, rm, bl], [bl, rm, br]);
+                }
+            }
+        }
+        data.indices = indices;
+        data.positions = positions;
+        data.uvs = uvs;
+        data.normals = normals;
+        return data;
+    }
+    build0(data, ...params) {
+        data = data || {};
+        const w = this._o?.columns || TerrainGridOptions.DefaultGridSize;
+        const h = this._o?.rows || w;
+        const sx = this._o?.sx || TerrainGridOptions.DefaultScale;
+        const sy = this._o?.sy || TerrainGridOptions.DefaultScale;
+        const ox = this._o?.ox || 0;
+        const oy = this._o?.oy || 0;
+        const positions = [];
+        const indices = [];
+        const uvs = this._o?.uvs ? [] : null;
+        const normals = this._o?.normals ? [] : null;
+        const dx = 1 / (w - 1);
+        const dy = 1 / (h - 1);
+        const x0 = -0.5 + ox * dx;
+        const y0 = 0.5 + oy * dy;
         // positions origin center of the grid with cartesian coordinate.
         // uvs origin upper left with v vertical and u horizontal.
         for (let row = 0; row < h; row++) {
-            let v = row == h - 1 ? 1 : row * dy;
+            const v = row === h - 1 ? 1 : row * dy;
             const y = (y0 - v) * sy;
             for (let column = 0; column < w; column++) {
-                const u = column == w - 1 ? 1 : column * dx;
+                const u = column === w - 1 ? 1 : column * dx;
                 const x = (x0 + u) * sx;
                 const z = this._o?.zInitializer ? this._o.zInitializer(column, row, w, h, ...params) : 0;
                 if (this._o?.invertYZ)
@@ -5812,7 +5992,7 @@ class TerrainNormalizedGridBuilder {
             }
         }
         // indices
-        const isWEven = w % 2 == 0;
+        const isWEven = w % 2 === 0;
         for (let row = 0; row < h - 1; row++) {
             const indice = isWEven ? row % 2 : 0;
             const offset = row * w;
@@ -5821,7 +6001,7 @@ class TerrainNormalizedGridBuilder {
                 const idx2 = idx1 + w;
                 const idx3 = idx2 + 1;
                 const idx4 = idx1 + 1;
-                if (idx1 % 2 != indice) {
+                if (idx1 % 2 !== indice) {
                     if (this._o?.invertIndices) {
                         indices.push(idx1, idx2, idx4, idx2, idx3, idx4);
                     }
@@ -9115,6 +9295,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   StepwiseSSEBudget: () => (/* reexport safe */ _streaming_visibility_budget__WEBPACK_IMPORTED_MODULE_2__.StepwiseSSEBudget),
 /* harmony export */   StreamActiveContext: () => (/* reexport safe */ _streaming_active_context__WEBPACK_IMPORTED_MODULE_5__.StreamActiveContext),
 /* harmony export */   StreamSourceContentAdapter: () => (/* reexport safe */ _streaming_content_adapter__WEBPACK_IMPORTED_MODULE_7__.StreamSourceContentAdapter),
+/* harmony export */   StreamSourceStatus: () => (/* reexport safe */ _streaming_datasource_interfaces__WEBPACK_IMPORTED_MODULE_0__.StreamSourceStatus),
 /* harmony export */   StreamingEngine: () => (/* reexport safe */ _streaming_engine__WEBPACK_IMPORTED_MODULE_6__.StreamingEngine)
 /* harmony export */ });
 /* harmony import */ var _streaming_datasource_interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./streaming.datasource.interfaces */ "./dist/streaming/streaming.datasource.interfaces.js");
@@ -9262,13 +9443,28 @@ class StreamSourceContentAdapter extends _tiles_pipeline_tiles_pipeline_sourcebl
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   IsStreamSource: () => (/* binding */ IsStreamSource)
+/* harmony export */   IsStreamSource: () => (/* binding */ IsStreamSource),
+/* harmony export */   StreamSourceStatus: () => (/* binding */ StreamSourceStatus)
 /* harmony export */ });
+/**
+ * Fetch/activation state exposed on each IStreamSource. Scenes render only
+ * datasources whose status is "ready"; other statuses are informational
+ * (progress UI, retry policies, etc.).
+ */
+var StreamSourceStatus;
+(function (StreamSourceStatus) {
+    StreamSourceStatus[StreamSourceStatus["idle"] = 0] = "idle";
+    StreamSourceStatus[StreamSourceStatus["pending"] = 1] = "pending";
+    StreamSourceStatus[StreamSourceStatus["loading"] = 2] = "loading";
+    StreamSourceStatus[StreamSourceStatus["ready"] = 3] = "ready";
+    StreamSourceStatus[StreamSourceStatus["error"] = 4] = "error";
+    StreamSourceStatus[StreamSourceStatus["unkknown"] = 999] = "unkknown";
+})(StreamSourceStatus || (StreamSourceStatus = {}));
 function IsStreamSource(b) {
     if (typeof b !== "object" || b === null)
         return false;
     const d = b;
-    return typeof d.id === "string" && typeof d.kind === "string" && d.encumbrance !== undefined && typeof d.contentType === "string" && typeof d.status === "string";
+    return typeof d.id === "string" && d.encumbrance !== undefined && typeof d.contentType === "string" && typeof d.status === "string";
 }
 //# sourceMappingURL=streaming.datasource.interfaces.js.map
 
@@ -10003,7 +10199,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   TileLoaderAdapter: () => (/* binding */ TileLoaderAdapter)
 /* harmony export */ });
 /* harmony import */ var _tiles_pipeline_tiles_pipeline_sourceblock__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../tiles/pipeline/tiles.pipeline.sourceblock */ "./dist/tiles/pipeline/tiles.pipeline.sourceblock.js");
-/* harmony import */ var _tile_stream_source__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tile.stream.source */ "./dist/streaming/tile/tile.stream.source.js");
+/* harmony import */ var _streaming_datasource_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../streaming.datasource.interfaces */ "./dist/streaming/streaming.datasource.interfaces.js");
+/* harmony import */ var _tile_stream_source__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tile.stream.source */ "./dist/streaming/tile/tile.stream.source.js");
+
 
 
 /**
@@ -10041,8 +10239,8 @@ class TileLoaderAdapter extends _tiles_pipeline_tiles_pipeline_sourceblock__WEBP
                 if (!addr)
                     continue;
                 this._entries.set(addr.quadkey, src);
-                if (src.status === "pending") {
-                    src.status = "downloading";
+                if (src.status === _streaming_datasource_interfaces__WEBPACK_IMPORTED_MODULE_1__.StreamSourceStatus.pending) {
+                    src.status = _streaming_datasource_interfaces__WEBPACK_IMPORTED_MODULE_1__.StreamSourceStatus.loading;
                     updatedStatus.push(src);
                 }
                 addresses.push(addr);
@@ -10064,7 +10262,7 @@ class TileLoaderAdapter extends _tiles_pipeline_tiles_pipeline_sourceblock__WEBP
                 this._entries.delete(addr.quadkey);
                 // Leave `status` untouched : the removed event is the authoritative
                 // signal. Drop the attached tile ref so consumers do not hold stale data.
-                if (src instanceof _tile_stream_source__WEBPACK_IMPORTED_MODULE_1__.TileStreamSource)
+                if (src instanceof _tile_stream_source__WEBPACK_IMPORTED_MODULE_2__.TileStreamSource)
                     src.tile = null;
                 addresses.push(addr);
                 out.push(src);
@@ -10128,7 +10326,7 @@ class TileLoaderAdapter extends _tiles_pipeline_tiles_pipeline_sourceblock__WEBP
                 continue;
             this._entries.delete(tile.address.quadkey);
             // Leave `status` untouched ; the removed event conveys the drop.
-            if (entry instanceof _tile_stream_source__WEBPACK_IMPORTED_MODULE_1__.TileStreamSource)
+            if (entry instanceof _tile_stream_source__WEBPACK_IMPORTED_MODULE_2__.TileStreamSource)
                 entry.tile = null;
             out.push(entry);
         }
@@ -10141,13 +10339,13 @@ class TileLoaderAdapter extends _tiles_pipeline_tiles_pipeline_sourceblock__WEBP
             const entry = this._entries.get(tile.address.quadkey);
             if (!entry)
                 continue;
-            if (entry instanceof _tile_stream_source__WEBPACK_IMPORTED_MODULE_1__.TileStreamSource)
+            if (entry instanceof _tile_stream_source__WEBPACK_IMPORTED_MODULE_2__.TileStreamSource)
                 entry.tile = tile;
-            if (ready && tile.content != null) {
-                entry.status = "ready";
+            if (ready && tile.content !== null) {
+                entry.status = _streaming_datasource_interfaces__WEBPACK_IMPORTED_MODULE_1__.StreamSourceStatus.ready;
             }
-            else if (entry.status === "pending") {
-                entry.status = "downloading";
+            else if (entry.status === _streaming_datasource_interfaces__WEBPACK_IMPORTED_MODULE_1__.StreamSourceStatus.pending) {
+                entry.status = _streaming_datasource_interfaces__WEBPACK_IMPORTED_MODULE_1__.StreamSourceStatus.loading;
             }
             out.push(entry);
         }
@@ -10171,9 +10369,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   TilePyramidStreamSource: () => (/* binding */ TilePyramidStreamSource)
 /* harmony export */ });
 /* harmony import */ var _geodesy_geodesy_system__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../geodesy/geodesy.system */ "./dist/geodesy/geodesy.system.js");
-/* harmony import */ var _geometry_geometry_bounds__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../geometry/geometry.bounds */ "./dist/geometry/geometry.bounds.js");
-/* harmony import */ var _geometry_geometry_interfaces__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../geometry/geometry.interfaces */ "./dist/geometry/geometry.interfaces.js");
-/* harmony import */ var _tiles_address_tiles_address__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../tiles/address/tiles.address */ "./dist/tiles/address/tiles.address.js");
+/* harmony import */ var _geometry_geometry_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../geometry/geometry.interfaces */ "./dist/geometry/geometry.interfaces.js");
+/* harmony import */ var _tiles_address_tiles_address__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../tiles/address/tiles.address */ "./dist/tiles/address/tiles.address.js");
+/* harmony import */ var _streaming_datasource_interfaces__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../streaming.datasource.interfaces */ "./dist/streaming/streaming.datasource.interfaces.js");
 /* harmony import */ var _streaming_engine__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../streaming.engine */ "./dist/streaming/streaming.engine.js");
 /* harmony import */ var _streaming_visibility_budget__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../streaming.visibility.budget */ "./dist/streaming/streaming.visibility.budget.js");
 /* harmony import */ var _streaming_visibility_overflight__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../streaming.visibility.overflight */ "./dist/streaming/streaming.visibility.overflight.js");
@@ -10210,13 +10408,12 @@ class TilePyramidStreamSource extends _streaming_engine__WEBPACK_IMPORTED_MODULE
     constructor(options) {
         super({}); // no octrees: pyramid's _traverse walks its own quadtree
         this.kind = "provider";
-        this.status = "ready";
+        this.status = _streaming_datasource_interfaces__WEBPACK_IMPORTED_MODULE_3__.StreamSourceStatus.ready;
         /** The pyramid is an aggregate, not a single tile; content is always null. */
         this.content = null;
         this.id = options.id;
         this.contentType = options.contentType ?? TILE_PYRAMID_CONTENT_TYPE;
         this.encumbrance = options.encumbrance;
-        this.dependencies = options.dependencies;
         this._metrics = options.metrics;
         this._ellipsoid = options.ellipsoid;
         this._geodetic = options.ellipsoid ? new _geodesy_geodesy_system__WEBPACK_IMPORTED_MODULE_0__.GeodeticSystem(options.ellipsoid) : undefined;
@@ -10225,8 +10422,8 @@ class TilePyramidStreamSource extends _streaming_engine__WEBPACK_IMPORTED_MODULE
         this._horizonCull = options.horizonCull ?? !!options.ellipsoid;
         this._budget = (0,_streaming_visibility_budget__WEBPACK_IMPORTED_MODULE_5__.ResolveSSEBudget)(options.maxScreenSpaceError ?? TilePyramidStreamSource.DefaultMaxScreenSpaceError);
         this._childContentType = options.childContentType ?? "tile-address";
-        this.boundingBox = options.boundingBox ?? TilePyramidStreamSource._deriveBounds(options.encumbrance);
-        if (!(0,_geometry_geometry_interfaces__WEBPACK_IMPORTED_MODULE_2__.IsBounds)(options.encumbrance)) {
+        this.boundingBox = options.boundingBox ?? (0,_geometry_geometry_interfaces__WEBPACK_IMPORTED_MODULE_1__.DeriveBounds)(options.encumbrance);
+        if (!(0,_geometry_geometry_interfaces__WEBPACK_IMPORTED_MODULE_1__.IsBounds)(options.encumbrance)) {
             this.boundingSphere = options.encumbrance;
         }
     }
@@ -10238,9 +10435,15 @@ class TilePyramidStreamSource extends _streaming_engine__WEBPACK_IMPORTED_MODULE
     }
     _traverse(camera, ctx, _parentsOut, _frontierOut, entriesOut) {
         const maxSSE = this._budget.getMaxSSE(this._cameraAltitude(camera));
-        this._walk(new _tiles_address_tiles_address__WEBPACK_IMPORTED_MODULE_3__.TileAddress(0, 0, this._metrics.minLOD), camera, ctx.clipBounds, maxSSE, entriesOut);
+        this._walk(new _tiles_address_tiles_address__WEBPACK_IMPORTED_MODULE_2__.TileAddress(0, 0, this._metrics.minLOD), camera, ctx.clipBounds, maxSSE, entriesOut);
     }
     _walk(address, camera, clipBounds, maxSSE, out) {
+        if (Array.isArray(address)) {
+            for (const a of address) {
+                this._walk(a, camera, clipBounds, maxSSE, out);
+            }
+            return;
+        }
         if (address.levelOfDetail > this._metrics.maxLOD)
             return;
         const bounds = this._computeBounds(address);
@@ -10257,7 +10460,7 @@ class TilePyramidStreamSource extends _streaming_engine__WEBPACK_IMPORTED_MODULE
         }
         if (camera.isInFrustum && !camera.isInFrustum(bounds))
             return;
-        const geometricError = _tiles_address_tiles_address__WEBPACK_IMPORTED_MODULE_3__.TileAddress.GeometricError(address, this._metrics);
+        const geometricError = _tiles_address_tiles_address__WEBPACK_IMPORTED_MODULE_2__.TileAddress.GeometricError(address, this._metrics);
         const sse = this._computeSSE(bounds, geometricError, camera);
         if (sse <= maxSSE || address.levelOfDetail >= this._metrics.maxLOD) {
             const tile = new _tile_stream_source__WEBPACK_IMPORTED_MODULE_7__.TileStreamSource({
@@ -10273,13 +10476,10 @@ class TilePyramidStreamSource extends _streaming_engine__WEBPACK_IMPORTED_MODULE
             out.set(tile.id, { source: tile, priority: sse, activatedFrame: -1, lastSeenFrame: -1 });
             return;
         }
-        const lod = address.levelOfDetail + 1;
-        const x2 = address.x * 2;
-        const y2 = address.y * 2;
-        this._walk(new _tiles_address_tiles_address__WEBPACK_IMPORTED_MODULE_3__.TileAddress(x2, y2, lod), camera, clipBounds, maxSSE, out);
-        this._walk(new _tiles_address_tiles_address__WEBPACK_IMPORTED_MODULE_3__.TileAddress(x2 + 1, y2, lod), camera, clipBounds, maxSSE, out);
-        this._walk(new _tiles_address_tiles_address__WEBPACK_IMPORTED_MODULE_3__.TileAddress(x2, y2 + 1, lod), camera, clipBounds, maxSSE, out);
-        this._walk(new _tiles_address_tiles_address__WEBPACK_IMPORTED_MODULE_3__.TileAddress(x2 + 1, y2 + 1, lod), camera, clipBounds, maxSSE, out);
+        const child = _tiles_address_tiles_address__WEBPACK_IMPORTED_MODULE_2__.TileAddress.Split(address, this._metrics);
+        if (child?.length) {
+            this._walk(child, camera, clipBounds, maxSSE, out);
+        }
     }
     /** Camera altitude above the map surface. Flat : Z of worldPosition. Sphere : |cam − center| − R. */
     _cameraAltitude(camera) {
@@ -10293,9 +10493,9 @@ class TilePyramidStreamSource extends _streaming_engine__WEBPACK_IMPORTED_MODULE
     }
     _computeBounds(address) {
         if (this._ellipsoid && this._geodetic) {
-            return _tiles_address_tiles_address__WEBPACK_IMPORTED_MODULE_3__.TileAddress.ToBoundsECEF(address, this._metrics, this._ellipsoid, this._geodetic);
+            return _tiles_address_tiles_address__WEBPACK_IMPORTED_MODULE_2__.TileAddress.ToBoundsECEF(address, this._metrics, this._ellipsoid, this._geodetic);
         }
-        return _tiles_address_tiles_address__WEBPACK_IMPORTED_MODULE_3__.TileAddress.ToBounds(address, this._metrics);
+        return _tiles_address_tiles_address__WEBPACK_IMPORTED_MODULE_2__.TileAddress.ToBounds(address, this._metrics);
     }
     _computeSSE(bounds, geometricError, camera) {
         const cx = bounds.center.x - camera.worldPosition.x;
@@ -10308,24 +10508,6 @@ class TilePyramidStreamSource extends _streaming_engine__WEBPACK_IMPORTED_MODULE
         if (tan <= 0 || vh <= 0)
             return 0;
         return (geometricError * vh) / (distance * 2 * tan);
-    }
-    // ───────── bounds helper ─────────
-    static _deriveBounds(enc) {
-        if ((0,_geometry_geometry_interfaces__WEBPACK_IMPORTED_MODULE_2__.IsBounds)(enc))
-            return enc;
-        const box = enc;
-        if (box.minimum && box.maximum) {
-            const w = box.maximum.x - box.minimum.x;
-            const h = box.maximum.y - box.minimum.y;
-            const d = box.maximum.z - box.minimum.z;
-            return new _geometry_geometry_bounds__WEBPACK_IMPORTED_MODULE_1__.Bounds(box.minimum.x, box.minimum.y, w, h, box.minimum.z, d);
-        }
-        const sphere = enc;
-        if (sphere.center && typeof sphere.radius === "number") {
-            const r = sphere.radius;
-            return new _geometry_geometry_bounds__WEBPACK_IMPORTED_MODULE_1__.Bounds(sphere.center.x - r, sphere.center.y - r, 2 * r, 2 * r, sphere.center.z - r, 2 * r);
-        }
-        return undefined;
     }
 }
 TilePyramidStreamSource.DefaultMaxScreenSpaceError = 16;
@@ -10346,6 +10528,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   TileStreamSource: () => (/* binding */ TileStreamSource)
 /* harmony export */ });
 /* harmony import */ var _geometry_geometry_bounds__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../geometry/geometry.bounds */ "./dist/geometry/geometry.bounds.js");
+/* harmony import */ var _streaming_datasource_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../streaming.datasource.interfaces */ "./dist/streaming/streaming.datasource.interfaces.js");
+
 
 /**
  * Default contentType for individual tile stream sources. Customize per layer
@@ -10377,14 +10561,7 @@ class TileStreamSource {
         this.encumbrance = options.boundingBox;
         this.geometricError = options.geometricError;
         this.boundingSphere = options.boundingSphere;
-        this.status = options.status ?? "pending";
-        // Cross-tile dep: coarser parent replaces at refinement boundary.
-        const q = options.address.quadkey;
-        if (q && q.length > 0) {
-            const parent = q.slice(0, -1);
-            const parentId = options.namespace ? `${options.namespace}:${parent}` : parent;
-            this.dependencies = [{ op: "replace", target: parentId }];
-        }
+        this.status = options.status ?? _streaming_datasource_interfaces__WEBPACK_IMPORTED_MODULE_1__.StreamSourceStatus.pending;
     }
     /** `<namespace>:<quadkey>` when namespace is set, else the quadkey alone. */
     get id() {
@@ -17356,6 +17533,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   DefaultScreenSpaceErrorFn: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_15__.DefaultScreenSpaceErrorFn),
 /* harmony export */   DemInfos: () => (/* reexport safe */ _dem_index__WEBPACK_IMPORTED_MODULE_12__.DemInfos),
 /* harmony export */   DemTileWebClient: () => (/* reexport safe */ _dem_index__WEBPACK_IMPORTED_MODULE_12__.DemTileWebClient),
+/* harmony export */   DeriveBounds: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.DeriveBounds),
 /* harmony export */   DeserializeLocalizableString: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.DeserializeLocalizableString),
 /* harmony export */   Display: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.Display),
 /* harmony export */   EPSG3857: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.EPSG3857),
@@ -17503,6 +17681,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   StepwiseSSEBudget: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_15__.StepwiseSSEBudget),
 /* harmony export */   StreamActiveContext: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_15__.StreamActiveContext),
 /* harmony export */   StreamSourceContentAdapter: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_15__.StreamSourceContentAdapter),
+/* harmony export */   StreamSourceStatus: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_15__.StreamSourceStatus),
 /* harmony export */   StreamingEngine: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_15__.StreamingEngine),
 /* harmony export */   TILE_PYRAMID_CONTENT_TYPE: () => (/* reexport safe */ _streaming_tile__WEBPACK_IMPORTED_MODULE_16__.TILE_PYRAMID_CONTENT_TYPE),
 /* harmony export */   TILE_STREAM_CONTENT_TYPE: () => (/* reexport safe */ _streaming_tile__WEBPACK_IMPORTED_MODULE_16__.TILE_STREAM_CONTENT_TYPE),

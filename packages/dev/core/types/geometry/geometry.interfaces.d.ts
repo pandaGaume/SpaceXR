@@ -43,7 +43,7 @@ export interface ISize3 {
 export declare function IsSize(b: unknown): b is ISize3 | ISize2;
 export declare function IsSize3(size: ISize2 | ISize3): size is ISize3;
 /**
- * Describes a 3D bounding sphere (as in Babylon.js BoundingSphere).
+ * Describes a 3D bounding sphere.
  */
 export interface IBoundingSphere {
     /**
@@ -99,4 +99,5 @@ export interface IPlane {
     d: number;
     normal: ICartesian3;
 }
-export declare function MakePlaneFromPointAndNormal(point: ICartesian3, normal: ICartesian3, hull: Array<ICartesian3>): IPlane;
+export declare function MakePlaneFromPointAndNormal(point: ICartesian3, normal: ICartesian3): IPlane;
+export declare function DeriveBounds(enc: IBoundingBox | IBoundingSphere): IBounds | undefined;

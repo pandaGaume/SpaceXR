@@ -3,7 +3,7 @@ import { IPipelineMessageType, ITransformBlock } from "../../dataflow";
 import { SourceBlock } from "../../tiles/pipeline/tiles.pipeline.sourceblock";
 import { ITile, ITile2DAddress, ITileLoader } from "../../tiles/tiles.interfaces";
 import { IDisposable } from "../../types";
-import { IStreamSource } from "../streaming.datasource.interfaces";
+import { IStreamSource, StreamSourceStatus } from "../streaming.datasource.interfaces";
 import { TileStreamSource } from "./tile.stream.source";
 
 type StreamBatch = IPipelineMessageType<IStreamSource<ITile2DAddress>>;
@@ -69,8 +69,8 @@ export class TileLoaderAdapter<T = unknown>
             const addr = src.content;
             if (!addr) continue;
             this._entries.set(addr.quadkey, src);
-            if (src.status === "pending") {
-                src.status = "downloading";
+            if (src.status === StreamSourceStatus.pending) {
+                src.status = StreamSourceStatus.loading;
                 updatedStatus.push(src);
             }
             addresses.push(addr);
@@ -152,10 +152,10 @@ export class TileLoaderAdapter<T = unknown>
             const entry = this._entries.get(tile.address.quadkey);
             if (!entry) continue;
             if (entry instanceof TileStreamSource) entry.tile = tile;
-            if (ready && tile.content != null) {
-                entry.status = "ready";
-            } else if (entry.status === "pending") {
-                entry.status = "downloading";
+            if (ready && tile.content !== null) {
+                entry.status = StreamSourceStatus.ready;
+            } else if (entry.status === StreamSourceStatus.pending) {
+                entry.status = StreamSourceStatus.loading;
             }
             out.push(entry);
         }

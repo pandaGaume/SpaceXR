@@ -26,6 +26,6 @@
     "sideEffects": false,
     "dependencies": {
         "protobufjs": "^7.5.5",
-        "protobufjs-cli": "^1.1.2"
+        "protobufjs-cli": "^1.2.2"
     }
 }

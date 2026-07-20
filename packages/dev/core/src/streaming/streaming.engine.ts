@@ -94,6 +94,21 @@ export class StreamingEngine extends SourceBlock<IStreamSource<unknown>> impleme
         return this._views.size;
     }
 
+    /**
+     * True while any view still holds queued refine/coarsen work left over
+     * from a per-frame budget. Drivers use it to keep pumping `setContext`
+     * until the cut converges (see IStreamEngine.hasPendingWork).
+     */
+    public get hasPendingWork(): boolean {
+        for (const ctx of this._views.values()) {
+            if (!ctx.refinePQ.isEmpty() || !ctx.coarsenPQ.isEmpty()) return true;
+        }
+        for (const se of this._activeSubEngines) {
+            if (se.hasPendingWork) return true;
+        }
+        return false;
+    }
+
     public get maxRefinePerFrame(): number {
         return this._maxRefinePerFrame;
     }

@@ -9548,6 +9548,22 @@ class StreamingEngine extends _tiles_pipeline_tiles_pipeline_sourceblock__WEBPAC
     get activeViewCount() {
         return this._views.size;
     }
+    /**
+     * True while any view still holds queued refine/coarsen work left over
+     * from a per-frame budget. Drivers use it to keep pumping `setContext`
+     * until the cut converges (see IStreamEngine.hasPendingWork).
+     */
+    get hasPendingWork() {
+        for (const ctx of this._views.values()) {
+            if (!ctx.refinePQ.isEmpty() || !ctx.coarsenPQ.isEmpty())
+                return true;
+        }
+        for (const se of this._activeSubEngines) {
+            if (se.hasPendingWork)
+                return true;
+        }
+        return false;
+    }
     get maxRefinePerFrame() {
         return this._maxRefinePerFrame;
     }
@@ -10415,7 +10431,6 @@ class TilePyramidStreamSource extends _streaming_engine__WEBPACK_IMPORTED_MODULE
         this.contentType = options.contentType ?? TILE_PYRAMID_CONTENT_TYPE;
         this.encumbrance = options.encumbrance;
         this._metrics = options.metrics;
-        this._ellipsoid = options.ellipsoid;
         this._geodetic = options.ellipsoid ? new _geodesy_geodesy_system__WEBPACK_IMPORTED_MODULE_0__.GeodeticSystem(options.ellipsoid) : undefined;
         this._sphereCenter = options.sphereCenter ?? { x: 0, y: 0, z: 0 };
         this._sphereRadius = options.ellipsoid?.semiMajorAxis ?? 0;
@@ -10431,7 +10446,7 @@ class TilePyramidStreamSource extends _streaming_engine__WEBPACK_IMPORTED_MODULE
         return this._metrics;
     }
     get ellipsoid() {
-        return this._ellipsoid;
+        return this._geodetic?.ellipsoid;
     }
     _traverse(camera, ctx, _parentsOut, _frontierOut, entriesOut) {
         const maxSSE = this._budget.getMaxSSE(this._cameraAltitude(camera));
@@ -10492,8 +10507,8 @@ class TilePyramidStreamSource extends _streaming_engine__WEBPACK_IMPORTED_MODULE
         return camera.worldPosition.z;
     }
     _computeBounds(address) {
-        if (this._ellipsoid && this._geodetic) {
-            return _tiles_address_tiles_address__WEBPACK_IMPORTED_MODULE_2__.TileAddress.ToBoundsECEF(address, this._metrics, this._ellipsoid, this._geodetic);
+        if (this._geodetic) {
+            return _tiles_address_tiles_address__WEBPACK_IMPORTED_MODULE_2__.TileAddress.ToBoundsECEF(address, this._metrics, this._geodetic);
         }
         return _tiles_address_tiles_address__WEBPACK_IMPORTED_MODULE_2__.TileAddress.ToBounds(address, this._metrics);
     }
@@ -11499,6 +11514,2148 @@ LocalString.DefaultCode = "en";
 
 /***/ },
 
+/***/ "./dist/tiles/3d/codecs/index.js"
+/*!***************************************!*\
+  !*** ./dist/tiles/3d/codecs/index.js ***!
+  \***************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   TilesetCodec: () => (/* reexport safe */ _tile3d_codec_tileset__WEBPACK_IMPORTED_MODULE_0__.TilesetCodec)
+/* harmony export */ });
+/* harmony import */ var _tile3d_codec_tileset__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tile3d.codec.tileset */ "./dist/tiles/3d/codecs/tile3d.codec.tileset.js");
+
+//# sourceMappingURL=index.js.map
+
+/***/ },
+
+/***/ "./dist/tiles/3d/codecs/tile3d.codec.tileset.js"
+/*!******************************************************!*\
+  !*** ./dist/tiles/3d/codecs/tile3d.codec.tileset.js ***!
+  \******************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   TilesetCodec: () => (/* binding */ TilesetCodec)
+/* harmony export */ });
+class TilesetCodec {
+    async decodeAsync(r) {
+        if (r instanceof Response) {
+            const b = await r.json();
+            return b;
+        }
+        return null;
+    }
+}
+TilesetCodec.Shared = new TilesetCodec();
+//# sourceMappingURL=tile3d.codec.tileset.js.map
+
+/***/ },
+
+/***/ "./dist/tiles/3d/engine/index.js"
+/*!***************************************!*\
+  !*** ./dist/tiles/3d/engine/index.js ***!
+  \***************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   ActiveContext: () => (/* reexport safe */ _tile3d_stream_engine__WEBPACK_IMPORTED_MODULE_0__.ActiveContext),
+/* harmony export */   DefaultScreenSpaceError: () => (/* reexport safe */ _tile3d_stream_engine__WEBPACK_IMPORTED_MODULE_0__.DefaultScreenSpaceError),
+/* harmony export */   TILE3D_NODE_CONTENT_TYPE: () => (/* reexport safe */ _tile3d_stream_source__WEBPACK_IMPORTED_MODULE_2__.TILE3D_NODE_CONTENT_TYPE),
+/* harmony export */   TILE3D_TILESET_CONTENT_TYPE: () => (/* reexport safe */ _tile3d_stream_source__WEBPACK_IMPORTED_MODULE_2__.TILE3D_TILESET_CONTENT_TYPE),
+/* harmony export */   Tile3dMaxPriority: () => (/* reexport safe */ _tile3d_stream_engine__WEBPACK_IMPORTED_MODULE_0__.Tile3dMaxPriority),
+/* harmony export */   Tile3dMinPriority: () => (/* reexport safe */ _tile3d_stream_engine__WEBPACK_IMPORTED_MODULE_0__.Tile3dMinPriority),
+/* harmony export */   Tile3dNodeSource: () => (/* reexport safe */ _tile3d_stream_source__WEBPACK_IMPORTED_MODULE_2__.Tile3dNodeSource),
+/* harmony export */   Tile3dNormalPriority: () => (/* reexport safe */ _tile3d_stream_engine__WEBPACK_IMPORTED_MODULE_0__.Tile3dNormalPriority),
+/* harmony export */   Tile3dRefineType: () => (/* reexport safe */ _tile3d_stream_engine__WEBPACK_IMPORTED_MODULE_0__.Tile3dRefineType),
+/* harmony export */   Tile3dStreamBinding: () => (/* reexport safe */ _tile3d_stream_binding__WEBPACK_IMPORTED_MODULE_3__.Tile3dStreamBinding),
+/* harmony export */   Tile3dStreamEngine: () => (/* reexport safe */ _tile3d_stream_engine__WEBPACK_IMPORTED_MODULE_0__.Tile3dStreamEngine),
+/* harmony export */   Tile3dStreamSource: () => (/* reexport safe */ _tile3d_stream_source__WEBPACK_IMPORTED_MODULE_2__.Tile3dStreamSource),
+/* harmony export */   TileContentStatus: () => (/* reexport safe */ _tile3d_stream_engine__WEBPACK_IMPORTED_MODULE_0__.TileContentStatus),
+/* harmony export */   TilesetClient: () => (/* reexport safe */ _tile3d_stream_client__WEBPACK_IMPORTED_MODULE_1__.TilesetClient)
+/* harmony export */ });
+/* harmony import */ var _tile3d_stream_engine__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tile3d.stream.engine */ "./dist/tiles/3d/engine/tile3d.stream.engine.js");
+/* harmony import */ var _tile3d_stream_client__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tile3d.stream.client */ "./dist/tiles/3d/engine/tile3d.stream.client.js");
+/* harmony import */ var _tile3d_stream_source__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tile3d.stream.source */ "./dist/tiles/3d/engine/tile3d.stream.source.js");
+/* harmony import */ var _tile3d_stream_binding__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./tile3d.stream.binding */ "./dist/tiles/3d/engine/tile3d.stream.binding.js");
+
+
+
+
+//# sourceMappingURL=index.js.map
+
+/***/ },
+
+/***/ "./dist/tiles/3d/engine/tile3d.stream.binding.js"
+/*!*******************************************************!*\
+  !*** ./dist/tiles/3d/engine/tile3d.stream.binding.js ***!
+  \*******************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   Tile3dStreamBinding: () => (/* binding */ Tile3dStreamBinding)
+/* harmony export */ });
+/* harmony import */ var _pipeline__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../pipeline */ "./dist/tiles/pipeline/tiles.pipeline.sourceblock.js");
+/* harmony import */ var _tile3d_stream_engine__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tile3d.stream.engine */ "./dist/tiles/3d/engine/tile3d.stream.engine.js");
+/* harmony import */ var _tile3d_stream_source__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tile3d.stream.source */ "./dist/tiles/3d/engine/tile3d.stream.source.js");
+
+
+
+/**
+ * Glue between a Tile3dStreamSource and a content loader:
+ *
+ *  - Downstream, it unwraps the engine's IStreamSource<ITile3d> emissions to
+ *    plain ITile3d batches, so existing sinks (Tile3dScene) keep their
+ *    contract.
+ *  - It drives the loader: entering tiles with unfetched renderable content
+ *    are enqueued, leaving tiles are cancelled while still pending.
+ *  - It closes the async loop: when the loader reports a tile settled, the
+ *    binding invalidates the source (re-traversal picks up the new state,
+ *    e.g. opens a REPLACE gate) and forwards the update to sinks.
+ *
+ * Wiring: `new Tile3dStreamBinding(source, loader).linkTo(scene)`.
+ */
+class Tile3dStreamBinding extends _pipeline__WEBPACK_IMPORTED_MODULE_0__.SourceBlock {
+    constructor(source, loader) {
+        super();
+        this._source = source;
+        this._loader = loader;
+        source.linkTo(this);
+        this._loaderObserver = loader.updatedObservable.add((tiles, state) => this._onLoaderUpdated(tiles, state));
+    }
+    get source() {
+        return this._source;
+    }
+    added(eventData, _eventState) {
+        const tiles = [];
+        for (const s of eventData) {
+            const tile = s?.content;
+            if (!tile)
+                continue;
+            if (tile.hasContent && tile.contentStatus === _tile3d_stream_engine__WEBPACK_IMPORTED_MODULE_1__.TileContentStatus.idle) {
+                this._loader.load(tile);
+            }
+            tiles.push(tile);
+        }
+        if (tiles.length)
+            this.notifyAdded(tiles, -1, this, this);
+    }
+    removed(eventData, _eventState) {
+        const tiles = [];
+        for (const s of eventData) {
+            const tile = s?.content;
+            if (!tile)
+                continue;
+            // cancel() only acts on tiles still pending in the queue.
+            this._loader.cancel(tile);
+            tiles.push(tile);
+        }
+        if (tiles.length)
+            this.notifyRemoved(tiles, -1, this, this);
+    }
+    updated(eventData, _eventState) {
+        const tiles = [];
+        for (const s of eventData) {
+            const tile = s?.content;
+            if (tile)
+                tiles.push(tile);
+        }
+        if (tiles.length)
+            this.notifyUpdated(tiles, -1, this, this);
+    }
+    _onLoaderUpdated(tiles, _state) {
+        // A failed fetch holds back the REPLACE swap (the parent keeps covering
+        // the footprint), so retry a bounded number of times before accepting
+        // the coarse fallback permanently.
+        for (const tile of tiles) {
+            if (tile?.contentStatus !== _tile3d_stream_engine__WEBPACK_IMPORTED_MODULE_1__.TileContentStatus.error)
+                continue;
+            const attempts = (tile.contentAttempts ?? 0) + 1;
+            tile.contentAttempts = attempts;
+            if (attempts < _tile3d_stream_source__WEBPACK_IMPORTED_MODULE_2__.Tile3dStreamSource.MaxLoadAttempts) {
+                tile.contentStatus = _tile3d_stream_engine__WEBPACK_IMPORTED_MODULE_1__.TileContentStatus.idle; // re-enqueued by the next traversal
+            }
+        }
+        // Re-traverse so load completions open REPLACE gates / trigger swaps,
+        // then let sinks react to the tiles' new status.
+        this._source.invalidate();
+        this.notifyUpdated(tiles, -1, this, this);
+    }
+    dispose() {
+        if (this._loaderObserver) {
+            this._loaderObserver.disconnect();
+            this._loaderObserver = null;
+        }
+        // Stop receiving the source's emissions: otherwise a disposed binding
+        // keeps driving the loader.
+        this._source.unlinkFrom(this);
+        super.dispose();
+    }
+}
+//# sourceMappingURL=tile3d.stream.binding.js.map
+
+/***/ },
+
+/***/ "./dist/tiles/3d/engine/tile3d.stream.client.js"
+/*!******************************************************!*\
+  !*** ./dist/tiles/3d/engine/tile3d.stream.client.js ***!
+  \******************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   TilesetClient: () => (/* binding */ TilesetClient)
+/* harmony export */ });
+/* harmony import */ var _codecs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../codecs */ "./dist/tiles/3d/codecs/tile3d.codec.tileset.js");
+/* harmony import */ var _io__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../io */ "./dist/io/webClient.js");
+
+
+class TilesetClient extends _io__WEBPACK_IMPORTED_MODULE_1__.WebClient {
+    constructor(name, options) {
+        super(name, _codecs__WEBPACK_IMPORTED_MODULE_0__.TilesetCodec.Shared, undefined, options);
+    }
+}
+//# sourceMappingURL=tile3d.stream.client.js.map
+
+/***/ },
+
+/***/ "./dist/tiles/3d/engine/tile3d.stream.engine.js"
+/*!******************************************************!*\
+  !*** ./dist/tiles/3d/engine/tile3d.stream.engine.js ***!
+  \******************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   ActiveContext: () => (/* binding */ ActiveContext),
+/* harmony export */   DefaultScreenSpaceError: () => (/* binding */ DefaultScreenSpaceError),
+/* harmony export */   Tile3dMaxPriority: () => (/* binding */ Tile3dMaxPriority),
+/* harmony export */   Tile3dMinPriority: () => (/* binding */ Tile3dMinPriority),
+/* harmony export */   Tile3dNormalPriority: () => (/* binding */ Tile3dNormalPriority),
+/* harmony export */   Tile3dRefineType: () => (/* binding */ Tile3dRefineType),
+/* harmony export */   Tile3dStreamEngine: () => (/* binding */ Tile3dStreamEngine),
+/* harmony export */   TileContentStatus: () => (/* binding */ TileContentStatus)
+/* harmony export */ });
+/* harmony import */ var _interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../interfaces */ "./dist/tiles/3d/interfaces/boundingVolume.js");
+/* harmony import */ var _interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../interfaces */ "./dist/tiles/3d/interfaces/tile3d.js");
+/* harmony import */ var _interfaces__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../interfaces */ "./dist/tiles/3d/interfaces/tileset.js");
+/* harmony import */ var _interfaces_math_math__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../interfaces/math/math */ "./dist/tiles/3d/interfaces/math/math.js");
+/* harmony import */ var _pipeline__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../pipeline */ "./dist/tiles/pipeline/tiles.pipeline.sourceblock.js");
+/* harmony import */ var _collections__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../../collections */ "./dist/collections/priorityQueue.js");
+/* harmony import */ var _geodesy__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../../geodesy */ "./dist/geodesy/geodesy.ellipsoid.js");
+/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../../../events */ "./dist/events/events.observable.js");
+/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../../../geometry */ "./dist/geometry/geometry.cartesian.js");
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../../../utils */ "./dist/utils/path.js");
+
+
+
+
+
+
+
+
+const Tile3dMinPriority = 0;
+const Tile3dNormalPriority = 30;
+const Tile3dMaxPriority = 100;
+/**
+ * Enumeration for the refinement strategy used when traversing the object hierarchy for rendering.
+ * - `add`: Children are added to the current set of rendered objects (additive refinement).
+ * - `replace`: Children replace the current object (replacement refinement).
+ * - `unknown`: The refinement strategy is not specified or is implementation dependent.
+ */
+var Tile3dRefineType;
+(function (Tile3dRefineType) {
+    Tile3dRefineType[Tile3dRefineType["add"] = 0] = "add";
+    Tile3dRefineType[Tile3dRefineType["replace"] = 1] = "replace";
+    Tile3dRefineType[Tile3dRefineType["unknown"] = 999] = "unknown";
+})(Tile3dRefineType || (Tile3dRefineType = {}));
+/**
+ * Computes the screen space error (SSE) for an object based on its geometric error,
+ * the distance to the camera, the viewport height, and the tangent of half the field of view.
+ *
+ * @param tileGeometricError - The geometric error of the object (in meters).
+ * @param distanceToCamera - The distance from the object to the camera (in meters).
+ * @param viewportHeight - The height of the viewport (in pixels).
+ * @param tanfov2 - The tangent of half the field of view (unitless).
+ * @returns The screen space error, typically in pixels.
+ */
+const DefaultScreenSpaceError = (tileGeometricError, distanceToCamera, viewportHeight, tanfov2) => (tileGeometricError * viewportHeight) / (2 * distanceToCamera * tanfov2);
+var TileContentStatus;
+(function (TileContentStatus) {
+    TileContentStatus[TileContentStatus["idle"] = 0] = "idle";
+    TileContentStatus[TileContentStatus["pending"] = 1] = "pending";
+    TileContentStatus[TileContentStatus["loading"] = 2] = "loading";
+    TileContentStatus[TileContentStatus["ready"] = 3] = "ready";
+    TileContentStatus[TileContentStatus["error"] = 4] = "error";
+    TileContentStatus[TileContentStatus["unkknown"] = 999] = "unkknown";
+})(TileContentStatus || (TileContentStatus = {}));
+class ActiveContext {
+    constructor(data) {
+        if (!data) {
+            this.cut = new Set();
+        }
+        else if (Array.isArray(data)) {
+            this.cut = new Set(data);
+        }
+        else if (typeof data[Symbol.iterator] === "function") {
+            // generic iterable (e.g. Set, Map keys, etc.)
+            this.cut = new Set(data);
+        }
+        else {
+            // single ITile3d
+            this.cut = new Set([data]);
+        }
+        this.parents = new Set();
+        this.frontier = new Set();
+        this.refinePQ = _collections__WEBPACK_IMPORTED_MODULE_5__.PriorityQueue.fromMax((t) => t.sse);
+        this.coarsenPQ = _collections__WEBPACK_IMPORTED_MODULE_5__.PriorityQueue.fromMin((t) => t.sse);
+    }
+}
+/**
+ * @deprecated Standalone engine kept for reference during the transition.
+ * Use `Tile3dStreamSource` (an IStreamSubEngine with working coarsening,
+ * region volumes and hole-free REPLACE refinement) driven by
+ * `setContext(viewId, cameraViewState)` instead. Note the coordinate
+ * convention differs: this engine stores worldBoundingVolume in the Babylon
+ * basis, Tile3dStreamSource stores raw ECEF.
+ */
+class Tile3dStreamEngine extends _pipeline__WEBPACK_IMPORTED_MODULE_4__.SourceBlock {
+    constructor(uri, display, contentLoader, contentOptions, navOptions) {
+        super();
+        this._views = [null, null];
+        this._root = null;
+        this._visited = [];
+        // Keep latest view-state to re-process after async loads
+        this._pendingState = null;
+        this._isProcessing = false;
+        this._cartesianCache = [_geometry__WEBPACK_IMPORTED_MODULE_8__.Cartesian3.Zero()];
+        this._uri = uri;
+        this._baseUri = _utils__WEBPACK_IMPORTED_MODULE_9__.PathUtils.GetBaseUrl(uri);
+        this._display = display;
+        this._tileContentLoader = contentLoader;
+        this._tileContentLoader.linkTo(this);
+        this._options = navOptions ?? Tile3dStreamEngine.DEFAULT_NAV_OPTIONS;
+        this._contentOptions = contentOptions ?? Tile3dStreamEngine.DEFAULT_CONTENT_OPTIONS;
+    }
+    get rootReadyObservable() {
+        if (!this._rootReadyObservable) {
+            this._rootReadyObservable = new _events__WEBPACK_IMPORTED_MODULE_7__.Observable();
+        }
+        return this._rootReadyObservable;
+    }
+    get options() {
+        return this._options;
+    }
+    get contentOptions() {
+        return this._contentOptions;
+    }
+    get display() {
+        return this._display;
+    }
+    get activeView() {
+        return this._views[0];
+    }
+    setContext(state) {
+        this._pendingState = state ?? null;
+        this._visited = [];
+        void this._process();
+    }
+    async _process() {
+        if (this._isProcessing)
+            return;
+        this._isProcessing = true;
+        try {
+            // Ensure root tileset is loaded once
+            if (!this._root) {
+                await this._initializeRootAsync();
+                // fallthrough: after load, we’ll consume latest pending state
+            }
+            const camState = this._pendingState;
+            if (!camState)
+                return; // nothing to do
+            this._pendingState = null;
+            // build the current view
+            const lastView = this._views[0]; // the view from last frame
+            let currentView; // the one to build.
+            if (!lastView || (lastView.cut.size ?? 0) === 0) {
+                if (!this._root) {
+                    return;
+                }
+                currentView = new ActiveContext(this._root?.root);
+            }
+            else {
+                currentView = new ActiveContext(lastView.cut);
+            }
+            this._views[1] = lastView;
+            this._views[0] = currentView;
+            // main stream logic
+            // -----------------
+            // the tile to remove
+            const toRemove = [];
+            const fn = this._options.screenSpaceError ?? DefaultScreenSpaceError;
+            let mse = this._contentOptions.maxScreenSpaceError ?? Tile3dStreamEngine.DEFAULT_MAX_SCREEN_SPACE_ERROR;
+            const ellipsoid = this._contentOptions.ellipsoid ?? _geodesy__WEBPACK_IMPORTED_MODULE_6__.Ellipsoid.WGS84;
+            const planetRadius = ellipsoid.semiMajorAxis;
+            let refineBudget = this._options.maxRefinePerFrame ?? Number.MAX_VALUE;
+            let coarsenBudget = this._options.maxCoarsenPerFrame ?? Number.MAX_VALUE;
+            for (const leaf of currentView.cut) {
+                this._visited.push(leaf);
+                if (leaf.geometricError === undefined || !leaf.worldBoundingVolume?.sphere) {
+                    // we can not process the tile due to a severe lack of informations
+                    // Not supposed to happen because we iterate over already checked tiles.
+                    continue;
+                }
+                const visibleNow = this._isVisible(leaf, camState, planetRadius);
+                if (!visibleNow) {
+                    if (leaf.visible) {
+                        leaf.visible = visibleNow;
+                        this._freeze(leaf);
+                    }
+                    continue;
+                }
+                // here it's visible.
+                if (!leaf.visible) {
+                    leaf.visible = visibleNow;
+                    this._unfreeze(leaf);
+                }
+                const tileCenter = this._cartesianCache[0];
+                _geometry__WEBPACK_IMPORTED_MODULE_8__.Cartesian3.ResetFromArray(tileCenter, leaf.worldBoundingVolume.sphere);
+                // we compute the distance from the camera, using the center of the bounding volume
+                const distanceToCamera = _geometry__WEBPACK_IMPORTED_MODULE_8__.Cartesian3.Distance(camState.worldPosition, tileCenter);
+                leaf.sse = fn(leaf.geometricError, distanceToCamera, this._display.resolution.height, camState.tanFov2);
+            }
+            //Build refine/coarsen queues from *visible leaves only*
+            for (const leaf of currentView.cut) {
+                if (leaf.visible) {
+                    mse = this._contentOptions.maxScreenSpaceErrorFn?.(leaf.depth) ?? Tile3dStreamEngine.DEFAULT_MAX_SCREEN_SPACE_ERROR;
+                    if (leaf.hasExternal || leaf.sse > mse) {
+                        currentView.refinePQ.enqueue(leaf);
+                    }
+                }
+            }
+            const toLoad = [];
+            if (refineBudget !== 0 && !currentView.refinePQ.isEmpty()) {
+                do {
+                    const leaf = currentView.refinePQ.dequeue();
+                    refineBudget--;
+                    if (!leaf) {
+                        continue;
+                    }
+                    if (leaf.children) {
+                        switch (leaf.refineType) {
+                            case Tile3dRefineType.add: {
+                                for (const child of leaf.children) {
+                                    if (this._isVisible(child, camState, planetRadius)) {
+                                        child.visible = true;
+                                        if (child.contentStatus === TileContentStatus.idle) {
+                                            toLoad.push(child);
+                                        }
+                                    }
+                                }
+                                break;
+                            }
+                            case Tile3dRefineType.replace:
+                            default: {
+                                if (!leaf.contents?.length || leaf.contentStatus === TileContentStatus.ready) {
+                                    for (const child of leaf.children) {
+                                        if (this._isVisible(child, camState, planetRadius)) {
+                                            child.visible = true;
+                                            if (child.contentStatus === TileContentStatus.idle) {
+                                                toLoad.push(child);
+                                            }
+                                        }
+                                    }
+                                    toRemove.push(leaf);
+                                    currentView.cut.delete(leaf);
+                                }
+                                break;
+                            }
+                        }
+                    }
+                    else {
+                        // thanks to the specification, it might be a tile with external reference set
+                        //if (leaf.status == TileContentStatus.idle) {
+                        //    leaf.status = TileContentStatus.pending;
+                        //    this._loadExternalSet(leaf);
+                        //}
+                    }
+                } while (refineBudget !== 0 && !currentView.refinePQ.isEmpty());
+            }
+            if (coarsenBudget !== 0 && !currentView.coarsenPQ.isEmpty()) {
+                do {
+                    coarsenBudget--;
+                } while (coarsenBudget !== 0 && !currentView.coarsenPQ.isEmpty());
+            }
+            if (toRemove.length) {
+                for (const item of toRemove) {
+                    switch (item.contentStatus) {
+                        case TileContentStatus.pending: {
+                            this._tileContentLoader.cancel(item);
+                            break;
+                        }
+                        case TileContentStatus.ready: {
+                            break;
+                        }
+                    }
+                    if (item.visible) {
+                        currentView.cut.delete(item);
+                    }
+                }
+                this.notifyRemoved(toRemove, -1, this, this);
+            }
+            // the remain tiles
+            //const remains: ITile3d[] = Array.from(currentView.cut);
+            if (toLoad.length) {
+                for (const leaf of toLoad) {
+                    if (leaf.visible) {
+                        this._tileContentLoader.load(leaf);
+                    }
+                }
+            }
+        }
+        finally {
+            this._isProcessing = false;
+            // If state changed during async work, process again
+            if (this._pendingState) {
+                const again = this._pendingState;
+                this._pendingState = null; // avoid infinite loop; _process will set if new input arrives
+                if (again)
+                    this.setContext(again);
+            }
+        }
+    }
+    _isVisible(leaf, camState, radius) {
+        if (!leaf.worldBoundingVolume?.sphere) {
+            return true;
+        }
+        if ((0,_interfaces_math_math__WEBPACK_IMPORTED_MODULE_3__.IsTileSphereBeyondHorizon)(leaf.worldBoundingVolume.sphere, camState.worldPosition, radius)) {
+            return false;
+        }
+        return (0,_interfaces_math_math__WEBPACK_IMPORTED_MODULE_3__.IsSphereInFrustum)(leaf.worldBoundingVolume.sphere, camState.frustumPlanes);
+    }
+    _freeze(_leaf) { }
+    _unfreeze(_leaf) { }
+    _internalResolveUri(uri) {
+        return this._contentOptions.uriResolver?.resolve(uri) ?? uri;
+    }
+    async _initializeRootAsync() {
+        const ts = await this._tileContentLoader.loadTileSetAsync(this._uri);
+        if (ts) {
+            this._root = ts;
+            if (ts.root) {
+                this._initializeSet(ts); // this is where we link the nodes and set the worldTransform
+                this._views[0] = new ActiveContext(ts.root);
+            }
+            this._rootReadyObservable?.notifyObservers(ts, -1, this, this);
+        }
+    }
+    _initializeSet(tileset, from) {
+        if (tileset.root) {
+            this._initializeTile(tileset.root, from);
+        }
+    }
+    _initializeTile(tile, parent) {
+        tile.parent = parent;
+        tile.contentStatus = TileContentStatus.idle;
+        // every tile start with a average priority of 50. Priority is set from 0 to 100 with zero is the lowest priority.
+        // priority will be used by loader which load the tile using a maximum batch size
+        tile.priority = Tile3dNormalPriority;
+        if (parent?.worldTransform || tile.transform) {
+            const parentTransform = parent?.worldTransform ?? _interfaces_math_math__WEBPACK_IMPORTED_MODULE_3__.IDENTITY44;
+            const localTransform = tile.transform ?? _interfaces_math_math__WEBPACK_IMPORTED_MODULE_3__.IDENTITY44;
+            tile.worldTransform = new Float64Array(16);
+            (0,_interfaces_math_math__WEBPACK_IMPORTED_MODULE_3__.Mat44MultToRef)(parentTransform, localTransform, tile.worldTransform);
+        }
+        tile.depth = parent !== undefined ? parent.depth + 1 : 0;
+        const refine = tile.refine ?? "REPLACE";
+        switch (refine) {
+            case "ADD": {
+                tile.refineType = Tile3dRefineType.add;
+                break;
+            }
+            case "REPLACE":
+            default: {
+                tile.refineType = Tile3dRefineType.replace;
+                break;
+            }
+        }
+        if (tile.boundingVolume) {
+            if (!tile.boundingVolume.box) {
+                if (tile.boundingVolume.region) {
+                    /* empty */
+                }
+            }
+            if (tile.boundingVolume.box) {
+                if (!tile.boundingVolume.sphere) {
+                    tile.boundingVolume.sphere = (0,_interfaces__WEBPACK_IMPORTED_MODULE_0__.CreateTileSphereFromBox)(tile.boundingVolume.box);
+                }
+            }
+            tile.worldBoundingVolume = {
+                sphere: tile.boundingVolume.sphere?.slice(0, 4),
+                box: tile.boundingVolume.box?.slice(0, 12),
+            };
+            (0,_interfaces_math_math__WEBPACK_IMPORTED_MODULE_3__.EcefBoxToBjsInPlace)(tile.worldBoundingVolume.box);
+            (0,_interfaces_math_math__WEBPACK_IMPORTED_MODULE_3__.EcefSphereToBjsInPlace)(tile.worldBoundingVolume.sphere);
+        }
+        // compute and set absolute paths for every content uri.
+        if (tile.content) {
+            // transfert everything to contents..
+            tile.contents = tile.contents ?? [];
+            tile.contents.push(tile.content);
+            tile.content = undefined;
+        }
+        if (tile.contents) {
+            tile.hasExternal = false;
+            for (const c of tile.contents) {
+                const uri = _utils__WEBPACK_IMPORTED_MODULE_9__.PathUtils.IsRelativeUrl(c.uri) ? _utils__WEBPACK_IMPORTED_MODULE_9__.PathUtils.ResolveUri(this._baseUri, c.uri) : c.uri;
+                c.uri = uri;
+                if (c.uri && _utils__WEBPACK_IMPORTED_MODULE_9__.PathUtils.EndsWith(c.uri, ".json")) {
+                    tile.hasExternal = true;
+                }
+            }
+        }
+        if (tile.children) {
+            for (const t of tile.children) {
+                this._initializeTile(t, tile);
+            }
+        }
+    }
+    updated(eventData, _eventState) {
+        const ctx = this.activeView;
+        if (ctx) {
+            for (const t of eventData) {
+                const contents = (0,_interfaces__WEBPACK_IMPORTED_MODULE_1__.GetTile3dContents)(t);
+                if (contents) {
+                    let hasExternalOnly = true;
+                    for (const c of contents) {
+                        if (c.container) {
+                            if ((0,_interfaces__WEBPACK_IMPORTED_MODULE_2__.IsITileset)(c.container)) {
+                                this._initializeSet(c.container, t);
+                                if (!t.children) {
+                                    t.children = [c.container.root];
+                                }
+                                else {
+                                    // may happen if several external set linked to one tile.
+                                    t.children.push(c.container.root);
+                                }
+                                continue;
+                            }
+                            hasExternalOnly = false;
+                        }
+                    }
+                    if (!hasExternalOnly) {
+                        this.notifyUpdated([t], -1, this, this);
+                    }
+                }
+                ctx.cut.add(t);
+            }
+        }
+    }
+}
+Tile3dStreamEngine.DEFAULT_MAX_SCREEN_SPACE_ERROR = 16;
+Tile3dStreamEngine.DEFAULT_HYSTERESIS_PERCENT = 0.1;
+Tile3dStreamEngine.DEFAULT_NAV_OPTIONS = {
+    hysteresisPercent: Tile3dStreamEngine.DEFAULT_HYSTERESIS_PERCENT,
+};
+Tile3dStreamEngine.DEFAULT_CONTENT_OPTIONS = {
+    maxScreenSpaceError: Tile3dStreamEngine.DEFAULT_MAX_SCREEN_SPACE_ERROR,
+};
+//# sourceMappingURL=tile3d.stream.engine.js.map
+
+/***/ },
+
+/***/ "./dist/tiles/3d/engine/tile3d.stream.source.js"
+/*!******************************************************!*\
+  !*** ./dist/tiles/3d/engine/tile3d.stream.source.js ***!
+  \******************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   TILE3D_NODE_CONTENT_TYPE: () => (/* binding */ TILE3D_NODE_CONTENT_TYPE),
+/* harmony export */   TILE3D_TILESET_CONTENT_TYPE: () => (/* binding */ TILE3D_TILESET_CONTENT_TYPE),
+/* harmony export */   Tile3dNodeSource: () => (/* binding */ Tile3dNodeSource),
+/* harmony export */   Tile3dStreamSource: () => (/* binding */ Tile3dStreamSource)
+/* harmony export */ });
+/* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../events */ "./dist/events/events.observable.js");
+/* harmony import */ var _geodesy__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../geodesy */ "./dist/geodesy/geodesy.ellipsoid.js");
+/* harmony import */ var _geometry_geometry_bounds__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../geometry/geometry.bounds */ "./dist/geometry/geometry.bounds.js");
+/* harmony import */ var _streaming_streaming_datasource_interfaces__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../streaming/streaming.datasource.interfaces */ "./dist/streaming/streaming.datasource.interfaces.js");
+/* harmony import */ var _streaming_streaming_engine__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../../streaming/streaming.engine */ "./dist/streaming/streaming.engine.js");
+/* harmony import */ var _streaming_streaming_visibility_budget__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../../streaming/streaming.visibility.budget */ "./dist/streaming/streaming.visibility.budget.js");
+/* harmony import */ var _streaming_streaming_visibility_overflight__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../../streaming/streaming.visibility.overflight */ "./dist/streaming/streaming.visibility.overflight.js");
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../../../utils */ "./dist/utils/path.js");
+/* harmony import */ var _interfaces__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../interfaces */ "./dist/tiles/3d/interfaces/boundingVolume.js");
+/* harmony import */ var _interfaces_math_math__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../interfaces/math/math */ "./dist/tiles/3d/interfaces/math/math.js");
+/* harmony import */ var _interfaces_math_region__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ../interfaces/math/region */ "./dist/tiles/3d/interfaces/math/region.js");
+/* harmony import */ var _tile3d_stream_engine__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./tile3d.stream.engine */ "./dist/tiles/3d/engine/tile3d.stream.engine.js");
+
+
+
+
+
+
+
+
+
+
+
+
+/** contentType of the Tile3dStreamSource aggregate itself. */
+const TILE3D_TILESET_CONTENT_TYPE = "tile3d-tileset";
+/** Default contentType of the per-tile stream sources it emits. */
+const TILE3D_NODE_CONTENT_TYPE = "tile3d-node";
+/** Maximum scale factor of the upper 3x3 of a column-major matrix. */
+function MaxScaleFactor(m) {
+    const sx = Math.hypot(m[0], m[1], m[2]);
+    const sy = Math.hypot(m[4], m[5], m[6]);
+    const sz = Math.hypot(m[8], m[9], m[10]);
+    return Math.max(sx, sy, sz);
+}
+function AabbFromBox(b) {
+    const ex = Math.abs(b[3]) + Math.abs(b[6]) + Math.abs(b[9]);
+    const ey = Math.abs(b[4]) + Math.abs(b[7]) + Math.abs(b[10]);
+    const ez = Math.abs(b[5]) + Math.abs(b[8]) + Math.abs(b[11]);
+    return new _geometry_geometry_bounds__WEBPACK_IMPORTED_MODULE_2__.Bounds(b[0] - ex, b[1] - ey, 2 * ex, 2 * ey, b[2] - ez, 2 * ez);
+}
+function AabbFromSphere(s) {
+    const r = s[3];
+    return new _geometry_geometry_bounds__WEBPACK_IMPORTED_MODULE_2__.Bounds(s[0] - r, s[1] - r, 2 * r, 2 * r, s[2] - r, 2 * r);
+}
+/**
+ * IStreamSource wrapper over one ITile3d node. Cached per tile by the
+ * sub-engine so the id / instance stay stable across traversals (the parent
+ * engine diffs its cut by id).
+ *
+ * `status` derives from the tile's load + render-gate state: a tile whose
+ * content is fetched but whose sibling set is not yet complete reports
+ * `loading`, so scenes that render only `ready` sources naturally implement
+ * hole-free REPLACE refinement.
+ */
+class Tile3dNodeSource {
+    constructor(tile, contentType = TILE3D_NODE_CONTENT_TYPE) {
+        this.kind = "static";
+        this.tile = tile;
+        this.content = tile;
+        this.contentType = contentType;
+    }
+    get id() {
+        return this.tile.uid ?? "";
+    }
+    get encumbrance() {
+        return this.tile.worldAabb ?? this.tile.worldSphere ?? _geometry_geometry_bounds__WEBPACK_IMPORTED_MODULE_2__.Bounds.Zero();
+    }
+    get boundingBox() {
+        return this.tile.worldAabb;
+    }
+    get boundingSphere() {
+        return this.tile.worldSphere;
+    }
+    /** Geometric error in meters (transform-scaled). */
+    get geometricError() {
+        return this.tile.worldGeometricError ?? this.tile.geometricError ?? 0;
+    }
+    get status() {
+        const t = this.tile;
+        if (!t.hasContent)
+            return _streaming_streaming_datasource_interfaces__WEBPACK_IMPORTED_MODULE_3__.StreamSourceStatus.ready; // structural node: nothing to fetch
+        switch (t.contentStatus) {
+            case _tile3d_stream_engine__WEBPACK_IMPORTED_MODULE_11__.TileContentStatus.ready:
+                return t.renderable === false ? _streaming_streaming_datasource_interfaces__WEBPACK_IMPORTED_MODULE_3__.StreamSourceStatus.loading : _streaming_streaming_datasource_interfaces__WEBPACK_IMPORTED_MODULE_3__.StreamSourceStatus.ready;
+            case _tile3d_stream_engine__WEBPACK_IMPORTED_MODULE_11__.TileContentStatus.error:
+                return _streaming_streaming_datasource_interfaces__WEBPACK_IMPORTED_MODULE_3__.StreamSourceStatus.error;
+            case _tile3d_stream_engine__WEBPACK_IMPORTED_MODULE_11__.TileContentStatus.loading:
+                return _streaming_streaming_datasource_interfaces__WEBPACK_IMPORTED_MODULE_3__.StreamSourceStatus.loading;
+            case _tile3d_stream_engine__WEBPACK_IMPORTED_MODULE_11__.TileContentStatus.pending:
+                return _streaming_streaming_datasource_interfaces__WEBPACK_IMPORTED_MODULE_3__.StreamSourceStatus.pending;
+            default:
+                return _streaming_streaming_datasource_interfaces__WEBPACK_IMPORTED_MODULE_3__.StreamSourceStatus.idle;
+        }
+    }
+    /** Status is derived (see getter); external writes are ignored. */
+    set status(_value) {
+        /* derived */
+    }
+}
+/**
+ * OGC 3D Tiles as an IStreamSubEngine: the 3D Tiles peer of
+ * TilePyramidStreamSource. It walks the materialized tileset tree with
+ * frustum + horizon + screen-space-error tests and emits one
+ * `Tile3dNodeSource` per tile of the current cut. Coarsening falls out of the
+ * parent StreamingEngine diff (tiles that leave the desired set are dequeued
+ * through `coarsenPQ` under budget).
+ *
+ * Behaviour:
+ *  - REPLACE refinement is hole-free: a parent stays in the cut (and its
+ *    children are emitted load-gated) until every visible descendant of the
+ *    replacement front is fetched, then the swap happens in a single frame.
+ *  - ADD refinement emits parents and children together.
+ *  - External tilesets (`content.uri` ending in .json) are grafted lazily the
+ *    first time refinement needs them, then traversal resumes.
+ *  - Tiles without renderable content are structural: traversal passes
+ *    through them without emitting.
+ *
+ * Drive it per frame with `setContext(viewId, cameraViewState, clipBounds?)`,
+ * or through a parent StreamingEngine. Call `invalidate()` when tile content
+ * finishes loading (Tile3dStreamBinding does this automatically).
+ *
+ * Known v1 limits: the REPLACE render gate is shared across views (correct
+ * for a single view); `viewerRequestVolume` is not honored; implicit tiling
+ * and binary tile formats are out of scope.
+ */
+class Tile3dStreamSource extends _streaming_streaming_engine__WEBPACK_IMPORTED_MODULE_4__.StreamingEngine {
+    constructor(options) {
+        super({
+            maxRefinePerFrame: options.maxRefinePerFrame,
+            maxCoarsenPerFrame: options.maxCoarsenPerFrame,
+            minFramesBeforeCoarsen: options.minFramesBeforeCoarsen,
+        });
+        this.kind = "provider";
+        this.status = _streaming_streaming_datasource_interfaces__WEBPACK_IMPORTED_MODULE_3__.StreamSourceStatus.idle;
+        /** The tileset is an aggregate; content is always null. */
+        this.content = null;
+        this._root = null;
+        this._rootPromise = null;
+        this._rootAttempts = 0;
+        this._sources = new Map();
+        this._renderStateChanged = [];
+        this.id = options.id;
+        this.contentType = options.contentType ?? TILE3D_TILESET_CONTENT_TYPE;
+        this.encumbrance = _geometry_geometry_bounds__WEBPACK_IMPORTED_MODULE_2__.Bounds.Zero();
+        this._uri = options.uri;
+        this._baseUri = _utils__WEBPACK_IMPORTED_MODULE_7__.PathUtils.GetBaseUrl(options.uri);
+        this._tilesetLoader = options.tilesetLoader;
+        this._budget = (0,_streaming_streaming_visibility_budget__WEBPACK_IMPORTED_MODULE_5__.ResolveSSEBudget)(options.maxScreenSpaceError ?? Tile3dStreamSource.DefaultMaxScreenSpaceError);
+        this._maxSSEFn = options.maxScreenSpaceErrorFn;
+        const ellipsoid = options.ellipsoid ?? _geodesy__WEBPACK_IMPORTED_MODULE_1__.Ellipsoid.WGS84;
+        this._planetRadius = ellipsoid.semiMajorAxis;
+        this._occluderRadius = Math.min(ellipsoid.semiMajorAxis, ellipsoid.semiMinorAxis);
+        this._horizonCull = options.horizonCull ?? true;
+        this._regionEllipsoid = options.regionEllipsoid ?? ellipsoid;
+        this._childContentType = options.childContentType ?? TILE3D_NODE_CONTENT_TYPE;
+    }
+    /** Notifies once when the root tileset document is parsed and linked. */
+    get rootReadyObservable() {
+        if (!this._rootReadyObservable)
+            this._rootReadyObservable = new _events__WEBPACK_IMPORTED_MODULE_0__.Observable();
+        return this._rootReadyObservable;
+    }
+    get rootTileset() {
+        return this._root;
+    }
+    /**
+     * Re-runs the traversal of every active view with its last camera state.
+     * Call whenever an async event (content loaded, external tileset grafted)
+     * changes what the traversal would select; camera movement does not need
+     * it (setContext already refreshes).
+     */
+    invalidate() {
+        for (const [viewId, ctx] of this._views) {
+            if (ctx.camera)
+                this._refresh(viewId, ctx);
+        }
+    }
+    dispose() {
+        super.dispose();
+        this._sources.clear();
+        this._rootReadyObservable?.clear();
+    }
+    /**
+     * Closes the render gate of every tile leaving the cut before announcing
+     * the removal.
+     *
+     * Without this, a tile coarsened out while its content was still in
+     * flight would keep `renderable === true`; when the fetch later settles,
+     * the sink would present geometry the engine no longer selects, and no
+     * further removal would ever fire for it (the cut exit already happened).
+     */
+    notifyRemoved(eventData, mask, target, currentTarget, userInfo) {
+        for (const s of eventData) {
+            const tile = s?.tile;
+            if (tile)
+                tile.renderable = false;
+        }
+        return super.notifyRemoved(eventData, mask, target, currentTarget, userInfo);
+    }
+    // ───────── traversal ─────────
+    _refresh(viewId, ctx) {
+        this._renderStateChanged.length = 0;
+        super._refresh(viewId, ctx);
+        if (this._renderStateChanged.length) {
+            const updated = [];
+            for (const t of this._renderStateChanged) {
+                const s = this._sources.get(t);
+                if (s)
+                    updated.push(s);
+            }
+            this._renderStateChanged.length = 0;
+            if (updated.length)
+                this.notifyUpdated(updated, -1, this, this);
+        }
+    }
+    _traverse(camera, ctx, _parentsOut, _frontierOut, entriesOut) {
+        if (!this._root) {
+            this._ensureRoot();
+            return;
+        }
+        const rootTile = this._root.root;
+        if (!rootTile)
+            return;
+        const maxSSE = this._budget.getMaxSSE(this._cameraAltitude(camera));
+        this._visit(rootTile, camera, ctx.clipBounds, maxSSE, entriesOut);
+    }
+    _visit(tile, camera, clip, maxSSE, out) {
+        if (!this._isVisible(tile, camera, clip))
+            return;
+        const sse = this._computeSSE(tile, camera);
+        tile.sse = sse;
+        const effMaxSSE = this._maxSSEFn?.(tile.depth) ?? maxSSE;
+        const children = tile.children;
+        const hasChildren = !!(children && children.length);
+        // Structural tiles must always try to reach renderable descendants.
+        const wantRefine = sse > effMaxSSE || !tile.hasContent;
+        if (wantRefine && tile.hasExternal && !hasChildren) {
+            // Refinement requires the external tileset; graft it, render own
+            // content (if any) meanwhile.
+            this._maybeLoadExternal(tile);
+            this._emitIfRenderable(tile, sse, out);
+            return;
+        }
+        if (!wantRefine || !hasChildren) {
+            this._emitIfRenderable(tile, sse, out);
+            return;
+        }
+        if (tile.refineType === _tile3d_stream_engine__WEBPACK_IMPORTED_MODULE_11__.Tile3dRefineType.add) {
+            // Additive refinement: parent and children accumulate.
+            this._emitIfRenderable(tile, sse, out);
+            for (const c of children)
+                this._visit(c, camera, clip, maxSSE, out);
+            return;
+        }
+        // REPLACE refinement, hole-free: descend only once the whole visible
+        // replacement front is fetched; until then keep the parent and stream
+        // the front in load-gated state.
+        const front = [];
+        let ready = true;
+        for (const c of children) {
+            if (!this._collectFront(c, camera, clip, front))
+                ready = false;
+        }
+        if (ready) {
+            for (const c of children)
+                this._visit(c, camera, clip, maxSSE, out);
+            return;
+        }
+        this._emitIfRenderable(tile, sse, out);
+        for (const f of front) {
+            this._emit(f, this._computeSSE(f, camera), out, false);
+        }
+    }
+    /**
+     * Walks a REPLACE front rooted at `c`: pushes every visible renderable
+     * node into `front` and reports whether the whole front is fetched.
+     * Structural nodes recurse; external references are kicked off and count
+     * as not-ready until grafted.
+     */
+    _collectFront(c, camera, clip, front) {
+        if (!this._isVisible(c, camera, clip))
+            return true; // culled: contributes nothing
+        // A failed fetch reports NOT ready on purpose: the swap is held back so
+        // the parent keeps covering the footprint with coarse geometry. Letting
+        // the swap proceed would drop the parent and leave a permanent hole,
+        // since an errored tile has no content to render.
+        if (c.hasExternal && !c.children?.length) {
+            this._maybeLoadExternal(c);
+            if (c.hasContent)
+                front.push(c);
+            return false;
+        }
+        if (c.hasContent) {
+            front.push(c);
+            return c.contentStatus === _tile3d_stream_engine__WEBPACK_IMPORTED_MODULE_11__.TileContentStatus.ready;
+        }
+        if (c.children?.length) {
+            let ready = true;
+            for (const k of c.children) {
+                if (!this._collectFront(k, camera, clip, front))
+                    ready = false;
+            }
+            return ready;
+        }
+        return true; // empty leaf
+    }
+    _emitIfRenderable(tile, priority, out) {
+        if (tile.hasContent)
+            this._emit(tile, priority, out, true);
+    }
+    _emit(tile, priority, out, renderable) {
+        if (tile.renderable !== renderable) {
+            tile.renderable = renderable;
+            this._renderStateChanged.push(tile);
+        }
+        // Fetch order follows visual urgency: the loader reads `priority` when
+        // the tile is enqueued, highest first.
+        tile.priority = Math.max(_tile3d_stream_engine__WEBPACK_IMPORTED_MODULE_11__.Tile3dMinPriority, Math.min(_tile3d_stream_engine__WEBPACK_IMPORTED_MODULE_11__.Tile3dMaxPriority, Math.round(priority)));
+        let src = this._sources.get(tile);
+        if (!src) {
+            src = new Tile3dNodeSource(tile, this._childContentType);
+            this._sources.set(tile, src);
+        }
+        out.set(src.id, { source: src, priority, activatedFrame: -1, lastSeenFrame: -1 });
+    }
+    // ───────── visibility / error metrics ─────────
+    _isVisible(tile, camera, clip) {
+        const aabb = tile.worldAabb;
+        if (clip && aabb && !(0,_streaming_streaming_engine__WEBPACK_IMPORTED_MODULE_4__.IntersectsBoundingBox)(aabb, clip))
+            return false;
+        const sphere = tile.worldBoundingVolume?.sphere;
+        if (this._horizonCull && this._occluderRadius > 0 && sphere) {
+            // Occluder = the ellipsoid's SMALLEST radius: a sphere that size is
+            // fully inside the planet, so the horizon test can never cull a
+            // tile that is actually visible.
+            if ((0,_interfaces_math_math__WEBPACK_IMPORTED_MODULE_9__.IsTileSphereBeyondHorizon)(sphere, camera.worldPosition, this._occluderRadius))
+                return false;
+        }
+        if (camera.isInFrustum && aabb)
+            return camera.isInFrustum(aabb);
+        if (camera.frustumPlanes && sphere)
+            return (0,_interfaces_math_math__WEBPACK_IMPORTED_MODULE_9__.IsSphereInFrustum)(sphere, camera.frustumPlanes);
+        return true;
+    }
+    _computeSSE(tile, camera) {
+        const ge = tile.worldGeometricError ?? tile.geometricError ?? 0;
+        if (ge <= 0)
+            return 0;
+        let distance = 1;
+        const s = tile.worldSphere;
+        if (s) {
+            const dx = s.center.x - camera.worldPosition.x;
+            const dy = s.center.y - camera.worldPosition.y;
+            const dz = s.center.z - camera.worldPosition.z;
+            distance = Math.max(Math.hypot(dx, dy, dz) - s.radius, 1e-6);
+        }
+        const tan = camera.tanFov2 > 0 ? camera.tanFov2 : Math.tan((camera.fovY || 0) * 0.5);
+        const vh = camera.viewportHeight && camera.viewportHeight > 0 ? camera.viewportHeight : 1080;
+        return (0,_streaming_streaming_visibility_overflight__WEBPACK_IMPORTED_MODULE_6__.DefaultScreenSpaceErrorFn)(ge, distance, vh, tan);
+    }
+    /** Camera altitude above the planet surface (raw ECEF, planet at origin). */
+    _cameraAltitude(camera) {
+        if (this._planetRadius <= 0)
+            return 0;
+        const p = camera.worldPosition;
+        return Math.max(Math.hypot(p.x, p.y, p.z) - this._planetRadius, 0);
+    }
+    // ───────── tree initialization ─────────
+    _ensureRoot() {
+        if (this._rootPromise)
+            return;
+        if (this._rootAttempts >= Tile3dStreamSource.MaxLoadAttempts)
+            return;
+        this._rootAttempts++;
+        this.status = _streaming_streaming_datasource_interfaces__WEBPACK_IMPORTED_MODULE_3__.StreamSourceStatus.loading;
+        this._rootPromise = this._tilesetLoader
+            .loadTileSetAsync(this._uri)
+            .then((ts) => {
+            if (!ts?.root) {
+                this.status = _streaming_streaming_datasource_interfaces__WEBPACK_IMPORTED_MODULE_3__.StreamSourceStatus.error;
+                this._rootPromise = null; // let the next traversal retry
+                return;
+            }
+            this._initializeTile(ts.root, undefined, this._baseUri, 0);
+            this._root = ts;
+            const rootTile = ts.root;
+            if (rootTile.worldAabb) {
+                this.boundingBox = rootTile.worldAabb;
+                this.encumbrance = rootTile.worldAabb;
+            }
+            if (rootTile.worldSphere)
+                this.boundingSphere = rootTile.worldSphere;
+            this.status = _streaming_streaming_datasource_interfaces__WEBPACK_IMPORTED_MODULE_3__.StreamSourceStatus.ready;
+            this._rootReadyObservable?.notifyObservers(ts, -1, this, this);
+            this.invalidate();
+        })
+            .catch(() => {
+            this.status = _streaming_streaming_datasource_interfaces__WEBPACK_IMPORTED_MODULE_3__.StreamSourceStatus.error;
+            // Transient failures (offline blip, 503, resolver token not
+            // ready) must not brick the source: the next traversal retries,
+            // up to MaxLoadAttempts.
+            this._rootPromise = null;
+        });
+    }
+    _maybeLoadExternal(tile) {
+        // Retry failed grafts on a later traversal, up to MaxLoadAttempts.
+        if (tile.externalStatus !== undefined && tile.externalStatus !== _tile3d_stream_engine__WEBPACK_IMPORTED_MODULE_11__.TileContentStatus.error)
+            return;
+        if (tile.externalStatus === _tile3d_stream_engine__WEBPACK_IMPORTED_MODULE_11__.TileContentStatus.error) {
+            if ((tile.externalAttempts ?? 0) >= Tile3dStreamSource.MaxLoadAttempts)
+                return;
+        }
+        tile.externalAttempts = (tile.externalAttempts ?? 0) + 1;
+        const jsonContents = (tile.contents ?? []).filter((c) => c.uri && _utils__WEBPACK_IMPORTED_MODULE_7__.PathUtils.EndsWith(c.uri, ".json"));
+        if (!jsonContents.length) {
+            tile.externalStatus = _tile3d_stream_engine__WEBPACK_IMPORTED_MODULE_11__.TileContentStatus.error;
+            return;
+        }
+        tile.externalStatus = _tile3d_stream_engine__WEBPACK_IMPORTED_MODULE_11__.TileContentStatus.loading;
+        Promise.all(jsonContents.map(async (c) => {
+            const ts = await this._tilesetLoader.loadTileSetAsync(c.uri);
+            if (ts?.root) {
+                const index = tile.children?.length ?? 0;
+                this._initializeTile(ts.root, tile, _utils__WEBPACK_IMPORTED_MODULE_7__.PathUtils.GetBaseUrl(c.uri), index);
+                if (!tile.children) {
+                    tile.children = [ts.root];
+                }
+                else {
+                    tile.children.push(ts.root);
+                }
+            }
+            else {
+                throw new Error(`External tileset "${c.uri}" is empty or invalid.`);
+            }
+        }))
+            .then(() => {
+            tile.externalStatus = _tile3d_stream_engine__WEBPACK_IMPORTED_MODULE_11__.TileContentStatus.ready;
+            this.invalidate();
+        })
+            .catch(() => {
+            tile.externalStatus = _tile3d_stream_engine__WEBPACK_IMPORTED_MODULE_11__.TileContentStatus.error;
+            this.invalidate();
+        });
+    }
+    /**
+     * Recursive tile initialization: parent link, uid, depth, refine
+     * inheritance, world transform chain, transform-scaled geometric error,
+     * world bounding volumes (raw ECEF) and absolute content uris.
+     *
+     * `baseUri` is the base of the tileset document DECLARING the tile, so
+     * relative uris inside external tilesets resolve against their own
+     * document (not the root's).
+     */
+    _initializeTile(tile, parent, baseUri, index) {
+        tile.parent = parent;
+        tile.uid = parent ? `${parent.uid}/${index}` : this.id;
+        tile.contentStatus = _tile3d_stream_engine__WEBPACK_IMPORTED_MODULE_11__.TileContentStatus.idle;
+        tile.priority = _tile3d_stream_engine__WEBPACK_IMPORTED_MODULE_11__.Tile3dNormalPriority;
+        tile.depth = parent ? parent.depth + 1 : 0;
+        tile.renderable = false;
+        tile.sse = 0;
+        if (parent?.worldTransform || tile.transform) {
+            const parentTransform = parent?.worldTransform ?? _interfaces_math_math__WEBPACK_IMPORTED_MODULE_9__.IDENTITY44;
+            const localTransform = tile.transform ?? _interfaces_math_math__WEBPACK_IMPORTED_MODULE_9__.IDENTITY44;
+            tile.worldTransform = new Float64Array(16);
+            (0,_interfaces_math_math__WEBPACK_IMPORTED_MODULE_9__.Mat44MultToRef)(parentTransform, localTransform, tile.worldTransform);
+        }
+        // refine inherits from the parent (spec); the root defaults to REPLACE.
+        if (tile.refine === "ADD")
+            tile.refineType = _tile3d_stream_engine__WEBPACK_IMPORTED_MODULE_11__.Tile3dRefineType.add;
+        else if (tile.refine === "REPLACE")
+            tile.refineType = _tile3d_stream_engine__WEBPACK_IMPORTED_MODULE_11__.Tile3dRefineType.replace;
+        else
+            tile.refineType = parent?.refineType ?? _tile3d_stream_engine__WEBPACK_IMPORTED_MODULE_11__.Tile3dRefineType.replace;
+        // The transform chain scales geometricError by its maximum scale factor (spec).
+        const scale = tile.worldTransform ? MaxScaleFactor(tile.worldTransform) : 1;
+        tile.worldGeometricError = (tile.geometricError ?? 0) * scale;
+        this._initializeWorldVolume(tile);
+        if (tile.content) {
+            tile.contents = tile.contents ?? [];
+            tile.contents.push(tile.content);
+            tile.content = undefined;
+        }
+        tile.hasExternal = false;
+        tile.hasContent = false;
+        if (tile.contents) {
+            for (const c of tile.contents) {
+                if (!c.uri)
+                    continue;
+                c.uri = _utils__WEBPACK_IMPORTED_MODULE_7__.PathUtils.IsRelativeUrl(c.uri) ? _utils__WEBPACK_IMPORTED_MODULE_7__.PathUtils.ResolveUri(baseUri, c.uri) : c.uri;
+                if (_utils__WEBPACK_IMPORTED_MODULE_7__.PathUtils.EndsWith(c.uri, ".json"))
+                    tile.hasExternal = true;
+                else
+                    tile.hasContent = true;
+            }
+        }
+        if (tile.children) {
+            for (let i = 0; i < tile.children.length; i++) {
+                this._initializeTile(tile.children[i], tile, baseUri, i);
+            }
+        }
+    }
+    /**
+     * Computes the tile's world bounding volumes in RAW ECEF: box / sphere
+     * volumes go through the tile's world transform (the spec applies
+     * `transform` to them), regions are already geodetic and ignore it.
+     */
+    _initializeWorldVolume(tile) {
+        const bv = tile.boundingVolume;
+        let box;
+        let sphere;
+        if (bv) {
+            if (bv.box) {
+                box = bv.box.slice(0, 12);
+                if (tile.worldTransform)
+                    (0,_interfaces_math_math__WEBPACK_IMPORTED_MODULE_9__.TransformBoxToRef)(bv.box, tile.worldTransform, box);
+                sphere = (0,_interfaces__WEBPACK_IMPORTED_MODULE_8__.CreateTileSphereFromBox)(box);
+            }
+            else if (bv.region) {
+                box = (0,_interfaces_math_region__WEBPACK_IMPORTED_MODULE_10__.RegionToBoxECEF)(bv.region, this._regionEllipsoid);
+                sphere = (0,_interfaces__WEBPACK_IMPORTED_MODULE_8__.CreateTileSphereFromBox)(box);
+            }
+            else if (bv.sphere) {
+                sphere = bv.sphere.slice(0, 4);
+                if (tile.worldTransform)
+                    (0,_interfaces_math_math__WEBPACK_IMPORTED_MODULE_9__.TransformSphereToRef)(bv.sphere, tile.worldTransform, sphere);
+            }
+        }
+        tile.worldBoundingVolume = { box, sphere };
+        if (sphere) {
+            tile.worldSphere = { center: { x: sphere[0], y: sphere[1], z: sphere[2] }, radius: sphere[3] };
+        }
+        tile.worldAabb = box ? AabbFromBox(box) : sphere ? AabbFromSphere(sphere) : undefined;
+    }
+}
+Tile3dStreamSource.DefaultMaxScreenSpaceError = 16;
+/** Fetch attempts per document before giving up (root tileset and external grafts). */
+Tile3dStreamSource.MaxLoadAttempts = 3;
+//# sourceMappingURL=tile3d.stream.source.js.map
+
+/***/ },
+
+/***/ "./dist/tiles/3d/index.js"
+/*!********************************!*\
+  !*** ./dist/tiles/3d/index.js ***!
+  \********************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   ActiveContext: () => (/* reexport safe */ _engine__WEBPACK_IMPORTED_MODULE_1__.ActiveContext),
+/* harmony export */   AreBoxIntersect: () => (/* reexport safe */ _interfaces__WEBPACK_IMPORTED_MODULE_0__.AreBoxIntersect),
+/* harmony export */   CreateTileSphereFromBox: () => (/* reexport safe */ _interfaces__WEBPACK_IMPORTED_MODULE_0__.CreateTileSphereFromBox),
+/* harmony export */   DefaultScreenSpaceError: () => (/* reexport safe */ _engine__WEBPACK_IMPORTED_MODULE_1__.DefaultScreenSpaceError),
+/* harmony export */   GeodeticRadToEcef: () => (/* reexport safe */ _interfaces__WEBPACK_IMPORTED_MODULE_0__.GeodeticRadToEcef),
+/* harmony export */   GetTile3dContents: () => (/* reexport safe */ _interfaces__WEBPACK_IMPORTED_MODULE_0__.GetTile3dContents),
+/* harmony export */   IsITileset: () => (/* reexport safe */ _interfaces__WEBPACK_IMPORTED_MODULE_0__.IsITileset),
+/* harmony export */   IsTile3d: () => (/* reexport safe */ _interfaces__WEBPACK_IMPORTED_MODULE_0__.IsTile3d),
+/* harmony export */   RegionToBoxECEF: () => (/* reexport safe */ _interfaces__WEBPACK_IMPORTED_MODULE_0__.RegionToBoxECEF),
+/* harmony export */   RegionToSphereECEF: () => (/* reexport safe */ _interfaces__WEBPACK_IMPORTED_MODULE_0__.RegionToSphereECEF),
+/* harmony export */   TILE3D_NODE_CONTENT_TYPE: () => (/* reexport safe */ _engine__WEBPACK_IMPORTED_MODULE_1__.TILE3D_NODE_CONTENT_TYPE),
+/* harmony export */   TILE3D_TILESET_CONTENT_TYPE: () => (/* reexport safe */ _engine__WEBPACK_IMPORTED_MODULE_1__.TILE3D_TILESET_CONTENT_TYPE),
+/* harmony export */   Tile3dMaxPriority: () => (/* reexport safe */ _engine__WEBPACK_IMPORTED_MODULE_1__.Tile3dMaxPriority),
+/* harmony export */   Tile3dMinPriority: () => (/* reexport safe */ _engine__WEBPACK_IMPORTED_MODULE_1__.Tile3dMinPriority),
+/* harmony export */   Tile3dNodeSource: () => (/* reexport safe */ _engine__WEBPACK_IMPORTED_MODULE_1__.Tile3dNodeSource),
+/* harmony export */   Tile3dNormalPriority: () => (/* reexport safe */ _engine__WEBPACK_IMPORTED_MODULE_1__.Tile3dNormalPriority),
+/* harmony export */   Tile3dRefineType: () => (/* reexport safe */ _engine__WEBPACK_IMPORTED_MODULE_1__.Tile3dRefineType),
+/* harmony export */   Tile3dStreamBinding: () => (/* reexport safe */ _engine__WEBPACK_IMPORTED_MODULE_1__.Tile3dStreamBinding),
+/* harmony export */   Tile3dStreamEngine: () => (/* reexport safe */ _engine__WEBPACK_IMPORTED_MODULE_1__.Tile3dStreamEngine),
+/* harmony export */   Tile3dStreamSource: () => (/* reexport safe */ _engine__WEBPACK_IMPORTED_MODULE_1__.Tile3dStreamSource),
+/* harmony export */   TileContentStatus: () => (/* reexport safe */ _engine__WEBPACK_IMPORTED_MODULE_1__.TileContentStatus),
+/* harmony export */   TilesetClient: () => (/* reexport safe */ _engine__WEBPACK_IMPORTED_MODULE_1__.TilesetClient),
+/* harmony export */   TilesetCodec: () => (/* reexport safe */ _codecs__WEBPACK_IMPORTED_MODULE_2__.TilesetCodec)
+/* harmony export */ });
+/* harmony import */ var _interfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./interfaces */ "./dist/tiles/3d/interfaces/index.js");
+/* harmony import */ var _engine__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./engine */ "./dist/tiles/3d/engine/index.js");
+/* harmony import */ var _codecs__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./codecs */ "./dist/tiles/3d/codecs/index.js");
+
+
+
+//# sourceMappingURL=index.js.map
+
+/***/ },
+
+/***/ "./dist/tiles/3d/interfaces/boundingVolume.js"
+/*!****************************************************!*\
+  !*** ./dist/tiles/3d/interfaces/boundingVolume.js ***!
+  \****************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   AreBoxIntersect: () => (/* binding */ AreBoxIntersect),
+/* harmony export */   CreateTileSphereFromBox: () => (/* binding */ CreateTileSphereFromBox)
+/* harmony export */ });
+function AreBoxIntersect(a, b) {
+    for (let i = 0; i < 3; ++i) {
+        const ai = 3 + i * 3;
+        const aj = ai + 1;
+        const ak = ai + 2;
+        const aHalf = Math.sqrt(a[ai] ** 2 + a[aj] ** 2 + a[ak] ** 2);
+        const bHalf = Math.sqrt(b[ai] ** 2 + b[aj] ** 2 + b[ak] ** 2);
+        const aMin = a[i] - aHalf;
+        const aMax = a[i] + aHalf;
+        const bMin = b[i] - bHalf;
+        const bMax = b[i] + bHalf;
+        // Sort early if separated on this axis
+        if (aMax < bMin || aMin > bMax) {
+            return false;
+        }
+    }
+    return true;
+}
+/**
+ * Create a tight bounding sphere from a 3D Tiles oriented box.
+ * Works in any coordinate system (ECEF, local, Babylon LH…) as long as
+ * the box and desired sphere are in the same space.
+ */
+function CreateTileSphereFromBox(box) {
+    if (!box || box.length !== 12) {
+        throw new Error("ITileBox must be number[12]: [C(3), U(3), V(3), W(3)].");
+    }
+    const Cx = box[0], Cy = box[1], Cz = box[2];
+    const Ux = box[3], Uy = box[4], Uz = box[5];
+    const Vx = box[6], Vy = box[7], Vz = box[8];
+    const Wx = box[9], Wy = box[10], Wz = box[11];
+    // Corner offsets relative to C: ±U ±V ±W
+    const offsets = [
+        [-Ux - Vx - Wx, -Uy - Vy - Wy, -Uz - Vz - Wz],
+        [Ux - Vx - Wx, Uy - Vy - Wy, Uz - Vz - Wz],
+        [-Ux + Vx - Wx, -Uy + Vy - Wy, -Uz + Vz - Wz],
+        [Ux + Vx - Wx, Uy + Vy - Wy, Uz + Vz - Wz],
+        [-Ux - Vx + Wx, -Uy - Vy + Wy, -Uz - Vz + Wz],
+        [Ux - Vx + Wx, Uy - Vy + Wy, Uz - Vz + Wz],
+        [-Ux + Vx + Wx, -Uy + Vy + Wy, -Uz + Vz + Wz],
+        [Ux + Vx + Wx, Uy + Vy + Wy, Uz + Vz + Wz],
+    ];
+    // Max distance from center among the 8 corners
+    let maxRSq = 0;
+    for (const [dx, dy, dz] of offsets) {
+        const r2 = dx * dx + dy * dy + dz * dz;
+        if (r2 > maxRSq)
+            maxRSq = r2;
+    }
+    return [Cx, Cy, Cz, Math.sqrt(maxRSq)];
+}
+//# sourceMappingURL=boundingVolume.js.map
+
+/***/ },
+
+/***/ "./dist/tiles/3d/interfaces/index.js"
+/*!*******************************************!*\
+  !*** ./dist/tiles/3d/interfaces/index.js ***!
+  \*******************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   AreBoxIntersect: () => (/* reexport safe */ _boundingVolume__WEBPACK_IMPORTED_MODULE_0__.AreBoxIntersect),
+/* harmony export */   CreateTileSphereFromBox: () => (/* reexport safe */ _boundingVolume__WEBPACK_IMPORTED_MODULE_0__.CreateTileSphereFromBox),
+/* harmony export */   GeodeticRadToEcef: () => (/* reexport safe */ _math_region__WEBPACK_IMPORTED_MODULE_3__.GeodeticRadToEcef),
+/* harmony export */   GetTile3dContents: () => (/* reexport safe */ _tile3d__WEBPACK_IMPORTED_MODULE_1__.GetTile3dContents),
+/* harmony export */   IsITileset: () => (/* reexport safe */ _tileset__WEBPACK_IMPORTED_MODULE_2__.IsITileset),
+/* harmony export */   IsTile3d: () => (/* reexport safe */ _tile3d__WEBPACK_IMPORTED_MODULE_1__.IsTile3d),
+/* harmony export */   RegionToBoxECEF: () => (/* reexport safe */ _math_region__WEBPACK_IMPORTED_MODULE_3__.RegionToBoxECEF),
+/* harmony export */   RegionToSphereECEF: () => (/* reexport safe */ _math_region__WEBPACK_IMPORTED_MODULE_3__.RegionToSphereECEF)
+/* harmony export */ });
+/* harmony import */ var _boundingVolume__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./boundingVolume */ "./dist/tiles/3d/interfaces/boundingVolume.js");
+/* harmony import */ var _tile3d__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tile3d */ "./dist/tiles/3d/interfaces/tile3d.js");
+/* harmony import */ var _tileset__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tileset */ "./dist/tiles/3d/interfaces/tileset.js");
+/* harmony import */ var _math_region__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./math/region */ "./dist/tiles/3d/interfaces/math/region.js");
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//# sourceMappingURL=index.js.map
+
+/***/ },
+
+/***/ "./dist/tiles/3d/interfaces/math/math.js"
+/*!***********************************************!*\
+  !*** ./dist/tiles/3d/interfaces/math/math.js ***!
+  \***********************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   A: () => (/* binding */ A),
+/* harmony export */   Ainv: () => (/* binding */ Ainv),
+/* harmony export */   BjsToEcefCartInPlace: () => (/* binding */ BjsToEcefCartInPlace),
+/* harmony export */   DistanceFromPlane: () => (/* binding */ DistanceFromPlane),
+/* harmony export */   Dot3: () => (/* binding */ Dot3),
+/* harmony export */   EcefBoxToBjsInPlace: () => (/* binding */ EcefBoxToBjsInPlace),
+/* harmony export */   EcefBoxToRHInPlace: () => (/* binding */ EcefBoxToRHInPlace),
+/* harmony export */   EcefMatToBjsToRef: () => (/* binding */ EcefMatToBjsToRef),
+/* harmony export */   EcefSphereToBjsInPlace: () => (/* binding */ EcefSphereToBjsInPlace),
+/* harmony export */   EcefSphereToRYInPlace: () => (/* binding */ EcefSphereToRYInPlace),
+/* harmony export */   EcefToBjs: () => (/* binding */ EcefToBjs),
+/* harmony export */   EcefToBjsBufferInPlace: () => (/* binding */ EcefToBjsBufferInPlace),
+/* harmony export */   EcefToBjsCartInPlace: () => (/* binding */ EcefToBjsCartInPlace),
+/* harmony export */   EcefToBjsInPlace: () => (/* binding */ EcefToBjsInPlace),
+/* harmony export */   EcefToRH: () => (/* binding */ EcefToRH),
+/* harmony export */   EcefToRHBufferInPlace: () => (/* binding */ EcefToRHBufferInPlace),
+/* harmony export */   EcefToRHInPlace: () => (/* binding */ EcefToRHInPlace),
+/* harmony export */   IDENTITY44: () => (/* binding */ IDENTITY44),
+/* harmony export */   IsBoxInFrustum: () => (/* binding */ IsBoxInFrustum),
+/* harmony export */   IsPointInBox: () => (/* binding */ IsPointInBox),
+/* harmony export */   IsPointInSphere: () => (/* binding */ IsPointInSphere),
+/* harmony export */   IsSphereInFrustum: () => (/* binding */ IsSphereInFrustum),
+/* harmony export */   IsTileCenterBeyondHorizon: () => (/* binding */ IsTileCenterBeyondHorizon),
+/* harmony export */   IsTileSphereBeyondHorizon: () => (/* binding */ IsTileSphereBeyondHorizon),
+/* harmony export */   Mat44MultToRef: () => (/* binding */ Mat44MultToRef),
+/* harmony export */   R_YupToZup: () => (/* binding */ R_YupToZup),
+/* harmony export */   R_ZupToYup: () => (/* binding */ R_ZupToYup),
+/* harmony export */   TransformBoxToRef: () => (/* binding */ TransformBoxToRef),
+/* harmony export */   TransformPointToRef: () => (/* binding */ TransformPointToRef),
+/* harmony export */   TransformSphereToRef: () => (/* binding */ TransformSphereToRef),
+/* harmony export */   TransformVectorToRef: () => (/* binding */ TransformVectorToRef)
+/* harmony export */ });
+/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../../geometry */ "./dist/geometry/geometry.cartesian.js");
+/* harmony import */ var _math__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../../math */ "./dist/math/math.js");
+
+
+// Column-major identity
+const IDENTITY44 = new Float64Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
+// A for (xb, yb, zb) = (x, z, y)
+const A = new Float64Array([-1, 0, 0, 0, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 1]);
+const Ainv = new Float64Array([-1, 0, 0, 0, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 1]);
+// +90° about X (Y-up -> Z-up), row-major
+const R_YupToZup = new Float64Array([1, 0, 0, 0, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 1]);
+// -90° about X (Z-up -> Y-up), row-major
+const R_ZupToYup = new Float64Array([1, 0, 0, 0, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 1]);
+/// <summary>
+/// Why `M_bjs = A * M_ecef * A^{-1}` ?  (change of basis)
+///
+/// We have two coordinate systems:
+///   - ECEF (right-handed), where tiles/boxes/transforms are defined
+///   - Babylon (left-handed, Y up), where we render
+///
+/// Let A be the fixed 4×4 matrix that converts a vector from ECEF to Babylon:
+///     p_bjs = A * p_ecef
+/// Then its inverse converts back:
+///     p_ecef = A^{-1} * p_bjs
+///
+/// If a child point transforms in ECEF as:
+///     p_parent_ecef = M_ecef * p_child_ecef
+/// substitute p_ecef = A^{-1} * p_bjs:
+///     p_parent_bjs = A * p_parent_ecef
+///                   = A * M_ecef * p_child_ecef
+///                   = A * M_ecef * (A^{-1} * p_child_bjs)
+///                   = (A * M_ecef * A^{-1}) * p_child_bjs
+///
+/// Therefore the same hierarchical relation holds in Babylon with:
+///     M_bjs = A * M_ecef * A^{-1}
+///
+/// Reading order (column-vector convention): right → left.
+/// So when applied to a point, A^{-1} acts first (go to ECEF),
+/// then M_ecef, then A (return to Babylon).
+///
+/// With your axis mapping (xb, yb, zb) = (-x, +z, -y), the matrices are:
+///   A =
+///     [ -1  0  0  0
+///       0   0  1  0
+///       0  -1  0  0
+///       0   0  0  1 ]
+///   A^{-1} = Aᵀ =
+///     [ -1  0   0  0
+///       0   0  -1  0
+///       0   1   0  0
+///       0   0   0  1 ]
+///
+/// Practical split for affine M = [R t; 0 1]:
+///   R_bjs = A * R_ecef * A^{-1}
+///   t_bjs = A * t_ecef      // just transform the translation as a vector
+///
+/// Sanity checks:
+///   - Pure translation t maps to the same component-wise mapping as points.
+///   - Rotation about ECEF-Z becomes rotation about Babylon-Y (since z→y).
+/// </summary>
+function EcefMatToBjsToRef(M_ecef, ref) {
+    // Float64: ECEF translations (~1e7 m) lose sub-meter precision in float32.
+    const tmp = new Float64Array(16);
+    Mat44MultToRef(A, M_ecef, tmp); // t = A * M
+    Mat44MultToRef(tmp, Ainv, ref); // M_bjs = t * Ainv
+}
+/// <summary>
+/// Column-major 4x4 multiply: ref = a * b
+/// Safe if ref === a or ref === b.
+/// </summary>
+function Mat44MultToRef(a, b, ref) {
+    // cache inputs (handles aliasing)
+    const a00 = a[0], a01 = a[1], a02 = a[2], a03 = a[3];
+    const a10 = a[4], a11 = a[5], a12 = a[6], a13 = a[7];
+    const a20 = a[8], a21 = a[9], a22 = a[10], a23 = a[11];
+    const a30 = a[12], a31 = a[13], a32 = a[14], a33 = a[15];
+    const b00 = b[0], b01 = b[1], b02 = b[2], b03 = b[3];
+    const b10 = b[4], b11 = b[5], b12 = b[6], b13 = b[7];
+    const b20 = b[8], b21 = b[9], b22 = b[10], b23 = b[11];
+    const b30 = b[12], b31 = b[13], b32 = b[14], b33 = b[15];
+    // column 0
+    ref[0] = a00 * b00 + a10 * b01 + a20 * b02 + a30 * b03;
+    ref[1] = a01 * b00 + a11 * b01 + a21 * b02 + a31 * b03;
+    ref[2] = a02 * b00 + a12 * b01 + a22 * b02 + a32 * b03;
+    ref[3] = a03 * b00 + a13 * b01 + a23 * b02 + a33 * b03;
+    // column 1
+    ref[4] = a00 * b10 + a10 * b11 + a20 * b12 + a30 * b13;
+    ref[5] = a01 * b10 + a11 * b11 + a21 * b12 + a31 * b13;
+    ref[6] = a02 * b10 + a12 * b11 + a22 * b12 + a32 * b13;
+    ref[7] = a03 * b10 + a13 * b11 + a23 * b12 + a33 * b13;
+    // column 2
+    ref[8] = a00 * b20 + a10 * b21 + a20 * b22 + a30 * b23;
+    ref[9] = a01 * b20 + a11 * b21 + a21 * b22 + a31 * b23;
+    ref[10] = a02 * b20 + a12 * b21 + a22 * b22 + a32 * b23;
+    ref[11] = a03 * b20 + a13 * b21 + a23 * b22 + a33 * b23;
+    // column 3 (translation column)
+    ref[12] = a00 * b30 + a10 * b31 + a20 * b32 + a30 * b33;
+    ref[13] = a01 * b30 + a11 * b31 + a21 * b32 + a31 * b33;
+    ref[14] = a02 * b30 + a12 * b31 + a22 * b32 + a32 * b33;
+    ref[15] = a03 * b30 + a13 * b31 + a23 * b32 + a33 * b33;
+}
+/**
+ * Computes the dot product between a vector `n`
+ * and a 3D point/vector stored in a flat array starting at `offset`.
+ *
+ * @param n           3D vector
+ * @param coordinates Flat array containing the point/vector components
+ * @param offset      Index of the x-component in the array
+ * @returns           Dot product result
+ */
+function Dot3(n, coordinates, offset) {
+    return n.x * coordinates[offset] + n.y * coordinates[offset + 1] + n.z * coordinates[offset + 2];
+}
+/**
+ * Computes the signed distance from a 3D point to a plane.
+ *
+ * Plane equation convention: dot(normal, x) + d = 0
+ *
+ * @param p           Plane (normal vector + constant d)
+ * @param coordinates Flat array containing the point coordinates
+ * @param offset      Index of the x-component in the array
+ * @returns           Signed distance (positive = in front of plane, negative = behind)
+ */
+function DistanceFromPlane(p, coordinates, offset) {
+    return Dot3(p.normal, coordinates, offset) + p.d;
+}
+/** Transforms a point by a column-major 4x4 affine matrix (includes translation). */
+function TransformPointToRef(transform, v, offset, ref, refOffset) {
+    const a = v[offset++];
+    const b = v[offset++];
+    const c = v[offset];
+    ref[refOffset++] = transform[0] * a + transform[4] * b + transform[8] * c + transform[12];
+    ref[refOffset++] = transform[1] * a + transform[5] * b + transform[9] * c + transform[13];
+    ref[refOffset] = transform[2] * a + transform[6] * b + transform[10] * c + transform[14];
+}
+/** Transforms a direction/half-axis by the linear (3x3) part only (no translation). */
+function TransformVectorToRef(m, v, offset, ref, refOffset) {
+    const a = v[offset++];
+    const b = v[offset++];
+    const c = v[offset];
+    ref[refOffset++] = m[0] * a + m[4] * b + m[8] * c;
+    ref[refOffset++] = m[1] * a + m[5] * b + m[9] * c;
+    ref[refOffset] = m[2] * a + m[6] * b + m[10] * c;
+}
+/**
+ * Transforms a 3D Tiles box (center + 3 half-axis vectors) by a world matrix.
+ * Uses your in-place helpers to avoid temporary object allocations.
+ *
+ * @param box  [cx,cy,cz, ex.x,ex.y,ex.z, ey.x,ey.y,ey.z, ez.x,ez.y,ez.z]
+ * @param m    Column-major 4x4 affine transform
+ * @param out  Destination array of length >= 12
+ */
+function TransformBoxToRef(box, m, out) {
+    // center (uses full affine: rotate/scale + translate)
+    TransformPointToRef(m, box, 0, out, 0);
+    // half-axes (use only linear part: rotate/scale/shear, no translation)
+    TransformVectorToRef(m, box, 3, out, 3);
+    TransformVectorToRef(m, box, 6, out, 6);
+    TransformVectorToRef(m, box, 9, out, 9);
+}
+/**
+ * Transforms a sphere by a world matrix.
+ * Center uses full affine transform; radius scales by the max column length
+ * of the 3x3 linear part (conservative under non-uniform scale/shear).
+ *
+ * @param sphere [cx,cy,cz,r]
+ * @param m      Column-major 4x4 affine transform
+ * @param out    Destination array length >= 4
+ */
+function TransformSphereToRef(sphere, m, out) {
+    // Transform center (includes translation)
+    TransformPointToRef(m, sphere, 0, out, 0);
+    // Compute conservative scale factor = max column length of the upper-left 3x3
+    const c0x = m[0], c0y = m[1], c0z = m[2];
+    const c1x = m[4], c1y = m[5], c1z = m[6];
+    const c2x = m[8], c2y = m[9], c2z = m[10];
+    const s0 = Math.hypot(c0x, c0y, c0z);
+    const s1 = Math.hypot(c1x, c1y, c1z);
+    const s2 = Math.hypot(c2x, c2y, c2z);
+    const sMax = Math.max(s0, s1, s2);
+    // Scale radius
+    out[3] = sphere[3] * sMax;
+}
+/**
+ * Frustum test for a 3D Tiles box using SAT-style projection.
+ * Works directly on the 12-number `box` array without creating temporaries.
+ *
+ * @param box      [cx,cy,cz, ex.x,ex.y,ex.z, ey.x,ey.y,ey.z, ez.x,ez.y,ez.z]
+ * @param frustum  Array of planes with convention: inside ⇔ dot(n, x) + d >= 0
+ */
+function IsBoxInFrustum(box, frustum) {
+    // Offsets in the 12-tuple
+    const CENTER = 0, EX = 3, EY = 6, EZ = 9;
+    for (const pl of frustum) {
+        // Project OBB half-axes onto plane normal to get projected radius
+        const r = Math.abs(Dot3(pl.normal, box, EX)) + Math.abs(Dot3(pl.normal, box, EY)) + Math.abs(Dot3(pl.normal, box, EZ));
+        // Signed distance of box center to plane
+        const s = DistanceFromPlane(pl, box, CENTER);
+        // If the center is farther behind the plane than its projected radius,
+        // the box is entirely outside this plane -> outside the frustum
+        if (s < -r)
+            return false;
+    }
+    return true;
+}
+/**
+ * Tests whether a sphere is inside (or intersects) a frustum.
+ *
+ * @param sphere [cx,cy,cz,r]
+ * @param frustum Array of planes with convention: inside ⇔ dot(n, x) + d >= 0
+ */
+function IsSphereInFrustum(sphere, frustum) {
+    if (frustum === undefined) {
+        return true;
+    }
+    const CENTER = 0; // offset for sphere center (x,y,z)
+    const r = sphere[3];
+    for (const pl of frustum) {
+        const s = DistanceFromPlane(pl, sphere, CENTER);
+        // If the sphere center is farther behind the plane than its radius,
+        // the sphere is completely outside this plane → outside frustum
+        if (s < -r)
+            return false;
+    }
+    return true;
+}
+/**
+ * Tests whether a point lies inside or on the surface of a sphere.
+ *
+ * @param sphere [cx, cy, cz, r] — center coordinates and radius
+ * @param point  Point to test
+ * @returns      True if the point is inside or on the sphere, false otherwise
+ */
+function IsPointInSphere(sphere, point) {
+    const dx = point.x - sphere[0];
+    const dy = point.y - sphere[1];
+    const dz = point.z - sphere[2];
+    const r = sphere[3];
+    return dx * dx + dy * dy + dz * dz <= r * r;
+}
+/**
+ * Tests whether a point lies inside or on the surface of a 3D Tiles box.
+ *
+ * A 3D Tiles box is defined as:
+ *   [ cx, cy, cz,
+ *     ex.x, ex.y, ex.z,
+ *     ey.x, ey.y, ey.z,
+ *     ez.x, ez.y, ez.z ]
+ * where (cx,cy,cz) is the center and ex/ey/ez are the half-axis vectors.
+ *
+ * @param box   12-tuple describing the oriented bounding box
+ * @param point Point to test
+ * @returns     True if the point is inside or on the box, false otherwise
+ */
+function IsPointInBox(box, point) {
+    const cx = box[0], cy = box[1], cz = box[2];
+    const exx = box[3], exy = box[4], exz = box[5];
+    const eyx = box[6], eyy = box[7], eyz = box[8];
+    const ezx = box[9], ezy = box[10], ezz = box[11];
+    // Vector from box center to point
+    const dx = point.x - cx;
+    const dy = point.y - cy;
+    const dz = point.z - cz;
+    // Project onto each half-axis and check extent
+    const projX = dx * exx + dy * exy + dz * exz;
+    const projY = dx * eyx + dy * eyy + dz * eyz;
+    const projZ = dx * ezx + dy * ezy + dz * ezz;
+    const lenX2 = exx * exx + exy * exy + exz * exz;
+    const lenY2 = eyx * eyx + eyy * eyy + eyz * eyz;
+    const lenZ2 = ezx * ezx + ezy * ezy + ezz * ezz;
+    // Inside if absolute projection ≤ squared length of each half-axis
+    return projX * projX <= lenX2 && projY * projY <= lenY2 && projZ * projZ <= lenZ2;
+}
+/// <summary>
+/// In-place ECEF → Babylon (LH, Y up) for a single vec3 stored in a strided array.
+/// Mapping: (xb, yb, zb) = (-x, +z, -y)
+/// </summary>
+function EcefToBjsInPlace(v, offset = 0, stride = 1) {
+    // x' = -x
+    v[offset] = -v[offset];
+    // swap/sign for y' and z'  (y' =  z,  z' = -y)
+    const yIdx = offset + stride;
+    const zIdx = yIdx + stride;
+    const y = v[yIdx];
+    v[yIdx] = v[zIdx];
+    v[zIdx] = -y;
+}
+function EcefToRHInPlace(v, offset = 0, stride = 1) {
+    // swap/sign for y' and z'  (y' =  z,  z' = -y)
+    const yIdx = offset + stride;
+    const zIdx = yIdx + stride;
+    const y = v[yIdx];
+    v[yIdx] = v[zIdx];
+    v[zIdx] = -y;
+}
+/// <summary>
+/// Non-in-place version returning a tuple [x', y', z'].
+/// </summary>
+function EcefToBjs(x, y, z) {
+    // (-x, +z, -y)
+    return [-x, z, -y];
+}
+/// <summary>
+/// Convert GLTF ECEF like (right-handed, Z-up)  to Babylon (left-handed, Y-up) in-place.
+/// Mapping here: (X, Y, Z) -> (-X, Z, -Y).
+/// </summary>
+function EcefToBjsCartInPlace(ref) {
+    // (-x, +z, -y)
+    ref.x = -ref.x;
+    const tmp = ref.y;
+    ref.y = ref.z;
+    ref.z = -tmp;
+}
+/// <summary>
+/// Convert Babylon (left-handed, Y-up) Cartesian to GLTF ECEF like (right-handed, Z-up) in-place.
+/// Inverse of EcefToBjsCartInPlace (which does: (-x, +z, -y)).
+/// Mapping here: (X, Y, Z) -> (-X, -Z, +Y).
+/// </summary>
+function BjsToEcefCartInPlace(ref) {
+    ref.x = -ref.x;
+    const tmp = ref.y;
+    ref.y = -ref.z;
+    ref.z = tmp;
+}
+/// <summary>
+/// Non-in-place version returning a tuple [x', y', z'].
+/// </summary>
+function EcefToRH(x, y, z) {
+    return [x, z, -y];
+}
+/// <summary>
+/// In-place transform of N consecutive vec3 in a buffer (with stride).
+/// If count is omitted, it is inferred from length.
+/// </summary>
+function EcefToBjsBufferInPlace(data, startOffset = 0, stride = 1, count) {
+    const step = 3 * stride;
+    const maxCount = Math.floor((data.length - startOffset) / step);
+    const n = Math.min(count ?? maxCount, maxCount);
+    let off = startOffset;
+    for (let i = 0; i < n; i++, off += step) {
+        EcefToBjsInPlace(data, off, stride);
+    }
+}
+function EcefToRHBufferInPlace(data, startOffset = 0, stride = 1, count) {
+    const step = 3 * stride;
+    const maxCount = Math.floor((data.length - startOffset) / step);
+    const n = Math.min(count ?? maxCount, maxCount);
+    let off = startOffset;
+    for (let i = 0; i < n; i++, off += step) {
+        EcefToRHInPlace(data, off, stride);
+    }
+}
+/// <summary>
+/// 3D Tiles boundingVolume.box (12 numbers) ECEF → Babylon (LH, Y up).
+/// Applies the same mapping to center and the 3 half-axes.
+/// Orientation fix is intentionally omitted (not needed for your frustum checks).
+/// </summary>
+function EcefBoxToBjsInPlace(box) {
+    // box = [ Cx,Cy,Cz,  Ux,Uy,Uz,  Vx,Vy,Vz,  Wx,Wy,Wz ]
+    // convert each triplet in place
+    EcefToBjsInPlace(box, 0, 1); // C
+    EcefToBjsInPlace(box, 3, 1); // U
+    EcefToBjsInPlace(box, 6, 1); // V
+    EcefToBjsInPlace(box, 9, 1); // W
+}
+function EcefBoxToRHInPlace(box) {
+    // box = [ Cx,Cy,Cz,  Ux,Uy,Uz,  Vx,Vy,Vz,  Wx,Wy,Wz ]
+    // convert each triplet in place
+    EcefToRHInPlace(box, 0, 1); // C
+    EcefToRHInPlace(box, 3, 1); // U
+    EcefToRHInPlace(box, 6, 1); // V
+    EcefToRHInPlace(box, 9, 1); // W
+}
+/// <summary>
+/// In-place ECEF → Babylon (LH, Y up) for a 3D Tiles sphere [cx,cy,cz,r].
+/// Mapping: (xb, yb, zb) = (-x, +z, -y). Radius unchanged.
+/// </summary>
+function EcefSphereToBjsInPlace(v) {
+    EcefToBjsInPlace(v);
+}
+function EcefSphereToRYInPlace(v) {
+    EcefToRHInPlace(v);
+}
+/**
+ * Compute whether a direction to a point on the globe is beyond the geometric horizon.
+ * Uses the spherical Earth test: a point direction `v` is visible iff
+ * dot(u, v) >= R / |C|, where u = normalize(camera), v = normalize(point).
+ *
+ * This is a conservative FAST test for tiles near the surface.
+ * Returns true if the tile center is beyond horizon (i.e., can be culled).
+ *
+ * @param tileCenter  Tile center (e.g., ECEF or your LH world with Earth at origin).
+ * @param camera      Camera position in the same frame.
+ * @param planetRadius    Planet radius (meters). Earth ≈ 6_371_000.
+ * @param safetyDeg       Extra angular safety margin (deg). Positive => less popping (culls a bit later).
+ */
+function IsTileCenterBeyondHorizon(tileCenter, camera, planetRadius, safetyDeg = 0) {
+    const rCam = _geometry__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.Magnitude(camera);
+    if (rCam <= planetRadius) {
+        // On/inside planet: geometric horizon test not meaningful -> don't cull.
+        return false;
+    }
+    const rCenter = _geometry__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.Magnitude(tileCenter);
+    if (_math__WEBPACK_IMPORTED_MODULE_1__.Scalar.WithinEpsilon(rCenter)) {
+        // Degenerate center (e.g. root at origin). Treat as visible.
+        return false;
+    }
+    // Unit vectors
+    const u = _geometry__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.Normalize(camera, rCam); // we already computed the length...
+    const v = _geometry__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.Normalize(tileCenter, rCenter);
+    // cos θ between camera dir and point dir
+    const cosTheta = _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.Clamp(_geometry__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.Dot(u, v), -1, 1);
+    // Quick sure-cull: strict back hemisphere
+    if (cosTheta < 0)
+        return true;
+    // Horizon threshold with optional safety angle s (radians)
+    //const cosH = Scalar.Clamp(planetRadius / rCam, 0, 1);
+    if (safetyDeg === 0) {
+        //return cosTheta < cosH;
+    }
+    else {
+        //const s = safetyDeg * Scalar.DEG2RAD;
+        //const coss = Math.cos(s);
+        //const sins = Math.sin(s);
+        //const sinH = Math.sqrt(Math.max(0, 1 - cosH * cosH));
+        //const cosHWithSafety = cosH * coss - sinH * sins; // cos(θ_h + s)
+        //return cosTheta < cosHWithSafety;
+    }
+    return false;
+}
+/**
+ * Robust test: a whole tile sphere (center S, radius rs) is fully beyond the horizon if
+ * (θ_s - δ) > θ_h, where:
+ *  - θ_s = angle between camera direction u and sphere center direction ŝ
+ *  - δ   = angular radius of the sphere as seen from the planet center = asin(rs / |S|)
+ *  - θ_h = horizon angle = acos(R / |C|)
+ * We cull only when the *entire* sphere is beyond the horizon (no popping).
+ *
+ * @param tileSphere      Tile bounding sphere. (e.g., ECEF or your LH world with Earth at origin)
+ * @param camera          Camera position in same frame.
+ * @param planetRadius    Planet radius.
+ * @param extraMeters     Extra radial padding (grow rs) to be conservative.
+ */
+function IsTileSphereBeyondHorizon(tileSphere, camera, planetRadius, extraMeters = 0) {
+    const C = camera;
+    const rCam = _geometry__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.Magnitude(C);
+    if (rCam <= planetRadius) {
+        return false;
+    }
+    const S = new _geometry__WEBPACK_IMPORTED_MODULE_0__.Cartesian3(tileSphere[0], tileSphere[1], tileSphere[2]);
+    const rS = _geometry__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.Magnitude(S);
+    if (rCam <= planetRadius || _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.WithinEpsilon(rS)) {
+        return false;
+    }
+    const sphereRadius = Math.max(0, tileSphere[3] + extraMeters);
+    // A sphere enclosing the planet center subtends every direction (angular
+    // radius PI), which asin() cannot express: it can never be fully beyond
+    // the horizon. Same for a camera sitting inside the sphere.
+    if (sphereRadius >= rS) {
+        return false;
+    }
+    const dx = C.x - S.x;
+    const dy = C.y - S.y;
+    const dz = C.z - S.z;
+    if (dx * dx + dy * dy + dz * dz <= sphereRadius * sphereRadius) {
+        return false;
+    }
+    const u = _geometry__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.Normalize(C, rCam);
+    const shat = _geometry__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.Normalize(S, rS);
+    const cosThetaS = _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.Clamp(_geometry__WEBPACK_IMPORTED_MODULE_0__.Cartesian3.Dot(u, shat), -1, 1);
+    const thetaS = Math.acos(cosThetaS);
+    const sinDelta = _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.Clamp(sphereRadius / rS, -1, 1);
+    const delta = Math.asin(sinDelta);
+    const cosH = _math__WEBPACK_IMPORTED_MODULE_1__.Scalar.Clamp(planetRadius / rCam, -1, 1);
+    const thetaH = Math.acos(cosH);
+    // Fully beyond horizon?
+    return thetaS - delta > thetaH;
+}
+//# sourceMappingURL=math.js.map
+
+/***/ },
+
+/***/ "./dist/tiles/3d/interfaces/math/region.js"
+/*!*************************************************!*\
+  !*** ./dist/tiles/3d/interfaces/math/region.js ***!
+  \*************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   GeodeticRadToEcef: () => (/* binding */ GeodeticRadToEcef),
+/* harmony export */   RegionToBoxECEF: () => (/* binding */ RegionToBoxECEF),
+/* harmony export */   RegionToSphereECEF: () => (/* binding */ RegionToSphereECEF)
+/* harmony export */ });
+/* harmony import */ var _geodesy__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../../geodesy */ "./dist/geodesy/geodesy.ellipsoid.js");
+/* harmony import */ var _boundingVolume__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../boundingVolume */ "./dist/tiles/3d/interfaces/boundingVolume.js");
+
+
+/**
+ * Region bounding-volume conversion (3D Tiles `boundingVolume.region`).
+ *
+ * A region is [west, south, east, north, minHeight, maxHeight] in EPSG:4979
+ * (lon/lat in radians, heights in meters above the ellipsoid). Regions are
+ * expressed directly in ECEF and are NOT subject to the tile `transform`
+ * chain (3D Tiles specification).
+ *
+ * The conversion samples the region surface at both height bounds, fits an
+ * oriented bounding box aligned to the ENU frame at the region center, and
+ * inflates it by the chord sagitta of the sampling step so the continuous
+ * (curved) region is guaranteed to be enclosed.
+ */
+/** Max angular sampling step (radians). 10 degrees keeps the sample count bounded for planet-wide regions. */
+const MAX_SAMPLING_STEP = (10 * Math.PI) / 180;
+/**
+ * Geodetic (radians, meters) to ECEF on the given ellipsoid.
+ */
+function GeodeticRadToEcef(latRad, lonRad, height, ellipsoid, out) {
+    const sinLat = Math.sin(latRad);
+    const cosLat = Math.cos(latRad);
+    const sinLon = Math.sin(lonRad);
+    const cosLon = Math.cos(lonRad);
+    const n = ellipsoid.semiMajorAxis / Math.sqrt(1 - ellipsoid.sqrEccentricity * sinLat * sinLat);
+    const tmp = (height + n) * cosLat;
+    out.x = tmp * cosLon;
+    out.y = tmp * sinLon;
+    out.z = (height + ellipsoid.oneMinusSqrEccentricity * n) * sinLat;
+}
+/**
+ * Converts a 3D Tiles region to an ECEF oriented bounding box (BoxType:
+ * [center xyz, x half-axis xyz, y half-axis xyz, z half-axis xyz]).
+ *
+ * The box axes are the ENU (east / north / up) directions at the region
+ * center, which yields tight boxes for the small regions typical of deep
+ * tiles and safely conservative boxes for continent / planet scale regions.
+ */
+function RegionToBoxECEF(region, ellipsoid = _geodesy__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.WGS84) {
+    const west = region[0];
+    const south = region[1];
+    let east = region[2];
+    const north = region[3];
+    const hMin = region[4];
+    const hMax = region[5];
+    // Antimeridian crossing: the spec allows west > east; unwrap east.
+    if (east < west)
+        east += 2 * Math.PI;
+    const lonCenter = (west + east) / 2;
+    const latCenter = (south + north) / 2;
+    // ENU basis at the region center (geodetic up).
+    const sinLat = Math.sin(latCenter);
+    const cosLat = Math.cos(latCenter);
+    const sinLon = Math.sin(lonCenter);
+    const cosLon = Math.cos(lonCenter);
+    const ex = -sinLon, ey = cosLon, ez = 0; // east
+    const nx = -sinLat * cosLon, ny = -sinLat * sinLon, nz = cosLat; // north
+    const ux = cosLat * cosLon, uy = cosLat * sinLon, uz = sinLat; // up
+    const origin = { x: 0, y: 0, z: 0 };
+    GeodeticRadToEcef(latCenter, lonCenter, (hMin + hMax) / 2, ellipsoid, origin);
+    // Sample the region at both heights on a grid bounded by MAX_SAMPLING_STEP.
+    const lonSpan = east - west;
+    const latSpan = north - south;
+    const lonSteps = Math.max(1, Math.ceil(lonSpan / MAX_SAMPLING_STEP));
+    const latSteps = Math.max(1, Math.ceil(latSpan / MAX_SAMPLING_STEP));
+    let minE = Number.POSITIVE_INFINITY, maxE = Number.NEGATIVE_INFINITY;
+    let minN = Number.POSITIVE_INFINITY, maxN = Number.NEGATIVE_INFINITY;
+    let minU = Number.POSITIVE_INFINITY, maxU = Number.NEGATIVE_INFINITY;
+    const p = { x: 0, y: 0, z: 0 };
+    for (let i = 0; i <= latSteps; i++) {
+        const lat = south + (latSpan * i) / latSteps;
+        for (let j = 0; j <= lonSteps; j++) {
+            const lon = west + (lonSpan * j) / lonSteps;
+            for (let h = 0; h < 2; h++) {
+                GeodeticRadToEcef(lat, lon, h === 0 ? hMin : hMax, ellipsoid, p);
+                const dx = p.x - origin.x;
+                const dy = p.y - origin.y;
+                const dz = p.z - origin.z;
+                const e = dx * ex + dy * ey + dz * ez;
+                const n2 = dx * nx + dy * ny + dz * nz;
+                const u = dx * ux + dy * uy + dz * uz;
+                if (e < minE)
+                    minE = e;
+                if (e > maxE)
+                    maxE = e;
+                if (n2 < minN)
+                    minN = n2;
+                if (n2 > maxN)
+                    maxN = n2;
+                if (u < minU)
+                    minU = u;
+                if (u > maxU)
+                    maxU = u;
+            }
+        }
+    }
+    // The sampled hull under-estimates the curved surface between samples by
+    // at most the chord sagitta of a grid cell's DIAGONAL arc (the bulge is
+    // maximal at the cell centre). Unscaled delta-lon is conservative.
+    const stepDiagonal = Math.hypot(lonSpan / lonSteps, latSpan / latSteps);
+    // Curvature radius, not the semi-major axis: on an ellipsoid the normal
+    // curvature radius peaks at the poles (a / sqrt(1 - e^2)), so using `a`
+    // would under-inflate the bound at high latitude.
+    const maxCurvatureRadius = ellipsoid.semiMajorAxis / Math.sqrt(ellipsoid.oneMinusSqrEccentricity);
+    const outerRadius = maxCurvatureRadius + Math.max(hMax, 0);
+    const sagitta = outerRadius * (1 - Math.cos(stepDiagonal / 2));
+    minE -= sagitta;
+    maxE += sagitta;
+    minN -= sagitta;
+    maxN += sagitta;
+    minU -= sagitta;
+    maxU += sagitta;
+    // Recentre and build half axes along the ENU directions.
+    const cE = (minE + maxE) / 2;
+    const cN = (minN + maxN) / 2;
+    const cU = (minU + maxU) / 2;
+    const hE = (maxE - minE) / 2;
+    const hN = (maxN - minN) / 2;
+    const hU = (maxU - minU) / 2;
+    return [
+        origin.x + cE * ex + cN * nx + cU * ux,
+        origin.y + cE * ey + cN * ny + cU * uy,
+        origin.z + cE * ez + cN * nz + cU * uz,
+        hE * ex,
+        hE * ey,
+        hE * ez,
+        hN * nx,
+        hN * ny,
+        hN * nz,
+        hU * ux,
+        hU * uy,
+        hU * uz,
+    ];
+}
+/**
+ * Converts a 3D Tiles region to an enclosing ECEF sphere.
+ */
+function RegionToSphereECEF(region, ellipsoid = _geodesy__WEBPACK_IMPORTED_MODULE_0__.Ellipsoid.WGS84) {
+    return (0,_boundingVolume__WEBPACK_IMPORTED_MODULE_1__.CreateTileSphereFromBox)(RegionToBoxECEF(region, ellipsoid));
+}
+//# sourceMappingURL=region.js.map
+
+/***/ },
+
+/***/ "./dist/tiles/3d/interfaces/tile3d.js"
+/*!********************************************!*\
+  !*** ./dist/tiles/3d/interfaces/tile3d.js ***!
+  \********************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   GetTile3dContents: () => (/* binding */ GetTile3dContents),
+/* harmony export */   IsTile3d: () => (/* binding */ IsTile3d)
+/* harmony export */ });
+function GetTile3dContents(tile) {
+    return tile.contents ?? (tile.content ? [tile.content] : undefined);
+}
+/**
+ * Type guard to check if an object is a valid ITile3d
+ */
+function IsTile3d(obj) {
+    if (typeof obj !== "object" || obj === null) {
+        return false;
+    }
+    const t = obj;
+    // Required property
+    if (typeof t.geometricError !== "number")
+        return false;
+    if (!t.boundingVolume || typeof t.boundingVolume !== "object")
+        return false;
+    // Optional checks (lightweight, only structure)
+    if (t.viewerRequestVolume && typeof t.viewerRequestVolume !== "object")
+        return false;
+    if (t.refine && typeof t.refine !== "string")
+        return false;
+    if (t.transform && (!Array.isArray(t.transform) || t.transform.length !== 16))
+        return false;
+    if (t.content && typeof t.content !== "object")
+        return false;
+    if (t.contents && !Array.isArray(t.contents))
+        return false;
+    if (t.children && !Array.isArray(t.children))
+        return false;
+    return true;
+}
+//# sourceMappingURL=tile3d.js.map
+
+/***/ },
+
+/***/ "./dist/tiles/3d/interfaces/tileset.js"
+/*!*********************************************!*\
+  !*** ./dist/tiles/3d/interfaces/tileset.js ***!
+  \*********************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   IsITileset: () => (/* binding */ IsITileset)
+/* harmony export */ });
+function IsITileset(obj) {
+    if (typeof obj !== "object" || obj === null)
+        return false;
+    // required
+    if (typeof obj.geometricError !== "number")
+        return false;
+    if (!obj.asset || typeof obj.asset !== "object")
+        return false;
+    if (!obj.root || typeof obj.root !== "object")
+        return false;
+    // optional
+    if (obj.properties && typeof obj.properties !== "object")
+        return false;
+    if (obj.schema && typeof obj.schema !== "object")
+        return false;
+    if (obj.schemaUri && typeof obj.schemaUri !== "string")
+        return false;
+    if (obj.statistics && typeof obj.statistics !== "object")
+        return false;
+    if (obj.groups) {
+        if (!Array.isArray(obj.groups) || obj.groups.length < 1)
+            return false;
+    }
+    if (obj.metadata && typeof obj.metadata !== "object")
+        return false;
+    if (obj.extensionsUsed) {
+        if (!Array.isArray(obj.extensionsUsed) || obj.extensionsUsed.length < 1)
+            return false;
+        if (!obj.extensionsUsed.every((e) => typeof e === "string"))
+            return false;
+    }
+    if (obj.extensionsRequired) {
+        if (!Array.isArray(obj.extensionsRequired) || obj.extensionsRequired.length < 1)
+            return false;
+        if (!obj.extensionsRequired.every((e) => typeof e === "string"))
+            return false;
+    }
+    return true;
+}
+//# sourceMappingURL=tileset.js.map
+
+/***/ },
+
 /***/ "./dist/tiles/address/index.js"
 /*!*************************************!*\
   !*** ./dist/tiles/address/index.js ***!
@@ -11530,7 +13687,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _math_math__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../math/math */ "./dist/math/math.js");
 /* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../geometry */ "./dist/geometry/geometry.cartesian.js");
 /* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../geometry */ "./dist/geometry/geometry.bounds.js");
-/* harmony import */ var _geodesy_geodesy_system__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../geodesy/geodesy.system */ "./dist/geodesy/geodesy.system.js");
+/* harmony import */ var _geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../geodesy/geodesy.ellipsoid */ "./dist/geodesy/geodesy.ellipsoid.js");
+/* harmony import */ var _geodesy_geodesy_system__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../geodesy/geodesy.system */ "./dist/geodesy/geodesy.system.js");
+
 
 
 
@@ -11634,8 +13793,8 @@ class TileAddress {
      * A single GeodeticSystem instance can be reused across calls to avoid
      * rebuilding it every time.
      */
-    static ToBoundsECEF(a, metrics, ellipsoid, system) {
-        const sys = system ?? new _geodesy_geodesy_system__WEBPACK_IMPORTED_MODULE_3__.GeodeticSystem(ellipsoid);
+    static ToBoundsECEF(a, metrics, system) {
+        const sys = system instanceof _geodesy_geodesy_ellipsoid__WEBPACK_IMPORTED_MODULE_3__.Ellipsoid ? new _geodesy_geodesy_system__WEBPACK_IMPORTED_MODULE_4__.GeodeticSystem(system) : system;
         const deltas = [
             [0, 0],
             [1, 0],
@@ -11748,10 +13907,10 @@ class TileAddress {
         for (let i = levelOfDetail; i > 0; i--) {
             let digit = 0;
             const mask = 1 << (i - 1);
-            if ((x & mask) != 0) {
+            if ((x & mask) !== 0) {
                 digit++;
             }
-            if ((y & mask) != 0) {
+            if ((y & mask) !== 0) {
                 digit++;
                 digit++;
             }
@@ -12623,106 +14782,131 @@ ShapeCollection.Epsilon = 1;
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   AbstractTileLoader: () => (/* reexport safe */ _loaders_index__WEBPACK_IMPORTED_MODULE_5__.AbstractTileLoader),
-/* harmony export */   AbstractTileMetrics: () => (/* reexport safe */ _tiles_metrics__WEBPACK_IMPORTED_MODULE_11__.AbstractTileMetrics),
-/* harmony export */   ArcGISGrayscaleElevationDecoder: () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_0__.ArcGISGrayscaleElevationDecoder),
-/* harmony export */   ArcGISImageServerUrlBuilder: () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_0__.ArcGISImageServerUrlBuilder),
-/* harmony export */   BlobTileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.BlobTileCodec),
-/* harmony export */   CanvasTileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.CanvasTileCodec),
-/* harmony export */   Cartesian4TileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.Cartesian4TileCodec),
-/* harmony export */   Cartesian4TileCodecOptions: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.Cartesian4TileCodecOptions),
-/* harmony export */   CellCoordinateReference: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_10__.CellCoordinateReference),
-/* harmony export */   Display: () => (/* reexport safe */ _display_index__WEBPACK_IMPORTED_MODULE_7__.Display),
-/* harmony export */   EPSG3857: () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_8__.EPSG3857),
-/* harmony export */   Float32Layer: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.Float32Layer),
-/* harmony export */   Float32TileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.Float32TileCodec),
-/* harmony export */   Float32TileCodecOptions: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.Float32TileCodecOptions),
-/* harmony export */   Float32TileCodecOptionsBuilder: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.Float32TileCodecOptionsBuilder),
-/* harmony export */   Google: () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_0__.Google),
-/* harmony export */   GoogleMap2DLayerCode: () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_0__.GoogleMap2DLayerCode),
-/* harmony export */   GoogleMap2DUrlBuilder: () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_0__.GoogleMap2DUrlBuilder),
-/* harmony export */   HasNavigationApi: () => (/* reexport safe */ _navigation_index__WEBPACK_IMPORTED_MODULE_3__.HasNavigationApi),
-/* harmony export */   HasNavigationState: () => (/* reexport safe */ _navigation_index__WEBPACK_IMPORTED_MODULE_3__.HasNavigationState),
-/* harmony export */   ImageDataTileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.ImageDataTileCodec),
-/* harmony export */   ImageDataTileCodecOptions: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.ImageDataTileCodecOptions),
-/* harmony export */   ImageDataTileCodecOptionsBuilder: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.ImageDataTileCodecOptionsBuilder),
-/* harmony export */   ImageLayer: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.ImageLayer),
-/* harmony export */   ImageTileClient: () => (/* reexport safe */ _tiles_client_image__WEBPACK_IMPORTED_MODULE_13__.ImageTileClient),
-/* harmony export */   ImageTileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.ImageTileCodec),
-/* harmony export */   IsArrayOfTile: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_10__.IsArrayOfTile),
-/* harmony export */   IsDrawableTileMapLayer: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.IsDrawableTileMapLayer),
-/* harmony export */   IsHasTileMetrics: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_10__.IsHasTileMetrics),
-/* harmony export */   IsPhysicalDisplay: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.IsPhysicalDisplay),
-/* harmony export */   IsTargetBlock: () => (/* reexport safe */ _pipeline_index__WEBPACK_IMPORTED_MODULE_2__.IsTargetBlock),
-/* harmony export */   IsTile: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_10__.IsTile),
-/* harmony export */   IsTile2DAddress: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_10__.IsTile2DAddress),
-/* harmony export */   IsTileCollection: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_10__.IsTileCollection),
-/* harmony export */   IsTileConstructor: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_10__.IsTileConstructor),
-/* harmony export */   IsTileDatasource: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_10__.IsTileDatasource),
-/* harmony export */   IsTileMapLayer: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.IsTileMapLayer),
-/* harmony export */   IsTileMapLayerContainerProxy: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.IsTileMapLayerContainerProxy),
-/* harmony export */   IsTileMapLayerProxy: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.IsTileMapLayerProxy),
-/* harmony export */   IsTileNavigationApi: () => (/* reexport safe */ _navigation_index__WEBPACK_IMPORTED_MODULE_3__.IsTileNavigationApi),
-/* harmony export */   IsTileNavigationState: () => (/* reexport safe */ _navigation_index__WEBPACK_IMPORTED_MODULE_3__.IsTileNavigationState),
-/* harmony export */   IsTileSystemBounds: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_10__.IsTileSystemBounds),
-/* harmony export */   JsonTileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.JsonTileCodec),
-/* harmony export */   MapZen: () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_0__.MapZen),
-/* harmony export */   MapZenDemUrlBuilder: () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_0__.MapZenDemUrlBuilder),
-/* harmony export */   MapZenNormalsDecoder: () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_0__.MapZenNormalsDecoder),
-/* harmony export */   MapzenAltitudeDecoder: () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_0__.MapzenAltitudeDecoder),
-/* harmony export */   MedianFilter: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.MedianFilter),
-/* harmony export */   NeighborsAddress: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_10__.NeighborsAddress),
-/* harmony export */   NeighborsIndex: () => (/* reexport safe */ _address_index__WEBPACK_IMPORTED_MODULE_6__.NeighborsIndex),
-/* harmony export */   RGBATileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.RGBATileCodec),
-/* harmony export */   RGBTileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.RGBTileCodec),
-/* harmony export */   ShapeCollection: () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_8__.ShapeCollection),
-/* harmony export */   ShapeCollectionEventArgs: () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_8__.ShapeCollectionEventArgs),
-/* harmony export */   SourceBlock: () => (/* reexport safe */ _pipeline_index__WEBPACK_IMPORTED_MODULE_2__.SourceBlock),
-/* harmony export */   TargetProxy: () => (/* reexport safe */ _pipeline_index__WEBPACK_IMPORTED_MODULE_2__.TargetProxy),
-/* harmony export */   TextTileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.TextTileCodec),
-/* harmony export */   Tile: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_14__.Tile),
-/* harmony export */   TileAddress: () => (/* reexport safe */ _address_index__WEBPACK_IMPORTED_MODULE_6__.TileAddress),
-/* harmony export */   TileCollection: () => (/* reexport safe */ _tiles_collection__WEBPACK_IMPORTED_MODULE_16__.TileCollection),
-/* harmony export */   TileContentFetcher: () => (/* reexport safe */ _loaders_index__WEBPACK_IMPORTED_MODULE_5__.TileContentFetcher),
-/* harmony export */   TileLoader: () => (/* reexport safe */ _loaders_index__WEBPACK_IMPORTED_MODULE_5__.TileLoader),
-/* harmony export */   TileMapBase: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.TileMapBase),
-/* harmony export */   TileMapLayer: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.TileMapLayer),
-/* harmony export */   TileMapLayerView: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.TileMapLayerView),
-/* harmony export */   TileMapVectorLayer: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.TileMapVectorLayer),
-/* harmony export */   TileNavigationApi: () => (/* reexport safe */ _navigation_index__WEBPACK_IMPORTED_MODULE_3__.TileNavigationApi),
-/* harmony export */   TileNavigationState: () => (/* reexport safe */ _navigation_index__WEBPACK_IMPORTED_MODULE_3__.TileNavigationState),
-/* harmony export */   TileNavigationStateSynchronizer: () => (/* reexport safe */ _navigation_index__WEBPACK_IMPORTED_MODULE_3__.TileNavigationStateSynchronizer),
-/* harmony export */   TilePipelineLink: () => (/* reexport safe */ _pipeline_index__WEBPACK_IMPORTED_MODULE_2__.TilePipelineLink),
-/* harmony export */   TileSystemBounds: () => (/* reexport safe */ _tiles_system__WEBPACK_IMPORTED_MODULE_17__.TileSystemBounds),
-/* harmony export */   TileVectorRenderer: () => (/* reexport safe */ _vector_index__WEBPACK_IMPORTED_MODULE_9__.TileVectorRenderer),
-/* harmony export */   TileView: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.TileView),
-/* harmony export */   TileViewBase: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_4__.TileViewBase),
-/* harmony export */   TileWebClient: () => (/* reexport safe */ _tiles_client__WEBPACK_IMPORTED_MODULE_12__.TileWebClient),
-/* harmony export */   VectorTileGeomType: () => (/* reexport safe */ _vector_index__WEBPACK_IMPORTED_MODULE_9__.VectorTileGeomType),
-/* harmony export */   WebTileUrlBuilder: () => (/* reexport safe */ _tiles_url_web__WEBPACK_IMPORTED_MODULE_15__.WebTileUrlBuilder),
-/* harmony export */   XmlDocumentTileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.XmlDocumentTileCodec),
-/* harmony export */   hasTileSelectionContext: () => (/* reexport safe */ _pipeline_index__WEBPACK_IMPORTED_MODULE_2__.hasTileSelectionContext),
-/* harmony export */   isFilter: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_1__.isFilter),
-/* harmony export */   isViewProxy: () => (/* reexport safe */ _pipeline_index__WEBPACK_IMPORTED_MODULE_2__.isViewProxy)
+/* harmony export */   AbstractTileLoader: () => (/* reexport safe */ _loaders_index__WEBPACK_IMPORTED_MODULE_6__.AbstractTileLoader),
+/* harmony export */   AbstractTileMetrics: () => (/* reexport safe */ _tiles_metrics__WEBPACK_IMPORTED_MODULE_12__.AbstractTileMetrics),
+/* harmony export */   ActiveContext: () => (/* reexport safe */ _3d_index__WEBPACK_IMPORTED_MODULE_0__.ActiveContext),
+/* harmony export */   ArcGISGrayscaleElevationDecoder: () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_1__.ArcGISGrayscaleElevationDecoder),
+/* harmony export */   ArcGISImageServerUrlBuilder: () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_1__.ArcGISImageServerUrlBuilder),
+/* harmony export */   AreBoxIntersect: () => (/* reexport safe */ _3d_index__WEBPACK_IMPORTED_MODULE_0__.AreBoxIntersect),
+/* harmony export */   BlobTileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_2__.BlobTileCodec),
+/* harmony export */   CanvasTileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_2__.CanvasTileCodec),
+/* harmony export */   Cartesian4TileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_2__.Cartesian4TileCodec),
+/* harmony export */   Cartesian4TileCodecOptions: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_2__.Cartesian4TileCodecOptions),
+/* harmony export */   CellCoordinateReference: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_11__.CellCoordinateReference),
+/* harmony export */   CreateTileSphereFromBox: () => (/* reexport safe */ _3d_index__WEBPACK_IMPORTED_MODULE_0__.CreateTileSphereFromBox),
+/* harmony export */   DefaultScreenSpaceError: () => (/* reexport safe */ _3d_index__WEBPACK_IMPORTED_MODULE_0__.DefaultScreenSpaceError),
+/* harmony export */   Display: () => (/* reexport safe */ _display_index__WEBPACK_IMPORTED_MODULE_8__.Display),
+/* harmony export */   EPSG3857: () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_9__.EPSG3857),
+/* harmony export */   Float32Layer: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_5__.Float32Layer),
+/* harmony export */   Float32TileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_2__.Float32TileCodec),
+/* harmony export */   Float32TileCodecOptions: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_2__.Float32TileCodecOptions),
+/* harmony export */   Float32TileCodecOptionsBuilder: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_2__.Float32TileCodecOptionsBuilder),
+/* harmony export */   GeodeticRadToEcef: () => (/* reexport safe */ _3d_index__WEBPACK_IMPORTED_MODULE_0__.GeodeticRadToEcef),
+/* harmony export */   GetTile3dContents: () => (/* reexport safe */ _3d_index__WEBPACK_IMPORTED_MODULE_0__.GetTile3dContents),
+/* harmony export */   Google: () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_1__.Google),
+/* harmony export */   GoogleMap2DLayerCode: () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_1__.GoogleMap2DLayerCode),
+/* harmony export */   GoogleMap2DUrlBuilder: () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_1__.GoogleMap2DUrlBuilder),
+/* harmony export */   HasNavigationApi: () => (/* reexport safe */ _navigation_index__WEBPACK_IMPORTED_MODULE_4__.HasNavigationApi),
+/* harmony export */   HasNavigationState: () => (/* reexport safe */ _navigation_index__WEBPACK_IMPORTED_MODULE_4__.HasNavigationState),
+/* harmony export */   ImageDataTileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_2__.ImageDataTileCodec),
+/* harmony export */   ImageDataTileCodecOptions: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_2__.ImageDataTileCodecOptions),
+/* harmony export */   ImageDataTileCodecOptionsBuilder: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_2__.ImageDataTileCodecOptionsBuilder),
+/* harmony export */   ImageLayer: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_5__.ImageLayer),
+/* harmony export */   ImageTileClient: () => (/* reexport safe */ _tiles_client_image__WEBPACK_IMPORTED_MODULE_14__.ImageTileClient),
+/* harmony export */   ImageTileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_2__.ImageTileCodec),
+/* harmony export */   IsArrayOfTile: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_11__.IsArrayOfTile),
+/* harmony export */   IsDrawableTileMapLayer: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_5__.IsDrawableTileMapLayer),
+/* harmony export */   IsHasTileMetrics: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_11__.IsHasTileMetrics),
+/* harmony export */   IsITileset: () => (/* reexport safe */ _3d_index__WEBPACK_IMPORTED_MODULE_0__.IsITileset),
+/* harmony export */   IsPhysicalDisplay: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_5__.IsPhysicalDisplay),
+/* harmony export */   IsTargetBlock: () => (/* reexport safe */ _pipeline_index__WEBPACK_IMPORTED_MODULE_3__.IsTargetBlock),
+/* harmony export */   IsTile: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_11__.IsTile),
+/* harmony export */   IsTile2DAddress: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_11__.IsTile2DAddress),
+/* harmony export */   IsTile3d: () => (/* reexport safe */ _3d_index__WEBPACK_IMPORTED_MODULE_0__.IsTile3d),
+/* harmony export */   IsTileCollection: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_11__.IsTileCollection),
+/* harmony export */   IsTileConstructor: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_11__.IsTileConstructor),
+/* harmony export */   IsTileDatasource: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_11__.IsTileDatasource),
+/* harmony export */   IsTileMapLayer: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_5__.IsTileMapLayer),
+/* harmony export */   IsTileMapLayerContainerProxy: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_5__.IsTileMapLayerContainerProxy),
+/* harmony export */   IsTileMapLayerProxy: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_5__.IsTileMapLayerProxy),
+/* harmony export */   IsTileNavigationApi: () => (/* reexport safe */ _navigation_index__WEBPACK_IMPORTED_MODULE_4__.IsTileNavigationApi),
+/* harmony export */   IsTileNavigationState: () => (/* reexport safe */ _navigation_index__WEBPACK_IMPORTED_MODULE_4__.IsTileNavigationState),
+/* harmony export */   IsTileSystemBounds: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_11__.IsTileSystemBounds),
+/* harmony export */   JsonTileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_2__.JsonTileCodec),
+/* harmony export */   MapZen: () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_1__.MapZen),
+/* harmony export */   MapZenDemUrlBuilder: () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_1__.MapZenDemUrlBuilder),
+/* harmony export */   MapZenNormalsDecoder: () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_1__.MapZenNormalsDecoder),
+/* harmony export */   MapzenAltitudeDecoder: () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_1__.MapzenAltitudeDecoder),
+/* harmony export */   MedianFilter: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_2__.MedianFilter),
+/* harmony export */   NeighborsAddress: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_11__.NeighborsAddress),
+/* harmony export */   NeighborsIndex: () => (/* reexport safe */ _address_index__WEBPACK_IMPORTED_MODULE_7__.NeighborsIndex),
+/* harmony export */   RGBATileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_2__.RGBATileCodec),
+/* harmony export */   RGBTileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_2__.RGBTileCodec),
+/* harmony export */   RegionToBoxECEF: () => (/* reexport safe */ _3d_index__WEBPACK_IMPORTED_MODULE_0__.RegionToBoxECEF),
+/* harmony export */   RegionToSphereECEF: () => (/* reexport safe */ _3d_index__WEBPACK_IMPORTED_MODULE_0__.RegionToSphereECEF),
+/* harmony export */   ShapeCollection: () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_9__.ShapeCollection),
+/* harmony export */   ShapeCollectionEventArgs: () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_9__.ShapeCollectionEventArgs),
+/* harmony export */   SourceBlock: () => (/* reexport safe */ _pipeline_index__WEBPACK_IMPORTED_MODULE_3__.SourceBlock),
+/* harmony export */   TILE3D_NODE_CONTENT_TYPE: () => (/* reexport safe */ _3d_index__WEBPACK_IMPORTED_MODULE_0__.TILE3D_NODE_CONTENT_TYPE),
+/* harmony export */   TILE3D_TILESET_CONTENT_TYPE: () => (/* reexport safe */ _3d_index__WEBPACK_IMPORTED_MODULE_0__.TILE3D_TILESET_CONTENT_TYPE),
+/* harmony export */   TargetProxy: () => (/* reexport safe */ _pipeline_index__WEBPACK_IMPORTED_MODULE_3__.TargetProxy),
+/* harmony export */   TextTileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_2__.TextTileCodec),
+/* harmony export */   Tile: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_15__.Tile),
+/* harmony export */   Tile3dMaxPriority: () => (/* reexport safe */ _3d_index__WEBPACK_IMPORTED_MODULE_0__.Tile3dMaxPriority),
+/* harmony export */   Tile3dMinPriority: () => (/* reexport safe */ _3d_index__WEBPACK_IMPORTED_MODULE_0__.Tile3dMinPriority),
+/* harmony export */   Tile3dNodeSource: () => (/* reexport safe */ _3d_index__WEBPACK_IMPORTED_MODULE_0__.Tile3dNodeSource),
+/* harmony export */   Tile3dNormalPriority: () => (/* reexport safe */ _3d_index__WEBPACK_IMPORTED_MODULE_0__.Tile3dNormalPriority),
+/* harmony export */   Tile3dRefineType: () => (/* reexport safe */ _3d_index__WEBPACK_IMPORTED_MODULE_0__.Tile3dRefineType),
+/* harmony export */   Tile3dStreamBinding: () => (/* reexport safe */ _3d_index__WEBPACK_IMPORTED_MODULE_0__.Tile3dStreamBinding),
+/* harmony export */   Tile3dStreamEngine: () => (/* reexport safe */ _3d_index__WEBPACK_IMPORTED_MODULE_0__.Tile3dStreamEngine),
+/* harmony export */   Tile3dStreamSource: () => (/* reexport safe */ _3d_index__WEBPACK_IMPORTED_MODULE_0__.Tile3dStreamSource),
+/* harmony export */   TileAddress: () => (/* reexport safe */ _address_index__WEBPACK_IMPORTED_MODULE_7__.TileAddress),
+/* harmony export */   TileCollection: () => (/* reexport safe */ _tiles_collection__WEBPACK_IMPORTED_MODULE_17__.TileCollection),
+/* harmony export */   TileContentFetcher: () => (/* reexport safe */ _loaders_index__WEBPACK_IMPORTED_MODULE_6__.TileContentFetcher),
+/* harmony export */   TileContentStatus: () => (/* reexport safe */ _3d_index__WEBPACK_IMPORTED_MODULE_0__.TileContentStatus),
+/* harmony export */   TileLoader: () => (/* reexport safe */ _loaders_index__WEBPACK_IMPORTED_MODULE_6__.TileLoader),
+/* harmony export */   TileMapBase: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_5__.TileMapBase),
+/* harmony export */   TileMapLayer: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_5__.TileMapLayer),
+/* harmony export */   TileMapLayerView: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_5__.TileMapLayerView),
+/* harmony export */   TileMapVectorLayer: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_5__.TileMapVectorLayer),
+/* harmony export */   TileNavigationApi: () => (/* reexport safe */ _navigation_index__WEBPACK_IMPORTED_MODULE_4__.TileNavigationApi),
+/* harmony export */   TileNavigationState: () => (/* reexport safe */ _navigation_index__WEBPACK_IMPORTED_MODULE_4__.TileNavigationState),
+/* harmony export */   TileNavigationStateSynchronizer: () => (/* reexport safe */ _navigation_index__WEBPACK_IMPORTED_MODULE_4__.TileNavigationStateSynchronizer),
+/* harmony export */   TilePipelineLink: () => (/* reexport safe */ _pipeline_index__WEBPACK_IMPORTED_MODULE_3__.TilePipelineLink),
+/* harmony export */   TileSystemBounds: () => (/* reexport safe */ _tiles_system__WEBPACK_IMPORTED_MODULE_18__.TileSystemBounds),
+/* harmony export */   TileVectorRenderer: () => (/* reexport safe */ _vector_index__WEBPACK_IMPORTED_MODULE_10__.TileVectorRenderer),
+/* harmony export */   TileView: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_5__.TileView),
+/* harmony export */   TileViewBase: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_5__.TileViewBase),
+/* harmony export */   TileWebClient: () => (/* reexport safe */ _tiles_client__WEBPACK_IMPORTED_MODULE_13__.TileWebClient),
+/* harmony export */   TilesetClient: () => (/* reexport safe */ _3d_index__WEBPACK_IMPORTED_MODULE_0__.TilesetClient),
+/* harmony export */   TilesetCodec: () => (/* reexport safe */ _3d_index__WEBPACK_IMPORTED_MODULE_0__.TilesetCodec),
+/* harmony export */   VectorTileGeomType: () => (/* reexport safe */ _vector_index__WEBPACK_IMPORTED_MODULE_10__.VectorTileGeomType),
+/* harmony export */   WebTileUrlBuilder: () => (/* reexport safe */ _tiles_url_web__WEBPACK_IMPORTED_MODULE_16__.WebTileUrlBuilder),
+/* harmony export */   XmlDocumentTileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_2__.XmlDocumentTileCodec),
+/* harmony export */   hasTileSelectionContext: () => (/* reexport safe */ _pipeline_index__WEBPACK_IMPORTED_MODULE_3__.hasTileSelectionContext),
+/* harmony export */   isFilter: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_2__.isFilter),
+/* harmony export */   isViewProxy: () => (/* reexport safe */ _pipeline_index__WEBPACK_IMPORTED_MODULE_3__.isViewProxy)
 /* harmony export */ });
-/* harmony import */ var _vendors_index__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./vendors/index */ "./dist/tiles/vendors/index.js");
-/* harmony import */ var _codecs_index__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./codecs/index */ "./dist/tiles/codecs/index.js");
-/* harmony import */ var _pipeline_index__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./pipeline/index */ "./dist/tiles/pipeline/index.js");
-/* harmony import */ var _navigation_index__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./navigation/index */ "./dist/tiles/navigation/index.js");
-/* harmony import */ var _map_index__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./map/index */ "./dist/tiles/map/index.js");
-/* harmony import */ var _loaders_index__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./loaders/index */ "./dist/tiles/loaders/index.js");
-/* harmony import */ var _address_index__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./address/index */ "./dist/tiles/address/index.js");
-/* harmony import */ var _display_index__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./display/index */ "./dist/tiles/display/index.js");
-/* harmony import */ var _geography_index__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./geography/index */ "./dist/tiles/geography/index.js");
-/* harmony import */ var _vector_index__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./vector/index */ "./dist/tiles/vector/index.js");
-/* harmony import */ var _tiles_interfaces__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./tiles.interfaces */ "./dist/tiles/tiles.interfaces.js");
-/* harmony import */ var _tiles_metrics__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./tiles.metrics */ "./dist/tiles/tiles.metrics.js");
-/* harmony import */ var _tiles_client__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./tiles.client */ "./dist/tiles/tiles.client.js");
-/* harmony import */ var _tiles_client_image__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./tiles.client.image */ "./dist/tiles/tiles.client.image.js");
-/* harmony import */ var _tiles__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./tiles */ "./dist/tiles/tiles.js");
-/* harmony import */ var _tiles_url_web__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./tiles.url.web */ "./dist/tiles/tiles.url.web.js");
-/* harmony import */ var _tiles_collection__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./tiles.collection */ "./dist/tiles/tiles.collection.js");
-/* harmony import */ var _tiles_system__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ./tiles.system */ "./dist/tiles/tiles.system.js");
+/* harmony import */ var _3d_index__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./3d/index */ "./dist/tiles/3d/index.js");
+/* harmony import */ var _vendors_index__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./vendors/index */ "./dist/tiles/vendors/index.js");
+/* harmony import */ var _codecs_index__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./codecs/index */ "./dist/tiles/codecs/index.js");
+/* harmony import */ var _pipeline_index__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./pipeline/index */ "./dist/tiles/pipeline/index.js");
+/* harmony import */ var _navigation_index__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./navigation/index */ "./dist/tiles/navigation/index.js");
+/* harmony import */ var _map_index__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./map/index */ "./dist/tiles/map/index.js");
+/* harmony import */ var _loaders_index__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./loaders/index */ "./dist/tiles/loaders/index.js");
+/* harmony import */ var _address_index__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./address/index */ "./dist/tiles/address/index.js");
+/* harmony import */ var _display_index__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./display/index */ "./dist/tiles/display/index.js");
+/* harmony import */ var _geography_index__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./geography/index */ "./dist/tiles/geography/index.js");
+/* harmony import */ var _vector_index__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./vector/index */ "./dist/tiles/vector/index.js");
+/* harmony import */ var _tiles_interfaces__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./tiles.interfaces */ "./dist/tiles/tiles.interfaces.js");
+/* harmony import */ var _tiles_metrics__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./tiles.metrics */ "./dist/tiles/tiles.metrics.js");
+/* harmony import */ var _tiles_client__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./tiles.client */ "./dist/tiles/tiles.client.js");
+/* harmony import */ var _tiles_client_image__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./tiles.client.image */ "./dist/tiles/tiles.client.image.js");
+/* harmony import */ var _tiles__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./tiles */ "./dist/tiles/tiles.js");
+/* harmony import */ var _tiles_url_web__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./tiles.url.web */ "./dist/tiles/tiles.url.web.js");
+/* harmony import */ var _tiles_collection__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ./tiles.collection */ "./dist/tiles/tiles.collection.js");
+/* harmony import */ var _tiles_system__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! ./tiles.system */ "./dist/tiles/tiles.system.js");
+
 
 
 
@@ -12977,7 +15161,7 @@ class AbstractTileLoader extends _validable__WEBPACK_IMPORTED_MODULE_5__.Validab
     unlinkFrom(target) {
         const i = this._links.findIndex((l) => l.target === target);
         if (i !== -1) {
-            const l = this._links.splice(i)[0];
+            const l = this._links.splice(i, 1)[0];
             this._onUnlinked(l);
             l.dispose();
             return l;
@@ -14728,7 +16912,7 @@ class SourceBlock {
     unlinkFrom(target) {
         const i = this._links.findIndex((l) => l.target === target);
         if (i !== -1) {
-            const l = this._links.splice(i)[0];
+            const l = this._links.splice(i, 1)[0];
             l.dispose();
             return l;
         }
@@ -17499,9 +19683,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   AbstractShape: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.AbstractShape),
 /* harmony export */   AbstractTileLoader: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.AbstractTileLoader),
 /* harmony export */   AbstractTileMetrics: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.AbstractTileMetrics),
+/* harmony export */   ActiveContext: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.ActiveContext),
 /* harmony export */   Angle: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_8__.Angle),
 /* harmony export */   ArcGISGrayscaleElevationDecoder: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.ArcGISGrayscaleElevationDecoder),
 /* harmony export */   ArcGISImageServerUrlBuilder: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.ArcGISImageServerUrlBuilder),
+/* harmony export */   AreBoxIntersect: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.AreBoxIntersect),
 /* harmony export */   Assert: () => (/* reexport safe */ _utils_index__WEBPACK_IMPORTED_MODULE_10__.Assert),
 /* harmony export */   Bearing: () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_4__.Bearing),
 /* harmony export */   BlobTileCodec: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.BlobTileCodec),
@@ -17528,8 +19714,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   ClosestDistanceToAABB: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_15__.ClosestDistanceToAABB),
 /* harmony export */   ConstantSSEBudget: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_15__.ConstantSSEBudget),
 /* harmony export */   Context2DTileMap: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_7__.Context2DTileMap),
+/* harmony export */   CreateTileSphereFromBox: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.CreateTileSphereFromBox),
 /* harmony export */   Current: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_8__.Current),
 /* harmony export */   DebugTouchConsole: () => (/* reexport safe */ _utils_index__WEBPACK_IMPORTED_MODULE_10__.DebugTouchConsole),
+/* harmony export */   DefaultScreenSpaceError: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.DefaultScreenSpaceError),
 /* harmony export */   DefaultScreenSpaceErrorFn: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_15__.DefaultScreenSpaceErrorFn),
 /* harmony export */   DemInfos: () => (/* reexport safe */ _dem_index__WEBPACK_IMPORTED_MODULE_12__.DemInfos),
 /* harmony export */   DemTileWebClient: () => (/* reexport safe */ _dem_index__WEBPACK_IMPORTED_MODULE_12__.DemTileWebClient),
@@ -17558,8 +19746,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   GeoPolyline: () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_4__.GeoPolyline),
 /* harmony export */   GeoShape: () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_4__.GeoShape),
 /* harmony export */   GeoShapeType: () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_4__.GeoShapeType),
+/* harmony export */   GeodeticRadToEcef: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.GeodeticRadToEcef),
 /* harmony export */   GeodeticSystem: () => (/* reexport safe */ _geodesy_index__WEBPACK_IMPORTED_MODULE_3__.GeodeticSystem),
 /* harmony export */   GetLocalizableStringValue: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.GetLocalizableStringValue),
+/* harmony export */   GetTile3dContents: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.GetTile3dContents),
 /* harmony export */   Google: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.Google),
 /* harmony export */   GoogleMap2DLayerCode: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.GoogleMap2DLayerCode),
 /* harmony export */   GoogleMap2DUrlBuilder: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.GoogleMap2DUrlBuilder),
@@ -17588,6 +19778,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   IsEnvelope: () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_4__.IsEnvelope),
 /* harmony export */   IsGeoBounded: () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_4__.IsGeoBounded),
 /* harmony export */   IsHasTileMetrics: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.IsHasTileMetrics),
+/* harmony export */   IsITileset: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.IsITileset),
 /* harmony export */   IsKDTreeSplitter: () => (/* reexport safe */ _tree__WEBPACK_IMPORTED_MODULE_14__.IsKDTreeSplitter),
 /* harmony export */   IsLocalizable: () => (/* reexport safe */ _text__WEBPACK_IMPORTED_MODULE_13__.IsLocalizable),
 /* harmony export */   IsLocation: () => (/* reexport safe */ _geography_index__WEBPACK_IMPORTED_MODULE_4__.IsLocation),
@@ -17603,6 +19794,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   IsTargetBlock: () => (/* reexport safe */ _dataflow_index__WEBPACK_IMPORTED_MODULE_6__.IsTargetBlock),
 /* harmony export */   IsTile: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.IsTile),
 /* harmony export */   IsTile2DAddress: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.IsTile2DAddress),
+/* harmony export */   IsTile3d: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.IsTile3d),
 /* harmony export */   IsTileCollection: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.IsTileCollection),
 /* harmony export */   IsTileConstructor: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.IsTileConstructor),
 /* harmony export */   IsTileDatasource: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.IsTileDatasource),
@@ -17661,6 +19853,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   RGBTileCodec: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.RGBTileCodec),
 /* harmony export */   Range: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_8__.Range),
 /* harmony export */   RegionCode: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.RegionCode),
+/* harmony export */   RegionToBoxECEF: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.RegionToBoxECEF),
+/* harmony export */   RegionToSphereECEF: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.RegionToSphereECEF),
 /* harmony export */   ResolveSSEBudget: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_15__.ResolveSSEBudget),
 /* harmony export */   RibbonBuilder: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.RibbonBuilder),
 /* harmony export */   RibbonOptions: () => (/* reexport safe */ _geometry_index__WEBPACK_IMPORTED_MODULE_5__.RibbonOptions),
@@ -17683,6 +19877,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   StreamSourceContentAdapter: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_15__.StreamSourceContentAdapter),
 /* harmony export */   StreamSourceStatus: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_15__.StreamSourceStatus),
 /* harmony export */   StreamingEngine: () => (/* reexport safe */ _streaming__WEBPACK_IMPORTED_MODULE_15__.StreamingEngine),
+/* harmony export */   TILE3D_NODE_CONTENT_TYPE: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TILE3D_NODE_CONTENT_TYPE),
+/* harmony export */   TILE3D_TILESET_CONTENT_TYPE: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TILE3D_TILESET_CONTENT_TYPE),
 /* harmony export */   TILE_PYRAMID_CONTENT_TYPE: () => (/* reexport safe */ _streaming_tile__WEBPACK_IMPORTED_MODULE_16__.TILE_PYRAMID_CONTENT_TYPE),
 /* harmony export */   TILE_STREAM_CONTENT_TYPE: () => (/* reexport safe */ _streaming_tile__WEBPACK_IMPORTED_MODULE_16__.TILE_STREAM_CONTENT_TYPE),
 /* harmony export */   TargetProxy: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TargetProxy),
@@ -17693,9 +19889,18 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   TextTileCodec: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TextTileCodec),
 /* harmony export */   TextUtils: () => (/* reexport safe */ _utils_index__WEBPACK_IMPORTED_MODULE_10__.TextUtils),
 /* harmony export */   Tile: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.Tile),
+/* harmony export */   Tile3dMaxPriority: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.Tile3dMaxPriority),
+/* harmony export */   Tile3dMinPriority: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.Tile3dMinPriority),
+/* harmony export */   Tile3dNodeSource: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.Tile3dNodeSource),
+/* harmony export */   Tile3dNormalPriority: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.Tile3dNormalPriority),
+/* harmony export */   Tile3dRefineType: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.Tile3dRefineType),
+/* harmony export */   Tile3dStreamBinding: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.Tile3dStreamBinding),
+/* harmony export */   Tile3dStreamEngine: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.Tile3dStreamEngine),
+/* harmony export */   Tile3dStreamSource: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.Tile3dStreamSource),
 /* harmony export */   TileAddress: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TileAddress),
 /* harmony export */   TileCollection: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TileCollection),
 /* harmony export */   TileContentFetcher: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TileContentFetcher),
+/* harmony export */   TileContentStatus: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TileContentStatus),
 /* harmony export */   TileLoader: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TileLoader),
 /* harmony export */   TileLoaderAdapter: () => (/* reexport safe */ _streaming_tile__WEBPACK_IMPORTED_MODULE_16__.TileLoaderAdapter),
 /* harmony export */   TileMapBase: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TileMapBase),
@@ -17713,6 +19918,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   TileView: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TileView),
 /* harmony export */   TileViewBase: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TileViewBase),
 /* harmony export */   TileWebClient: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TileWebClient),
+/* harmony export */   TilesetClient: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TilesetClient),
+/* harmony export */   TilesetCodec: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.TilesetCodec),
 /* harmony export */   Timespan: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_8__.Timespan),
 /* harmony export */   TouchGestureType: () => (/* reexport safe */ _map_index__WEBPACK_IMPORTED_MODULE_7__.TouchGestureType),
 /* harmony export */   Unit: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_8__.Unit),

@@ -51,7 +51,11 @@ export enum TileBorder {
 
 // internal class used to hold the tile pool areas
 class TileLayout<T, V> implements IDisposable {
-    public constructor(public tile: T, public layer: ITileMapLayerView<V>, public area: Nullable<ITexture3Layer> = null) {}
+    public constructor(
+        public tile: T,
+        public layer: ITileMapLayerView<V>,
+        public area: Nullable<ITexture3Layer> = null
+    ) {}
 
     public dispose() {
         this.area?.release();
@@ -89,11 +93,9 @@ class ElevationLayout extends TileLayout<ITile<ElevationType>, ElevationType> {
     }
 }
 
-
 export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
-
     public static GL_RGB8 = 0x8051;
-    public static GL_R16F = 0x822D;
+    public static GL_R16F = 0x822d;
 
     public static ElevationDepthsEastProperty: string = "y";
     public static ElevationDepthsSouthProperty: string = "z";
@@ -164,6 +166,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
         this._shaderName = shaderName ?? Map3dMaterial.ShaderName;
         this._imagesTarget = new TargetProxy<ITileWithGridElevation<TextureType>>(this._imagesAdded.bind(this), this._imagesRemoved.bind(this), this._imagesUpdated.bind(this));
         this._elevationsTarget = new TargetProxy<ITile<ElevationType>>(this._elevationsAdded.bind(this), this._elevationsRemoved.bind(this), this._elevationsUpdated.bind(this));
+        //this.wireframe = true;
     }
 
     public get imagesTarget(): ITargetBlock<ITileWithGridElevation<TextureType>> {
@@ -345,7 +348,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
 
     protected _ensureTextureSamplersReady(src: TextureLayerView): void {
         if (!this._textureSampler) {
-            let size = src.metrics?.tileSize ?? AbstractTileMetrics.DefaultTileSize;
+            const size = src.metrics?.tileSize ?? AbstractTileMetrics.DefaultTileSize;
             this._textureSampler = this._buildTextureSampler(size, size);
             this._ensureInstanceBufferReady(src._map.grid);
         }
@@ -459,7 +462,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
     }
 
     protected _bindClipPlane(effect: Effect, planes: Array<ClipPlaneDefinition>, name: string, index: ClipIndex): void {
-        let clipPlane = planes[index];
+        const clipPlane = planes[index];
         if (clipPlane) {
             effect.setVector3(`${name}.point`, clipPlane.point);
             effect.setVector3(`${name}.normal`, clipPlane.normal);
@@ -553,7 +556,7 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
 
     private _buildElevationRange(): Range {
         let range: Nullable<Range> = null;
-        for (let b of this._elevationTileLayouts.values()) {
+        for (const b of this._elevationTileLayouts.values()) {
             const infos = b.tile.content;
             if (infos) {
                 if (range === null) {
@@ -589,10 +592,10 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
 
                 this._ensureTextureSamplersReady(host);
 
-                let layout = new TextureLayout(tile, host);
+                const layout = new TextureLayout(tile, host);
                 this._textureTileLayouts.set(key, layout);
 
-                let area = this._reserveArea(this._textureSampler);
+                const area = this._reserveArea(this._textureSampler);
                 if (area === undefined) {
                     return;
                 }
@@ -658,10 +661,10 @@ export class Map3dMaterial extends PushMaterial implements IMap3DMaterial {
                 }
                 this._ensureElevationSamplersReady(host);
 
-                let layout = new ElevationLayout(tile, host);
+                const layout = new ElevationLayout(tile, host);
                 this._elevationTileLayouts.set(key, layout);
 
-                let area = this._reserveArea(this._elevationSampler);
+                const area = this._reserveArea(this._elevationSampler);
                 if (area === undefined) {
                     return;
                 }

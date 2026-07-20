@@ -1,3 +1,4 @@
+export * from "./3d/index";
 export * from "./vendors/index";
 export * from "./codecs/index";
 export * from "./pipeline/index";

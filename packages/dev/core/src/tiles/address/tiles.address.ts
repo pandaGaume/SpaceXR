@@ -121,8 +121,8 @@ export class TileAddress implements ITile2DAddress {
      * A single GeodeticSystem instance can be reused across calls to avoid
      * rebuilding it every time.
      */
-    public static ToBoundsECEF(a: ITile2DAddress, metrics: ITileMetrics, ellipsoid: Ellipsoid, system?: GeodeticSystem): IBounds {
-        const sys = system ?? new GeodeticSystem(ellipsoid);
+    public static ToBoundsECEF(a: ITile2DAddress, metrics: ITileMetrics, system: Ellipsoid | GeodeticSystem): IBounds {
+        const sys = system instanceof Ellipsoid ? new GeodeticSystem(system) : system;
         const deltas: Array<[number, number]> = [
             [0, 0],
             [1, 0],
@@ -240,10 +240,10 @@ export class TileAddress implements ITile2DAddress {
         for (let i = levelOfDetail; i > 0; i--) {
             let digit = 0;
             const mask = 1 << (i - 1);
-            if ((x & mask) != 0) {
+            if ((x & mask) !== 0) {
                 digit++;
             }
-            if ((y & mask) != 0) {
+            if ((y & mask) !== 0) {
                 digit++;
                 digit++;
             }

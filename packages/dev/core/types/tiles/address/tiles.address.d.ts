@@ -28,7 +28,7 @@ export declare class TileAddress implements ITile2DAddress {
      * A single GeodeticSystem instance can be reused across calls to avoid
      * rebuilding it every time.
      */
-    static ToBoundsECEF(a: ITile2DAddress, metrics: ITileMetrics, ellipsoid: Ellipsoid, system?: GeodeticSystem): IBounds;
+    static ToBoundsECEF(a: ITile2DAddress, metrics: ITileMetrics, system: Ellipsoid | GeodeticSystem): IBounds;
     /**
      * Geometric error of the tile in world meters, defined as the tile side at
      * the equator for this LOD (groundResolution * tileSize). Used as the

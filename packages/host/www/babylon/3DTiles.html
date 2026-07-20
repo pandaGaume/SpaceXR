@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>3D Tiles streaming sample</title>
+        <script src="../libs/babylon.js"></script>
+        <script src="../libs/babylonjs.loaders.min.js"></script>
+        <script src="../libs/stellar_landscape_xr.1.0.0.js"></script>
+
+        <style>
+            html,
+            body {
+                background-color: rgb(8, 10, 20);
+                overflow: hidden;
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+                font-family: sans-serif;
+                color: #ddd;
+            }
+            #mapcontainer {
+                position: relative;
+                width: 100%;
+                height: 100%;
+            }
+            #mapcontainer canvas {
+                width: 100%;
+                height: 100%;
+                touch-action: none;
+            }
+            .panel {
+                position: absolute;
+                top: 10px;
+                left: 10px;
+                background: rgba(0, 0, 0, 0.55);
+                padding: 12px 14px;
+                border-radius: 8px;
+                font-size: 13px;
+                line-height: 1.5;
+                z-index: 2;
+                min-width: 300px;
+            }
+            .panel h2 {
+                margin: 0 0 8px 0;
+                font-size: 14px;
+            }
+            .panel label {
+                display: block;
+                margin-top: 6px;
+                font-size: 12px;
+                color: #aaa;
+            }
+            .panel input {
+                width: 100%;
+                padding: 4px;
+                background: #1a1a22;
+                color: #ddd;
+                border: 1px solid #444;
+                border-radius: 4px;
+                box-sizing: border-box;
+            }
+            .panel button {
+                margin-top: 10px;
+                padding: 6px 14px;
+                background: #274b6d;
+                color: #eee;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+            }
+            .panel button:hover {
+                background: #326089;
+            }
+            #status {
+                margin-top: 8px;
+                font-size: 12px;
+                color: #9c9;
+                word-break: break-all;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div id="mapcontainer">
+            <div class="panel">
+                <h2>3D Tiles streaming (Tile3dStreamSource)</h2>
+                <label for="uri">Tileset uri</label>
+                <input id="uri" type="text" value="https://tile.googleapis.com/v1/3dtiles/root.json" />
+                <label for="key">Google API key (for the Google Photorealistic tileset; stored locally)</label>
+                <input id="key" type="password" placeholder="AIza..." />
+                <button id="load">Load</button>
+                <div id="status">Enter a tileset uri (and an API key for Google), then Load.</div>
+            </div>
+        </div>
+
+        <script>
+            /* global SPACEXR, BABYLON */
+            const KEY_STORAGE = "spacexr.google.tiles.key";
+
+            const uriInput = document.getElementById("uri");
+            const keyInput = document.getElementById("key");
+            const statusEl = document.getElementById("status");
+            keyInput.value = localStorage.getItem(KEY_STORAGE) ?? "";
+
+            let viewer = null;
+
+            function load() {
+                const uri = uriInput.value.trim();
+                if (!uri) {
+                    statusEl.textContent = "A tileset uri is required.";
+                    return;
+                }
+                const key = keyInput.value.trim();
+                if (key) {
+                    localStorage.setItem(KEY_STORAGE, key);
+                }
+
+                if (viewer) {
+                    viewer.dispose();
+                    viewer = null;
+                    const canvas = document.querySelector("#mapcontainer canvas");
+                    if (canvas) canvas.remove();
+                }
+
+                const isGoogle = uri.includes("googleapis.com");
+                const options = {
+                    uri: uri,
+                    // Google Photorealistic: credential-injecting resolver + per-depth SSE table.
+                    resolver: isGoogle && key ? new SPACEXR.GoogleTiles3dUriResolver(key) : undefined,
+                    maxScreenSpaceErrorFn: isGoogle ? SPACEXR.GoogleTile3dErrorFn : undefined,
+                    initialPosition: new SPACEXR.Geo3(37.7749, -122.4194, 10000000),
+                };
+
+                try {
+                    viewer = new SPACEXR.Map3DViewer("mapcontainer", options);
+                    statusEl.textContent = "Loading root tileset…";
+                    viewer.source?.rootReadyObservable.addOnce(() => {
+                        statusEl.textContent = "Root ready. Zoom in: tiles refine; zoom out: tiles coarsen.";
+                    });
+                } catch (e) {
+                    statusEl.textContent = "Error: " + e.message;
+                }
+            }
+
+            document.getElementById("load").addEventListener("click", load);
+        </script>
+    </body>
+</html>

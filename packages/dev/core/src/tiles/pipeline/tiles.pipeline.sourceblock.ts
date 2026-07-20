@@ -48,7 +48,7 @@ export class SourceBlock<T> implements ISourceBlock<T> {
     public unlinkFrom(target: ITargetBlock<T>): IPipelineLink<T> | undefined {
         const i = this._links.findIndex((l) => l.target === target);
         if (i !== -1) {
-            const l = this._links.splice(i)[0];
+            const l = this._links.splice(i, 1)[0];
             l.dispose();
             return l;
         }

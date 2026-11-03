@@ -1,0 +1,18 @@
+{
+  "raw": {
+    "seamBlendFraction": 0,
+    "epsilonMeters": 0.001,
+    "transitions": 74,
+    "mixedTransitions": 2,
+    "sameLevelMax": 3.1004931955180837e-10,
+    "mixedLevelMax": 0.0012750755942966263
+  },
+  "continuous": {
+    "seamBlendFraction": 0.08,
+    "epsilonMeters": 0.001,
+    "transitions": 74,
+    "mixedTransitions": 2,
+    "sameLevelMax": 2.9990543382041324e-10,
+    "mixedLevelMax": 2.5854052232432423e-10
+  }
+}

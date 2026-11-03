@@ -1,0 +1,113 @@
+{
+  "note": "CPU wall-clock timings, not GPU measurements. Identical maxStep and solarSteps; octree splits introduce different quadrature positions. Warm view is unchanged.",
+  "reports": [
+    {
+      "name": "ground-day",
+      "rays": 288,
+      "nodes": 19059,
+      "reference": {
+        "ms": 1020.55,
+        "densityEvaluations": 2745028,
+        "solarIntegrations": 42228
+      },
+      "cold": {
+        "ms": 2012.59,
+        "densityEvaluations": 4500272,
+        "solarIntegrations": 69506,
+        "hits": 33106,
+        "misses": 12736,
+        "direct": 5826,
+        "lookups": 51888,
+        "skippedMeters": 0,
+        "blended": 20002
+      },
+      "warm": {
+        "ms": 859.38,
+        "densityEvaluations": 1704880,
+        "solarIntegrations": 25828,
+        "hits": 45842,
+        "misses": 0,
+        "direct": 5826,
+        "lookups": 51888,
+        "skippedMeters": 0,
+        "blended": 20002
+      },
+      "warmSpeedup": 1.19,
+      "maxRadianceError": 0.00011966219401798872,
+      "radianceRMSE": 0.000039089582005712766,
+      "maxTransmittanceError": 0.00005399316279119937
+    },
+    {
+      "name": "ground-sunset",
+      "rays": 288,
+      "nodes": 19059,
+      "reference": {
+        "ms": 978.07,
+        "densityEvaluations": 2745028,
+        "solarIntegrations": 42228
+      },
+      "cold": {
+        "ms": 1978.28,
+        "densityEvaluations": 4500272,
+        "solarIntegrations": 69506,
+        "hits": 33106,
+        "misses": 12736,
+        "direct": 5826,
+        "lookups": 51888,
+        "skippedMeters": 0,
+        "blended": 20002
+      },
+      "warm": {
+        "ms": 863.57,
+        "densityEvaluations": 1704880,
+        "solarIntegrations": 25828,
+        "hits": 45842,
+        "misses": 0,
+        "direct": 5826,
+        "lookups": 51888,
+        "skippedMeters": 0,
+        "blended": 20002
+      },
+      "warmSpeedup": 1.13,
+      "maxRadianceError": 0.00033498298396298243,
+      "radianceRMSE": 0.00008007336462023046,
+      "maxTransmittanceError": 0.00005399316279119937
+    },
+    {
+      "name": "orbit",
+      "rays": 288,
+      "nodes": 11005,
+      "reference": {
+        "ms": 389.43,
+        "densityEvaluations": 1063920,
+        "solarIntegrations": 16368
+      },
+      "cold": {
+        "ms": 1073.05,
+        "densityEvaluations": 2491768,
+        "solarIntegrations": 38627,
+        "hits": 11408,
+        "misses": 5536,
+        "direct": 2696,
+        "lookups": 19640,
+        "skippedMeters": 0,
+        "blended": 8608
+      },
+      "warm": {
+        "ms": 354.67,
+        "densityEvaluations": 743096,
+        "solarIntegrations": 11304,
+        "hits": 16944,
+        "misses": 0,
+        "direct": 2696,
+        "lookups": 19640,
+        "skippedMeters": 0,
+        "blended": 8608
+      },
+      "warmSpeedup": 1.1,
+      "maxRadianceError": 0.000042277786253437644,
+      "radianceRMSE": 0.000011479121351730385,
+      "maxTransmittanceError": 0.0003480429835109877
+    }
+  ]
+}

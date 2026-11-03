@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="fr">
+<meta charset="utf-8">
+<title>SpaceXR | Atmosphere ellipsoidale et octree</title>
+<style>
+body{font:16px system-ui;background:#111827;color:#e5e7eb;max-width:1150px;margin:32px auto;padding:0 20px}h1{font-size:26px}p{line-height:1.5;color:#b7c6d9}label{display:inline-block;margin:8px 18px 8px 0}button,select,input{font:inherit;padding:7px;background:#203149;color:white;border:1px solid #486078;border-radius:5px}button{cursor:pointer}button:disabled{opacity:.5}#views{display:flex;gap:20px;flex-wrap:wrap}canvas{width:480px;height:270px;image-rendering:pixelated;border:1px solid #486078}pre{white-space:pre-wrap;background:#192438;padding:18px;font-size:13px}.caption{margin:8px 0}details{margin:18px 0}
+</style>
+<h1>Atmosphere ellipsoidale : prototype octree</h1>
+<p>Diffusion simple Rayleigh et Mie. Altitude geodesique ECEF, ellipsoide WGS84. Comparaison en radiance lineaire, exposition commune pour l'affichage. Aucun raccordement Babylon ou XR dans cette experience.</p>
+<label>Vue <select id="view"><option value="ground">Sol, horizon</option><option value="orbit">Orbite</option><option value="polar">Region polaire</option><option value="limb">Bord de la planete</option></select></label>
+<label>Soleil <select id="sun"><option value="day">Jour</option><option value="sunset">Coucher</option><option value="night">Nuit</option></select></label>
+<label>Resolution <select id="resolution"><option value="32">32 x 18</option><option value="48">48 x 27</option><option value="96">96 x 54</option></select></label>
+<label>Raccords <select id="seams"><option value="0.08">Transition continue</option><option value="0">Interpolation brute</option></select></label><label>Exposition <input id="exposure" type="number" value="12" min="1" max="100" style="width:60px"></label>
+<p><button id="render">Comparer CPU</button> <button id="gpu" disabled>Comparer WebGPU</button> <button id="layouts" disabled>Comparer les formats GPU</button></p>
+<div id="views"><div><div class="caption">Reference</div><canvas id="reference" width="48" height="27"></canvas></div><div><div class="caption">Octree avec cache solaire</div><canvas id="accelerated" width="48" height="27"></canvas></div></div>
+<p>Erreur absolue amplifiee : noir = faible, jaune = forte. Radiance lineaire x10000, avant exposition.</p><canvas id="error" width="48" height="27"></canvas>
+<pre id="status">Pret. Le premier calcul remplit le cache; le second reutilise le meme point de vue.</pre>
+<details><summary>Ce que les mesures signifient</summary><p>CPU : calcul de reference, construction a froid, reutilisation a chaud. WebGPU : cache prepare par le CPU, deux integrations GPU sur les memes rayons. Les temps WebGPU comprennent transfert et lecture retour, ce ne sont pas des temps GPU purs. Le budget limite l'arbre a 30000 noeuds; les zones non preparees sont integrees directement. Le cache reste reutilisable quand on change seulement la resolution ou l'exposition.</p></details>
+<script type="module" src="./demo.js"></script>
+</html>
+
+
+

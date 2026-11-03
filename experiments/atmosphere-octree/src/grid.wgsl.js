@@ -37,5 +37,3 @@ fn gridSolar(p: vec3f) -> vec3f {
 }
 `;
 }
-
-

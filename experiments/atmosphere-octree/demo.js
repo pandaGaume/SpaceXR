@@ -122,5 +122,3 @@ $('layouts').onclick = async () => {
     } catch (error) { $('status').textContent = String(error.stack || error); }
     finally { devices.forEach(d => d.dispose()); for (const id of ['render', 'gpu', 'layouts']) $(id).disabled = id !== 'render' && !navigator.gpu; }
 };
-
-

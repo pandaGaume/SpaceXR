@@ -134,5 +134,3 @@ fn main(@builtin(global_invocation_id) id: vec3u) {
     }
     results[id.x] = Result(vec4f(light, f32(cacheHits)), vec4f(transmission, f32(directCalls)));
 }
-
-

@@ -35,4 +35,3 @@ export class Atmosphere {
         return optical.map(t => Math.exp(-t));
     }
 }
-

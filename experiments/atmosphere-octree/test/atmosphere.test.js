@@ -149,4 +149,3 @@ test('solar cache remains continuous at same-level and mixed-level cell faces', 
     assert.ok(result.sameLevelMax < 1e-6, JSON.stringify(result));
     assert.ok(result.mixedLevelMax < 1e-6, JSON.stringify(result));
 });
-

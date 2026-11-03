@@ -25,4 +25,3 @@ export function measureContinuity(seamBlendFraction) {
     return { seamBlendFraction, epsilonMeters: epsilon, transitions, mixedTransitions, sameLevelMax, mixedLevelMax };
 }
 if (process.argv[1]?.endsWith('continuity.js')) console.log(JSON.stringify({ raw: measureContinuity(0), continuous: measureContinuity(0.08) }, null, 2));
-

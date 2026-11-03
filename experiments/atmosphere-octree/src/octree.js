@@ -102,7 +102,3 @@ export class AtmosphereOctree {
         return Math.max(0, distance);
     }
 }
-
-
-
-

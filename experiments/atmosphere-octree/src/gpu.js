@@ -113,6 +113,3 @@ export class GpuAtmosphere {
     }
     dispose() { this.device.destroy(); }
 }
-
-
-

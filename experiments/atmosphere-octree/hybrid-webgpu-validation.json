@@ -1,0 +1,16 @@
+{
+  "scenario": "ground-day, synthetic scene depth 5km / 20km",
+  "output": [32, 18],
+  "volume": [24, 16, 64],
+  "volumeFarMeters": 20000,
+  "note": "One browser validation run. GPU timestamps exclude uploads, readbacks and CPU solar preparation. Zero sampling timestamp is below timing granularity, not zero cost.",
+  "directGpuMs": 2.490368,
+  "buildGpuMs": 13.172736,
+  "sampleGpuMs": 0,
+  "fallbackGpuMs": 2.752512,
+  "fallbackRays": 76,
+  "textureBytes": 393216,
+  "radianceRMSEAgainstCPU": 0.00001921960002854592,
+  "maxRadianceErrorAgainstCPU": 0.00007089669475718319,
+  "maxTransmittanceErrorAgainstCPU": 0.0013005869747744203
+}

@@ -1,0 +1,309 @@
+{
+  "note": "CPU measurements. Total includes volume construction and conservative direct fallbacks. Octree is persistent between quality runs, so the second quality uses a warmer solar cache. Reconstruction-only timing is not full frame timing.",
+  "reports": [
+    {
+      "name": "ground-day",
+      "output": [
+        48,
+        27
+      ],
+      "direct": {
+        "ms": 5595.565799999999,
+        "densityEvaluations": 14071386,
+        "solarIntegrations": 216468
+      },
+      "qualities": [
+        {
+          "dimensions": [
+            12,
+            8,
+            48
+          ],
+          "bytes": 148224,
+          "build": {
+            "ms": 932.3418000000001,
+            "densityEvaluations": 1792898,
+            "solarIntegrations": 27763,
+            "hits": 8974,
+            "misses": 4576,
+            "direct": 2456,
+            "lookups": 16066,
+            "skippedMeters": 0,
+            "blended": 6332
+          },
+          "reconstruct": {
+            "ms": 3921.2059,
+            "densityEvaluations": 8550771,
+            "solarIntegrations": 131866,
+            "fallbacks": 576,
+            "lookups": 720
+          },
+          "totalSpeedup": 1.1528815921598956,
+          "reconstructionOnlySpeedup": 1.4270012701959873,
+          "radianceRMSE": 0.0005397422889617291,
+          "maxRadianceError": 0.0025827688528699544,
+          "maxTransmittanceError": 0.03554789572118955
+        },
+        {
+          "dimensions": [
+            24,
+            16,
+            64
+          ],
+          "bytes": 789504,
+          "build": {
+            "ms": 1954.9112000000005,
+            "densityEvaluations": 4072309,
+            "solarIntegrations": 62423,
+            "hits": 26458,
+            "misses": 0,
+            "direct": 50516,
+            "lookups": 77237,
+            "skippedMeters": 0,
+            "blended": 11907
+          },
+          "reconstruct": {
+            "ms": 964.7325999999994,
+            "densityEvaluations": 2314071,
+            "solarIntegrations": 35600,
+            "fallbacks": 432,
+            "lookups": 864
+          },
+          "totalSpeedup": 1.916523447141052,
+          "reconstructionOnlySpeedup": 5.800120986893159,
+          "radianceRMSE": 0.0003561380432645586,
+          "maxRadianceError": 0.001830889090843335,
+          "maxTransmittanceError": 0.031817340074609346
+        }
+      ]
+    },
+    {
+      "name": "ground-sunset",
+      "output": [
+        48,
+        27
+      ],
+      "direct": {
+        "ms": 5366.3235,
+        "densityEvaluations": 14071386,
+        "solarIntegrations": 216468
+      },
+      "qualities": [
+        {
+          "dimensions": [
+            12,
+            8,
+            48
+          ],
+          "bytes": 148224,
+          "build": {
+            "ms": 782.1848000000027,
+            "densityEvaluations": 1792898,
+            "solarIntegrations": 27763,
+            "hits": 8974,
+            "misses": 4576,
+            "direct": 2456,
+            "lookups": 16066,
+            "skippedMeters": 0,
+            "blended": 6332
+          },
+          "reconstruct": {
+            "ms": 4030.4393999999993,
+            "densityEvaluations": 8550771,
+            "solarIntegrations": 131866,
+            "fallbacks": 576,
+            "lookups": 720
+          },
+          "totalSpeedup": 1.1150514307765809,
+          "reconstructionOnlySpeedup": 1.3314487497318535,
+          "radianceRMSE": 0.0005125256059989984,
+          "maxRadianceError": 0.004217994012895812,
+          "maxTransmittanceError": 0.03554789572118955
+        },
+        {
+          "dimensions": [
+            24,
+            16,
+            64
+          ],
+          "bytes": 789504,
+          "build": {
+            "ms": 1987.491900000001,
+            "densityEvaluations": 4072309,
+            "solarIntegrations": 62423,
+            "hits": 26458,
+            "misses": 0,
+            "direct": 50516,
+            "lookups": 77237,
+            "skippedMeters": 0,
+            "blended": 11907
+          },
+          "reconstruct": {
+            "ms": 1091.9657999999981,
+            "densityEvaluations": 2314071,
+            "solarIntegrations": 35600,
+            "fallbacks": 432,
+            "lookups": 864
+          },
+          "totalSpeedup": 1.7426196502065938,
+          "reconstructionOnlySpeedup": 4.914369570915142,
+          "radianceRMSE": 0.0013721426102985964,
+          "maxRadianceError": 0.02450726770380296,
+          "maxTransmittanceError": 0.031817340074609346
+        }
+      ]
+    },
+    {
+      "name": "orbit",
+      "output": [
+        48,
+        27
+      ],
+      "direct": {
+        "ms": 2416.723299999998,
+        "densityEvaluations": 4784130,
+        "solarIntegrations": 73602
+      },
+      "qualities": [
+        {
+          "dimensions": [
+            12,
+            8,
+            48
+          ],
+          "bytes": 148224,
+          "build": {
+            "ms": 500.49129999999786,
+            "densityEvaluations": 923772,
+            "solarIntegrations": 14328,
+            "hits": 3920,
+            "misses": 1956,
+            "direct": 888,
+            "lookups": 6780,
+            "skippedMeters": 0,
+            "blended": 2800
+          },
+          "reconstruct": {
+            "ms": 3932.3143999999993,
+            "densityEvaluations": 7741043,
+            "solarIntegrations": 119612,
+            "fallbacks": 1296,
+            "lookups": 0
+          },
+          "totalSpeedup": 0.5451904422519578,
+          "reconstructionOnlySpeedup": 0.6145803855358052,
+          "radianceRMSE": 0.00000929307914615728,
+          "maxRadianceError": 0.00003887029231568542,
+          "maxTransmittanceError": 0.0004431378802854935
+        },
+        {
+          "dimensions": [
+            24,
+            16,
+            64
+          ],
+          "bytes": 789504,
+          "build": {
+            "ms": 570.9693999999945,
+            "densityEvaluations": 1190338,
+            "solarIntegrations": 18204,
+            "hits": 12684,
+            "misses": 0,
+            "direct": 12586,
+            "lookups": 25282,
+            "skippedMeters": 0,
+            "blended": 5618
+          },
+          "reconstruct": {
+            "ms": 1849.3289000000004,
+            "densityEvaluations": 3678963,
+            "solarIntegrations": 56142,
+            "fallbacks": 1296,
+            "lookups": 0
+          },
+          "totalSpeedup": 0.9985229093455145,
+          "reconstructionOnlySpeedup": 1.3068109734293327,
+          "radianceRMSE": 0.00000929307914615728,
+          "maxRadianceError": 0.00003887029231568542,
+          "maxTransmittanceError": 0.0004431378802854935
+        }
+      ]
+    },
+    {
+      "name": "terrain-depth-step",
+      "output": [
+        48,
+        27
+      ],
+      "direct": {
+        "ms": 202.03789999999572,
+        "densityEvaluations": 517335,
+        "solarIntegrations": 7959
+      },
+      "qualities": [
+        {
+          "dimensions": [
+            12,
+            8,
+            48
+          ],
+          "bytes": 148224,
+          "build": {
+            "ms": 137.8686000000016,
+            "densityEvaluations": 291834,
+            "solarIntegrations": 4481,
+            "hits": 2184,
+            "misses": 144,
+            "direct": 2722,
+            "lookups": 5050,
+            "skippedMeters": 0,
+            "blended": 1226
+          },
+          "reconstruct": {
+            "ms": 61.79179999999906,
+            "densityEvaluations": 129805,
+            "solarIntegrations": 1997,
+            "fallbacks": 202,
+            "lookups": 1094
+          },
+          "totalSpeedup": 1.0119077193073591,
+          "reconstructionOnlySpeedup": 3.2696555206354048,
+          "radianceRMSE": 0.000023242142053695855,
+          "maxRadianceError": 0.00012039629440312779,
+          "maxTransmittanceError": 0.003302058595606172
+        },
+        {
+          "dimensions": [
+            24,
+            16,
+            64
+          ],
+          "bytes": 789504,
+          "build": {
+            "ms": 657.8162999999986,
+            "densityEvaluations": 1356876,
+            "solarIntegrations": 20792,
+            "hits": 11598,
+            "misses": 0,
+            "direct": 14590,
+            "lookups": 26188,
+            "skippedMeters": 0,
+            "blended": 6202
+          },
+          "reconstruct": {
+            "ms": 47.09629999999743,
+            "densityEvaluations": 99190,
+            "solarIntegrations": 1526,
+            "fallbacks": 167,
+            "lookups": 1129
+          },
+          "totalSpeedup": 0.28661411357946626,
+          "reconstructionOnlySpeedup": 4.289889014636112,
+          "radianceRMSE": 0.000016996690443088002,
+          "maxRadianceError": 0.00007739609022711785,
+          "maxTransmittanceError": 0.0010265976524389542
+        }
+      ]
+    }
+  ]
+}

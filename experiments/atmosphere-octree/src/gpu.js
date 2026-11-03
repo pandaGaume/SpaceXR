@@ -55,7 +55,7 @@ export class GpuAtmosphere {
                 maxStep / 1000, model.solarSteps, rays.length, useCache ? (this.layout === 'octree' ? 1 : 2) : 0
             ]);
             const uniforms = upload(parameters, GPUBufferUsage.UNIFORM);
-            const directions = upload(new Float32Array(rays.flatMap(r => [...r, 0])), GPUBufferUsage.STORAGE);
+            const directions = upload(new Float32Array(rays.flatMap(r => [...r.slice(0, 3), (r[3] ?? 1e23) / 1000])), GPUBufferUsage.STORAGE);
             const nodes = upload(packOctree(tree), GPUBufferUsage.STORAGE);
             const output = d.createBuffer({ size: rays.length * 32, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC }); resources.push(output);
             const staging = d.createBuffer({ size: rays.length * 32, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ }); resources.push(staging);

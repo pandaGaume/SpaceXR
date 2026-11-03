@@ -109,7 +109,7 @@ fn main(@builtin(global_invocation_id) id: vec3u) {
     if id.x >= u32(params.settings.z) { return; }
     let o = params.origin.xyz; let d = normalize(rays[id.x].xyz);
     let hit = intersect(o, d, 1.0 + params.axesTop.z / params.axesTop.y);
-    let start = max(0.0, hit.x); var end = hit.y;
+    let start = max(0.0, hit.x); var end = min(hit.y, rays[id.x].w);
     let ground = intersect(o, d, 1.0);
     if ground.y >= start && ground.x >= start { end = min(end, ground.x); }
     var light = vec3f(0.0); var transmission = vec3f(1.0);

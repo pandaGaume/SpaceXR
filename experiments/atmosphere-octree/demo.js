@@ -1,4 +1,6 @@
-import { WGS84, geodeticPosition, normalize } from './src/geometry.js';
+import { FrustumCamera, FrustumVolume } from './src/frustum.js';
+import { GpuFrustumVolume } from './src/frustum.gpu.js';
+import { WGS84, geodeticPosition } from './src/geometry.js';
 import { Atmosphere } from './src/model.js';
 import { AtmosphereOctree } from './src/octree.js';
 import { integrate } from './src/integrator.js';
@@ -17,13 +19,13 @@ function setup() {
         current = { key, model, tree: new AtmosphereOctree(model, { seamBlendFraction: Number($("seams").value) }), origin: geodeticPosition(WGS84, polar ? Math.PI / 2 : 0, 0, orbital ? 400000 : 2000), values: null };
     }
     const width = Number($('resolution').value), height = width * 9 / 16, rays = [];
-    for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) {
-        const u = (2 * (x + 0.5) / width - 1) * 0.7, v = (1 - 2 * (y + 0.5) / height) * 0.45;
-        let ray = view === 'orbit' ? [-1, u, v] : view === 'limb' ? [-0.35 + v * 0.25, 1, u * 0.3] : [v + 0.15, 1, u];
-        if (view === 'polar') ray = [ray[2], ray[1], ray[0]];
-        rays.push(normalize(ray));
-    }
-    return { ...current, width, height, rays };
+    let forward = [0.15, 1, 0], right = [0, 0, 1], up = [1, -0.15, 0], halfWidth = 0.7, halfHeight = 0.45;
+    if (view === 'orbit') { forward = [-1, 0, 0]; right = [0, 1, 0]; up = [0, 0, 1]; }
+    if (view === 'limb') { forward = [-0.35, 1, 0]; up = [1, 0.35, 0]; halfWidth = 0.21; halfHeight = 0.1; }
+    if (view === 'polar') { forward = [0, 1, 0.15]; right = [1, 0, 0]; up = [0, -0.15, 1]; }
+    const camera = new FrustumCamera(current.origin, forward, right, up, halfWidth, halfHeight);
+    for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) rays.push(camera.ray((x + 0.5) / width, (y + 0.5) / height));
+    return { ...current, camera, width, height, rays };
 }
 function draw(id, values, width, height) {
     const canvas = $(id); canvas.width = width; canvas.height = height;
@@ -62,7 +64,7 @@ function compare(a, b) {
 }
 const compact = ({ values, ...stats }) => stats;
 async function render(useGPU = false) {
-    $('render').disabled = true; $('gpu').disabled = true;
+    setBusy(true);
     try {
         const s = setup();
         $('status').textContent = 'Calcul de la reference et preparation du cache...'; await yieldUI();
@@ -81,7 +83,7 @@ async function render(useGPU = false) {
         $('status').textContent = JSON.stringify(report, null, 2);
         window.atmosphereResult = report;
     } catch (error) { $('status').textContent = `${error.stack || error}`; window.atmosphereError = String(error); }
-    finally { $('render').disabled = false; $('gpu').disabled = !navigator.gpu; }
+    finally { setBusy(false); }
 }
 $('render').onclick = () => render(false);
 $('gpu').disabled = !navigator.gpu;
@@ -95,7 +97,7 @@ if (new URLSearchParams(location.search).has('auto')) render(new URLSearchParams
 import { buildSolarGrid } from './src/grid.js';
 $('layouts').disabled = !navigator.gpu;
 $('layouts').onclick = async () => {
-    for (const id of ['render', 'gpu', 'layouts']) $(id).disabled = true;
+    setBusy(true);
     const devices = [];
     try {
         const s = setup();
@@ -120,5 +122,72 @@ $('layouts').onclick = async () => {
         }
         $('status').textContent = JSON.stringify(report, null, 2);
     } catch (error) { $('status').textContent = String(error.stack || error); }
-    finally { devices.forEach(d => d.dispose()); for (const id of ['render', 'gpu', 'layouts']) $(id).disabled = id !== 'render' && !navigator.gpu; }
+    finally { devices.forEach(d => d.dispose()); setBusy(false); }
+};
+
+
+function setBusy(busy) {
+    for (const id of ['render', 'gpu', 'layouts', 'hybrid', 'hybridgpu']) $(id).disabled = busy || (['gpu', 'layouts', 'hybridgpu'].includes(id) && !navigator.gpu);
+    for (const select of document.querySelectorAll('select')) select.disabled = busy;
+}
+function sceneDepth(u) {
+    const value = $('sceneDepth').value;
+    return value === 'sky' ? Infinity : value === 'terrain' ? 10000 : u < 0.5 ? 5000 : 20000;
+}
+function drawComposite(id, values, width, height) {
+    const terrain = $('sceneDepth').value !== 'sky';
+    const composed = values.map(value => ({ radiance: value.radiance.map((v, c) => v + (terrain ? [0.06, 0.08, 0.04][c] * value.transmittance[c] : 0)) }));
+    draw(id, composed, width, height);
+}
+async function hybrid(useGPU) {
+    setBusy(true); let renderer;
+    try {
+        const s = setup(), size = Number($('volumeSize').value);
+        const options = { width: size, height: Math.round(size * 2 / 3), depth: size === 12 ? 48 : 64, far: $('sceneDepth').value === 'sky' ? 2000000 : $('sceneDepth').value === 'terrain' ? 10000 : 20000, maxStep: 2000 };
+        $('status').textContent = 'Reference directe aux profondeurs de la scene...'; await yieldUI();
+        s.model.resetStats(); const reference = [], referenceStart = performance.now();
+        for (let y = 0; y < s.height; y++) for (let x = 0; x < s.width; x++) {
+            const u = (x + 0.5) / s.width, v = (y + 0.5) / s.height;
+            reference.push(integrate(s.model, s.origin, s.camera.ray(u, v), { maxDistance: sceneDepth(u), maxStep: 2000 }));
+            if ((x + y * s.width) % 96 === 0) await yieldUI();
+        }
+        const report = { mode: 'octree solaire + volume camera', output: [s.width, s.height], volume: [options.width, options.height, options.depth],
+            directCPU: { ms: performance.now() - referenceStart, ...s.model.stats } };
+        $('status').textContent = 'Construction cumulative du volume, avec cache solaire octree...'; await yieldUI();
+        const volume = new FrustumVolume(s.model, s.tree, s.camera, options);
+        s.model.resetStats(); s.tree.resetStats(); const buildStart = performance.now(); volume.build();
+        report.volumeBuildCPU = { ms: performance.now() - buildStart, ...s.model.stats, ...s.tree.stats, integratedSamples: volume.stats.integratedSamples, bytes: volume.bytes };
+        s.model.resetStats(); const sampleStart = performance.now(), values = [];
+        for (let y = 0; y < s.height; y++) for (let x = 0; x < s.width; x++) {
+            const u = (x + 0.5) / s.width, v = (y + 0.5) / s.height;
+            values.push(volume.sample(u, v, sceneDepth(u)));
+            if ((x + y * s.width) % 192 === 0) await yieldUI();
+        }
+        report.reconstructionCPU = { ms: performance.now() - sampleStart, fallbacks: volume.stats.fallbacks, lookups: volume.stats.lookups, ...s.model.stats };
+        report.errorCPU = compare(reference, values);
+        let result = values;
+        if (useGPU) {
+            $('status').textContent = 'Construction GPU du volume et lecture des textures 3D...'; await yieldUI();
+            gpu ??= await GpuAtmosphere.create(); renderer = await GpuFrustumVolume.create(gpu.device, gpu);
+            report.directGPU = compact(await gpu.render(s.model, s.tree, s.origin, s.rays.map((ray, i) => [...ray, sceneDepth((i % s.width + 0.5) / s.width)]), false));
+            report.volumeBuildGPU = await renderer.build(volume);
+            await renderer.sample(s.width, s.height, sceneDepth);
+            const sampled = await renderer.sample(s.width, s.height, sceneDepth);
+            report.reconstructionGPU = compact(sampled); report.errorGPU = compare(reference, sampled.values); report.gpuVersusCPUVolume = compare(values, sampled.values);
+            result = sampled.values;
+        }
+        drawComposite('reference', reference, s.width, s.height); drawComposite('accelerated', result, s.width, s.height); drawError(reference, result, s.width, s.height);
+        current.values = { a: reference, b: result, width: s.width, height: s.height, composite: true };
+        $('status').textContent = JSON.stringify(report, null, 2); window.atmosphereResult = report;
+    } catch (error) { $('status').textContent = String(error.stack || error); }
+    finally { renderer?.dispose(); setBusy(false); }
+}
+$('hybrid').onclick = () => hybrid(false);
+$('hybridgpu').onclick = () => hybrid(true);
+$('hybridgpu').disabled = !navigator.gpu;
+$('exposure').oninput = () => {
+    if (current?.values) {
+        const v = current.values, display = v.composite ? drawComposite : draw;
+        display('reference', v.a, v.width, v.height); display('accelerated', v.b, v.width, v.height);
+    }
 };

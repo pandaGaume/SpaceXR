@@ -1,0 +1,328 @@
+{
+  "mode": "Sky-View LUT + presentation WebGPU native",
+  "nativeImage": {
+    "width": 1920,
+    "height": 1080,
+    "pixels": 2073600,
+    "canvasWidth": 1920,
+    "canvasHeight": 1080,
+    "upscaledLowResolutionImage": false
+  },
+  "solarLut": {
+    "ms": 17.299999952316284,
+    "gpuMs": 3.60448,
+    "size": [
+      128,
+      32,
+      32
+    ],
+    "bytes": 1048576,
+    "solarSteps": 64,
+    "reused": false
+  },
+  "skyView": {
+    "gpuMs": 5.963776,
+    "ms": 9.899999976158142,
+    "width": 256,
+    "height": 128,
+    "samples": 64,
+    "bytes": 786432,
+    "regime": "internal"
+  },
+  "hdDisplay": {
+    "measurements": [
+      {
+        "gpuMs": 0.524288,
+        "ms": 4.199999988079071,
+        "width": 1920,
+        "height": 1080,
+        "pixels": 2073600,
+        "imageReadback": false
+      },
+      {
+        "gpuMs": 0.458752,
+        "ms": 2.900000035762787,
+        "width": 1920,
+        "height": 1080,
+        "pixels": 2073600,
+        "imageReadback": false
+      },
+      {
+        "gpuMs": 0.458752,
+        "ms": 2.899999976158142,
+        "width": 1920,
+        "height": 1080,
+        "pixels": 2073600,
+        "imageReadback": false
+      }
+    ],
+    "medianGpuMs": 0.458752,
+    "imageReadback": false,
+    "steadyOrientationFramesReuseLuts": true
+  },
+  "rebuildSkyAndDisplayGpuMs": 6.422528,
+  "setupAndValidationWallMs": 115.20000004768372,
+  "validation": {
+    "probes": 336,
+    "radianceRMSE": 0.0002944661488212537,
+    "maxRadianceError": 0.004547096788883209,
+    "maxTransmittanceError": 0.011259205639362335,
+    "reference": "GPU ray marching, 1 km maximum step, same solar LUT; excludes disk and ground base color"
+  },
+  "note": "Le temps d affichage seul reutilise la Sky-View LUT. Un changement de position ou de soleil exige sa reconstruction. Validation hors boucle; disque solaire natif et globe uni exclus du comparatif numerique.",
+  "reuseCalibration": {
+    "origin": [
+      6438137,
+      0,
+      0
+    ],
+    "altitudeMeters": 60000,
+    "definition": [
+      1920,
+      1080
+    ],
+    "projectionHalfTangents": [
+      0.8,
+      0.45
+    ],
+    "exposure": 12,
+    "sun": [
+      -0.04993761694389223,
+      0.9987523388778446,
+      0
+    ],
+    "skyView": [
+      256,
+      128
+    ],
+    "probes": 438,
+    "horizonSamples": 35,
+    "budgets": {
+      "horizonPixels": 0.5,
+      "maximumDisplayCodeError": 2
+    },
+    "calibrationStepsMeters": [
+      600,
+      600,
+      60
+    ],
+    "photometricSensitivityCodesPerMeterENU": [
+      0.0004823255151987856,
+      0.0001379928485488809,
+      0.0024496075217048958
+    ],
+    "limits": [
+      {
+        "axis": "east",
+        "geometryPixelsPerMeter": 0.00018664419974526335,
+        "colorCodesPerMeter": 0.0004823255151987856,
+        "geometricLimitMeters": 2678.893856237764,
+        "photometricLimitMeters": 4146.577232547443,
+        "extrapolationCapMeters": 19200,
+        "firstOrderLimitMeters": 2678.893856237764,
+        "recommendedMeters": 1339.446928118882
+      },
+      {
+        "axis": "north",
+        "geometryPixelsPerMeter": 0.00015152808357603862,
+        "colorCodesPerMeter": 0.0001379928485488809,
+        "geometricLimitMeters": 3299.718363751984,
+        "photometricLimitMeters": 14493.50470717723,
+        "extrapolationCapMeters": 19200,
+        "firstOrderLimitMeters": 3299.718363751984,
+        "recommendedMeters": 1649.859181875992
+      },
+      {
+        "axis": "up",
+        "geometryPixelsPerMeter": 0.001741435660398922,
+        "colorCodesPerMeter": 0.0024496075217048958,
+        "geometricLimitMeters": 287.119421848443,
+        "photometricLimitMeters": 816.4573231747858,
+        "extrapolationCapMeters": 1920,
+        "firstOrderLimitMeters": 287.119421848443,
+        "recommendedMeters": 143.5597109242215
+      }
+    ],
+    "safetyFactor": 0.5,
+    "holdoutsPass": true,
+    "samples": [
+      {
+        "label": "Calibration est -",
+        "localOffsetMeters": [
+          -600,
+          0,
+          0
+        ],
+        "actualDistanceMeters": 599.9999980458198,
+        "predictedHorizonPixels": 0.11202447393457089,
+        "measuredHorizonPixels": 0.11198613391644748,
+        "maximumColorErrorCodes": 0.20228456387580707,
+        "rmsColorErrorCodes": 0.05487480721371033,
+        "referenceBuildGpuMs": 16.187392,
+        "wallMs": 34.39999997615814
+      },
+      {
+        "label": "Calibration est +",
+        "localOffsetMeters": [
+          600,
+          0,
+          0
+        ],
+        "actualDistanceMeters": 599.9999980458198,
+        "predictedHorizonPixels": 0.11194856478711475,
+        "measuredHorizonPixels": 0.11198690578048233,
+        "maximumColorErrorCodes": 0.28939530911927136,
+        "rmsColorErrorCodes": 0.05428327504917611,
+        "referenceBuildGpuMs": 15.532032,
+        "wallMs": 33.89999997615814
+      },
+      {
+        "label": "Calibration nord -",
+        "localOffsetMeters": [
+          0,
+          -600,
+          0
+        ],
+        "actualDistanceMeters": 599.999998030632,
+        "predictedHorizonPixels": 0.09096586255174367,
+        "measuredHorizonPixels": 0.09091740617231076,
+        "maximumColorErrorCodes": 0.08279570912932854,
+        "rmsColorErrorCodes": 0.008577035726651748,
+        "referenceBuildGpuMs": 17.235968,
+        "wallMs": 33.90000003576279
+      },
+      {
+        "label": "Calibration nord +",
+        "localOffsetMeters": [
+          0,
+          600,
+          0
+        ],
+        "actualDistanceMeters": 599.999998030632,
+        "predictedHorizonPixels": 0.09096586255174367,
+        "measuredHorizonPixels": 0.09091740617231076,
+        "maximumColorErrorCodes": 0.08279570912932854,
+        "rmsColorErrorCodes": 0.008558431298720437,
+        "referenceBuildGpuMs": 16.384,
+        "wallMs": 30.900000035762787
+      },
+      {
+        "label": "Calibration altitude -",
+        "localOffsetMeters": [
+          0,
+          0,
+          -60
+        ],
+        "actualDistanceMeters": 60,
+        "predictedHorizonPixels": 0.10448613962393531,
+        "measuredHorizonPixels": 0.10451284995179633,
+        "maximumColorErrorCodes": 0.12924292312877128,
+        "rmsColorErrorCodes": 0.04126274635571613,
+        "referenceBuildGpuMs": 16.187392,
+        "wallMs": 26.599999964237213
+      },
+      {
+        "label": "Calibration altitude +",
+        "localOffsetMeters": [
+          0,
+          0,
+          60
+        ],
+        "actualDistanceMeters": 60,
+        "predictedHorizonPixels": 0.10448613962393531,
+        "measuredHorizonPixels": 0.10445945611827061,
+        "maximumColorErrorCodes": 0.14697645130229375,
+        "rmsColorErrorCodes": 0.039890436383883565,
+        "referenceBuildGpuMs": 15.663104,
+        "wallMs": 29.80000001192093
+      },
+      {
+        "label": "Validation mixte 1",
+        "localOffsetMeters": [
+          1875.2256993664346,
+          -659.9436727503968,
+          28.7119421848443
+        ],
+        "actualDistanceMeters": 1988.1658708260893,
+        "predictedHorizonPixels": 0.4978608436773503,
+        "measuredHorizonPixels": 0.4983897809208685,
+        "maximumColorErrorCodes": 0.6608967310925777,
+        "rmsColorErrorCodes": 0.18145094952686813,
+        "referenceBuildGpuMs": 15.663104,
+        "wallMs": 27.30000001192093,
+        "predictedColorErrorCodes": 1.0658696983843072,
+        "withinBudgets": true
+      },
+      {
+        "label": "Validation mixte 2",
+        "localOffsetMeters": [
+          -535.7787712475528,
+          1979.8310182511902,
+          -57.4238843696886
+        ],
+        "actualDistanceMeters": 2051.858836878141,
+        "predictedHorizonPixels": 0.5001141055313325,
+        "measuredHorizonPixels": 0.49956563311935764,
+        "maximumColorErrorCodes": 0.30514948192848124,
+        "rmsColorErrorCodes": 0.08277590889107295,
+        "referenceBuildGpuMs": 15.40096,
+        "wallMs": 28.600000023841858,
+        "predictedColorErrorCodes": 0.6722882728059627,
+        "withinBudgets": true
+      },
+      {
+        "label": "Validation mixte 3",
+        "localOffsetMeters": [
+          535.7787712475528,
+          659.9436727503968,
+          172.2716531090658
+        ],
+        "actualDistanceMeters": 867.3192282446457,
+        "predictedHorizonPixels": 0.4994435222627459,
+        "measuredHorizonPixels": 0.4993170604006152,
+        "maximumColorErrorCodes": 0.3718175462834665,
+        "rmsColorErrorCodes": 0.14772732285716308,
+        "referenceBuildGpuMs": 15.466496,
+        "wallMs": 27.899999976158142,
+        "predictedColorErrorCodes": 0.7714852163916901,
+        "withinBudgets": true
+      },
+      {
+        "label": "Verification stereo : 64 mm",
+        "localOffsetMeters": [
+          0.064,
+          0,
+          0
+        ],
+        "actualDistanceMeters": 0.064,
+        "predictedHorizonPixels": 0.000011945228783696855,
+        "measuredHorizonPixels": 0.000011945228696281671,
+        "maximumColorErrorCodes": 0.016584394165960248,
+        "rmsColorErrorCodes": 0.000510057849467818,
+        "referenceBuildGpuMs": 16.187392,
+        "wallMs": 27.899999976158142
+      }
+    ],
+    "stereo": {
+      "label": "Verification stereo : 64 mm",
+      "localOffsetMeters": [
+        0.064,
+        0,
+        0
+      ],
+      "actualDistanceMeters": 0.064,
+      "predictedHorizonPixels": 0.000011945228783696855,
+      "measuredHorizonPixels": 0.000011945228696281671,
+      "maximumColorErrorCodes": 0.016584394165960248,
+      "rmsColorErrorCodes": 0.000510057849467818,
+      "referenceBuildGpuMs": 16.187392,
+      "wallMs": 27.899999976158142
+    },
+    "wallMs": 446,
+    "formulas": {
+      "geometry": "max_k |J_horizon_k dot deltaECEF| <= horizonPixelBudget",
+      "color": "sE*|deltaEast| + sN*|deltaNorth| + sH*|deltaUp| <= displayCodeBudget"
+    },
+    "validity": "Local first-order model for this origin, Sun, exposure, projection and LUT quality. Color residual uses horizon reprojection and a freshly rebuilt LUT at every test position. Holdouts are independent of the six calibration samples. No universal translation threshold is implied."
+  }
+}

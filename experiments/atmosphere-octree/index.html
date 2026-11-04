@@ -1,11 +1,12 @@
 <!doctype html>
 <html lang="fr">
 <meta charset="utf-8">
-<title>SpaceXR | Atmosphere ellipsoidale et octree</title>
+<title>SpaceXR | Atmosphere ellipsoidale HD</title>
 <style>
 body{font:16px system-ui;background:#111827;color:#e5e7eb;max-width:1150px;margin:32px auto;padding:0 20px}h1{font-size:26px}p{line-height:1.5;color:#b7c6d9}label{display:inline-block;margin:8px 18px 8px 0}button,select,input{font:inherit;padding:7px;background:#203149;color:white;border:1px solid #486078;border-radius:5px}button{cursor:pointer}button:disabled{opacity:.5}#views{display:flex;gap:20px;flex-wrap:wrap}canvas{width:480px;height:270px;image-rendering:pixelated;border:1px solid #486078}pre{white-space:pre-wrap;background:#192438;padding:18px;font-size:13px}.caption{margin:8px 0}details{margin:18px 0}
+#hdSection{margin:24px 0}#hdSky{display:block;width:100%;height:auto;image-rendering:auto;background:#000}#hdSky:fullscreen{width:100vw;height:100vh;object-fit:contain;background:#000}#hdStatus{font-size:13px}#hdSection[hidden]{display:none}
 </style>
-<h1>Atmosphere ellipsoidale : prototype octree</h1>
+<h1>Atmosphere ellipsoidale : Sky-View et rendu HD</h1>
 <p>Diffusion simple Rayleigh et Mie. Altitude geodesique ECEF, ellipsoide WGS84. Comparaison en radiance lineaire, exposition commune pour l'affichage. Aucun raccordement Babylon ou XR dans cette experience.</p>
 <label>Vue <select id="view"><option value="ground">Sol, horizon</option><option value="orbit">Orbite</option><option value="polar">Region polaire</option><option value="limb">Bord de la planete</option><option value="dawn">Aube orbitale a 60 km (soleil impose)</option></select></label>
 <label>Soleil <select id="sun"><option value="day">Jour</option><option value="sunset">Coucher</option><option value="night">Nuit</option></select></label>
@@ -13,6 +14,8 @@ body{font:16px system-ui;background:#111827;color:#e5e7eb;max-width:1150px;margi
 <label>Raccords <select id="seams"><option value="0.08">Transition continue</option><option value="0">Interpolation brute</option></select></label><label>Exposition <input id="exposure" type="number" value="12" min="1" max="100" style="width:60px"></label>
 <p><label>Volume camera <select id="volumeSize"><option value="12">12 x 8 x 48</option><option value="24">24 x 16 x 64</option></select></label><label>Profondeur scene <select id="sceneDepth"><option value="sky">Ciel et globe</option><option value="terrain">Surface a 10 km</option><option value="step">Rupture : 5 km / 20 km</option></select></label></p><p><button id="hybrid">Hybride CPU</button> <button id="hybridgpu">Hybride WebGPU</button></p><p><button id="render">Comparer CPU</button> <button id="gpu" disabled>Comparer WebGPU</button> <button id="layouts" disabled>Comparer les formats GPU</button></p>
 <p><label>LUT solaire (lon x lat x alt) <select id="solarLutSize"><option value="128">128 x 32 x 32, 1 Mio</option><option value="256">256 x 64 x 48, 6 Mio</option></select></label><button id="solarlut">LUT 3D WebGPU</button> <button id="solarlutvolume">Volume + LUT 3D</button></p>
+<p><label>Definition <select id="hdDefinition"><option value="1920">Full HD : 1920 x 1080</option><option value="1280">HD : 1280 x 720</option></select></label><label>Sky-View <select id="skyLutQuality"><option value="256">256 x 128, 64 echantillons</option><option value="128">128 x 64, 32 echantillons</option></select></label><label><input type="checkbox" id="hdSun" checked> Soleil</label><button id="renderhd">Rendu HD</button> <button id="animatehd" disabled>Animer le regard</button> <button id="fullscreenhd" disabled>Plein ecran</button> <button id="savehd" disabled>PNG natif</button> <button id="calibratehd" disabled>Mesurer le seuil camera</button> <button id="reporthd" disabled>Rapport JSON</button></p>
+<section id="hdSection" hidden><h2>Ciel a la definition de l'ecran</h2><p id="hdCaption">Sky-View LUT et reconstruction par pixel. Globe uni, sans terrain detaille ni nuages.</p><canvas id="hdSky" width="1920" height="1080" aria-label="Ciel atmospherique en definition HD native"></canvas><pre id="hdStatus">Preparation...</pre></section>
 <div id="views"><div><div class="caption">Reference</div><canvas id="reference" width="48" height="27"></canvas></div><div><div class="caption">Mode teste : LUT, octree ou volume</div><canvas id="accelerated" width="48" height="27"></canvas></div></div>
 <p>Erreur absolue amplifiee : noir = faible, jaune = forte. Radiance lineaire x10000, avant exposition.</p><canvas id="error" width="48" height="27"></canvas>
 <pre id="status">Pret. Le premier calcul remplit le cache; le second reutilise le meme point de vue.</pre>

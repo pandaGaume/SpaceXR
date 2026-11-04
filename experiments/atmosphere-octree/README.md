@@ -74,3 +74,7 @@ Le mode octree solaire + volume camera cumulatif est implemente en CPU et WebGPU
 ## LUT solaire ellipsoidale
 
 Le cache optique 3D global est disponible en CPU et WebGPU, avec deux variantes internes et spatiales. Voir [SOLAR-LUT.md](SOLAR-LUT.md) pour les coordonnees, mesures et limites, et [VISUAL-TARGET.md](VISUAL-TARGET.md) pour la reference utilisateur. Les nouveaux boutons sont `LUT 3D WebGPU` et `Volume + LUT 3D`.
+
+## Rendu natif Full HD et seuil camera
+
+Le chemin `Rendu HD` affiche maintenant 1920 x 1080 sur WebGPU, depuis une Sky-View directionnelle et une LUT solaire 3D. `Animer le regard` reutilise ces textures. `Mesurer le seuil camera` calibre deux criteres, deplacement de l'horizon et variation de couleur, puis les verifie sur des mouvements mixtes. Voir [SKY-VIEW.md](SKY-VIEW.md), le [rapport GPU](outputs/sky-view-full-hd-report.json) et le [PNG natif](outputs/sky-view-full-hd.png). Les comparatifs historiques a basse definition restent disponibles separement. 48 tests Node passent.

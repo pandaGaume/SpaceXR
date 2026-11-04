@@ -1,3 +1,6 @@
+import { calibrateSkyReuse } from './src/sky-reuse.js';
+import { cameraForDisplay } from './src/sky-view.js';
+import { GpuSkyView } from './src/sky-view.gpu.js';
 import { GpuSolarOpticalLut } from './src/solar-lut.gpu.js';
 import { solarSignature } from './src/solar-lut.js';
 import { FrustumCamera, FrustumVolume } from './src/frustum.js';
@@ -9,6 +12,7 @@ import { integrate } from './src/integrator.js';
 import { GpuAtmosphere } from './src/gpu.js';
 const $ = id => document.getElementById(id);
 let current = null, gpu = null;
+var hdState = null;
 const yieldUI = () => new Promise(resolve => setTimeout(resolve, 0));
 function setup() {
     const view = $('view').value, sunlight = $('sun').value;
@@ -130,8 +134,14 @@ $('layouts').onclick = async () => {
 
 
 function setBusy(busy) {
-    for (const id of ['render', 'gpu', 'layouts', 'hybrid', 'hybridgpu', 'solarlut', 'solarlutvolume']) $(id).disabled = busy || (['gpu', 'layouts', 'hybridgpu', 'solarlut', 'solarlutvolume'].includes(id) && !navigator.gpu);
+    if (busy) stopHdAnimation();
+    for (const id of ['render', 'gpu', 'layouts', 'hybrid', 'hybridgpu', 'solarlut', 'solarlutvolume', 'renderhd', 'animatehd', 'fullscreenhd', 'savehd', 'calibratehd', 'reporthd']) $(id).disabled = busy || (['gpu', 'layouts', 'hybridgpu', 'solarlut', 'solarlutvolume', 'renderhd', 'animatehd', 'fullscreenhd', 'savehd', 'calibratehd', 'reporthd'].includes(id) && !navigator.gpu);
     for (const select of document.querySelectorAll('select')) select.disabled = busy;
+    $('animatehd').disabled = busy || !hdState?.renderer;
+    $('fullscreenhd').disabled = busy || !hdState?.renderer;
+    $('savehd').disabled = busy || !hdState?.renderer;
+    $('calibratehd').disabled = busy || !hdState?.renderer;
+    $('reporthd').disabled = busy || !hdState?.renderer;
 }
 function sceneDepth(u) {
     const value = $('sceneDepth').value;
@@ -274,3 +284,131 @@ async function runSolarLut(withVolume = false) {
 $('solarlut').onclick = () => runSolarLut(false);
 $('solarlutvolume').onclick = () => runSolarLut(true);
 $('solarlut').disabled = $('solarlutvolume').disabled = !navigator.gpu;
+
+async function getHdSolarLut(model) {
+    gpu ??= await GpuAtmosphere.create();
+    solarLutRenderer ??= await GpuAtmosphere.create('solar-lut', gpu.device);
+    const quality = Number($('solarLutSize').value), size = quality === 128 ? [128, 32, 32] : [256, 64, 48];
+    const key = JSON.stringify([solarSignature(model), size, model.solarSteps]);
+    const existing = persistentSolarLuts.get(key);
+    if (existing) return { ...existing, reused: true };
+    if (persistentSolarLuts.size >= 2) {
+        const oldest = persistentSolarLuts.keys().next().value;
+        persistentSolarLuts.get(oldest).lut.dispose(); persistentSolarLuts.delete(oldest);
+    }
+    const lut = await GpuSolarOpticalLut.create(gpu.device, model, { longitude: size[0], latitude: size[1], altitude: size[2], steps: model.solarSteps });
+    try {
+        const build = await lut.build((done, total) => { $('hdStatus').textContent = `Construction LUT solaire : ${done}/${total} couches...`; });
+        const result = { lut, build }; persistentSolarLuts.set(key, result); return { ...result, reused: false };
+    } catch (error) { lut.dispose(); throw error; }
+}
+async function renderHD() {
+    setBusy(true); $('hdSection').hidden = false;
+    hdState?.renderer?.dispose(); hdState = null;
+    let renderer;
+    try {
+        const s = setup(), width = Number($('hdDefinition').value), height = width * 9 / 16;
+        const camera = cameraForDisplay(s.camera, width, height);
+        $('hdStatus').textContent = 'Preparation des ressources GPU...'; await yieldUI();
+        const solar = await getHdSolarLut(s.model), quality = Number($('skyLutQuality').value);
+        $('hdStatus').textContent = 'Compilation et construction de la Sky-View LUT...'; await yieldUI();
+        const setupStart = performance.now();
+        renderer = await GpuSkyView.create(gpu.device, $('hdSky'), s.model, camera, solar.lut, { width: quality, hemisphereRows: quality / 4, samples: quality === 256 ? 64 : 32 });
+        renderer.resize(width, height); renderer.writeCamera(camera, Number($('exposure').value), $('hdSun').checked);
+        const skyBuild = await renderer.build();
+        renderer.draw(); await gpu.device.queue.onSubmittedWorkDone();
+        const display = [];
+        for (let i = 0; i < 3; i++) display.push(await renderer.measureDisplay());
+        $('hdStatus').textContent = 'Verification sur des rayons independants de la grille HD...'; await yieldUI();
+        const validation = await renderer.validate(solarLutRenderer);
+        const validTimes = display.map(v => v.gpuMs).filter(v => v !== null).sort((a, b) => a - b);
+        const medianGpuMs = validTimes.length ? validTimes[Math.floor(validTimes.length / 2)] : null;
+        const report = { mode: 'Sky-View LUT + presentation WebGPU native', nativeImage: { width, height, pixels: width * height, canvasWidth: $('hdSky').width, canvasHeight: $('hdSky').height, upscaledLowResolutionImage: false },
+            solarLut: { ...solar.build, reused: solar.reused }, skyView: skyBuild, hdDisplay: { measurements: display, medianGpuMs, imageReadback: false, steadyOrientationFramesReuseLuts: true },
+            rebuildSkyAndDisplayGpuMs: skyBuild.gpuMs !== null && medianGpuMs !== null ? skyBuild.gpuMs + medianGpuMs : null,
+            setupAndValidationWallMs: performance.now() - setupStart, validation,
+            note: 'Le temps d affichage seul reutilise la Sky-View LUT. Un changement de position ou de soleil exige sa reconstruction. Validation hors boucle; disque solaire natif et globe uni exclus du comparatif numerique.' };
+        hdState = { renderer, report, baseCamera: camera, animation: null };
+        $('hdCaption').textContent = `${width} x ${height} pixels calcules sur GPU; Sky-View ${skyBuild.width} x ${skyBuild.height}. Soleil calcule par pixel. Globe uni, sans nuages.`;
+        $('hdStatus').textContent = JSON.stringify(report, null, 2);
+        window.atmosphereHDResult = report;
+        renderer.draw(camera, Number($('exposure').value), $('hdSun').checked);
+    } catch (error) { renderer?.dispose(); $('hdStatus').textContent = String(error.stack || error); }
+    finally { setBusy(false); }
+}
+function stopHdAnimation() {
+    if (!hdState?.animation) return;
+    cancelAnimationFrame(hdState.animation.request); hdState.animation = null;
+    $('animatehd').textContent = 'Animer le regard';
+}
+function rotateHdCamera(camera, angle) {
+    const axis = camera.up, c = Math.cos(angle), s = Math.sin(angle);
+    const rotate = vector => {
+        const cross = [axis[1] * vector[2] - axis[2] * vector[1], axis[2] * vector[0] - axis[0] * vector[2], axis[0] * vector[1] - axis[1] * vector[0]];
+        const dot = axis.reduce((sum, v, i) => sum + v * vector[i], 0);
+        return vector.map((v, i) => v * c + cross[i] * s + axis[i] * dot * (1 - c));
+    };
+    return new FrustumCamera(camera.origin, rotate(camera.forward), rotate(camera.right), camera.up, camera.halfWidth, camera.halfHeight);
+}
+function animateHD() {
+    if (!hdState?.renderer) return;
+    if (hdState.animation) { stopHdAnimation(); return; }
+    const state = hdState, base = state.renderer.camera, start = performance.now();
+    state.animation = { request: 0, frames: 0, lastReport: start, lastFrames: 0 };
+    $('animatehd').textContent = 'Pause';
+    const frame = timestamp => {
+        if (hdState !== state || !state.animation) return;
+        try {
+            const camera = rotateHdCamera(base, 0.18 * Math.sin((timestamp - start) * 0.0004));
+            state.renderer.draw(camera, Number($('exposure').value), $('hdSun').checked); state.animation.frames++;
+            if (timestamp - state.animation.lastReport >= 1000) {
+                const fps = (state.animation.frames - state.animation.lastFrames) * 1000 / (timestamp - state.animation.lastReport);
+                state.report.animation = { requestAnimationFrameFps: fps, imagePixels: state.renderer.width * state.renderer.height, skyViewRebuilds: 0, orientationOnly: true, imageReadback: false };
+                $('hdStatus').textContent = JSON.stringify(state.report, null, 2);
+                state.animation.lastReport = timestamp; state.animation.lastFrames = state.animation.frames;
+            }
+            state.animation.request = requestAnimationFrame(frame);
+        } catch (error) { stopHdAnimation(); $('hdStatus').textContent = String(error.stack || error); }
+    };
+    state.animation.request = requestAnimationFrame(frame);
+}
+$('renderhd').onclick = renderHD;
+$('animatehd').onclick = animateHD;
+$('fullscreenhd').onclick = () => $('hdSky').requestFullscreen().catch(error => { $('hdStatus').textContent = String(error); });
+$('renderhd').disabled = !navigator.gpu;
+for (const id of ['exposure', 'hdSun']) $(id).addEventListener('input', () => {
+    if (hdState?.renderer && !hdState.animation) hdState.renderer.draw(hdState.renderer.camera, Number($('exposure').value), $('hdSun').checked);
+});
+for (const id of ['view', 'sun', 'hdDefinition', 'skyLutQuality']) $(id).addEventListener('change', stopHdAnimation);
+
+$('savehd').onclick = async () => {
+    if (!hdState?.renderer) return;
+    setBusy(true);
+    try {
+        const blob = await hdState.renderer.capturePng(), url = URL.createObjectURL(blob);
+        const link = document.createElement('a'); link.href = url; link.download = 'spacexr-sky-full-hd.png'; link.click();
+        setTimeout(() => URL.revokeObjectURL(url), 5000);
+    } catch (error) { $('hdStatus').textContent = String(error.stack || error); }
+    finally { setBusy(false); }
+};
+
+$('calibratehd').onclick = async () => {
+    if (!hdState?.renderer) return;
+    setBusy(true);
+    try {
+        const renderer = hdState.renderer;
+        renderer.writeCamera(hdState.baseCamera, Number($('exposure').value), $('hdSun').checked);
+        hdState.report.reuseCalibration = await calibrateSkyReuse(renderer, { onProgress: message => { $('hdStatus').textContent = message; } });
+        $('hdStatus').textContent = JSON.stringify(hdState.report, null, 2);
+        renderer.draw();
+    } catch (error) { $('hdStatus').textContent = String(error.stack || error); }
+    finally { setBusy(false); }
+};
+
+$('reporthd').onclick = () => {
+    if (!hdState?.report) return;
+    const blob = new Blob([JSON.stringify(hdState.report, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob), link = document.createElement('a');
+    link.href = url; link.download = 'spacexr-sky-report.json'; link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+};

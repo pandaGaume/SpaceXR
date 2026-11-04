@@ -1,10 +1,10 @@
 import { SolarOpticalLut } from './solar-lut.js';
 import { solarGeometrySource, solarLutBake, solarLutSampling } from './solar-lut.wgsl.js';
-export async function compileCompute(device, code) {
+export async function compileCompute(device, code, entryPoint = 'main') {
     const module = device.createShaderModule({ code });
     const errors = (await module.getCompilationInfo()).messages.filter(m => m.type === 'error');
     if (errors.length) throw new Error(errors.map(m => `${m.lineNum}: ${m.message}`).join('\n'));
-    return device.createComputePipelineAsync({ layout: 'auto', compute: { module, entryPoint: 'main' } });
+    return device.createComputePipelineAsync({ layout: 'auto', compute: { module, entryPoint } });
 }
 export function atmosphereParameters(model, { origin = [0, 0, 0], count = 0, maxStep = 2000, mode = 0, canonicalSun = false, steps = model.solarSteps, guardHeight = 20000 } = {}) {
     const sun = canonicalSun ? [Math.sqrt(Math.max(0, 1 - model.sun[2] ** 2)), 0, model.sun[2]] : model.sun;

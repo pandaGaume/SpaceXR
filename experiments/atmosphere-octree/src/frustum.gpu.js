@@ -1,4 +1,5 @@
-import { packOctree } from './gpu.js';
+import { solarLutSampling } from './solar-lut.wgsl.js';
+import { atmosphereRegime, packOctree } from './gpu.js';
 import { dot } from './geometry.js';
 
 const buildMain = `
@@ -57,20 +58,27 @@ fn main(@builtin(global_invocation_id) id: vec3u) {
 `;
 /** GPU volume construction and texture3D reconstruction. Uses an already prepared CPU solar octree. */
 export class GpuFrustumVolume {
-    static async create(device, fallbackRenderer = null) {
+    static async create(device, fallbackRenderer = null, solarLut = null) {
         const response = await fetch(new URL('./atmosphere.wgsl', import.meta.url));
         if (!response.ok) throw new Error('Cannot load atmospheric shader');
-        const source = (await response.text()).split('@compute @workgroup_size(64)')[0]
+        let source = (await response.text()).split('@compute @workgroup_size(64)')[0]
             .replace('@group(0) @binding(3) var<storage, read_write> results: array<Result>;', '') + buildMain;
-        const compile = async code => {
+        if (solarLut) source = solarLutSampling + source.replace('if params.settings.w < 0.5', 'if params.settings.w > 2.5 { return lutSolar(p); } if params.settings.w < 0.5');
+        const compile = async (code, entryPoint = 'main') => {
             const module = device.createShaderModule({ code });
             const errors = (await module.getCompilationInfo()).messages.filter(m => m.type === 'error');
             if (errors.length) throw new Error(errors.map(m => `${m.lineNum}: ${m.message}`).join('\n'));
-            return device.createComputePipelineAsync({ layout: 'auto', compute: { module, entryPoint: 'main' } });
+            return device.createComputePipelineAsync({ layout: 'auto', compute: { module, entryPoint } });
         };
-        return new GpuFrustumVolume(device, await compile(source), await compile(sampleCode), fallbackRenderer);
+        source = source.replace(/@compute\s+@workgroup_size\(64\)\s+fn main\(@builtin\(global_invocation_id\) id: vec3u\)/, 'fn buildCameraVolume(id: vec3u, fromSpace: bool)')
+            .replace('let start = max(0.0, hit.x); var end', 'let start = select(0.0, max(0.0, hit.x), fromSpace); var end');
+        source += `
+@compute @workgroup_size(64) fn main_inside(@builtin(global_invocation_id) id: vec3u) { buildCameraVolume(id, false); }
+@compute @workgroup_size(64) fn main_space(@builtin(global_invocation_id) id: vec3u) { buildCameraVolume(id, true); }`;
+        const renderer = new GpuFrustumVolume(device, await compile(source, 'main_inside'), await compile(sampleCode), fallbackRenderer, solarLut);
+        renderer.spaceBuilder = await compile(source, 'main_space'); return renderer;
     }
-    constructor(device, builder, sampler, fallbackRenderer) { this.fallbackRenderer = fallbackRenderer; this.device = device; this.builder = builder; this.sampler = sampler; this.textures = []; }
+    constructor(device, builder, sampler, fallbackRenderer, solarLut) { this.solarLut = solarLut; this.fallbackRenderer = fallbackRenderer; this.device = device; this.builder = builder; this.sampler = sampler; this.textures = []; }
     upload(data, usage, resources) {
         const buffer = this.device.createBuffer({ size: data.byteLength, usage: usage | GPUBufferUsage.COPY_DST });
         this.device.queue.writeBuffer(buffer, 0, data); resources.push(buffer); return buffer;
@@ -99,24 +107,27 @@ export class GpuFrustumVolume {
     }
     async build(volume) {
         const start = performance.now(), d = this.device, resources = [], m = volume.model;
-        if (!volume.tree) throw new Error('Hybrid GPU requires a solar tree');
+        const viewRegime = atmosphereRegime(m, volume.camera.origin), builder = viewRegime === 'external' ? this.spaceBuilder : this.builder;
+        if (!volume.tree && !this.solarLut) throw new Error('Hybrid GPU requires a solar cache');
+        this.solarLut?.assertCompatible(m);
         this.textures.forEach(t => t.destroy()); this.textures = [];
         try {
             for (let i = 0; i < 2; i++) this.textures.push(d.createTexture({ dimension: '3d', size: [volume.width, volume.height, volume.depth], format: 'rgba16float', usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING }));
             const parameters = new Float32Array([
-                ...volume.camera.origin.map(v => v / 1000), volume.tree.options.seamBlendFraction, ...m.sun, 0,
-                m.ellipsoid.semiMajorAxis / 1000, m.ellipsoid.semiMinorAxis / 1000, m.top / 1000, 0, ...m.rayleigh.map(v => v * 1000), 0,
+                ...volume.camera.origin.map(v => v / 1000), (volume.tree?.options.seamBlendFraction ?? 0), ...m.sun, 0,
+                m.ellipsoid.semiMajorAxis / 1000, m.ellipsoid.semiMinorAxis / 1000, m.top / 1000, 0, ...m.rayleigh.map(v => v * 1000), (this.solarLut?.layout.guardHeight ?? 0) / 1000,
                 m.mieScattering * 1000, m.mieExtinction * 1000, m.rayleighHeight / 1000, m.mieHeight / 1000,
-                volume.maxStep / 1000, m.solarSteps, volume.rays.length, 1
+                volume.maxStep / 1000, m.solarSteps, volume.rays.length, this.solarLut ? 3 : 1
             ]);
             const buffers = [this.upload(parameters, GPUBufferUsage.UNIFORM, resources),
                 this.upload(new Float32Array(volume.rays.flatMap(ray => [...ray, dot(ray, volume.camera.forward)])), GPUBufferUsage.STORAGE, resources),
-                this.upload(packOctree(volume.tree), GPUBufferUsage.STORAGE, resources),
+                this.upload(volume.tree ? packOctree(volume.tree) : new ArrayBuffer(192), GPUBufferUsage.STORAGE, resources),
                 this.upload(new Float32Array(volume.depths.map(v => v / 1000)), GPUBufferUsage.STORAGE, resources)];
             const entries = buffers.map((buffer, binding) => ({ binding, resource: { buffer } }));
             this.textures.forEach((texture, i) => entries.push({ binding: 4 + i, resource: texture.createView() }));
-            const gpuMs = await this.dispatch(this.builder, entries, volume.rays.length);
-            this.volume = volume; return { ms: performance.now() - start, gpuMs, textureBytes: volume.width * volume.height * volume.depth * 16 };
+            if (this.solarLut) entries.push(...this.solarLut.bindings());
+            const gpuMs = await this.dispatch(builder, entries, volume.rays.length);
+            this.volume = volume; return { ms: performance.now() - start, gpuMs, viewRegime, textureBytes: volume.width * volume.height * volume.depth * 16 };
         } finally { resources.forEach(r => r.destroy()); }
     }
     async sample(width, height, maxDistance = Infinity) {
@@ -127,9 +138,9 @@ export class GpuFrustumVolume {
             for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) {
                 const u = (x + 0.5) / width, w = (y + 0.5) / height;
                 const depth = typeof maxDistance === 'function' ? maxDistance(u, w) : maxDistance;
-                const target = v.target(u, w, depth), valid = v.lookup(u, w, target.depth);
+                const target = v.target(u, w, depth), valid = v.coordinates(u, w, target.depth);
                 if (!valid) {
-                                        if (this.fallbackRenderer) {
+                    if (this.fallbackRenderer) {
                         initial.push(0, 0, 0, 1, 1, 1, 1, 1); fallbackQueries.push([...target.ray, depth]); fallbackIndices.push(initial.length / 8 - 1);
                     } else {
                         const result = v.sample(u, w, depth); initial.push(...result.radiance, 1, ...result.transmittance, 1);
@@ -148,10 +159,10 @@ export class GpuFrustumVolume {
                 { binding: 2, resource: d.createSampler({ magFilter: 'linear', minFilter: 'linear' }) }, { binding: 3, resource: { buffer: queryBuffer } }, { binding: 4, resource: { buffer: output } }];
             const gpuMs = await this.dispatch(this.sampler, entries, count, encoder => encoder.copyBufferToBuffer(output, 0, staging, 0, count * 32));
             await staging.mapAsync(GPUMapMode.READ); const data = new Float32Array(staging.getMappedRange().slice(0)); staging.unmap();
-                        const values = Array.from({ length: count }, (_, i) => ({ radiance: Array.from(data.slice(i * 8, i * 8 + 3)), transmittance: Array.from(data.slice(i * 8 + 4, i * 8 + 7)) }));
+            const values = Array.from({ length: count }, (_, i) => ({ radiance: Array.from(data.slice(i * 8, i * 8 + 3)), transmittance: Array.from(data.slice(i * 8 + 4, i * 8 + 7)) }));
             let fallbackGpuMs = 0;
             if (fallbackQueries.length) {
-                const fallback = await this.fallbackRenderer.render(v.model, v.tree, v.camera.origin, fallbackQueries, true, v.maxStep);
+                const fallback = await this.fallbackRenderer.render(v.model, v.tree, v.camera.origin, fallbackQueries, true, v.maxStep, this.solarLut);
                 fallbackGpuMs = fallback.gpuMs;
                 fallbackIndices.forEach((index, i) => { values[index] = fallback.values[i]; });
             }

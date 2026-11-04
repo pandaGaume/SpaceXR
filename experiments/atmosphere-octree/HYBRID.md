@@ -54,4 +54,8 @@ Le resultat est donc un essai fonctionnel, pas un gain acquis : la lecture du vo
 
 ## Validation
 
-La suite compte 22 tests, dont sept pour l'hybride : checkpoints cumulatifs, correspondance aux noeuds du volume, interpolation a profondeur finie, protection de silhouette, stereo, entrees invalides et empreinte au sol. Les deux passes WebGPU ont ete compilees et executees sur le navigateur de la demo, avec une comparaison a la reference CPU. L'absence de mosaique perceptible n'est pas certifiee par ces tests; la carte d'erreur amplifiee sert a examiner les cas restants.
+Cette extension ajoute sept tests pour l'hybride, dans une suite qui en compte maintenant 35 : checkpoints cumulatifs, correspondance aux noeuds du volume, interpolation a profondeur finie, protection de silhouette, stereo, entrees invalides et empreinte au sol. Les deux passes WebGPU ont ete compilees et executees sur le navigateur de la demo, avec une comparaison a la reference CPU. L'absence de mosaique perceptible n'est pas certifiee par ces tests; la carte d'erreur amplifiee sert a examiner les cas restants.
+
+## Mise a jour : cache solaire 3D
+
+Le chemin hybride peut maintenant utiliser une LUT optique solaire 3D construite sur GPU, et preparer uniquement les metadonnees du volume sur CPU. Les mesures historiques ci-dessus concernent la premiere version avec octree. Voir [SOLAR-LUT.md](SOLAR-LUT.md) pour la nouvelle variante et ses resultats.

@@ -1,3 +1,5 @@
+import { GpuSolarOpticalLut } from './src/solar-lut.gpu.js';
+import { solarSignature } from './src/solar-lut.js';
 import { FrustumCamera, FrustumVolume } from './src/frustum.js';
 import { GpuFrustumVolume } from './src/frustum.gpu.js';
 import { WGS84, geodeticPosition } from './src/geometry.js';
@@ -12,14 +14,15 @@ function setup() {
     const view = $('view').value, sunlight = $('sun').value;
     const key = `${view}/${sunlight}/${$("seams").value}`;
     if (!current || current.key !== key) {
-        const sun = sunlight === 'day' ? [1, 1, 0.3] : sunlight === 'sunset' ? [0.02, 1, 0] : [-1, 0, 0];
+        const sun = view === 'dawn' ? [-0.05, 1, 0] : sunlight === 'day' ? [1, 1, 0.3] : sunlight === 'sunset' ? [0.02, 1, 0] : [-1, 0, 0];
         const polar = view === 'polar';
         const model = new Atmosphere({ sun: polar ? [sun[2], sun[1], sun[0]] : sun });
         const orbital = view === 'orbit' || view === 'limb';
-        current = { key, model, tree: new AtmosphereOctree(model, { seamBlendFraction: Number($("seams").value) }), origin: geodeticPosition(WGS84, polar ? Math.PI / 2 : 0, 0, orbital ? 400000 : 2000), values: null };
+        current = { key, model, tree: new AtmosphereOctree(model, { seamBlendFraction: Number($("seams").value) }), origin: geodeticPosition(WGS84, polar ? Math.PI / 2 : 0, 0, view === 'dawn' ? 60000 : orbital ? 400000 : 2000), values: null };
     }
     const width = Number($('resolution').value), height = width * 9 / 16, rays = [];
     let forward = [0.15, 1, 0], right = [0, 0, 1], up = [1, -0.15, 0], halfWidth = 0.7, halfHeight = 0.45;
+    if (view === 'dawn') { forward = [-0.1, 1, 0]; up = [1, 0.1, 0]; }
     if (view === 'orbit') { forward = [-1, 0, 0]; right = [0, 1, 0]; up = [0, 0, 1]; }
     if (view === 'limb') { forward = [-0.35, 1, 0]; up = [1, 0.35, 0]; halfWidth = 0.21; halfHeight = 0.1; }
     if (view === 'polar') { forward = [0, 1, 0.15]; right = [1, 0, 0]; up = [0, -0.15, 1]; }
@@ -127,7 +130,7 @@ $('layouts').onclick = async () => {
 
 
 function setBusy(busy) {
-    for (const id of ['render', 'gpu', 'layouts', 'hybrid', 'hybridgpu']) $(id).disabled = busy || (['gpu', 'layouts', 'hybridgpu'].includes(id) && !navigator.gpu);
+    for (const id of ['render', 'gpu', 'layouts', 'hybrid', 'hybridgpu', 'solarlut', 'solarlutvolume']) $(id).disabled = busy || (['gpu', 'layouts', 'hybridgpu', 'solarlut', 'solarlutvolume'].includes(id) && !navigator.gpu);
     for (const select of document.querySelectorAll('select')) select.disabled = busy;
 }
 function sceneDepth(u) {
@@ -191,3 +194,83 @@ $('exposure').oninput = () => {
         display('reference', v.a, v.width, v.height); display('accelerated', v.b, v.width, v.height);
     }
 };
+
+const persistentSolarLuts = new Map();
+let solarLutRenderer;
+async function runSolarLut(withVolume = false) {
+    setBusy(true); let volumeRenderer;
+    try {
+        const s = setup(), quality = Number($('solarLutSize').value), size = quality === 128 ? [128, 32, 32] : [256, 64, 48];
+        $('status').textContent = 'Compilation des shaders de LUT solaire...'; await yieldUI();
+        gpu ??= await GpuAtmosphere.create();
+        solarLutRenderer ??= await GpuAtmosphere.create('solar-lut', gpu.device);
+        const key = JSON.stringify([solarSignature(s.model), size, s.model.solarSteps]);
+        let cached = persistentSolarLuts.get(key), reused = !!cached;
+        if (!cached) {
+            // Keep at most two solar tables resident in this exploratory demo.
+            if (persistentSolarLuts.size >= 2) {
+                const oldest = persistentSolarLuts.keys().next().value;
+                persistentSolarLuts.get(oldest).lut.dispose(); persistentSolarLuts.delete(oldest);
+            }
+            const lut = await GpuSolarOpticalLut.create(gpu.device, s.model, { longitude: size[0], latitude: size[1], altitude: size[2], steps: s.model.solarSteps });
+            let build;
+            try { build = await lut.build((done, total) => { $('status').textContent = `Construction LUT solaire : ${done}/${total} couches...`; }); }
+            catch (error) { lut.dispose(); throw error; }
+            cached = { lut, build }; persistentSolarLuts.set(key, cached);
+        }
+        const report = { mode: withVolume ? 'LUT solaire 3D + volume camera GPU' : 'LUT solaire 3D + ray marching de vue GPU', output: [s.width, s.height],
+            solarLut: { ...cached.build, reused, note: 'Construction globale hors camera; cout amorti tant que les profils et la declinaison solaire restent fixes.' } };
+        const rays = s.rays.map((ray, i) => [...ray, sceneDepth((i % s.width + 0.5) / s.width)]);
+        $('status').textContent = 'Chauffe et mesures du rendu direct et de la LUT...'; await yieldUI();
+        await gpu.render(s.model, null, s.origin, rays, false);
+        await solarLutRenderer.render(s.model, null, s.origin, rays, true, 2000, cached.lut);
+        const directRuns = [], lutRuns = [];
+        for (let i = 0; i < 3; i++) {
+            directRuns.push(await gpu.render(s.model, null, s.origin, rays, false));
+            lutRuns.push(await solarLutRenderer.render(s.model, null, s.origin, rays, true, 2000, cached.lut));
+        }
+        const median = values => { const valid = values.filter(v => v !== null).sort((a, b) => a - b); return valid.length ? valid[Math.floor(valid.length / 2)] : null; };
+        const a = directRuns.at(-1), b = lutRuns.at(-1);
+        report.directGPU = { runs: directRuns.map(compact), medianGpuMs: median(directRuns.map(r => r.gpuMs)) };
+        report.lutGPU = { runs: lutRuns.map(compact), medianGpuMs: median(lutRuns.map(r => r.gpuMs)), error: compare(a.values, b.values) };
+        report.warmGpuSpeedup = report.directGPU.medianGpuMs > 0 && report.lutGPU.medianGpuMs > 0 ? report.directGPU.medianGpuMs / report.lutGPU.medianGpuMs : null;
+        let displayed = b.values;
+        if (withVolume) {
+            const n = Number($('volumeSize').value), far = $('sceneDepth').value === 'sky' ? 2000000 : $('sceneDepth').value === 'terrain' ? 10000 : 20000;
+            const volume = new FrustumVolume(s.model, null, s.camera, { width: n, height: Math.round(n * 2 / 3), depth: n === 12 ? 48 : 64, far, maxStep: 2000, allocateData: false });
+            volumeRenderer = await GpuFrustumVolume.create(gpu.device, solarLutRenderer, cached.lut);
+            await volumeRenderer.build(volume); const builds = [], samples = [];
+            for (let i = 0; i < 3; i++) { builds.push(await volumeRenderer.build(volume)); samples.push(await volumeRenderer.sample(s.width, s.height, sceneDepth)); }
+            displayed = samples.at(-1).values;
+            report.hybridGPU = { dimensions: [volume.width, volume.height, volume.depth], builds, reconstruction: samples.map(compact),
+                medianBuildGpuMs: median(builds.map(r => r.gpuMs)), error: compare(a.values, displayed), cpuAtmosphereIntegration: false };
+        }
+        // Validate points across latitudes, heights and the terminator without downloading the 3D texture.
+        const points = [], azimuth = Math.atan2(s.model.sun[1], s.model.sun[0]);
+        for (const latitude of [-Math.PI / 3, 0, Math.PI / 3]) for (const longitude of [0, 1.2, 1.5, Math.PI / 2, 1.6, 1.8, Math.PI]) for (const h of [100, 1000, 10000, 50000]) points.push(geodeticPosition(s.model.ellipsoid, latitude, azimuth + longitude, h));
+        const validation = await cached.lut.validate(points, s.model);
+        let squared = 0, maximum = 0, worst = -1, cpuMaximum = 0;
+        validation.forEach((value, i) => {
+            const cpu = s.model.solarTransmittance(points[i]);
+            value.cached.forEach((v, c) => {
+                const error = Math.abs(v - value.direct[c]); squared += error * error;
+                if (error > maximum) { maximum = error; worst = i; }
+                cpuMaximum = Math.max(cpuMaximum, Math.abs(v - cpu[c]));
+            });
+        });
+        report.solarPointValidation = { points: points.length, maxErrorAgainstGPUDirect: maximum, rmseAgainstGPUDirect: Math.sqrt(squared / (3 * points.length)), maxErrorAgainstCPUDirect: cpuMaximum,
+            textureHits: validation.reduce((sum, v) => sum + v.hit, 0), directFallbacks: validation.reduce((sum, v) => sum + v.fallback, 0), worstPointECEF: worst < 0 ? null : points[worst] };
+        // Check the internal/external pipeline boundary at the configured atmosphere top.
+        const transitionRays = [[1, 0, 0], [-1, 0.2, 0], [-0.1, 1, 0]];
+        const below = await solarLutRenderer.render(s.model, null, [s.model.ellipsoid.semiMajorAxis + s.model.top - 1, 0, 0], transitionRays, true, 2000, cached.lut);
+        const above = await solarLutRenderer.render(s.model, null, [s.model.ellipsoid.semiMajorAxis + s.model.top + 1, 0, 0], transitionRays, true, 2000, cached.lut);
+        report.pipelineTransition = { heights: [s.model.top - 1, s.model.top + 1], regimes: [below.viewRegime, above.viewRegime], changeAcrossTwoMeters: compare(below.values, above.values) };
+        drawComposite('reference', a.values, s.width, s.height); drawComposite('accelerated', displayed, s.width, s.height); drawError(a.values, displayed, s.width, s.height);
+        current.values = { a: a.values, b: displayed, width: s.width, height: s.height, composite: true };
+        $('status').textContent = JSON.stringify(report, null, 2); window.atmosphereResult = report;
+    } catch (error) { $('status').textContent = String(error.stack || error); }
+    finally { volumeRenderer?.dispose(); setBusy(false); }
+}
+$('solarlut').onclick = () => runSolarLut(false);
+$('solarlutvolume').onclick = () => runSolarLut(true);
+$('solarlut').disabled = $('solarlutvolume').disabled = !navigator.gpu;

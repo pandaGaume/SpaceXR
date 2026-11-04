@@ -1,7 +1,9 @@
 import { along, atmosphericInterval, dot } from './geometry.js';
 /** Integrate increasing physical ray distances in one traversal. Each checkpoint is cumulative. */
-export function integrateProfile(model, origin, direction, distances, { tree = null, eyes = [origin], maxStep = 2000, g = 0.8 } = {}) {
+export function integrateProfile(model, origin, direction, distances, { tree = null, solarLut = null, eyes = [origin], maxStep = 2000, g = 0.8 } = {}) {
     if (!(maxStep > 0 && Number.isFinite(maxStep)) || !(Math.abs(g) < 1) || !distances.length || distances.some((v, i) => !(v >= 0) || (i > 0 && v <= distances[i - 1]))) throw new Error('Invalid integration settings');
+    if (tree && solarLut) throw new Error('Choose one solar cache');
+    solarLut?.assertCompatible(model);
     if (tree && tree.model !== model) throw new Error('Tree belongs to another atmosphere');
     tree?.assertValid();
     const interval = atmosphericInterval(model, origin, direction, distances.at(-1));
@@ -23,7 +25,7 @@ export function integrateProfile(model, origin, direction, distances, { tree = n
             }
             const p = along(origin, d, t + ds / 2), density = model.density(p);
             if (density[0] || density[1]) {
-                const solar = tree ? tree.solar(p, lookup) : model.solarTransmittance(p), extinction = model.extinction(density);
+                const solar = solarLut ? solarLut.transmittance(p, model) : tree ? tree.solar(p, lookup) : model.solarTransmittance(p), extinction = model.extinction(density);
                 for (let c = 0; c < 3; c++) {
                     const source = solar[c] * (model.rayleigh[c] * density[0] * phaseR + model.mieScattering * density[1] * phaseM);
                     const stepT = Math.exp(-extinction[c] * ds);

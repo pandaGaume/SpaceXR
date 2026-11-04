@@ -28,19 +28,28 @@ export class FrustumVolume {
         if (inside(model.ellipsoid, camera.origin)) throw new Error('Camera must be above the ellipsoid');
         this.model = model; this.tree = tree; this.camera = camera;
         Object.assign(this, frustumLayout(camera, options));
+        this.solarLut = options.solarLut ?? null;
         this.maxStep = options.maxStep ?? 2000;
-        this.light = new Float32Array(this.width * this.height * this.depth * 4);
+        this.light = new Float32Array(options.allocateData === false ? 0 : this.width * this.height * this.depth * 4);
         this.transmission = new Float32Array(this.light.length);
         this.groundDepths = new Float64Array(this.rays.length);
         this.stats = { lookups: 0, fallbacks: 0, integratedSamples: 0 };
+        this.rays.forEach((ray, i) => {
+            const ground = intersectEllipsoid(this.model.ellipsoid, this.camera.origin, ray);
+            this.groundDepths[i] = ground && ground[0] >= 0 ? ground[0] * dot(ray, this.camera.forward) : Infinity;
+        });
     }
     build() {
+        if (!this.light.length) {
+            this.light = new Float32Array(this.width * this.height * this.depth * 4);
+            this.transmission = new Float32Array(this.light.length);
+        }
         const count = this.rays.length;
         for (let i = 0; i < count; i++) {
             const ray = this.rays[i], cosine = dot(ray, this.camera.forward);
             const ground = intersectEllipsoid(this.model.ellipsoid, this.camera.origin, ray);
             this.groundDepths[i] = ground && ground[0] >= 0 ? ground[0] * cosine : Infinity;
-            const values = integrateProfile(this.model, this.camera.origin, ray, this.depths.map(z => z / cosine), { tree: this.tree, maxStep: this.maxStep });
+            const values = integrateProfile(this.model, this.camera.origin, ray, this.depths.map(z => z / cosine), { tree: this.tree, solarLut: this.solarLut, maxStep: this.maxStep });
             values.forEach((value, z) => {
                 const index = (z * count + i) * 4;
                 this.light.set([...value.radiance, 1], index); this.transmission.set([...value.transmittance, 1], index);
@@ -54,8 +63,7 @@ export class FrustumVolume {
         return { ray, distance: interval?.end ?? 0, depth: (interval?.end ?? 0) * dot(ray, this.camera.forward) };
     }
     /** Reject horizon-straddling angular cells instead of interpolating across the planet silhouette. */
-    lookup(u, v, requestedDepth) {
-        if (!this.built) throw new Error('Build volume before sampling');
+    coordinates(u, v, requestedDepth) {
         if (![u, v, requestedDepth].every(Number.isFinite) || u < 0 || u > 1 || v < 0 || v > 1 || requestedDepth < 0 || requestedDepth > this.far) return null;
         // A coarse angular footprint cannot safely reconstruct the clipped ground boundary.
         // Preserve the ellipsoidal silhouette through direct integration in this band.
@@ -72,7 +80,13 @@ export class FrustumVolume {
         let z = 0;
         while (z < this.depth - 2 && this.depths[z + 1] < requestedDepth) z++;
         const fraction = (requestedDepth - this.depths[z]) / (this.depths[z + 1] - this.depths[z]);
-        const weights = [fx - x, fy - y, fraction], radiance = [0, 0, 0], transmittance = [0, 0, 0];
+        return { x, y, z, weights: [fx - x, fy - y, fraction] };
+    }
+    lookup(u, v, requestedDepth) {
+        if (!this.built) throw new Error('Build volume before sampling');
+        const coordinates = this.coordinates(u, v, requestedDepth);
+        if (!coordinates) return null;
+        const { x, y, z, weights } = coordinates, radiance = [0, 0, 0], transmittance = [0, 0, 0];
         for (let corner = 0; corner < 8; corner++) {
             const ix = x + (corner & 1), iy = y + ((corner >> 1) & 1), iz = z + ((corner >> 2) & 1);
             const weight = weights.reduce((w, value, axis) => w * (corner & (1 << axis) ? value : 1 - value), 1);
@@ -89,7 +103,7 @@ export class FrustumVolume {
         if (value) return value;
         this.stats.fallbacks++;
         if (maxDistance === 0) return { radiance: [0, 0, 0], transmittance: [1, 1, 1], samples: 0, fallback: true };
-        return { ...integrate(this.model, this.camera.origin, target.ray, { tree: this.tree, maxStep: this.maxStep, maxDistance }), fallback: true };
+        return { ...integrate(this.model, this.camera.origin, target.ray, { tree: this.tree, solarLut: this.solarLut, maxStep: this.maxStep, maxDistance }), fallback: true };
     }
     get bytes() { return this.light.byteLength + this.transmission.byteLength + this.groundDepths.byteLength; }
 }

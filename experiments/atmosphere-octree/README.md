@@ -57,7 +57,7 @@ Les compteurs GPU `cacheHits` et `directCalls` permettent de verifier que le sha
 
 ## Verification et limites
 
-22 tests Node couvrent altitude geodesique, axes distincts, vues orbitales, clipping terrain, occultation, vide, budget, cache, ABI GPU, deplacement/stereo, convergence numerique, grille, float16 et raccords de niveaux. Les resultats CPU reproductibles sont dans `benchmark-results.json`; les mesures de continuite sont dans `continuity-results.json`.
+35 tests Node couvrent altitude geodesique, axes distincts, vues orbitales, clipping terrain, occultation, vide, budget, cache, ABI GPU, deplacement/stereo, convergence numerique, grille, float16 et raccords de niveaux. Les resultats CPU reproductibles sont dans `benchmark-results.json`; les mesures de continuite sont dans `continuity-results.json`.
 
 La demo WebGPU a compile et execute les variantes octree, buffer, texture 3D et atlas 2D dans le navigateur integre. Une premiere verification au bord planetaire montre un ecart float32/double pouvant atteindre environ 0.014 en transmittance sur les rayons les plus sensibles. Le shader n'est donc pas valide pour les exigences de precision d'un rendu planetaire de production. Une representation relative camera avec geometrie compensee est a etudier avant integration.
 
@@ -70,3 +70,7 @@ Conserver le modele ellipsoidal et sa reference numerique. Evaluer ensuite un ar
 ## Extension hybride
 
 Le mode octree solaire + volume camera cumulatif est implemente en CPU et WebGPU. Voir [HYBRID.md](HYBRID.md) pour les passes, la profondeur de scene, les mesures et les limites. La demonstration propose les boutons `Hybride CPU` et `Hybride WebGPU`. Le gain GPU global reste a etablir.
+
+## LUT solaire ellipsoidale
+
+Le cache optique 3D global est disponible en CPU et WebGPU, avec deux variantes internes et spatiales. Voir [SOLAR-LUT.md](SOLAR-LUT.md) pour les coordonnees, mesures et limites, et [VISUAL-TARGET.md](VISUAL-TARGET.md) pour la reference utilisateur. Les nouveaux boutons sont `LUT 3D WebGPU` et `Volume + LUT 3D`.

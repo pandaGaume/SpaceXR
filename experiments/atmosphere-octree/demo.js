@@ -1,6 +1,6 @@
 import { makePhysicalScene, physicalPresets } from './src/spectrum.js';
 import { calibrateSkyReuse } from './src/sky-reuse.js';
-import { cameraForDisplay, skyBasis, horizonElevation } from './src/sky-view.js';
+import { cameraForDisplay, cameraWithHorizontalFov, cameraFramingSun, projectedSolarDisk, skyBasis, horizonElevation } from './src/sky-view.js';
 import { GpuSkyView } from './src/sky-view.gpu.js';
 import { GpuSolarOpticalLut } from './src/solar-lut.gpu.js';
 import { solarSignature } from './src/solar-lut.js';
@@ -324,7 +324,10 @@ async function renderHD() {
     let renderer;
     try {
         const s = setup(), width = Number($('hdDefinition').value), height = width * 9 / 16;
-        const camera = cameraForDisplay(s.camera, width, height);
+        let camera = $('hdFov').value === 'scene' ? cameraForDisplay(s.camera,width,height) : cameraWithHorizontalFov(s.camera,width,height,+$('hdFov').value);
+        if ($('hdFrameSun').checked && ['ground','dawn','polar'].includes($('view').value)) camera = cameraFramingSun(camera,s.model.sun);
+        const solarDisk = projectedSolarDisk(camera,s.model.sun,s.spectral?.solarAngularRadius ?? 0.00465,width,height);
+        const framing = { horizontalFovDegrees: 360/Math.PI*Math.atan(camera.halfWidth), verticalFovDegrees:360/Math.PI*Math.atan(camera.halfHeight), solarDisk };
         $('hdStatus').textContent = 'Preparation des ressources GPU...'; await yieldUI();
         const solar = await getHdSolarLut(s.model), quality = Number($('skyLutQuality').value);
         $('hdStatus').textContent = 'Compilation et construction de la Sky-View LUT...'; await yieldUI();
@@ -339,13 +342,14 @@ async function renderHD() {
         const validation = await renderer.validate(solarLutRenderer);
         const validTimes = display.map(v => v.gpuMs).filter(v => v !== null).sort((a, b) => a - b);
         const medianGpuMs = validTimes.length ? validTimes[Math.floor(validTimes.length / 2)] : null;
-        const report = { mode: s.spectral ? 'Transport spectral physique + Sky-View HD' : 'Sky-View LUT + presentation WebGPU native', physicalSpectrum: s.spectral?.report ?? null, nativeImage: { width, height, pixels: width * height, canvasWidth: $('hdSky').width, canvasHeight: $('hdSky').height, upscaledLowResolutionImage: false },
+        const report = { mode: s.spectral ? 'Transport spectral physique + Sky-View HD' : 'Sky-View LUT + presentation WebGPU native', physicalSpectrum: s.spectral?.report ?? null, framing, nativeImage: { width, height, pixels: width * height, canvasWidth: $('hdSky').width, canvasHeight: $('hdSky').height, upscaledLowResolutionImage: false },
             solarLut: { ...solar.build, reused: solar.reused }, skyView: skyBuild, hdDisplay: { measurements: display, medianGpuMs, imageReadback: false, steadyOrientationFramesReuseLuts: true },
             rebuildSkyAndDisplayGpuMs: skyBuild.gpuMs !== null && medianGpuMs !== null ? skyBuild.gpuMs + medianGpuMs : null,
             setupAndValidationWallMs: performance.now() - setupStart, validation,
             note: 'Le temps d affichage seul reutilise la Sky-View LUT. Un changement de position ou de soleil exige sa reconstruction. Validation hors boucle; disque solaire natif et globe uni exclus du comparatif numerique.' };
         hdState = { renderer, report, baseCamera: camera, animation: null };
         $('hdCaption').textContent = `${width} x ${height} pixels calcules sur GPU; Sky-View ${skyBuild.width} x ${skyBuild.height}. Soleil calcule par pixel. Globe uni, sans nuages.${s.spectral ? ' Transport spectral physique, ' + s.spectral.bins.length + ' longueurs d onde. Hypotheses de poussiere experimentales.' : ''}`;
+        $('hdCaption').textContent += ` Champ horizontal ${framing.horizontalFovDegrees.toFixed(1)} degres; diametre solaire ${solarDisk ? solarDisk.widthPixels.toFixed(1) + ' pixels natifs (' + solarDisk.angularDiameterDegrees.toFixed(3) + ' degres)' : 'hors champ avant'}.`;
         $('hdStatus').textContent = JSON.stringify(report, null, 2);
         window.atmosphereHDResult = report;
         renderer.draw(camera, Number($('exposure').value), $('hdSun').checked);
@@ -395,7 +399,7 @@ $('renderhd').disabled = !navigator.gpu;
 for (const id of ['exposure', 'hdSun']) $(id).addEventListener('input', () => {
     if (hdState?.renderer && !hdState.animation) hdState.renderer.draw(hdState.renderer.camera, Number($('exposure').value), $('hdSun').checked);
 });
-for (const id of ['view', 'sun', 'hdDefinition', 'skyLutQuality']) $(id).addEventListener('change', stopHdAnimation);
+for (const id of ['view', 'sun', 'hdDefinition', 'skyLutQuality', 'hdFov', 'hdFrameSun']) $(id).addEventListener('change', stopHdAnimation);
 
 $('savehd').onclick = async () => {
     if (!hdState?.renderer) return;

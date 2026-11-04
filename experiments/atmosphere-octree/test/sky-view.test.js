@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { Atmosphere } from '../src/model.js';
 import { FrustumCamera } from '../src/frustum.js';
 import { WGS84, dot, geodeticPosition, intersectEllipsoid } from '../src/geometry.js';
-import { skyBasis, skyDirection, horizonElevation, skyElevationFromUnit, skyUnitFromElevation, makeSkyViewLayout, skyTextureCoordinates, cameraForDisplay } from '../src/sky-view.js';
+import { skyBasis, skyDirection, horizonElevation, skyElevationFromUnit, skyUnitFromElevation, makeSkyViewLayout, skyTextureCoordinates, cameraForDisplay, cameraWithHorizontalFov, cameraFramingSun, projectedSolarDisk } from '../src/sky-view.js';
 const model = new Atmosphere();
 const origin = geodeticPosition(WGS84, 0.8, 0.3, 60000), basis = skyBasis(WGS84, origin);
 const close = (a, b, epsilon) => assert.ok(Math.abs(a - b) <= epsilon, `${a} != ${b}`);
@@ -55,4 +55,22 @@ test('Sky-View memory and invalid layouts are explicit', () => {
     assert.throws(() => makeSkyViewLayout(model, origin, { width: 1 }));
     assert.throws(() => makeSkyViewLayout(model, [0, 0, 0]));
     assert.throws(() => cameraForDisplay({}, 0, 1080));
+});
+
+test('optical zoom matches physical disk diameter in native pixels', () => {
+    const camera=new FrustumCamera(origin,basis.east,basis.north,basis.up,.8,.45),alpha=.00465047;
+    for(const fov of [10,20,40,77.3196]) {
+        const framed=cameraWithHorizontalFov(camera,1920,1080,fov),disk=projectedSolarDisk(framed,framed.forward,alpha,1920,1080);
+        close(disk.widthPixels,1920*Math.tan(alpha)/Math.tan(fov*Math.PI/360),1e-8);
+        close(disk.heightPixels,disk.widthPixels,1e-8);
+    }
+});
+test('zoom preserves angular solar size and framing keeps the solar disk visible', () => {
+    const camera=new FrustumCamera(origin,basis.east,basis.north,basis.up,.8,.45),sun=skyDirection(basis,0,.01745),alpha=.00465047;
+    const wide=cameraFramingSun(cameraWithHorizontalFov(camera,1920,1080,77.3196),sun),zoom=cameraFramingSun(cameraWithHorizontalFov(camera,1920,1080,20),sun);
+    const a=projectedSolarDisk(wide,sun,alpha,1920,1080),b=projectedSolarDisk(zoom,sun,alpha,1920,1080);
+    close(a.angularDiameterDegrees,b.angularDiameterDegrees,1e-12);assert.ok(b.widthPixels>a.widthPixels*4);
+    assert.ok(b.boundsPixels[0]>0&&b.boundsPixels[1]>0&&b.boundsPixels[2]<1920&&b.boundsPixels[3]<1080);
+    const smaller=projectedSolarDisk(zoom,sun,alpha/1.524,1920,1080);
+    close(smaller.widthPixels/b.widthPixels,1/1.524,1e-5);
 });

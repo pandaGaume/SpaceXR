@@ -26,7 +26,7 @@ Le rapport martien a 24 longueurs d'onde contient 34 sondes confrontees a une in
 
 Mesures de passes GPU sur cette machine, non garanties de cadence moteur : environ 32 a 40 ms pour construire la Sky-View a 24 longueurs d'onde et 1 a 2.5 ms pour la presentation Full HD avec cache persistant. A 48 longueurs d'onde, environ 47 a 62 ms de construction et 2 ms de presentation. La rotation peut reutiliser le cache; les translations demandent encore sa reconstruction.
 
-`npm test` : 59 tests. Les nouveaux tests verifient Mie contre une reference independante SciPy par fonctions de Bessel (`mie-reference.py`, fixtures fournies), la normalisation de la phase sur l'angle solide, la limite Rayleigh, la passivite, les lois de densite et de distance, et le crepuscule. SciPy n'est pas une dependance du rendu ni des tests Node, seulement du script facultatif qui regenere les fixtures.
+`npm test` : 61 tests. Les nouveaux tests verifient Mie contre une reference independante SciPy par fonctions de Bessel (`mie-reference.py`, fixtures fournies), la normalisation de la phase sur l'angle solide, la limite Rayleigh, la passivite, les lois de densite et de distance, et le crepuscule. SciPy n'est pas une dependance du rendu ni des tests Node, seulement du script facultatif qui regenere les fixtures.
 
 `node twilight.js` mesure la luminance apres le coucher sans imposer une duree. A elevation solaire -12 degres, le maximum des cinq rayons testes vaut 0.0001382 pour une hauteur de poussiere de 10 km et 0.001108 pour 20 km, a epaisseur optique de reference identique. Le fichier `outputs/mars-twilight.json` conserve les valeurs. L'atmosphere est tronquee vers 130 km dans ce cas; les profils exponentiels et l'absence de diffusion multiple limitent l'interpretation d'un crepuscule tardif. Aucun parametre « deux heures » n'intervient.
 
@@ -46,3 +46,7 @@ La prochaine comparaison devra utiliser des produits PDS calibres en radiance et
 - Crepuscule jusqu'a deux heures, observations NASA : https://www.nasa.gov/image-article/sunset-mars/
 - Acces aux produits calibres Mastcam-Z : https://mastcamz.asu.edu/mastcam-z-data-for-all/
 - Calibration instrumentale Mastcam-Z : https://pmc.ncbi.nlm.nih.gov/articles/PMC7892537/
+
+## Cadrage optique du Soleil
+
+Le champ horizontal HD est maintenant reglable (10, 20, 40, 77 degres ou cadrage de scene). Par defaut, 20 degres et un recentrage vers le Soleil facilitent l'inspection du disque et du halo pour les vues sol, aube et poles. La taille angulaire de l'etoile reste physique. A 1920 pixels de large, le diametre solaire central vaut environ 51 pixels sur Terre et 33 pixels sur Mars a 20 degres de champ, contre environ 11 et 7 pixels a 77 degres. Le rapport JSON conserve les angles, le diametre projete et le cadre attendu. Comparer des photos exige aussi un champ de vue comparable. Le recentrage change la direction d'observation, sans changer l'eclairage ni les coefficients du milieu.

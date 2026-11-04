@@ -81,4 +81,4 @@ Le chemin `Rendu HD` affiche maintenant 1920 x 1080 sur WebGPU, depuis une Sky-V
 
 ## Compositions et spectres physiques
 
-Le mode HD propose maintenant un transport spectral physique a 24 ou 48 longueurs d'onde : melanges N2/O2/CO2/Ar, etat gazeux, poussiere de Mie et spectre de Planck ou bande spectrale modifiables. Voir [SPECTRAL.md](SPECTRAL.md) pour les equations, hypotheses et limites. Le premier [rendu martien](outputs/mars-spectral-24.png) et son [rapport](outputs/mars-spectral-24.json) sont conserves. Aucun ajustement aux donnees PDS n'a encore ete effectue. 59 tests Node passent.
+Le mode HD propose maintenant un transport spectral physique a 24 ou 48 longueurs d'onde : melanges N2/O2/CO2/Ar, etat gazeux, poussiere de Mie et spectre de Planck ou bande spectrale modifiables. Voir [SPECTRAL.md](SPECTRAL.md) pour les equations, hypotheses et limites. Le premier [rendu martien](outputs/mars-spectral-24.png) et son [rapport](outputs/mars-spectral-24.json) sont conserves. Aucun ajustement aux donnees PDS n'a encore ete effectue. 61 tests Node passent.

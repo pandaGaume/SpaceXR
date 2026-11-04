@@ -115,6 +115,7 @@ export function axisReuseLimits(geometry, basis, colorSensitivity, pixelBudget, 
 }
 /** Six directional samples fit the color formula; independent mixed moves check its validity. */
 export async function calibrateSkyReuse(renderer, { pixelBudget = 0.5, codeBudget = 2, onProgress = () => {} } = {}) {
+    if (renderer.spectral) throw new Error('Recalibrate spectral display errors before enabling translation reuse');
     if (!(pixelBudget > 0 && codeBudget > 0)) throw new Error('Positive reuse budgets required');
     const start = performance.now(), camera = renderer.camera, model = renderer.model, basis = skyBasis(model.ellipsoid, camera.origin);
     const geometry = horizonSensitivity(model.ellipsoid, camera, renderer.width, renderer.height), rays = probeRays(camera, geometry);

@@ -78,3 +78,7 @@ Le cache optique 3D global est disponible en CPU et WebGPU, avec deux variantes 
 ## Rendu natif Full HD et seuil camera
 
 Le chemin `Rendu HD` affiche maintenant 1920 x 1080 sur WebGPU, depuis une Sky-View directionnelle et une LUT solaire 3D. `Animer le regard` reutilise ces textures. `Mesurer le seuil camera` calibre deux criteres, deplacement de l'horizon et variation de couleur, puis les verifie sur des mouvements mixtes. Voir [SKY-VIEW.md](SKY-VIEW.md), le [rapport GPU](outputs/sky-view-full-hd-report.json) et le [PNG natif](outputs/sky-view-full-hd.png). Les comparatifs historiques a basse definition restent disponibles separement. 48 tests Node passent.
+
+## Compositions et spectres physiques
+
+Le mode HD propose maintenant un transport spectral physique a 24 ou 48 longueurs d'onde : melanges N2/O2/CO2/Ar, etat gazeux, poussiere de Mie et spectre de Planck ou bande spectrale modifiables. Voir [SPECTRAL.md](SPECTRAL.md) pour les equations, hypotheses et limites. Le premier [rendu martien](outputs/mars-spectral-24.png) et son [rapport](outputs/mars-spectral-24.json) sont conserves. Aucun ajustement aux donnees PDS n'a encore ete effectue. 59 tests Node passent.

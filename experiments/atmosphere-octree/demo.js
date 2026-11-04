@@ -1,5 +1,6 @@
+import { makePhysicalScene, physicalPresets } from './src/spectrum.js';
 import { calibrateSkyReuse } from './src/sky-reuse.js';
-import { cameraForDisplay } from './src/sky-view.js';
+import { cameraForDisplay, skyBasis, horizonElevation } from './src/sky-view.js';
 import { GpuSkyView } from './src/sky-view.gpu.js';
 import { GpuSolarOpticalLut } from './src/solar-lut.gpu.js';
 import { solarSignature } from './src/solar-lut.js';
@@ -14,21 +15,33 @@ const $ = id => document.getElementById(id);
 let current = null, gpu = null;
 var hdState = null;
 const yieldUI = () => new Promise(resolve => setTimeout(resolve, 0));
+function readPhysicalConfig() {
+    return { planet: $('physicalPlanet').value, pressure: +$('pressure').value, temperature: +$('gasTemperature').value, gravity: +$('gravity').value,
+        mix: Object.fromEntries(['N2','O2','CO2','Ar'].map(g => [g, +$('gas'+g).value])),
+        dustTau: +$('dustTau').value, dustHeight: +$('dustHeight').value, radiusUm: +$('dustRadius').value, logSigma: +$('dustSigma').value, indexN: +$('dustN').value, indexK: +$('dustK').value,
+        source: $('stellarSource').value, starTemperature: +$('starTemperature').value, distanceAU: +$('starDistance').value, bandCenter: +$('bandCenter').value, bandWidth: +$('bandWidth').value, wavelengths: +$('spectralSamples').value };
+}
 function setup() {
     const view = $('view').value, sunlight = $('sun').value;
-    const key = `${view}/${sunlight}/${$("seams").value}`;
+    const physicalConfig = $('transport').value === 'spectral' ? readPhysicalConfig() : null;
+    const key = JSON.stringify([view,sunlight,$("seams").value,physicalConfig,$('solarElevation').value,$('physicalAltitude').value]);
     if (!current || current.key !== key) {
         const sun = view === 'dawn' ? [-0.05, 1, 0] : sunlight === 'day' ? [1, 1, 0.3] : sunlight === 'sunset' ? [0.02, 1, 0] : [-1, 0, 0];
         const polar = view === 'polar';
-        const model = new Atmosphere({ sun: polar ? [sun[2], sun[1], sun[0]] : sun });
+        const elevation = +$('solarElevation').value * Math.PI / 180;
+        const physicalSun = polar ? [0,Math.cos(elevation),Math.sin(elevation)] : [Math.sin(elevation),Math.cos(elevation),0];
+        const spectral = physicalConfig ? makePhysicalScene(physicalConfig,physicalSun) : null;
+        const model = spectral?.model ?? new Atmosphere({ sun: polar ? [sun[2], sun[1], sun[0]] : sun });
         const orbital = view === 'orbit' || view === 'limb';
-        current = { key, model, tree: new AtmosphereOctree(model, { seamBlendFraction: Number($("seams").value) }), origin: geodeticPosition(WGS84, polar ? Math.PI / 2 : 0, 0, view === 'dawn' ? 60000 : orbital ? 400000 : 2000), values: null };
+        current = { key, model, spectral, tree: new AtmosphereOctree(model, { seamBlendFraction: Number($("seams").value) }), origin: geodeticPosition(model.ellipsoid, polar ? Math.PI / 2 : 0, 0, spectral ? +$('physicalAltitude').value : view === 'dawn' ? 60000 : orbital ? 400000 : 2000), values: null };
     }
     const width = Number($('resolution').value), height = width * 9 / 16, rays = [];
     let forward = [0.15, 1, 0], right = [0, 0, 1], up = [1, -0.15, 0], halfWidth = 0.7, halfHeight = 0.45;
     if (view === 'dawn') { forward = [-0.1, 1, 0]; up = [1, 0.1, 0]; }
     if (view === 'orbit') { forward = [-1, 0, 0]; right = [0, 1, 0]; up = [0, 0, 1]; }
-    if (view === 'limb') { forward = [-0.35, 1, 0]; up = [1, 0.35, 0]; halfWidth = 0.21; halfHeight = 0.1; }
+    if (view === 'limb') { forward = [-0.35, 1, 0]; up = [1, 0.35, 0]; halfWidth = 0.21; halfHeight = 0.1;
+        if (current.spectral) { const h = horizonElevation(current.model.ellipsoid,current.origin,skyBasis(current.model.ellipsoid,current.origin),0); forward = [Math.sin(h),Math.cos(h),0]; up = [Math.cos(h),-Math.sin(h),0]; }
+    }
     if (view === 'polar') { forward = [0, 1, 0.15]; right = [1, 0, 0]; up = [0, -0.15, 1]; }
     const camera = new FrustumCamera(current.origin, forward, right, up, halfWidth, halfHeight);
     for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) rays.push(camera.ray((x + 0.5) / width, (y + 0.5) / height));
@@ -140,7 +153,10 @@ function setBusy(busy) {
     $('animatehd').disabled = busy || !hdState?.renderer;
     $('fullscreenhd').disabled = busy || !hdState?.renderer;
     $('savehd').disabled = busy || !hdState?.renderer;
-    $('calibratehd').disabled = busy || !hdState?.renderer;
+    $('calibratehd').disabled = busy || !hdState?.renderer || !!hdState?.renderer?.spectral;
+    for (const id of ['render','gpu','layouts','hybrid','hybridgpu','solarlut','solarlutvolume']) if ($('transport').value === 'spectral') $(id).disabled = true;
+    for (const input of document.querySelectorAll('fieldset input')) input.disabled = busy;
+    if ($('transport').value === 'spectral') for (const id of ['sun','resolution','seams','volumeSize','sceneDepth']) $(id).disabled = true;
     $('reporthd').disabled = busy || !hdState?.renderer;
 }
 function sceneDepth(u) {
@@ -313,7 +329,7 @@ async function renderHD() {
         const solar = await getHdSolarLut(s.model), quality = Number($('skyLutQuality').value);
         $('hdStatus').textContent = 'Compilation et construction de la Sky-View LUT...'; await yieldUI();
         const setupStart = performance.now();
-        renderer = await GpuSkyView.create(gpu.device, $('hdSky'), s.model, camera, solar.lut, { width: quality, hemisphereRows: quality / 4, samples: quality === 256 ? 64 : 32 });
+        renderer = await GpuSkyView.create(gpu.device, $('hdSky'), s.model, camera, solar.lut, { width: quality, hemisphereRows: quality / 4, samples: quality === 256 ? 64 : 32, spectral: s.spectral });
         renderer.resize(width, height); renderer.writeCamera(camera, Number($('exposure').value), $('hdSun').checked);
         const skyBuild = await renderer.build();
         renderer.draw(); await gpu.device.queue.onSubmittedWorkDone();
@@ -323,13 +339,13 @@ async function renderHD() {
         const validation = await renderer.validate(solarLutRenderer);
         const validTimes = display.map(v => v.gpuMs).filter(v => v !== null).sort((a, b) => a - b);
         const medianGpuMs = validTimes.length ? validTimes[Math.floor(validTimes.length / 2)] : null;
-        const report = { mode: 'Sky-View LUT + presentation WebGPU native', nativeImage: { width, height, pixels: width * height, canvasWidth: $('hdSky').width, canvasHeight: $('hdSky').height, upscaledLowResolutionImage: false },
+        const report = { mode: s.spectral ? 'Transport spectral physique + Sky-View HD' : 'Sky-View LUT + presentation WebGPU native', physicalSpectrum: s.spectral?.report ?? null, nativeImage: { width, height, pixels: width * height, canvasWidth: $('hdSky').width, canvasHeight: $('hdSky').height, upscaledLowResolutionImage: false },
             solarLut: { ...solar.build, reused: solar.reused }, skyView: skyBuild, hdDisplay: { measurements: display, medianGpuMs, imageReadback: false, steadyOrientationFramesReuseLuts: true },
             rebuildSkyAndDisplayGpuMs: skyBuild.gpuMs !== null && medianGpuMs !== null ? skyBuild.gpuMs + medianGpuMs : null,
             setupAndValidationWallMs: performance.now() - setupStart, validation,
             note: 'Le temps d affichage seul reutilise la Sky-View LUT. Un changement de position ou de soleil exige sa reconstruction. Validation hors boucle; disque solaire natif et globe uni exclus du comparatif numerique.' };
         hdState = { renderer, report, baseCamera: camera, animation: null };
-        $('hdCaption').textContent = `${width} x ${height} pixels calcules sur GPU; Sky-View ${skyBuild.width} x ${skyBuild.height}. Soleil calcule par pixel. Globe uni, sans nuages.`;
+        $('hdCaption').textContent = `${width} x ${height} pixels calcules sur GPU; Sky-View ${skyBuild.width} x ${skyBuild.height}. Soleil calcule par pixel. Globe uni, sans nuages.${s.spectral ? ' Transport spectral physique, ' + s.spectral.bins.length + ' longueurs d onde. Hypotheses de poussiere experimentales.' : ''}`;
         $('hdStatus').textContent = JSON.stringify(report, null, 2);
         window.atmosphereHDResult = report;
         renderer.draw(camera, Number($('exposure').value), $('hdSun').checked);
@@ -412,3 +428,22 @@ $('reporthd').onclick = () => {
     link.href = url; link.download = 'spacexr-sky-report.json'; link.click();
     setTimeout(() => URL.revokeObjectURL(url), 5000);
 };
+
+$('physicalPreset').onchange = () => {
+    stopHdAnimation();
+    const p = physicalPresets[$('physicalPreset').value];
+    const fields = { physicalPlanet:'planet',pressure:'pressure',gasTemperature:'temperature',gravity:'gravity',dustTau:'dustTau',dustHeight:'dustHeight',dustRadius:'radiusUm',dustSigma:'logSigma',dustN:'indexN',dustK:'indexK',starDistance:'distanceAU' };
+    for (const [id,key] of Object.entries(fields)) $(id).value = p[key];
+    for (const g of ['N2','O2','CO2','Ar']) $('gas'+g).value = p.mix[g];
+    $('view').value = 'ground'; $('physicalAltitude').value = '2'; $('solarElevation').value = '1';
+    $('transport').value = 'spectral'; setBusy(false);
+};
+$('transport').onchange = () => { stopHdAnimation(); setBusy(false); };
+for (const input of document.querySelectorAll('fieldset input,fieldset select')) input.addEventListener('change', stopHdAnimation);
+setBusy(false);
+
+$('view').addEventListener('change', () => {
+    if ($('transport').value !== 'spectral') return;
+    const v = $('view').value;
+    $('physicalAltitude').value = v === 'orbit' || v === 'limb' ? '400000' : v === 'dawn' ? '60000' : '2';
+});

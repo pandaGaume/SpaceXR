@@ -1,4 +1,7 @@
+import { spectralSkySources } from './spectral-sky.wgsl.js';
+import { spectrumBuffer, phaseTable, integrateSpectral } from './spectrum.js';
 import { atmosphereRegime } from './gpu.js';
+import { dot } from './geometry.js';
 import { makeSkyViewLayout } from './sky-view.js';
 import { atmosphereParameters, compileCompute, timedCompute } from './solar-lut.gpu.js';
 import { solarGeometrySource } from './solar-lut.wgsl.js';
@@ -12,17 +15,19 @@ export class GpuSkyView {
         if (!response.ok) throw new Error('Cannot load atmosphere equations');
         let geometry = solarGeometrySource(await response.text());
         geometry = geometry.replace(/fn altitude\(p: vec3f\) -> f32 \{[\s\S]*?\nfn density/, 'fn altitude(p: vec3f) -> f32 { return mediumCoordinates(p).z; }\nfn density') + mediumCoordinates;
-        const buildSource = geometry + solarAtCoordinates + viewStruct + skyMapping + bakeSkyView;
+        const spectral = options.spectral ? spectralSkySources(geometry) : null;
+        const buildSource = spectral?.build ?? geometry + solarAtCoordinates + viewStruct + skyMapping + bakeSkyView;
         const [inside, space] = await Promise.all(['main_inside', 'main_space'].map(entry => compileCompute(device, buildSource, entry)));
-        const presentationCode = geometry + viewStruct + skyMapping + skyReadBindings + skyRadiance + presentSky;
+        const presentationCode = spectral?.presentation ?? geometry + viewStruct + skyMapping + skyReadBindings + skyRadiance + presentSky;
         const module = device.createShaderModule({ code: presentationCode });
         const errors = (await module.getCompilationInfo()).messages.filter(m => m.type === 'error');
         if (errors.length) throw new Error(errors.map(m => `${m.lineNum}: ${m.message}`).join('\n'));
         const format = navigator.gpu.getPreferredCanvasFormat();
         const presentation = await device.createRenderPipelineAsync({ layout: 'auto', vertex: { module, entryPoint: 'vertexMain' }, fragment: { module, entryPoint: 'fragmentMain', targets: [{ format }] }, primitive: { topology: 'triangle-list' } });
-        return new GpuSkyView(device, canvas, model, camera, solarLut, options, { inside, space, presentation, geometry, format });
+        return new GpuSkyView(device, canvas, model, camera, solarLut, options, { inside, space, presentation, geometry, format, probe: spectral?.probe });
     }
     constructor(device, canvas, model, camera, solarLut, options, pipelines) {
+        this.spectral = options.spectral; this.groups = this.spectral?.groups ?? 1;
         this.device = device; this.canvas = canvas; this.model = model; this.origin = [...camera.origin]; this.solarLut = solarLut; this.pipelines = pipelines;
         this.layout = makeSkyViewLayout(model, camera.origin, options); this.regime = atmosphereRegime(model, camera.origin);
         this.context = canvas.getContext('webgpu');
@@ -31,11 +36,20 @@ export class GpuSkyView {
         this.uniform = device.createBuffer({ size: 96, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
         this.viewUniform = device.createBuffer({ size: 144, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
         this.horizon = device.createBuffer({ size: this.layout.horizon.byteLength, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });
-        this.cameraSun = device.createBuffer({ size: 16, usage: GPUBufferUsage.STORAGE });
+        this.cameraSun = device.createBuffer({ size: 16 * this.groups, usage: GPUBufferUsage.STORAGE });
         device.queue.writeBuffer(this.horizon, 0, this.layout.horizon);
         device.queue.writeBuffer(this.uniform, 0, atmosphereParameters(model, { origin: camera.origin, guardHeight: solarLut.layout.guardHeight }));
-        this.textures = Array.from({ length: 3 }, () => device.createTexture({ size: [this.layout.width, this.layout.height], format: 'rgba16float', usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING }));
-        this.views = this.textures.map(t => t.createView());
+        this.textures = Array.from({ length: 3 }, () => device.createTexture({ size: [this.layout.width, this.layout.height, this.groups], format: 'rgba16float', usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING }));
+        this.views = this.textures.map(t => t.createView(this.spectral ? { dimension: '2d-array' } : {}));
+        this.spectralResources = [];
+        if (this.spectral) {
+            const data = spectrumBuffer(this.spectral), phase = phaseTable(this.spectral);
+            this.spectrum = device.createBuffer({ size: data.byteLength, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });
+            device.queue.writeBuffer(this.spectrum, 0, data);
+            this.phase = device.createTexture({ size: [phase.width, phase.height], format: 'rgba32float', usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST });
+            device.queue.writeTexture({ texture: this.phase }, phase.data, { bytesPerRow: phase.width * 16 }, [phase.width, phase.height]);
+            this.spectralResources = [this.spectrum, this.phase];
+        }
         this.sampler = device.createSampler({ addressModeU: 'repeat', addressModeV: 'clamp-to-edge', minFilter: 'linear', magFilter: 'linear' });
         this.width = canvas.width; this.height = canvas.height;
         this.exposure = 12; this.sunEnabled = true;
@@ -43,15 +57,17 @@ export class GpuSkyView {
         const builder = this.regime === 'external' ? pipelines.space : pipelines.inside;
         this.buildEntries = [{ binding: 0, resource: { buffer: this.uniform } }, ...this.views.map((resource, i) => ({ binding: i + 1, resource })),
             { binding: 5, resource: { buffer: this.viewUniform } }, ...solarLut.bindings(), { binding: 8, resource: { buffer: this.horizon } }, { binding: 9, resource: { buffer: this.cameraSun } }];
+        if (this.spectral) this.buildEntries.push({ binding: 12, resource: { buffer: this.spectrum } });
         this.builder = builder;
         this.readEntries = [{ binding: 0, resource: { buffer: this.uniform } }, ...this.views.map((resource, i) => ({ binding: i + 1, resource })),
             { binding: 4, resource: this.sampler }, { binding: 5, resource: { buffer: this.viewUniform } }, { binding: 8, resource: { buffer: this.horizon } }];
+        if (this.spectral) this.readEntries.push({ binding: 12, resource: { buffer: this.spectrum } }, { binding: 13, resource: this.phase.createView() });
         this.presentGroup = device.createBindGroup({ layout: pipelines.presentation.getBindGroupLayout(0), entries: [...this.readEntries, { binding: 9, resource: { buffer: this.cameraSun } }] });
     }
     viewParameters(camera, basis = this.layout.basis) {
         return new Float32Array([...basis.east, this.layout.width, ...basis.north, this.layout.hemisphereRows, ...basis.up, this.regime === 'external' ? 1 : 0,
             ...camera.forward, 0, ...camera.right, camera.halfWidth, ...camera.up, camera.halfHeight,
-            this.width, this.height, this.exposure, 0.00465, this.layout.samples, 1000, this.sunEnabled ? 1 : 0, 0,
+            this.width, this.height, this.exposure, this.spectral?.solarAngularRadius ?? 0.00465, this.layout.samples, this.spectral ? 1 / (Math.PI * this.spectral.solarAngularRadius ** 2) : 1000, this.sunEnabled ? 1 : 0, 0,
             0.005, 0.007, 0.01, 1]);
     }
     writeCamera(camera, exposure = this.exposure, sunEnabled = this.sunEnabled) {
@@ -63,7 +79,7 @@ export class GpuSkyView {
     cloneForCamera(camera) {
         const canvas = document.createElement('canvas'); canvas.width = 1; canvas.height = 1;
         const clone = new GpuSkyView(this.device, canvas, this.model, camera, this.solarLut,
-            { width: this.layout.width, hemisphereRows: this.layout.hemisphereRows, samples: this.layout.samples }, this.pipelines);
+            { width: this.layout.width, hemisphereRows: this.layout.hemisphereRows, samples: this.layout.samples, spectral: this.spectral }, this.pipelines);
         clone.writeCamera(camera, this.exposure, this.sunEnabled); clone.validationPipeline = this.validationPipeline;
         return clone;
     }
@@ -87,9 +103,9 @@ export class GpuSkyView {
     }
     async build() {
         const start = performance.now();
-        const gpuMs = await timedCompute(this.device, this.builder, this.buildEntries, [Math.ceil(this.layout.width / 8), Math.ceil(this.layout.height / 4)]);
+        const gpuMs = await timedCompute(this.device, this.builder, this.buildEntries, [Math.ceil(this.layout.width / 8), Math.ceil(this.layout.height / 4), this.groups]);
         this.built = true;
-        return { gpuMs, ms: performance.now() - start, width: this.layout.width, height: this.layout.height, samples: this.layout.samples, bytes: this.layout.bytes, regime: this.regime };
+        return { gpuMs, ms: performance.now() - start, width: this.layout.width, height: this.layout.height, samples: this.layout.samples, bytes: this.layout.bytes * this.groups, wavelengthGroups: this.groups, regime: this.regime };
     }
     encodeDisplay(encoder, timestampWrites) {
         if (!this.built) throw new Error('Build Sky-View LUT before display');
@@ -120,7 +136,7 @@ export class GpuSkyView {
     async sampleRays(rays) {
         if (!this.built || !rays.length) throw new Error('Built Sky-View LUT and rays are required');
         const d = this.device, cleanup = [];
-        this.validationPipeline ??= await compileCompute(d, this.pipelines.geometry + viewStruct + skyMapping + skyReadBindings + skyRadiance + `
+        this.validationPipeline ??= await compileCompute(d, this.pipelines.probe ?? this.pipelines.geometry + viewStruct + skyMapping + skyReadBindings + skyRadiance + `
 struct Result { radiance: vec4f, transmission: vec4f }
 @group(0) @binding(10) var<storage, read> rays: array<vec4f>;
 @group(0) @binding(11) var<storage, read_write> result: array<Result>;
@@ -143,6 +159,24 @@ struct Result { radiance: vec4f, transmission: vec4f }
         } finally { cleanup.forEach(resource => resource.destroy()); }
     }
     async validate(referenceRenderer, columns = 24, rows = 14) {
+        if (this.spectral) {
+            const rays = [];
+            for (const v of [0.15, 0.35, 0.48, 0.65, 0.82, 0.95]) for (const u of [0.2, 0.4, 0.5, 0.6, 0.8]) rays.push(this.camera.ray(u, v));
+            // Probe the solar forward lobe as well as the broad sky, independently of the grid.
+            const sf = dot(this.model.sun,this.camera.forward);
+            if (sf > 0) {
+                const u = (dot(this.model.sun,this.camera.right)/sf/this.camera.halfWidth+1)/2;
+                const v = (1-dot(this.model.sun,this.camera.up)/sf/this.camera.halfHeight)/2;
+                for (const offset of [-0.015,-0.005,0,0.005]) if(u>0&&u<1&&v+offset>0&&v+offset<1) rays.push(this.camera.ray(u,v+offset));
+            }
+            const values = await this.sampleRays(rays);
+            const reference = rays.map(ray => integrateSpectral(this.spectral, this.origin, ray));
+            let squared = 0, maximum = 0, maximumReference = 0;
+            values.forEach((value,i) => value.radiance.forEach((v,c) => { const error = Math.abs(v-reference[i].radiance[c]); squared += error*error; maximum = Math.max(maximum,error); maximumReference = Math.max(maximumReference,Math.abs(reference[i].radiance[c])); }));
+            return { probes: rays.length, nonzeroReferenceRays: reference.filter(v => v.radiance.some(c => Math.abs(c) > 1e-10)).length, radianceRMSE: Math.sqrt(squared/(rays.length*3)), maxRadianceError: maximum, referencePeakRadiance: maximumReference,
+                reference: 'Independent CPU spectral integration, 256 view steps and 96 direct solar steps. No GPU solar LUT. Disk and neutral ground excluded.',
+                raySamples: rays.map((direction,i) => ({direction,cachedRgb:values[i].radiance,referenceRgb:reference[i].radiance})) };
+        }
         const rays = [];
         for (let y = 0; y < rows; y++) for (let x = 0; x < columns; x++) rays.push(this.camera.ray((x + 0.5) / columns, (y + 0.5) / rows));
         const values = await this.sampleRays(rays);
@@ -178,6 +212,6 @@ struct Result { radiance: vec4f, transmission: vec4f }
         } finally { staging.destroy(); }
     }
     dispose() {
-        this.textures.forEach(t => t.destroy()); this.uniform.destroy(); this.viewUniform.destroy(); this.horizon.destroy(); this.cameraSun.destroy(); this.context.unconfigure(); this.built = false;
+        this.spectralResources.forEach(r => r.destroy()); this.textures.forEach(t => t.destroy()); this.uniform.destroy(); this.viewUniform.destroy(); this.horizon.destroy(); this.cameraSun.destroy(); this.context.unconfigure(); this.built = false;
     }
 }

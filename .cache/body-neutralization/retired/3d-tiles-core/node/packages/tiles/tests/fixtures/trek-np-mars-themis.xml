@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Capabilities xmlns="http://www.opengis.net/wmts/1.0" xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:gml="http://www.opengis.net/gml" xsi:schemaLocation="http://www.opengis.net/wmts/1.0 http://schemas.opengis.net/wmts/1.0/wmtsGetCapabilities_response.xsd" version="1.0.0">
+    <!-- Service Identification --> 
+    <ows:ServiceIdentification>
+        <ows:Title>Mars_MO_THEMIS-IR-Day_mosaic_global_100m_v12_clon0_ly_np</ows:Title>
+        <ows:ServiceType>OGC WMTS</ows:ServiceType>
+        <ows:ServiceTypeVersion>1.0.0</ows:ServiceTypeVersion>
+    </ows:ServiceIdentification> <!-- Operations Metadata --> 
+    <ows:OperationsMetadata>
+        <ows:Operation name="GetCapabilities">
+            <ows:DCP>
+                <ows:HTTP>
+                    <ows:Get xlink:href="https://trek.nasa.gov/tiles/Mars/NP/Mars_MO_THEMIS-IR-Day_mosaic_global_100m_v12_clon0_ly_np/1.0.0/WMTSCapabilities.xml">
+                        <ows:Constraint name="GetEncoding">
+                            <ows:AllowedValues>
+                                <ows:Value>RESTful</ows:Value>
+                            </ows:AllowedValues>
+                        </ows:Constraint>
+                    </ows:Get>
+                    
+                </ows:HTTP>
+            </ows:DCP>
+        </ows:Operation>
+        <ows:Operation name="GetTile">
+            <ows:DCP>
+                <ows:HTTP>
+                    <ows:Get xlink:href="https://trek.nasa.gov/tiles/Mars/NP/Mars_MO_THEMIS-IR-Day_mosaic_global_100m_v12_clon0_ly_np/1.0.0/">
+                        <ows:Constraint name="GetEncoding">
+                            <ows:AllowedValues>
+                                <ows:Value>RESTful</ows:Value>
+                            </ows:AllowedValues>
+                        </ows:Constraint>
+                    </ows:Get>
+                    
+                </ows:HTTP>
+            </ows:DCP>
+        </ows:Operation>
+    </ows:OperationsMetadata> 
+    <Contents>
+        <!--Layer--> 
+        <Layer>
+            <ows:Title>Mars_MO_THEMIS-IR-Day_mosaic_global_100m_v12_clon0_ly_np</ows:Title> 
+            <ows:Identifier>Mars_MO_THEMIS-IR-Day_mosaic_global_100m_v12_clon0_ly_np</ows:Identifier>
+            <ows:BoundingBox crs="urn:ogc:def:crs:EPSG::0">
+                <ows:LowerCorner>-1820023.683 -1820002.001</ows:LowerCorner>
+                <ows:UpperCorner>1820002.001 1820023.683</ows:UpperCorner>
+            </ows:BoundingBox>
+            <ows:WGS84BoundingBox crs="urn:ogc:def:crs:OGC:2:84">
+                <ows:LowerCorner>-1820023.683 -1820002.001</ows:LowerCorner>
+                <ows:UpperCorner>1820002.001 1820023.683</ows:UpperCorner>
+            </ows:WGS84BoundingBox>
+            
+            <Style isDefault="true">
+                <ows:Title>Default Style</ows:Title>
+                <ows:Identifier>default</ows:Identifier>
+            </Style>
+            <Format>image/png</Format>
+            <TileMatrixSetLink>
+                <TileMatrixSet>default028mm</TileMatrixSet>
+            </TileMatrixSetLink>
+            <ResourceURL format="image/png" resourceType="tile" template="https://trek.nasa.gov/tiles/Mars/NP/Mars_MO_THEMIS-IR-Day_mosaic_global_100m_v12_clon0_ly_np/1.0.0//{Style}/{TileMatrixSet}/{TileMatrix}/{TileRow}/{TileCol}.png"/>
+        </Layer> <!--TileMatrixSet-->
+        <TileMatrixSet>
+            <ows:Title>default</ows:Title>
+            <ows:Abstract>The tile matrix set that has scale values calculated based on the dpi defined by OGC specification (dpi assumes 0.28mm as the physical distance of a pixel).</ows:Abstract> 
+            <ows:Identifier>default028mm</ows:Identifier>
+            <ows:SupportedCRS>urn:ogc:def:crs:EPSG::0</ows:SupportedCRS>
+            <TileMatrix><ows:Identifier>0</ows:Identifier><ScaleDenominator>5.0482700928565077E+07</ScaleDenominator><TopLeftCorner>-1821000.0 1821000.0</TopLeftCorner><TileWidth>256</TileWidth><TileHeight>256</TileHeight><MatrixWidth>2.0</MatrixWidth><MatrixHeight>1.0</MatrixHeight></TileMatrix>
+<TileMatrix><ows:Identifier>1</ows:Identifier><ScaleDenominator>2.5241350464282539E+07</ScaleDenominator><TopLeftCorner>-1821000.0 1821000.0</TopLeftCorner><TileWidth>256</TileWidth><TileHeight>256</TileHeight><MatrixWidth>4.0</MatrixWidth><MatrixHeight>2.0</MatrixHeight></TileMatrix>
+<TileMatrix><ows:Identifier>2</ows:Identifier><ScaleDenominator>1.2620675232141269E+07</ScaleDenominator><TopLeftCorner>-1821000.0 1821000.0</TopLeftCorner><TileWidth>256</TileWidth><TileHeight>256</TileHeight><MatrixWidth>8.0</MatrixWidth><MatrixHeight>4.0</MatrixHeight></TileMatrix>
+<TileMatrix><ows:Identifier>3</ows:Identifier><ScaleDenominator>6.3103376160706347E+06</ScaleDenominator><TopLeftCorner>-1821000.0 1821000.0</TopLeftCorner><TileWidth>256</TileWidth><TileHeight>256</TileHeight><MatrixWidth>16.0</MatrixWidth><MatrixHeight>8.0</MatrixHeight></TileMatrix>
+<TileMatrix><ows:Identifier>4</ows:Identifier><ScaleDenominator>3.1551688080353173E+06</ScaleDenominator><TopLeftCorner>-1821000.0 1821000.0</TopLeftCorner><TileWidth>256</TileWidth><TileHeight>256</TileHeight><MatrixWidth>32.0</MatrixWidth><MatrixHeight>16.0</MatrixHeight></TileMatrix>
+<TileMatrix><ows:Identifier>5</ows:Identifier><ScaleDenominator>1.5775844040176587E+06</ScaleDenominator><TopLeftCorner>-1821000.0 1821000.0</TopLeftCorner><TileWidth>256</TileWidth><TileHeight>256</TileHeight><MatrixWidth>64.0</MatrixWidth><MatrixHeight>32.0</MatrixHeight></TileMatrix>
+<TileMatrix><ows:Identifier>6</ows:Identifier><ScaleDenominator>7.8879220200882934E+05</ScaleDenominator><TopLeftCorner>-1821000.0 1821000.0</TopLeftCorner><TileWidth>256</TileWidth><TileHeight>256</TileHeight><MatrixWidth>128.0</MatrixWidth><MatrixHeight>64.0</MatrixHeight></TileMatrix>
+
+            <!--<TileMatrix>
+                <ows:Identifier>0</ows:Identifier> 
+                <ScaleDenominator>2.3623511904761901E8</ScaleDenominator>
+                <TopLeftCorner>-180.0 90.0</TopLeftCorner> 
+                <TileWidth>256</TileWidth> 
+                <TileHeight>256</TileHeight>
+                <MatrixWidth>3</MatrixWidth> 
+                <MatrixHeight>2</MatrixHeight>
+            </TileMatrix>
+            <TileMatrix>
+                <ows:Identifier>1</ows:Identifier> 
+                <ScaleDenominator>1.1811755952380951E8</ScaleDenominator>
+                <TopLeftCorner>-180.0 90.0</TopLeftCorner> 
+                <TileWidth>256</TileWidth> 
+                <TileHeight>256</TileHeight>
+                <MatrixWidth>5</MatrixWidth> 
+                <MatrixHeight>3</MatrixHeight>
+            </TileMatrix>
+            -->
+            
+        </TileMatrixSet>
+    </Contents>
+    <ServiceMetadataURL xlink:href="https://trek.nasa.gov/tiles/Mars/NP/Mars_MO_THEMIS-IR-Day_mosaic_global_100m_v12_clon0_ly_np/1.0.0/WMTSCapabilities.xml"/> 
+</Capabilities>

@@ -1,0 +1,47 @@
+f3d17d5eaa8641ca9cde75e0c176a2b6
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.PhasedNode = void 0;
+const tslib_1 = require("tslib");
+const graph_interfaces_1 = require("../graph/graph.interfaces");
+const execution_node_1 = require("../execution/execution.node");
+const sim_interfaces_1 = require("./sim.interfaces");
+/**
+ * Base class for nodes that gate themselves on the current sim phase.
+ * Extends the generic RuntimeNode with a declared phases list and an
+ * isReady() override that additionally checks the session's
+ * currentPhase against this list.
+ *
+ * Nodes that fire in every phase (pure KPN, no phase awareness) extend
+ * RuntimeNode directly. Nodes that participate only in PreStep, only
+ * in Step, etc., extend PhasedNode and pass their phases list to the
+ * constructor.
+ *
+ * The scheduler itself remains phase-agnostic; this class encodes the
+ * phase-awareness as a node-side concern, matching our separation
+ * between core/execution (pure dataflow) and core/sim (phase concept).
+ */
+class PhasedNode extends execution_node_1.RuntimeNode {
+    constructor(phases, onsc = null, opsc = null, position, enabled = true) {
+        super(onsc, opsc, position, enabled);
+        this.phases = phases;
+    }
+    isReady(session) {
+        if (!super.isReady(session)) {
+            return false;
+        }
+        // Phase-aware only when the session is a SimSession. Non-sim
+        // sessions ignore phase declarations: phased nodes behave like
+        // regular RuntimeNodes (always-eligible on data readiness).
+        if ((0, sim_interfaces_1.isSimSession)(session)) {
+            return this.phases.includes(session.currentPhase);
+        }
+        return true;
+    }
+}
+exports.PhasedNode = PhasedNode;
+tslib_1.__decorate([
+    graph_interfaces_1.cloneable,
+    tslib_1.__metadata("design:type", Array)
+], PhasedNode.prototype, "phases", void 0);
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiQzpcXFVzZXJzXFxHdWlsbGF1bWVQZWxsZXRpZXJcXERvY3VtZW50c1xcR2l0SHViXFxTcGFjZVhSXFwuY2FjaGVcXGNvcmUtY29uY3VycmVudC10cmFuc2Zlclxcc3JjXFxzaW1cXHNpbS5waGFzZWQubm9kZS50cyIsIm1hcHBpbmdzIjoiOzs7O0FBRUEsZ0VBQXNEO0FBRXRELGdFQUEwRDtBQUUxRCxxREFBNEY7QUFFNUY7Ozs7Ozs7Ozs7Ozs7O0dBY0c7QUFDSCxNQUFhLFVBQXNELFNBQVEsNEJBQWM7SUFHckYsWUFBbUIsTUFBK0IsRUFBRSxPQUEyQixJQUFJLEVBQUUsT0FBMkIsSUFBSSxFQUFFLFFBQXFCLEVBQUUsVUFBbUIsSUFBSTtRQUNoSyxLQUFLLENBQUMsSUFBSSxFQUFFLElBQUksRUFBRSxRQUFRLEVBQUUsT0FBTyxDQUFDLENBQUM7UUFDckMsSUFBSSxDQUFDLE1BQU0sR0FBRyxNQUFNLENBQUM7SUFDekIsQ0FBQztJQUVlLE9BQU8sQ0FBQyxPQUFpQjtRQUNyQyxJQUFJLENBQUMsS0FBSyxDQUFDLE9BQU8sQ0FBQyxPQUFPLENBQUMsRUFBRSxDQUFDO1lBQzFCLE9BQU8sS0FBSyxDQUFDO1FBQ2pCLENBQUM7UUFDRCw2REFBNkQ7UUFDN0QsK0RBQStEO1FBQy9ELDREQUE0RDtRQUM1RCxJQUFJLElBQUEsNkJBQVksRUFBQyxPQUFPLENBQUMsRUFBRSxDQUFDO1lBQ3hCLE9BQU8sSUFBSSxDQUFDLE1BQU0sQ0FBQyxRQUFRLENBQUMsT0FBTyxDQUFDLFlBQVksQ0FBQyxDQUFDO1FBQ3RELENBQUM7UUFDRCxPQUFPLElBQUksQ0FBQztJQUNoQixDQUFDO0NBQ0o7QUFwQkQsZ0NBb0JDO0FBbkJxQjtJQUFqQiw0QkFBUzs7MENBQXdDIiwibmFtZXMiOltdLCJzb3VyY2VzIjpbIkM6XFxVc2Vyc1xcR3VpbGxhdW1lUGVsbGV0aWVyXFxEb2N1bWVudHNcXEdpdEh1YlxcU3BhY2VYUlxcLmNhY2hlXFxjb3JlLWNvbmN1cnJlbnQtdHJhbnNmZXJcXHNyY1xcc2ltXFxzaW0ucGhhc2VkLm5vZGUudHMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHR5cGUgeyBJQ2FydGVzaWFuIH0gZnJvbSBcIi4uL2dlb21ldHJ5XCI7XHJcbmltcG9ydCB7IElPbGluayB9IGZyb20gXCIuLi9ncmFwaC9ncmFwaC5pbnRlcmZhY2VzXCI7XHJcbmltcG9ydCB7IGNsb25lYWJsZSB9IGZyb20gXCIuLi9ncmFwaC9ncmFwaC5pbnRlcmZhY2VzXCI7XHJcbmltcG9ydCB7IElTZXNzaW9uIH0gZnJvbSBcIi4uL2V4ZWN1dGlvbi9leGVjdXRpb24uaW50ZXJmYWNlc1wiO1xyXG5pbXBvcnQgeyBSdW50aW1lTm9kZSB9IGZyb20gXCIuLi9leGVjdXRpb24vZXhlY3V0aW9uLm5vZGVcIjtcclxuaW1wb3J0IHsgTnVsbGFibGUgfSBmcm9tIFwiLi4vdHlwZXNcIjtcclxuaW1wb3J0IHsgSVBoYXNlZE5vZGVCYWcsIGlzU2ltU2Vzc2lvbiwgSVN1cHBvcnRzUGhhc2luZywgU2ltUGhhc2UgfSBmcm9tIFwiLi9zaW0uaW50ZXJmYWNlc1wiO1xyXG5cclxuLyoqXHJcbiAqIEJhc2UgY2xhc3MgZm9yIG5vZGVzIHRoYXQgZ2F0ZSB0aGVtc2VsdmVzIG9uIHRoZSBjdXJyZW50IHNpbSBwaGFzZS5cclxuICogRXh0ZW5kcyB0aGUgZ2VuZXJpYyBSdW50aW1lTm9kZSB3aXRoIGEgZGVjbGFyZWQgcGhhc2VzIGxpc3QgYW5kIGFuXHJcbiAqIGlzUmVhZHkoKSBvdmVycmlkZSB0aGF0IGFkZGl0aW9uYWxseSBjaGVja3MgdGhlIHNlc3Npb24nc1xyXG4gKiBjdXJyZW50UGhhc2UgYWdhaW5zdCB0aGlzIGxpc3QuXHJcbiAqXHJcbiAqIE5vZGVzIHRoYXQgZmlyZSBpbiBldmVyeSBwaGFzZSAocHVyZSBLUE4sIG5vIHBoYXNlIGF3YXJlbmVzcykgZXh0ZW5kXHJcbiAqIFJ1bnRpbWVOb2RlIGRpcmVjdGx5LiBOb2RlcyB0aGF0IHBhcnRpY2lwYXRlIG9ubHkgaW4gUHJlU3RlcCwgb25seVxyXG4gKiBpbiBTdGVwLCBldGMuLCBleHRlbmQgUGhhc2VkTm9kZSBhbmQgcGFzcyB0aGVpciBwaGFzZXMgbGlzdCB0byB0aGVcclxuICogY29uc3RydWN0b3IuXHJcbiAqXHJcbiAqIFRoZSBzY2hlZHVsZXIgaXRzZWxmIHJlbWFpbnMgcGhhc2UtYWdub3N0aWM7IHRoaXMgY2xhc3MgZW5jb2RlcyB0aGVcclxuICogcGhhc2UtYXdhcmVuZXNzIGFzIGEgbm9kZS1zaWRlIGNvbmNlcm4sIG1hdGNoaW5nIG91ciBzZXBhcmF0aW9uXHJcbiAqIGJldHdlZW4gY29yZS9leGVjdXRpb24gKHB1cmUgZGF0YWZsb3cpIGFuZCBjb3JlL3NpbSAocGhhc2UgY29uY2VwdCkuXHJcbiAqL1xyXG5leHBvcnQgY2xhc3MgUGhhc2VkTm9kZTxCIGV4dGVuZHMgSVBoYXNlZE5vZGVCYWcgPSBJUGhhc2VkTm9kZUJhZz4gZXh0ZW5kcyBSdW50aW1lTm9kZTxCPiBpbXBsZW1lbnRzIElTdXBwb3J0c1BoYXNpbmcge1xyXG4gICAgQGNsb25lYWJsZSBwdWJsaWMgcGhhc2VzOiBSZWFkb25seUFycmF5PFNpbVBoYXNlPjtcclxuXHJcbiAgICBwdWJsaWMgY29uc3RydWN0b3IocGhhc2VzOiBSZWFkb25seUFycmF5PFNpbVBoYXNlPiwgb25zYzogTnVsbGFibGU8SU9saW5rW10+ID0gbnVsbCwgb3BzYzogTnVsbGFibGU8SU9saW5rW10+ID0gbnVsbCwgcG9zaXRpb24/OiBJQ2FydGVzaWFuLCBlbmFibGVkOiBib29sZWFuID0gdHJ1ZSkge1xyXG4gICAgICAgIHN1cGVyKG9uc2MsIG9wc2MsIHBvc2l0aW9uLCBlbmFibGVkKTtcclxuICAgICAgICB0aGlzLnBoYXNlcyA9IHBoYXNlcztcclxuICAgIH1cclxuXHJcbiAgICBwdWJsaWMgb3ZlcnJpZGUgaXNSZWFkeShzZXNzaW9uOiBJU2Vzc2lvbik6IGJvb2xlYW4ge1xyXG4gICAgICAgIGlmICghc3VwZXIuaXNSZWFkeShzZXNzaW9uKSkge1xyXG4gICAgICAgICAgICByZXR1cm4gZmFsc2U7XHJcbiAgICAgICAgfVxyXG4gICAgICAgIC8vIFBoYXNlLWF3YXJlIG9ubHkgd2hlbiB0aGUgc2Vzc2lvbiBpcyBhIFNpbVNlc3Npb24uIE5vbi1zaW1cclxuICAgICAgICAvLyBzZXNzaW9ucyBpZ25vcmUgcGhhc2UgZGVjbGFyYXRpb25zOiBwaGFzZWQgbm9kZXMgYmVoYXZlIGxpa2VcclxuICAgICAgICAvLyByZWd1bGFyIFJ1bnRpbWVOb2RlcyAoYWx3YXlzLWVsaWdpYmxlIG9uIGRhdGEgcmVhZGluZXNzKS5cclxuICAgICAgICBpZiAoaXNTaW1TZXNzaW9uKHNlc3Npb24pKSB7XHJcbiAgICAgICAgICAgIHJldHVybiB0aGlzLnBoYXNlcy5pbmNsdWRlcyhzZXNzaW9uLmN1cnJlbnRQaGFzZSk7XHJcbiAgICAgICAgfVxyXG4gICAgICAgIHJldHVybiB0cnVlO1xyXG4gICAgfVxyXG59XHJcbiJdLCJ2ZXJzaW9uIjozfQ==

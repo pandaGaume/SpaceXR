@@ -1,0 +1,595 @@
+{
+  "label": "main",
+  "date": "2026-11-08T05:27:39.556Z",
+  "seconds": 8,
+  "results": [
+    {
+      "id": "mont-blanc/mesh",
+      "url": "http://localhost:5174/?engine=mesh&solid=1&imagery=none&radius=25000&pitch=60",
+      "errors": [],
+      "performance": {
+        "engine": "mesh",
+        "framesPerSecond": 89.2,
+        "frameMsMedian": 8.9,
+        "frameMsP95": 26.2,
+        "frameMsP99": 38.4,
+        "cutEntered": 293,
+        "cutLeft": 284,
+        "cancelledLoads": 16,
+        "refineAttempts": 6938,
+        "refines": 106,
+        "rebuilds": 0,
+        "identicalRebuilds": 0,
+        "terrainCpuMs": 1.19,
+        "renderCpuMs": 2.57,
+        "runtimeFrameMs": 2.9,
+        "gpuMs": 2.59,
+        "instances": 79,
+        "drawCalls": 78.8,
+        "trianglesPerFrame": 643580,
+        "uploadKiBPerFrame": 243.5,
+        "uploadCallsPerFrame": 12.5,
+        "gpuMiB": 113.5,
+        "cpuMiB": 162.8,
+        "demTiles": 837,
+        "tileRequests": 837,
+        "distinctTileRequests": 837,
+        "tileHosts": [
+          "s3.amazonaws.com"
+        ],
+        "loadSeconds": 8.5
+      },
+      "integrity": {
+        "probeDetects": true,
+        "lod": {
+          "shown": 291,
+          "hidden": 282,
+          "returns": 83,
+          "quickReturns": 25,
+          "quickReturnsInView": 25,
+          "tilesReturning": 80,
+          "mostReturns": 2,
+          "mostReturningTile": "0/12/2123/1461",
+          "mostReturningHistory": [
+            "319 ms shown, visible, parent visible refining",
+            "495 ms hidden, active, parent visible refining",
+            "2495 ms shown, visible, parent visible refining",
+            "2693 ms hidden, active, parent visible refining",
+            "3318 ms shown, visible, parent visible refining",
+            "4253 ms hidden, inactive, parent visible"
+          ],
+          "meanThresholdScale": 1,
+          "changesAtRest": 0,
+          "presentedAtRest": 79,
+          "worstErrorAtRest": 9.28,
+          "meanErrorAtRest": 5.59,
+          "selectedAtRest": 79,
+          "errorsAbove10AtRest": 0
+        },
+        "settleSeconds": 0.1,
+        "holesAtRest": 0,
+        "worstSharedEdgeAtRestMetres": 0,
+        "frames": 409,
+        "framesWithHoles": 0,
+        "worstHoles": 0,
+        "edgeChecks": 16,
+        "sharedVerticesPerCheck": 4008,
+        "worstSharedEdgeMetres": 0,
+        "worstOutOfViewEdgeMetres": 0,
+        "tileRequests": 834,
+        "distinctTileRequests": 834,
+        "tileHosts": [
+          "s3.amazonaws.com"
+        ],
+        "loadSeconds": 5
+      }
+    },
+    {
+      "id": "mont-blanc/gpu",
+      "url": "http://localhost:5174/?engine=gpu&solid=1&imagery=none&radius=25000&pitch=60",
+      "errors": [],
+      "performance": {
+        "engine": "gpu",
+        "framesPerSecond": 108.3,
+        "frameMsMedian": 8.5,
+        "frameMsP95": 18.2,
+        "frameMsP99": 32.2,
+        "cutEntered": 287,
+        "cutLeft": 278,
+        "cancelledLoads": 3,
+        "refineAttempts": 8331,
+        "refines": 110,
+        "rebuilds": 350,
+        "identicalRebuilds": 0,
+        "terrainCpuMs": 0.77,
+        "renderCpuMs": 1.09,
+        "runtimeFrameMs": 2,
+        "gpuMs": 1.85,
+        "instances": 79,
+        "drawCalls": 5.4,
+        "trianglesPerFrame": 651152,
+        "uploadKiBPerFrame": 336.2,
+        "uploadCallsPerFrame": 12.9,
+        "gpuMiB": 94.3,
+        "cpuMiB": 0,
+        "demTiles": 835,
+        "tileRequests": 1662,
+        "distinctTileRequests": 1446,
+        "tileHosts": [
+          "s3.amazonaws.com"
+        ],
+        "loadSeconds": 3.8
+      },
+      "integrity": {
+        "probeDetects": true,
+        "lod": {
+          "shown": 294,
+          "hidden": 285,
+          "returns": 80,
+          "quickReturns": 23,
+          "quickReturnsInView": 23,
+          "tilesReturning": 77,
+          "mostReturns": 2,
+          "mostReturningTile": "0/12/2123/1461",
+          "mostReturningHistory": [
+            "396 ms shown, visible, parent visible refining",
+            "534 ms hidden, active, parent visible refining",
+            "2537 ms shown, visible, parent visible refining",
+            "2716 ms hidden, active, parent visible refining",
+            "3440 ms shown, visible, parent visible refining",
+            "4313 ms hidden, inactive, parent visible"
+          ],
+          "meanThresholdScale": 1,
+          "changesAtRest": 0,
+          "presentedAtRest": 79,
+          "worstErrorAtRest": 9.28,
+          "meanErrorAtRest": 5.59,
+          "selectedAtRest": 79,
+          "errorsAbove10AtRest": 0
+        },
+        "settleSeconds": 0,
+        "holesAtRest": 0,
+        "worstSharedEdgeAtRestMetres": 6000.221,
+        "worstPairAtRest": {
+          "gap": 6000.220703125539,
+          "a": {
+            "address": {
+              "lod": 9,
+              "x": 265,
+              "y": 180
+            },
+            "terrain": {
+              "lod": 9,
+              "x": 265,
+              "y": 180
+            },
+            "terrainLevel": 9,
+            "finer": 4,
+            "coarser": 0,
+            "demOfTerrain": {
+              "lod": 9,
+              "x": 265,
+              "y": 180
+            }
+          },
+          "aLattice": [
+            0,
+            0
+          ],
+          "aHeight": -4842,
+          "b": {
+            "address": {
+              "lod": 9,
+              "x": 264,
+              "y": 179
+            },
+            "terrain": {
+              "lod": 9,
+              "x": 264,
+              "y": 179
+            },
+            "terrainLevel": 9,
+            "finer": 0,
+            "coarser": 8,
+            "demOfTerrain": {
+              "lod": 9,
+              "x": 264,
+              "y": 179
+            }
+          },
+          "bLattice": [
+            128,
+            128
+          ],
+          "bHeight": 1158.220703125,
+          "aReference": [
+            0,
+            0,
+            1,
+            76
+          ],
+          "bReference": [
+            0,
+            0,
+            1,
+            32
+          ]
+        },
+        "frames": 225,
+        "framesWithHoles": 2,
+        "worstHoles": 29,
+        "edgeChecks": 16,
+        "sharedVerticesPerCheck": 13780,
+        "worstSharedEdgeMetres": 8084.922,
+        "worstOutOfViewEdgeMetres": 8229.523,
+        "worstPair": {
+          "gap": 8084.921874999814,
+          "a": {
+            "address": {
+              "lod": 10,
+              "x": 529,
+              "y": 366
+            },
+            "terrain": {
+              "lod": 10,
+              "x": 529,
+              "y": 366
+            },
+            "terrainLevel": 10,
+            "finer": 0,
+            "coarser": 0,
+            "demOfTerrain": {
+              "lod": 10,
+              "x": 529,
+              "y": 366
+            }
+          },
+          "aLattice": [
+            128,
+            62
+          ],
+          "aHeight": 3329.671875,
+          "b": {
+            "address": {
+              "lod": 10,
+              "x": 530,
+              "y": 366
+            },
+            "terrain": {
+              "lod": 10,
+              "x": 530,
+              "y": 366
+            },
+            "terrainLevel": 10,
+            "finer": 3,
+            "coarser": 0,
+            "demOfTerrain": {
+              "lod": 10,
+              "x": 530,
+              "y": 366
+            }
+          },
+          "bLattice": [
+            0,
+            62
+          ],
+          "bHeight": -4755.25,
+          "aReference": [
+            0,
+            0,
+            1,
+            23
+          ],
+          "bReference": [
+            0,
+            0,
+            1,
+            71
+          ]
+        },
+        "tileRequests": 1991,
+        "distinctTileRequests": 1471,
+        "tileHosts": [
+          "s3.amazonaws.com"
+        ],
+        "loadSeconds": 4.9
+      }
+    },
+    {
+      "id": "mont-blanc-zoom/mesh",
+      "url": "http://localhost:5174/?engine=mesh&solid=1&imagery=none&radius=400000&pitch=60",
+      "errors": [],
+      "performance": {
+        "engine": "mesh",
+        "framesPerSecond": 96.6,
+        "frameMsMedian": 8.5,
+        "frameMsP95": 21.9,
+        "frameMsP99": 55.2,
+        "cutEntered": 566,
+        "cutLeft": 520,
+        "cancelledLoads": 60,
+        "refineAttempts": 9539,
+        "refines": 147,
+        "rebuilds": 0,
+        "identicalRebuilds": 0,
+        "terrainCpuMs": 1.03,
+        "renderCpuMs": 2.06,
+        "runtimeFrameMs": 2.4,
+        "gpuMs": 1.95,
+        "instances": 96,
+        "drawCalls": 81.1,
+        "trianglesPerFrame": 662732,
+        "uploadKiBPerFrame": 353,
+        "uploadCallsPerFrame": 12.8,
+        "gpuMiB": 112.4,
+        "cpuMiB": 161.2,
+        "demTiles": 882,
+        "tileRequests": 882,
+        "distinctTileRequests": 882,
+        "tileHosts": [
+          "s3.amazonaws.com"
+        ],
+        "loadSeconds": 3.8
+      },
+      "integrity": {
+        "probeDetects": true,
+        "lod": {
+          "shown": 541,
+          "hidden": 492,
+          "returns": 268,
+          "quickReturns": 130,
+          "quickReturnsInView": 130,
+          "tilesReturning": 177,
+          "mostReturns": 3,
+          "mostReturningTile": "0/11/1062/730",
+          "mostReturningHistory": [
+            "750 ms shown, visible, parent visible refining",
+            "1262 ms hidden, visible refining, parent visible refining",
+            "1734 ms shown, visible, parent visible refining",
+            "2326 ms hidden, inactive, parent visible",
+            "4108 ms shown, visible, parent visible refining",
+            "4602 ms hidden, visible refining, parent visible refining",
+            "7506 ms shown, visible, parent visible refining",
+            "8014 ms hidden, inactive, parent visible"
+          ],
+          "meanThresholdScale": 1,
+          "changesAtRest": 0,
+          "presentedAtRest": 74,
+          "worstErrorAtRest": 8.58,
+          "meanErrorAtRest": 4.99,
+          "selectedAtRest": 74,
+          "errorsAbove10AtRest": 0
+        },
+        "settleSeconds": 0.1,
+        "holesAtRest": 0,
+        "worstSharedEdgeAtRestMetres": 0,
+        "frames": 359,
+        "framesWithHoles": 15,
+        "worstHoles": 1682,
+        "edgeChecks": 16,
+        "sharedVerticesPerCheck": 3151,
+        "worstSharedEdgeMetres": 0,
+        "worstOutOfViewEdgeMetres": 0,
+        "tileRequests": 899,
+        "distinctTileRequests": 899,
+        "tileHosts": [
+          "s3.amazonaws.com"
+        ],
+        "loadSeconds": 3.8
+      }
+    },
+    {
+      "id": "mont-blanc-zoom/gpu",
+      "url": "http://localhost:5174/?engine=gpu&solid=1&imagery=none&radius=400000&pitch=60",
+      "errors": [],
+      "performance": {
+        "engine": "gpu",
+        "framesPerSecond": 70.3,
+        "frameMsMedian": 9.2,
+        "frameMsP95": 47.3,
+        "frameMsP99": 69.5,
+        "cutEntered": 583,
+        "cutLeft": 538,
+        "cancelledLoads": 43,
+        "refineAttempts": 6799,
+        "refines": 151,
+        "rebuilds": 296,
+        "identicalRebuilds": 0,
+        "terrainCpuMs": 1.36,
+        "renderCpuMs": 1.71,
+        "runtimeFrameMs": 2.3,
+        "gpuMs": 2.16,
+        "instances": 95,
+        "drawCalls": 6.8,
+        "trianglesPerFrame": 652072,
+        "uploadKiBPerFrame": 756.1,
+        "uploadCallsPerFrame": 20.4,
+        "gpuMiB": 106.6,
+        "cpuMiB": 0,
+        "demTiles": 903,
+        "tileRequests": 1763,
+        "distinctTileRequests": 1516,
+        "tileHosts": [
+          "s3.amazonaws.com"
+        ],
+        "loadSeconds": 3.3
+      },
+      "integrity": {
+        "probeDetects": true,
+        "lod": {
+          "shown": 526,
+          "hidden": 471,
+          "returns": 252,
+          "quickReturns": 116,
+          "quickReturnsInView": 116,
+          "tilesReturning": 165,
+          "mostReturns": 3,
+          "mostReturningTile": "0/11/1062/730",
+          "mostReturningHistory": [
+            "803 ms shown, visible, parent visible refining",
+            "944 ms hidden, visible refining, parent visible refining",
+            "1770 ms shown, visible, parent visible refining",
+            "2236 ms hidden, inactive, parent visible",
+            "4177 ms shown, visible, parent visible refining",
+            "4776 ms hidden, visible refining, parent visible refining",
+            "7577 ms shown, visible, parent visible refining",
+            "8095 ms hidden, inactive, parent visible"
+          ],
+          "meanThresholdScale": 1,
+          "changesAtRest": 0,
+          "presentedAtRest": 74,
+          "worstErrorAtRest": 8.58,
+          "meanErrorAtRest": 4.99,
+          "selectedAtRest": 74,
+          "errorsAbove10AtRest": 0
+        },
+        "settleSeconds": 0.2,
+        "holesAtRest": 0,
+        "worstSharedEdgeAtRestMetres": 3360.729,
+        "worstPairAtRest": {
+          "gap": 3360.7285156246458,
+          "a": {
+            "address": {
+              "lod": 7,
+              "x": 66,
+              "y": 42
+            },
+            "terrain": {
+              "lod": 7,
+              "x": 66,
+              "y": 42
+            },
+            "terrainLevel": 7,
+            "finer": 0,
+            "coarser": 1,
+            "demOfTerrain": {
+              "lod": 7,
+              "x": 66,
+              "y": 42
+            }
+          },
+          "aLattice": [
+            120,
+            128
+          ],
+          "aHeight": 3686.228515625,
+          "b": {
+            "address": {
+              "lod": 7,
+              "x": 66,
+              "y": 43
+            },
+            "terrain": {
+              "lod": 7,
+              "x": 66,
+              "y": 43
+            },
+            "terrainLevel": 7,
+            "finer": 4,
+            "coarser": 0,
+            "demOfTerrain": {
+              "lod": 7,
+              "x": 66,
+              "y": 43
+            }
+          },
+          "bLattice": [
+            120,
+            0
+          ],
+          "bHeight": 325.5,
+          "aReference": [
+            0,
+            0,
+            1,
+            19
+          ],
+          "bReference": [
+            0,
+            0,
+            1,
+            34
+          ]
+        },
+        "frames": 215,
+        "framesWithHoles": 20,
+        "worstHoles": 5555,
+        "edgeChecks": 16,
+        "sharedVerticesPerCheck": 13547,
+        "worstSharedEdgeMetres": 6044.289,
+        "worstOutOfViewEdgeMetres": 6044.289,
+        "worstPair": {
+          "gap": 6044.289062500222,
+          "a": {
+            "address": {
+              "lod": 11,
+              "x": 1060,
+              "y": 729
+            },
+            "terrain": {
+              "lod": 11,
+              "x": 1060,
+              "y": 729
+            },
+            "terrainLevel": 11,
+            "finer": 0,
+            "coarser": 0,
+            "demOfTerrain": {
+              "lod": 11,
+              "x": 1060,
+              "y": 729
+            }
+          },
+          "aLattice": [
+            0,
+            0
+          ],
+          "aHeight": 3406.0390625,
+          "b": {
+            "address": {
+              "lod": 11,
+              "x": 1060,
+              "y": 728
+            },
+            "terrain": {
+              "lod": 11,
+              "x": 1060,
+              "y": 728
+            },
+            "terrainLevel": 11,
+            "finer": 0,
+            "coarser": 1,
+            "demOfTerrain": {
+              "lod": 11,
+              "x": 1060,
+              "y": 728
+            }
+          },
+          "bLattice": [
+            0,
+            128
+          ],
+          "bHeight": -2638.25,
+          "aReference": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "bReference": [
+            0,
+            0,
+            1,
+            62
+          ]
+        },
+        "tileRequests": 1781,
+        "distinctTileRequests": 1498,
+        "tileHosts": [
+          "s3.amazonaws.com"
+        ],
+        "loadSeconds": 3.8
+      }
+    }
+  ]
+}

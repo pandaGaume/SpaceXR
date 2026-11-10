@@ -1,0 +1,284 @@
+[
+  {
+    "id": "@spacexr/raster@0.1.0",
+    "name": "@spacexr/raster",
+    "version": "0.1.0",
+    "size": 72970,
+    "unpackedSize": 311428,
+    "shasum": "cec3e7f6655696ce69651d5b431dd3605fa8b7c9",
+    "integrity": "sha512-qRjRgOJMlwRlseOqrwfmeVTRgqQDxSjGKZhIn6vbK1unzQpsErhCHgt5+WfuElqZjuoDEIhWly6hGHeuZOAG9g==",
+    "filename": "spacexr-raster-0.1.0.tgz",
+    "files": [
+      {
+        "path": "LICENSE",
+        "size": 11357,
+        "mode": 420
+      },
+      {
+        "path": "README.md",
+        "size": 5759,
+        "mode": 420
+      },
+      {
+        "path": "dist/index.d.ts",
+        "size": 27495,
+        "mode": 420
+      },
+      {
+        "path": "dist/index.js",
+        "size": 48367,
+        "mode": 420
+      },
+      {
+        "path": "dist/index.js.map",
+        "size": 135669,
+        "mode": 420
+      },
+      {
+        "path": "package.json",
+        "size": 2407,
+        "mode": 420
+      },
+      {
+        "path": "src/drape-instances.ts",
+        "size": 17290,
+        "mode": 420
+      },
+      {
+        "path": "src/draping.ts",
+        "size": 2427,
+        "mode": 420
+      },
+      {
+        "path": "src/image.ts",
+        "size": 2091,
+        "mode": 420
+      },
+      {
+        "path": "src/index.ts",
+        "size": 287,
+        "mode": 420
+      },
+      {
+        "path": "src/png-data-decoder.ts",
+        "size": 8074,
+        "mode": 420
+      },
+      {
+        "path": "src/raster-grid.ts",
+        "size": 1744,
+        "mode": 420
+      },
+      {
+        "path": "src/raster-pyramid.ts",
+        "size": 14419,
+        "mode": 420
+      },
+      {
+        "path": "src/resampling.ts",
+        "size": 11316,
+        "mode": 420
+      },
+      {
+        "path": "src/sampling.ts",
+        "size": 4836,
+        "mode": 420
+      },
+      {
+        "path": "src/stitched-raster-grids.ts",
+        "size": 17890,
+        "mode": 420
+      }
+    ],
+    "entryCount": 16,
+    "bundled": []
+  },
+  {
+    "id": "@spacexr/dem@0.1.0",
+    "name": "@spacexr/dem",
+    "version": "0.1.0",
+    "size": 52327,
+    "unpackedSize": 206699,
+    "shasum": "86985ba034ffdb6b3a136d83563a572b677ac977",
+    "integrity": "sha512-I21328EmIuZHYb1++Nstwu5BVGhX5IQxYcwTNYGq/O2xYexkE5X6PhXtrBlbiSF3Y0ZYVsmAoYzMol+QAbTGVw==",
+    "filename": "spacexr-dem-0.1.0.tgz",
+    "files": [
+      {
+        "path": "LICENSE",
+        "size": 11357,
+        "mode": 420
+      },
+      {
+        "path": "README.md",
+        "size": 6353,
+        "mode": 420
+      },
+      {
+        "path": "dist/index.d.ts",
+        "size": 27203,
+        "mode": 420
+      },
+      {
+        "path": "dist/index.js",
+        "size": 26424,
+        "mode": 420
+      },
+      {
+        "path": "dist/index.js.map",
+        "size": 81095,
+        "mode": 420
+      },
+      {
+        "path": "package.json",
+        "size": 2517,
+        "mode": 420
+      },
+      {
+        "path": "src/codecs/dem-decoder.ts",
+        "size": 8053,
+        "mode": 420
+      },
+      {
+        "path": "src/codecs/dem-infos.ts",
+        "size": 8963,
+        "mode": 420
+      },
+      {
+        "path": "src/codecs/dem.ts",
+        "size": 4633,
+        "mode": 420
+      },
+      {
+        "path": "src/codecs/index.ts",
+        "size": 154,
+        "mode": 420
+      },
+      {
+        "path": "src/codecs/mapzen-normals.ts",
+        "size": 2396,
+        "mode": 420
+      },
+      {
+        "path": "src/codecs/terrarium-encoder.ts",
+        "size": 5503,
+        "mode": 420
+      },
+      {
+        "path": "src/index.ts",
+        "size": 80,
+        "mode": 420
+      },
+      {
+        "path": "src/pyramid/child-height-ranges.ts",
+        "size": 1311,
+        "mode": 420
+      },
+      {
+        "path": "src/pyramid/dem-pyramid.ts",
+        "size": 10788,
+        "mode": 420
+      },
+      {
+        "path": "src/pyramid/index.ts",
+        "size": 143,
+        "mode": 420
+      },
+      {
+        "path": "src/pyramid/surface-normal.ts",
+        "size": 1831,
+        "mode": 420
+      },
+      {
+        "path": "src/pyramid/tile-surface-normal.ts",
+        "size": 3403,
+        "mode": 420
+      },
+      {
+        "path": "src/sources/dem-tile-loader.ts",
+        "size": 1798,
+        "mode": 420
+      },
+      {
+        "path": "src/sources/index.ts",
+        "size": 62,
+        "mode": 420
+      },
+      {
+        "path": "src/sources/presets.ts",
+        "size": 2632,
+        "mode": 420
+      }
+    ],
+    "entryCount": 21,
+    "bundled": []
+  },
+  {
+    "id": "@spacexr/grid@0.1.0",
+    "name": "@spacexr/grid",
+    "version": "0.1.0",
+    "size": 27224,
+    "unpackedSize": 115622,
+    "shasum": "a59f52533023114002b25cc9a3fdcad6f3591f2c",
+    "integrity": "sha512-6yhEgKPtWxP22Nv68sHGV5Y4HF7SkBnnFp3HkcnTX+Xi7d7ZJXal+1HkZIgPij3nGna+YqKHjdujvxE1zxryHA==",
+    "filename": "spacexr-grid-0.1.0.tgz",
+    "files": [
+      {
+        "path": "LICENSE",
+        "size": 11357,
+        "mode": 420
+      },
+      {
+        "path": "README.md",
+        "size": 3584,
+        "mode": 420
+      },
+      {
+        "path": "dist/index.d.ts",
+        "size": 10323,
+        "mode": 420
+      },
+      {
+        "path": "dist/index.js",
+        "size": 14803,
+        "mode": 420
+      },
+      {
+        "path": "dist/index.js.map",
+        "size": 46078,
+        "mode": 420
+      },
+      {
+        "path": "package.json",
+        "size": 2350,
+        "mode": 420
+      },
+      {
+        "path": "src/grid-lod.ts",
+        "size": 2702,
+        "mode": 420
+      },
+      {
+        "path": "src/grid-tile-geometry.ts",
+        "size": 5719,
+        "mode": 420
+      },
+      {
+        "path": "src/grid-topology.ts",
+        "size": 14326,
+        "mode": 420
+      },
+      {
+        "path": "src/grid-vertices.ts",
+        "size": 4248,
+        "mode": 420
+      },
+      {
+        "path": "src/index.ts",
+        "size": 132,
+        "mode": 420
+      }
+    ],
+    "entryCount": 11,
+    "bundled": []
+  }
+]

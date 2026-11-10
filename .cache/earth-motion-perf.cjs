@@ -1,0 +1,12 @@
+const {chromium}=require('C:/Users/GuillaumePelletier/Documents/GitHub/Gaume/spacexr-atmosphere/node_modules/playwright');
+const fs=require('node:fs');const out='C:/Users/GuillaumePelletier/Documents/GitHub/SpaceXR/.cache/earth-motion';fs.mkdirSync(out,{recursive:true});
+(async()=>{const browser=await chromium.launch({channel:'chrome',headless:true,args:['--enable-unsafe-webgpu','--use-angle=d3d11','--ignore-gpu-blocklist']});
+try{const wide=process.argv[4]==='wide';const page=await browser.newPage({viewport:wide?{width:2560,height:1440}:{width:1200,height:860},deviceScaleFactor:wide?2:1});const errors=[];page.on('pageerror',e=>errors.push(e.message));
+await page.addInitScript(()=>{const raf=requestAnimationFrame;window.requestAnimationFrame=cb=>raf(t=>{if(!window.pauseEarth)cb(t);});});
+const inside=process.argv[3]==='inside';await page.goto('http://127.0.0.1:5189/'+(process.env.EARTH_PERF_PATH||(inside?'atmosphere.html':'orbital.html')));await page.waitForFunction(()=>window.earthDemo?.earth.atmosphereReady,{},{timeout:60000});if(inside)await page.waitForTimeout(5000);
+const report=await page.evaluate(async({inside,horizon})=>{window.pauseEarth=true;await new Promise(r=>setTimeout(r,50));const e=window.earthDemo.earth,scene=e.camera.getScene(),engine=scene.getEngine(),device=engine._device;
+await device.queue.onSubmittedWorkDone();const runs=[];for(const enabled of [false,true]){e.setAtmosphereEnabled(enabled);const costs=[],cpu=[];
+for(let i=0;i<60;i++){const p=e.geodeticSystem.geodeticDegreesToEcef(inside?45.8326:(horizon?45:25), inside?6.8652+i*.0012:(horizon?5:0)+i*.12,inside?4808:0);e.camera.center.copyFromFloats(p.x,p.y,p.z);const start=performance.now();await e.update();engine.beginFrame();scene.render(false);engine.endFrame();cpu.push(performance.now()-start);await device.queue.onSubmittedWorkDone();costs.push(performance.now()-start);}
+costs.sort((a,b)=>a-b);cpu.sort((a,b)=>a-b);runs.push({enabled,median:costs[30],p95:costs[57],cpu:cpu[30],fps:60000/costs.reduce((a,b)=>a+b,0)});}
+return runs;},{inside,horizon:!!process.env.EARTH_PERF_PATH?.includes('horizon')});console.log(JSON.stringify({report,errors},null,2));fs.writeFileSync(out+'/'+(process.argv[2]||'baseline')+'.json',JSON.stringify({report,errors},null,2));await page.screenshot({path:out+'/'+(process.argv[2]||'baseline')+'.png'});
+}finally{await browser.close();}})().catch(e=>{console.error(e);process.exitCode=1;});

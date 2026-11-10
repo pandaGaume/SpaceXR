@@ -1,0 +1,94 @@
+{
+  "asset": {
+    "version": "1.1"
+  },
+  "geometricError": 100,
+  "extras": {
+    "source": "co2-scrubber-governed-agent/video/3d/nuit9-shackleton.blend",
+    "frame": "MOON_ME_DE421",
+    "latitude": -89.135035,
+    "longitude": 106.872906,
+    "polarStereographic": [
+      25100.0,
+      -7613.0
+    ]
+  },
+  "root": {
+    "transform": [
+      3.1650106568303915e-05,
+      0.9998956498522442,
+      0.014446051530744223,
+      0,
+      0.9999904003083145,
+      3.1650106568303915e-05,
+      -0.004381585271057998,
+      0,
+      -0.004381585271057998,
+      0.014446051530744223,
+      -0.9998860501605588,
+      0,
+      -7613.276198197635,
+      25100.910623244537,
+      -1737364.0350856623,
+      1
+    ],
+    "boundingVolume": {
+      "sphere": [
+        3.568,
+        -7.282,
+        5.13,
+        15.649
+      ]
+    },
+    "geometricError": 100,
+    "refine": "ADD",
+    "children": [
+      {
+        "boundingVolume": {
+          "sphere": [
+            1.434,
+            -7.329,
+            5.153,
+            14.676
+          ]
+        },
+        "geometricError": 0,
+        "content": {
+          "uri": "station.glb"
+        }
+      },
+      {
+        "transform": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0.415,
+          1
+        ],
+        "boundingVolume": {
+          "sphere": [
+            11.5,
+            3.0,
+            1.143,
+            2.084
+          ]
+        },
+        "geometricError": 0,
+        "content": {
+          "uri": "rover.glb"
+        }
+      }
+    ]
+  }
+}

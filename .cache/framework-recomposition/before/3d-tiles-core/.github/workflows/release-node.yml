@@ -1,0 +1,50 @@
+name: release-node
+
+on:
+  push:
+    tags: ["node-v*"]
+
+defaults:
+  run:
+    working-directory: node
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 20.x
+          registry-url: https://registry.npmjs.org
+          cache: npm
+          cache-dependency-path: node/package-lock.json
+
+      - name: Upgrade npm for trusted publishing
+        run: npm install -g npm@^11
+
+      - run: npm ci
+      - run: npm run check
+      - run: npm publish --workspace @spacexr/3d-tiles-core --access public --provenance
+      - run: npm publish --workspace @spacexr/tiles --access public --provenance
+      - run: npm publish --workspace @spacexr/raster --access public --provenance
+      - run: npm publish --workspace @spacexr/dem --access public --provenance
+      - run: npm publish --workspace @spacexr/grid --access public --provenance
+      - run: npm publish --workspace @spacexr/3d-tiles-runtime --access public --provenance
+
+      - name: Dump npm debug logs on failure
+        if: failure()
+        run: |
+          npm --version
+          npm config list
+          for f in /home/runner/.npm/_logs/*.log; do
+            echo "----- $f -----"
+            cat "$f"
+          done
+
+      - uses: softprops/action-gh-release@v3
+        with:
+          generate_release_notes: true

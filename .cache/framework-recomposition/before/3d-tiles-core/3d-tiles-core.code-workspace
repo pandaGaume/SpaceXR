@@ -1,0 +1,243 @@
+{
+    "folders": [
+        {
+            "name": "📦 Workspace",
+            "path": "."
+        },
+        {
+            "name": "🧱 3D Tiles Core",
+            "path": "node/packages/core"
+        },
+        {
+            "name": "⚙️ 3D Tiles Runtime",
+            "path": "node/packages/runtime"
+        },
+        {
+            "name": "🧩 3D Tiles Grid",
+            "path": "node/packages/grid"
+        },
+        {
+            "name": "🏔️ 3D Tiles DEM",
+            "path": "node/packages/dem"
+        },
+        {
+            "name": "🧊 3D Tiles Babylon",
+            "path": "../3d-tiles-babylon"
+        },
+        {
+            "name": "🏙️ Babylon Google 3D Tiles",
+            "path": "../3d-tiles-babylon/examples/babylon-google-3d-tiles"
+        },
+        {
+            "name": "🔷 Babylon Implicit Grid Mapzen",
+            "path": "../3d-tiles-babylon/examples/babylon-implicit-grid-mapzen"
+        },
+        {
+            "name": "🌐 Geodesy",
+            "path": "../geodesy_ts"
+        },
+        {
+            "name": "🔷 3D Tiles .NET",
+            "path": "dotnet"
+        },
+        {
+            "name": "🎮 3D Tiles C++ and Unreal",
+            "path": "cpp"
+        }
+    ],
+    "settings": {
+        "files.exclude": {
+            "**/node_modules": true,
+            "**/bin": true,
+            "**/obj": true,
+            "**/dist": true,
+            "**/build": true,
+            "**/coverage": true,
+            "**/docs/api": true
+        },
+        "search.exclude": {
+            "**/node_modules": true,
+            "**/dist": true,
+            "**/bin": true,
+            "**/obj": true,
+            "**/build": true,
+            "**/coverage": true,
+            "**/docs/api": true
+        },
+        "typescript.tsdk": "node/node_modules/typescript/lib",
+        "typescript.enablePromptUseWorkspaceTsdk": true,
+        "eslint.workingDirectories": [
+            {
+                "mode": "auto"
+            }
+        ],
+        "npm.packageManager": "npm",
+        "files.eol": "\n"
+    },
+    "extensions": {
+        "recommendations": [
+            "dbaeumer.vscode-eslint",
+            "esbenp.prettier-vscode",
+            "ms-dotnettools.csharp",
+            "ms-dotnettools.csdevkit",
+            "ms-vscode.cpptools",
+            "editorconfig.editorconfig"
+        ]
+    },
+    "tasks": {
+        "version": "2.0.0",
+        "tasks": [
+            {
+                "label": "3D Tiles: install",
+                "type": "shell",
+                "command": "npm ci",
+                "options": {
+                    "cwd": "${workspaceFolder:📦 Workspace}/node"
+                },
+                "problemMatcher": []
+            },
+            {
+                "label": "3D Tiles: build",
+                "type": "shell",
+                "command": "npm run build",
+                "options": {
+                    "cwd": "${workspaceFolder:📦 Workspace}/node"
+                },
+                "group": {
+                    "kind": "build",
+                    "isDefault": true
+                },
+                "problemMatcher": ["$tsc"]
+            },
+            {
+                "label": "3D Tiles: test",
+                "type": "shell",
+                "command": "npm run test",
+                "options": {
+                    "cwd": "${workspaceFolder:📦 Workspace}/node"
+                },
+                "group": "test",
+                "problemMatcher": []
+            },
+            {
+                "label": "3D Tiles: check",
+                "type": "shell",
+                "command": "npm run check",
+                "options": {
+                    "cwd": "${workspaceFolder:📦 Workspace}/node"
+                },
+                "problemMatcher": ["$tsc"]
+            },
+            {
+                "label": "3D Tiles Runtime: watch",
+                "type": "shell",
+                "command": "npm run watch",
+                "options": {
+                    "cwd": "${workspaceFolder:⚙️ 3D Tiles Runtime}"
+                },
+                "isBackground": true,
+                "problemMatcher": []
+            },
+            {
+                "label": "Babylon Implicit Grid: dev",
+                "type": "shell",
+                "command": "npm run dev",
+                "options": {
+                    "cwd": "${workspaceFolder:🔷 Babylon Implicit Grid}"
+                },
+                "isBackground": true,
+                "problemMatcher": []
+            },
+            {
+                "label": "Babylon Implicit Grid: build",
+                "type": "shell",
+                "command": "npm run build",
+                "options": {
+                    "cwd": "${workspaceFolder:🔷 Babylon Implicit Grid}"
+                },
+                "problemMatcher": ["$tsc"]
+            },
+            {
+                "label": "Babylon Google 3D Tiles: dev",
+                "type": "shell",
+                "command": "npm run dev",
+                "options": {
+                    "cwd": "${workspaceFolder:🏙️ Babylon Google 3D Tiles}"
+                },
+                "isBackground": true,
+                "problemMatcher": []
+            },
+            {
+                "label": "Babylon Google 3D Tiles: build",
+                "type": "shell",
+                "command": "npm run build",
+                "options": {
+                    "cwd": "${workspaceFolder:🏙️ Babylon Google 3D Tiles}"
+                },
+                "problemMatcher": ["$tsc"]
+            },
+            {
+                "label": "Babylon Google 3D Tiles: preview",
+                "type": "shell",
+                "command": "npm run preview",
+                "options": {
+                    "cwd": "${workspaceFolder:🏙️ Babylon Google 3D Tiles}"
+                },
+                "isBackground": true,
+                "problemMatcher": []
+            },
+            {
+                "label": "Geodesy: install",
+                "type": "shell",
+                "command": "npm ci",
+                "options": {
+                    "cwd": "${workspaceFolder:🌐 Geodesy}"
+                },
+                "problemMatcher": []
+            },
+            {
+                "label": "Geodesy: build",
+                "type": "shell",
+                "command": "npm run build",
+                "options": {
+                    "cwd": "${workspaceFolder:🌐 Geodesy}"
+                },
+                "problemMatcher": ["$tsc"]
+            },
+            {
+                "label": "Geodesy: test",
+                "type": "shell",
+                "command": "npm run test",
+                "options": {
+                    "cwd": "${workspaceFolder:🌐 Geodesy}"
+                },
+                "group": "test",
+                "problemMatcher": []
+            },
+            {
+                "label": "Geodesy: check",
+                "type": "shell",
+                "command": "npm run check",
+                "options": {
+                    "cwd": "${workspaceFolder:🌐 Geodesy}"
+                },
+                "problemMatcher": ["$tsc"]
+            },
+            {
+                "label": "Geodesy: documentation",
+                "type": "shell",
+                "command": "npm run docs",
+                "options": {
+                    "cwd": "${workspaceFolder:🌐 Geodesy}"
+                },
+                "problemMatcher": []
+            },
+            {
+                "label": "All: check",
+                "dependsOrder": "parallel",
+                "dependsOn": ["Geodesy: check", "3D Tiles: check"],
+                "problemMatcher": []
+            }
+        ]
+    }
+}

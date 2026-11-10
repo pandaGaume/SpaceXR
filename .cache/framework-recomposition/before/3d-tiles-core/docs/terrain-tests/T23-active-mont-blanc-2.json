@@ -1,0 +1,144 @@
+{
+  "label": "active-mb2",
+  "date": "2026-11-07T04:08:52.997Z",
+  "seconds": 6,
+  "results": [
+    {
+      "id": "mont-blanc/gpu",
+      "url": "http://localhost:5174/?engine=gpu&solid=1&imagery=none&radius=25000&pitch=60",
+      "errors": [],
+      "performance": {
+        "engine": "gpu",
+        "framesPerSecond": 87.2,
+        "frameMsMedian": 9.5,
+        "frameMsP95": 23.9,
+        "frameMsP99": 38.2,
+        "cutEntered": 202,
+        "cutLeft": 250,
+        "cancelledLoads": 3,
+        "refineAttempts": 92,
+        "refines": 38,
+        "rebuilds": 99,
+        "identicalRebuilds": 47,
+        "terrainCpuMs": 1.43,
+        "renderCpuMs": 0.71,
+        "runtimeFrameMs": 3.2,
+        "gpuMs": 5.95,
+        "instances": 229,
+        "drawCalls": 1,
+        "trianglesPerFrame": 2035549,
+        "uploadKiBPerFrame": 247.6,
+        "uploadCallsPerFrame": 2.7,
+        "gpuMiB": 99.2,
+        "cpuMiB": 0,
+        "demTiles": 600,
+        "tileRequests": 604,
+        "distinctTileRequests": 600,
+        "tileHosts": [
+          "s3.amazonaws.com"
+        ],
+        "loadSeconds": 8.9
+      },
+      "integrity": {
+        "probeDetects": true,
+        "lod": {
+          "shown": 188,
+          "hidden": 236,
+          "returns": 84,
+          "quickReturns": 75,
+          "tilesReturning": 52,
+          "mostReturns": 4,
+          "mostReturningTile": "0/5/15/11",
+          "meanThresholdScale": 3.99,
+          "changesAtRest": 0,
+          "presentedAtRest": 235,
+          "worstErrorAtRest": 9.77,
+          "meanErrorAtRest": 5.64,
+          "selectedAtRest": 83,
+          "errorsAbove10AtRest": 0
+        },
+        "settleSeconds": 1.8,
+        "holesAtRest": 0,
+        "worstSharedEdgeAtRestMetres": 0,
+        "frames": 217,
+        "framesWithHoles": 0,
+        "worstHoles": 0,
+        "edgeChecks": 12,
+        "sharedVerticesPerCheck": 55602,
+        "worstSharedEdgeMetres": 0,
+        "worstOutOfViewEdgeMetres": 0,
+        "worstPair": {
+          "gap": 1.3753286688490062e-9,
+          "a": {
+            "address": {
+              "lod": 3,
+              "x": 7,
+              "y": 3
+            },
+            "terrain": {
+              "lod": 3,
+              "x": 7,
+              "y": 3
+            },
+            "terrainLevel": 3,
+            "finer": 0,
+            "coarser": 0,
+            "demOfTerrain": {
+              "lod": 3,
+              "x": 7,
+              "y": 3
+            }
+          },
+          "aLattice": [
+            128,
+            44
+          ],
+          "aHeight": -5223.75,
+          "b": {
+            "address": {
+              "lod": 3,
+              "x": 0,
+              "y": 3
+            },
+            "terrain": {
+              "lod": 3,
+              "x": 0,
+              "y": 3
+            },
+            "terrainLevel": 3,
+            "finer": 0,
+            "coarser": 0,
+            "demOfTerrain": {
+              "lod": 3,
+              "x": 0,
+              "y": 3
+            }
+          },
+          "bLattice": [
+            0,
+            44
+          ],
+          "bHeight": -5223.75,
+          "aReference": [
+            0,
+            0,
+            1,
+            28
+          ],
+          "bReference": [
+            0,
+            0,
+            1,
+            25
+          ]
+        },
+        "tileRequests": 700,
+        "distinctTileRequests": 700,
+        "tileHosts": [
+          "s3.amazonaws.com"
+        ],
+        "loadSeconds": 5.6
+      }
+    }
+  ]
+}

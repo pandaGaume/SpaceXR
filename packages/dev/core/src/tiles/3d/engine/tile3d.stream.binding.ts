@@ -83,9 +83,12 @@ export class Tile3dStreamBinding extends SourceBlock<ITile3d> implements ITarget
                 tile.contentStatus = TileContentStatus.idle; // re-enqueued by the next traversal
             }
         }
-        // Re-traverse so load completions open REPLACE gates / trigger swaps,
-        // then let sinks react to the tiles' new status.
-        this._source.invalidate();
+        // Mark stale rather than re-traversing here: the next frame's
+        // setContext picks it up, so one frame does ONE traversal and the
+        // per-frame refine budget actually holds. Re-traversing synchronously
+        // on every settled load makes each load open the next level in the
+        // same frame, which stalls navigation.
+        this._source.markDirty();
         this.notifyUpdated(tiles, -1, this, this);
     }
 

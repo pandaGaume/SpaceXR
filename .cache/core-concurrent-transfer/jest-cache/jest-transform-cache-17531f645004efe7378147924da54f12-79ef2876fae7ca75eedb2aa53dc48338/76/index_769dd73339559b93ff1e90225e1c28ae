@@ -1,0 +1,21 @@
+bd5f558c16ef820c211645f6c99fb6e4
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const tslib_1 = require("tslib");
+/**
+ * The unit projection layer.
+ *
+ * Importing this barrel is what registers the implemented projections, QUDT
+ * being the only one today. The unimplemented targets export their type and
+ * their documentation and register nothing, so `unitProjectionIds()` lists
+ * what works rather than what is planned.
+ *
+ * See `docs/architecture/unit-projection.md`.
+ */
+tslib_1.__exportStar(require("./projection.interfaces"), exports);
+tslib_1.__exportStar(require("./projection.registry"), exports);
+tslib_1.__exportStar(require("./projection.qudt"), exports);
+tslib_1.__exportStar(require("./projection.opcua"), exports);
+tslib_1.__exportStar(require("./projection.sparkplug"), exports);
+tslib_1.__exportStar(require("./projection.om"), exports);
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiQzpcXFVzZXJzXFxHdWlsbGF1bWVQZWxsZXRpZXJcXERvY3VtZW50c1xcR2l0SHViXFxTcGFjZVhSXFwuY2FjaGVcXGNvcmUtY29uY3VycmVudC10cmFuc2Zlclxcc3JjXFxtYXRoXFx1bml0c1xcaW5kZXgudHMiLCJtYXBwaW5ncyI6Ijs7O0FBQUE7Ozs7Ozs7OztHQVNHO0FBQ0gsa0VBQXdDO0FBQ3hDLGdFQUFzQztBQUN0Qyw0REFBa0M7QUFDbEMsNkRBQW1DO0FBQ25DLGlFQUF1QztBQUN2QywwREFBZ0MiLCJuYW1lcyI6W10sInNvdXJjZXMiOlsiQzpcXFVzZXJzXFxHdWlsbGF1bWVQZWxsZXRpZXJcXERvY3VtZW50c1xcR2l0SHViXFxTcGFjZVhSXFwuY2FjaGVcXGNvcmUtY29uY3VycmVudC10cmFuc2Zlclxcc3JjXFxtYXRoXFx1bml0c1xcaW5kZXgudHMiXSwic291cmNlc0NvbnRlbnQiOlsiLyoqXHJcbiAqIFRoZSB1bml0IHByb2plY3Rpb24gbGF5ZXIuXHJcbiAqXHJcbiAqIEltcG9ydGluZyB0aGlzIGJhcnJlbCBpcyB3aGF0IHJlZ2lzdGVycyB0aGUgaW1wbGVtZW50ZWQgcHJvamVjdGlvbnMsIFFVRFRcclxuICogYmVpbmcgdGhlIG9ubHkgb25lIHRvZGF5LiBUaGUgdW5pbXBsZW1lbnRlZCB0YXJnZXRzIGV4cG9ydCB0aGVpciB0eXBlIGFuZFxyXG4gKiB0aGVpciBkb2N1bWVudGF0aW9uIGFuZCByZWdpc3RlciBub3RoaW5nLCBzbyBgdW5pdFByb2plY3Rpb25JZHMoKWAgbGlzdHNcclxuICogd2hhdCB3b3JrcyByYXRoZXIgdGhhbiB3aGF0IGlzIHBsYW5uZWQuXHJcbiAqXHJcbiAqIFNlZSBgZG9jcy9hcmNoaXRlY3R1cmUvdW5pdC1wcm9qZWN0aW9uLm1kYC5cclxuICovXHJcbmV4cG9ydCAqIGZyb20gXCIuL3Byb2plY3Rpb24uaW50ZXJmYWNlc1wiO1xyXG5leHBvcnQgKiBmcm9tIFwiLi9wcm9qZWN0aW9uLnJlZ2lzdHJ5XCI7XHJcbmV4cG9ydCAqIGZyb20gXCIuL3Byb2plY3Rpb24ucXVkdFwiO1xyXG5leHBvcnQgKiBmcm9tIFwiLi9wcm9qZWN0aW9uLm9wY3VhXCI7XHJcbmV4cG9ydCAqIGZyb20gXCIuL3Byb2plY3Rpb24uc3BhcmtwbHVnXCI7XHJcbmV4cG9ydCAqIGZyb20gXCIuL3Byb2plY3Rpb24ub21cIjtcclxuIl0sInZlcnNpb24iOjN9

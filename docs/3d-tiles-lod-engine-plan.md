@@ -229,6 +229,63 @@ Hardening pass (adversarial review, 28 confirmed findings fixed):
   removed, SSE now drives load priority, ellipsoid-correct occluder and curvature radii,
   complete `dispose` paths, `IsGeodeticCamera` guard on the `_createCamera` extension point.
 
+Atmosphere (evaluated then dropped): the official Babylon atmosphere addon
+(`@babylonjs/addons/atmosphere`) was prototyped on `3DTiles.html` and rejected as
+demo-grade. It assumes a strictly spherical planet (one `planetRadius` baked into its LUTs),
+so on the WGS84 ellipsoid the horizon misaligns by ~10 km at mid latitudes, and it is a
+full-screen compositor that cannot follow the Phase C sphere-to-plane holographic morph.
+A bespoke atmosphere shader built on the existing ellipsoidal path (trig lookup textures +
+`enuTransform` in `geodesyDeclaration.glsl`, the `ellipsoidalmap` shader) is the intended
+route if/when atmosphere is needed. All addon wiring (bundle, webpack config, devDependency,
+`Map3DViewer.useFloatingOrigin`, demo sky code) was removed.
+
+Implicit tiling + tile-server encapsulation (Phase B seam, 2026-07-28):
+
+- **`Tile3dStreamSource` now supports OGC implicit tiling** (`implicitProvider` option):
+  the QUADTREE is grown lazily during traversal (children materialized on demand from
+  the provider), so a whole global z/x/y pyramid is navigated as a standard 3D Tiles
+  implicit tileset with no tileset document and no binary subtree (dense availability).
+  `_initializeTile` was split into a reusable non-recursive `_initializeNode`.
+- **`MetricsImplicitTilesetProvider`** wraps ANY `ITileMetrics` (EPSG3857 for MapZen, a
+  geographic quadtree, a custom scheme) as an implicit provider. Regions are computed
+  from the metrics (`getTileXYToLatLon`), NOT by linear parent subdivision, so Web
+  Mercator's non-linear latitude is exact; geometric error follows
+  `groundResolution * tileSize` (same convention as `TilePyramidStreamSource`).
+- **Minimal globe rendering** (`babylon/src/tiles/3d/imagery/`): `EllipsoidImageryTileLoader`
+  (fetches each tile's imagery raster as a Babylon texture, opens the REPLACE gate) +
+  `EllipsoidTilePatchScene` (tessellated ECEF patches on the ellipsoid). This validates
+  the implicit traversal on the globe WITHOUT the dormant DEM displacement shader.
+- Sample: `packages/host/www/babylon/3DTilesImplicitMap.html` navigates a global imagery
+  pyramid (ESRI World Imagery, same EPSG:3857 scheme as MapZen Terrarium) as an implicit
+  3D Tiles tileset; zoom refines / coarsens on the globe.
+- Verified: 11 new unit tests (`tiles3d.implicit.test.ts`) prove region correctness
+  (Mercator, radians, quadrant union), geometric-error halving, lazy child
+  materialization along a clip column, refine-on-descent / coarsen-on-ascent, leaf-level
+  cap, and stable hierarchical uids. In-browser (driven manually, the pane does not
+  composite an idle RAF here): the implicit root builds from the provider with no fetch,
+  the pump produces a valid ECEF camera state, the cut refines to ~900 tiles at levels
+  5-6 over the Alps, ESRI textures load, and every emitted patch is a curved ECEF mesh
+  that projects into the camera frustum.
+- **Fixes after first navigation feedback (slow zoom + meshes never freed):**
+  - *Root cause of both*: `Tile3dStreamBinding` called `invalidate()` on every settled
+    load, so each load re-ran the traversal IN THE SAME FRAME and opened the next level.
+    That defeated `maxRefinePerFrame` entirely: with a warm HTTP cache one frame activated
+    thousands of tiles (measured: 20 000+ load requests, depth 7, in a single
+    `setContext`), freezing the frame and making zoom respond seconds later. The binding
+    now calls `markDirty()`; the source exposes it through `hasPendingWork`, and the pump
+    (which already pumps while work is pending) performs exactly ONE traversal per frame.
+  - *Mesh/GPU leak*: `EllipsoidTilePatchScene` disposed the mesh but leaked its unique
+    `StandardMaterial`, and `EllipsoidImageryTileLoader.cancel` left the texture resident.
+    Patches now dispose mesh + material (not the texture, which the loader owns), and the
+    loader evicts the texture and resets the tile to `idle` so re-entry reloads cleanly.
+  - *Speculative expansion*: children were materialized even while the REPLACE gate was
+    shut; a node now expands only once its own content is ready. Plus a re-entrancy guard
+    on `_refresh` (iterative drain, so the stack cannot grow with tree depth).
+  - Locked by 2 regression tests that fail on the old code (5000+ loads in one frame, and
+    whole-subtree materialization) and one asserting `removed` fires for every coarsened tile.
+- Next toward full DEM-on-globe: feed MapZen Terrarium elevation as a second content
+  type and revive the ellipsoidal displacement shader (`ellipsoidalmap`), still dormant.
+
 Still open in Phase A: Draco/KTX2 decoder configuration on the host page, live visual
 parity check against the Cesium reference (needs a Google API key at runtime),
 eviction/memory bounds (`_sources` and AssetContainers are never evicted). Budgeted refine

@@ -1,0 +1,800 @@
+{
+  "label": "nom",
+  "date": "2026-11-07T18:34:27.294Z",
+  "seconds": 8,
+  "results": [
+    {
+      "id": "mont-blanc/gpu",
+      "url": "http://localhost:5174/?engine=gpu&solid=1&imagery=none&radius=25000&pitch=60",
+      "errors": [],
+      "performance": {
+        "engine": "gpu",
+        "framesPerSecond": 112.8,
+        "frameMsMedian": 8.4,
+        "frameMsP95": 15,
+        "frameMsP99": 27.7,
+        "cutEntered": 294,
+        "cutLeft": 285,
+        "cancelledLoads": 25,
+        "refineAttempts": 9879,
+        "refines": 103,
+        "rebuilds": 364,
+        "identicalRebuilds": 0,
+        "terrainCpuMs": 0.6,
+        "renderCpuMs": 0.88,
+        "runtimeFrameMs": 1.6,
+        "gpuMs": 0,
+        "instances": 79,
+        "drawCalls": 5.7,
+        "trianglesPerFrame": 629875,
+        "uploadKiBPerFrame": 342.2,
+        "uploadCallsPerFrame": 13.3,
+        "gpuMiB": 94.3,
+        "cpuMiB": 0,
+        "demTiles": 837,
+        "tileRequests": 1684,
+        "distinctTileRequests": 1430,
+        "tileHosts": [
+          "s3.amazonaws.com"
+        ],
+        "loadSeconds": 10.3
+      },
+      "integrity": {
+        "holeDiagnostics": {
+          "samples": [
+            {
+              "frame": 105,
+              "holes": 2,
+              "framesSinceChange": 0,
+              "changes": [
+                "+7/66/48",
+                "-10/535/364",
+                "-7/69/45"
+              ],
+              "changeCount": 3,
+              "selected": 80,
+              "uncoveredVisible": [
+                "9/265/184 ready anc 8/132/92 under 0 new-place 9/265/184:A0@9.1 8/132/92:A0@20.9 7/66/46:A0@64.2 6/33/23:A0@285.5"
+              ],
+              "uncoveredCount": 1,
+              "selectedWithoutDem": [],
+              "withoutDemCount": 0,
+              "calls": {
+                "process": 1,
+                "retain": 0,
+                "blocked": 0,
+                "unbalanced": 0
+              },
+              "pendingWork": false,
+              "gpuDirty": false
+            }
+          ],
+          "jumps": {
+            "closures": 236,
+            "failed": 0,
+            "failedWithoutJump": 0,
+            "pairs": 0,
+            "bySse": 0,
+            "byReadiness": 0,
+            "levels": {},
+            "samples": []
+          },
+          "waits": [],
+          "stillWaiting": [],
+          "concurrency": 12
+        },
+        "probeDetects": true,
+        "lod": {
+          "shown": 294,
+          "hidden": 285,
+          "returns": 81,
+          "quickReturns": 22,
+          "quickReturnsInView": 22,
+          "tilesReturning": 78,
+          "mostReturns": 2,
+          "mostReturningTile": "0/12/2123/1461",
+          "mostReturningHistory": [
+            "348 ms shown, visible, parent visible refining",
+            "530 ms hidden, active, parent visible refining",
+            "2555 ms shown, visible, parent visible refining",
+            "2761 ms hidden, active, parent visible refining",
+            "3401 ms shown, visible, parent visible refining",
+            "4291 ms hidden, inactive, parent visible"
+          ],
+          "meanThresholdScale": 1,
+          "changesAtRest": 0,
+          "presentedAtRest": 79,
+          "worstErrorAtRest": 9.28,
+          "meanErrorAtRest": 5.59,
+          "selectedAtRest": 79,
+          "errorsAbove10AtRest": 0
+        },
+        "settleSeconds": 0,
+        "holesAtRest": 0,
+        "worstSharedEdgeAtRestMetres": 8304.191,
+        "worstPairAtRest": {
+          "gap": 8304.191406249472,
+          "a": {
+            "address": {
+              "lod": 11,
+              "x": 1062,
+              "y": 729
+            },
+            "terrain": {
+              "lod": 11,
+              "x": 1062,
+              "y": 729
+            },
+            "terrainLevel": 11,
+            "finer": 6,
+            "coarser": 0,
+            "demOfTerrain": {
+              "lod": 11,
+              "x": 1062,
+              "y": 729
+            }
+          },
+          "aLattice": [
+            128,
+            90
+          ],
+          "aHeight": -4806.5,
+          "b": {
+            "address": {
+              "lod": 12,
+              "x": 2126,
+              "y": 1459
+            },
+            "terrain": {
+              "lod": 12,
+              "x": 2126,
+              "y": 1459
+            },
+            "terrainLevel": 12,
+            "finer": 0,
+            "coarser": 8,
+            "demOfTerrain": {
+              "lod": 12,
+              "x": 2126,
+              "y": 1459
+            }
+          },
+          "bLattice": [
+            0,
+            52
+          ],
+          "bHeight": 3497.69140625,
+          "aReference": [
+            0,
+            0,
+            1,
+            76
+          ],
+          "bReference": [
+            0,
+            0,
+            1,
+            43
+          ]
+        },
+        "frames": 220,
+        "framesWithHoles": 1,
+        "worstHoles": 2,
+        "edgeChecks": 16,
+        "sharedVerticesPerCheck": 15718,
+        "worstSharedEdgeMetres": 8372.828,
+        "worstOutOfViewEdgeMetres": 8372.828,
+        "worstPair": {
+          "gap": 8372.828124999636,
+          "a": {
+            "address": {
+              "lod": 11,
+              "x": 1062,
+              "y": 732
+            },
+            "terrain": {
+              "lod": 11,
+              "x": 1062,
+              "y": 732
+            },
+            "terrainLevel": 11,
+            "finer": 0,
+            "coarser": 8,
+            "demOfTerrain": {
+              "lod": 11,
+              "x": 1062,
+              "y": 732
+            }
+          },
+          "aLattice": [
+            58,
+            128
+          ],
+          "aHeight": 2492.578125,
+          "b": {
+            "address": {
+              "lod": 11,
+              "x": 1062,
+              "y": 733
+            },
+            "terrain": {
+              "lod": 11,
+              "x": 1062,
+              "y": 733
+            },
+            "terrainLevel": 11,
+            "finer": 0,
+            "coarser": 12,
+            "demOfTerrain": {
+              "lod": 11,
+              "x": 1062,
+              "y": 733
+            }
+          },
+          "bLattice": [
+            58,
+            0
+          ],
+          "bHeight": -5880.25,
+          "aReference": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "bReference": [
+            0,
+            0,
+            1,
+            17
+          ]
+        },
+        "tileRequests": 1922,
+        "distinctTileRequests": 1457,
+        "tileHosts": [
+          "s3.amazonaws.com"
+        ],
+        "loadSeconds": 4.3
+      }
+    },
+    {
+      "id": "mont-blanc-zoom/gpu",
+      "url": "http://localhost:5174/?engine=gpu&solid=1&imagery=none&radius=400000&pitch=60",
+      "errors": [],
+      "performance": {
+        "engine": "gpu",
+        "framesPerSecond": 47.6,
+        "frameMsMedian": 12,
+        "frameMsP95": 66,
+        "frameMsP99": 105.1,
+        "cutEntered": 497,
+        "cutLeft": 447,
+        "cancelledLoads": 83,
+        "refineAttempts": 5204,
+        "refines": 132,
+        "rebuilds": 204,
+        "identicalRebuilds": 0,
+        "terrainCpuMs": 2.04,
+        "renderCpuMs": 2.52,
+        "runtimeFrameMs": 2.9,
+        "gpuMs": 0,
+        "instances": 100,
+        "drawCalls": 6.4,
+        "trianglesPerFrame": 571524,
+        "uploadKiBPerFrame": 1060.9,
+        "uploadCallsPerFrame": 22.4,
+        "gpuMiB": 106.6,
+        "cpuMiB": 0,
+        "demTiles": 865,
+        "tileRequests": 1771,
+        "distinctTileRequests": 1466,
+        "tileHosts": [
+          "s3.amazonaws.com"
+        ],
+        "loadSeconds": 4.5
+      },
+      "integrity": {
+        "holeDiagnostics": {
+          "samples": [
+            {
+              "frame": 42,
+              "holes": 2,
+              "framesSinceChange": 0,
+              "changes": [
+                "+11/1065/730"
+              ],
+              "changeCount": 1,
+              "selected": 73,
+              "uncoveredVisible": [
+                "10/529/364 not-ready[1] anc 9/264/182 under 0 new-place 10/529/364:A0@6.8 9/264/182:A0@18.7 8/132/91:A0@7.036003520225805e+21 7/66/45:A0@1.407200704045161e+22"
+              ],
+              "uncoveredCount": 1,
+              "selectedWithoutDem": [],
+              "withoutDemCount": 0,
+              "calls": {
+                "process": 1,
+                "retain": 0,
+                "blocked": 0,
+                "unbalanced": 0
+              },
+              "pendingWork": false,
+              "gpuDirty": false
+            },
+            {
+              "frame": 43,
+              "holes": 18,
+              "framesSinceChange": 0,
+              "changes": [
+                "+11/1061/731",
+                "+11/1060/730",
+                "+11/1061/730",
+                "+12/2124/1462",
+                "+12/2125/1462",
+                "-11/1062/731",
+                "-10/530/365"
+              ],
+              "changeCount": 7,
+              "selected": 76,
+              "uncoveredVisible": [
+                "10/529/364 not-ready[2] anc 9/264/182 under 0 new-place 10/529/364:A0@6.6 9/264/182:A0@18.3 8/132/91:A0@7.036003520225805e+21 7/66/45:A0@1.407200704045161e+22",
+                "10/532/366 not-ready[1] anc 9/266/183 under 0 new-place 10/532/366:A0@23.9 9/266/183:A0@65.6 8/133/91:A0@7.036003520225805e+21 7/66/45:A0@1.407200704045161e+22"
+              ],
+              "uncoveredCount": 2,
+              "selectedWithoutDem": [],
+              "withoutDemCount": 0,
+              "calls": {
+                "process": 1,
+                "retain": 0,
+                "blocked": 0,
+                "unbalanced": 0
+              },
+              "pendingWork": true,
+              "gpuDirty": false
+            },
+            {
+              "frame": 44,
+              "holes": 132,
+              "framesSinceChange": 0,
+              "changes": [
+                "+6/32/19",
+                "+6/33/19",
+                "+7/68/43",
+                "+7/68/42",
+                "+7/69/42",
+                "+12/2124/1463",
+                "+12/2125/1463",
+                "+12/2126/1463",
+                "+12/2127/1463",
+                "-6/34/21",
+                "-5/16/9"
+              ],
+              "changeCount": 11,
+              "selected": 83,
+              "uncoveredVisible": [
+                "10/529/364 not-ready[2] anc 9/264/182 under 0 new-place 10/529/364:A0@6.2 9/264/182:A0@17.1 8/132/91:A0@7.036003520225805e+21 7/66/45:A0@1.407200704045161e+22",
+                "10/532/366 not-ready[2] anc 9/266/183 under 0 new-place 10/532/366:A0@22.1 9/266/183:A0@67.3 8/133/91:A0@7.036003520225805e+21 7/66/45:A0@1.407200704045161e+22"
+              ],
+              "uncoveredCount": 2,
+              "selectedWithoutDem": [],
+              "withoutDemCount": 0,
+              "calls": {
+                "process": 1,
+                "retain": 0,
+                "blocked": 0,
+                "unbalanced": 0
+              },
+              "pendingWork": true,
+              "gpuDirty": false
+            },
+            {
+              "frame": 45,
+              "holes": 270,
+              "framesSinceChange": 0,
+              "changes": [
+                "+5/18/9"
+              ],
+              "changeCount": 1,
+              "selected": 84,
+              "uncoveredVisible": [
+                "10/529/364 not-ready[2] anc 9/264/182 under 0 new-place 10/529/364:A0@6 9/264/182:A0@16.5 8/132/91:A0@7.036003520225805e+21 7/66/45:A0@1.407200704045161e+22",
+                "10/532/366 not-ready[2] anc 9/266/183 under 0 new-place 10/532/366:A0@20.9 9/266/183:A0@66.8 8/133/91:A0@7.036003520225805e+21 7/66/45:A0@1.407200704045161e+22"
+              ],
+              "uncoveredCount": 2,
+              "selectedWithoutDem": [],
+              "withoutDemCount": 0,
+              "calls": {
+                "process": 1,
+                "retain": 0,
+                "blocked": 0,
+                "unbalanced": 0
+              },
+              "pendingWork": false,
+              "gpuDirty": false
+            },
+            {
+              "frame": 46,
+              "holes": 555,
+              "framesSinceChange": 0,
+              "changes": [
+                "+10/530/366",
+                "+10/528/363"
+              ],
+              "changeCount": 2,
+              "selected": 86,
+              "uncoveredVisible": [
+                "11/1062/732 not-ready[2] anc 10/531/366 under 0 new-place 11/1062/732:A0@8.7 10/531/366:A0@39 9/265/183:A0@3.5180017601129024e+21 8/132/91:A0@7.036003520225805e+21",
+                "11/1063/732 not-ready[2] anc 10/531/366 under 0 new-place 11/1063/732:A0@8.9 10/531/366:A0@39 9/265/183:A0@3.5180017601129024e+21 8/132/91:A0@7.036003520225805e+21",
+                "10/529/364 not-ready[2] anc 9/264/182 under 0 new-place 10/529/364:A0@5.7 9/264/182:A0@15.7 8/132/91:A0@7.036003520225805e+21 7/66/45:A0@1.407200704045161e+22",
+                "11/1060/731 ready anc 10/530/365 under 3 new-place 11/1060/731:A0@4.5 10/530/365:A0@12 9/265/182:A0@46.2 8/132/91:A0@7.036003520225805e+21",
+                "10/532/366 not-ready[2] anc 9/266/183 under 0 new-place 10/532/366:A0@19.2 9/266/183:A0@64.8 8/133/91:A0@7.036003520225805e+21 7/66/45:A0@1.407200704045161e+22",
+                "11/1065/731 ready anc 10/532/365 under 3 new-place 11/1065/731:A0@4.7 10/532/365:A0@12.4 9/266/182:A0@27 8/133/91:A0@7.036003520225805e+21"
+              ],
+              "uncoveredCount": 6,
+              "selectedWithoutDem": [],
+              "withoutDemCount": 0,
+              "calls": {
+                "process": 1,
+                "retain": 0,
+                "blocked": 0,
+                "unbalanced": 0
+              },
+              "pendingWork": false,
+              "gpuDirty": false
+            },
+            {
+              "frame": 47,
+              "holes": 438,
+              "framesSinceChange": 0,
+              "changes": [
+                "+10/529/364",
+                "+11/1060/731"
+              ],
+              "changeCount": 2,
+              "selected": 88,
+              "uncoveredVisible": [
+                "11/1062/732 not-ready[2] anc 10/531/366 under 0 new-place 11/1062/732:A0@7.6 10/531/366:A0@30.5 9/265/183:A0@3.5180017601129024e+21 8/132/91:A0@7.036003520225805e+21",
+                "11/1063/732 not-ready[2] anc 10/531/366 under 0 new-place 11/1063/732:A0@7.7 10/531/366:A0@30.5 9/265/183:A0@3.5180017601129024e+21 8/132/91:A0@7.036003520225805e+21",
+                "10/532/366 not-ready[2] anc 9/266/183 under 0 new-place 10/532/366:A0@17.4 9/266/183:A0@61.1 8/133/91:A0@4240 7/66/45:A0@1.407200704045161e+22",
+                "11/1065/731 ready anc 10/532/365 under 3 new-place 11/1065/731:A0@4.4 10/532/365:A0@11.1 9/266/182:A0@24.2 8/133/91:A0@4240"
+              ],
+              "uncoveredCount": 4,
+              "selectedWithoutDem": [],
+              "withoutDemCount": 0,
+              "calls": {
+                "process": 1,
+                "retain": 0,
+                "blocked": 0,
+                "unbalanced": 0
+              },
+              "pendingWork": false,
+              "gpuDirty": false
+            },
+            {
+              "frame": 55,
+              "holes": 12,
+              "framesSinceChange": 0,
+              "changes": [
+                "+10/532/364",
+                "-11/1064/729",
+                "-11/1065/729",
+                "-11/1064/728",
+                "-11/1065/728"
+              ],
+              "changeCount": 5,
+              "selected": 91,
+              "uncoveredVisible": [
+                "10/529/366 not-ready[2] anc 9/264/183 under 0 new-place 10/529/366:A0@6.3 9/264/183:A0@16.3 8/132/91:A0@1406.6 7/66/45:A0@1.407200704045161e+22",
+                "11/1060/733 ready anc 10/530/366 under 3 new-place 11/1060/733:A0@3.5 10/530/366:A0@8.5 9/265/183:A0@53.8 8/132/91:A0@1406.6"
+              ],
+              "uncoveredCount": 2,
+              "selectedWithoutDem": [],
+              "withoutDemCount": 0,
+              "calls": {
+                "process": 1,
+                "retain": 0,
+                "blocked": 0,
+                "unbalanced": 0
+              },
+              "pendingWork": true,
+              "gpuDirty": false
+            },
+            {
+              "frame": 56,
+              "holes": 513,
+              "framesSinceChange": 1,
+              "changes": [],
+              "changeCount": 0,
+              "selected": 91,
+              "uncoveredVisible": [
+                "10/529/366 ready anc 9/264/183 under 0 new-place 10/529/366:A0@6 9/264/183:A0@15.6 8/132/91:A0@333.7 7/66/45:A0@1.407200704045161e+22",
+                "11/1060/733 ready anc 10/530/366 under 3 new-place 11/1060/733:A0@3.3 10/530/366:A0@7.9 9/265/183:A0@43.6 8/132/91:A0@333.7"
+              ],
+              "uncoveredCount": 2,
+              "selectedWithoutDem": [],
+              "withoutDemCount": 0,
+              "calls": {
+                "process": 1,
+                "retain": 0,
+                "blocked": 0,
+                "unbalanced": 0
+              },
+              "pendingWork": false,
+              "gpuDirty": false
+            },
+            {
+              "frame": 61,
+              "holes": 5,
+              "framesSinceChange": 1,
+              "changes": [],
+              "changeCount": 0,
+              "selected": 99,
+              "uncoveredVisible": [
+                "9/263/182 ready anc 8/131/91 under 0 new-place 9/263/182:A0@5.6 8/131/91:A0@14.7 7/65/45:A0@31.7 6/32/22:A0@73.3"
+              ],
+              "uncoveredCount": 1,
+              "selectedWithoutDem": [],
+              "withoutDemCount": 0,
+              "calls": {
+                "process": 1,
+                "retain": 0,
+                "blocked": 0,
+                "unbalanced": 0
+              },
+              "pendingWork": false,
+              "gpuDirty": false
+            },
+            {
+              "frame": 62,
+              "holes": 74,
+              "framesSinceChange": 0,
+              "changes": [
+                "+8/132/89",
+                "+9/266/181",
+                "+10/530/366",
+                "+10/530/365",
+                "+10/531/365",
+                "+10/532/365",
+                "-11/1062/731",
+                "-11/1063/731",
+                "-11/1062/730",
+                "-11/1063/730",
+                "-11/1064/731",
+                "-11/1065/731"
+              ],
+              "changeCount": 30,
+              "selected": 81,
+              "uncoveredVisible": [
+                "9/263/182 ready anc 8/131/91 under 0 new-place 9/263/182:A0@5.4 8/131/91:A0@14.2 7/65/45:A0@30.5 6/32/22:A0@69.9",
+                "10/528/366 ready anc 9/264/183 under 2 new-place 10/528/366:A0@3.5 9/264/183:A0@10.5 8/132/91:A0@40.7 7/66/45:A0@1.407200704045161e+22"
+              ],
+              "uncoveredCount": 2,
+              "selectedWithoutDem": [],
+              "withoutDemCount": 0,
+              "calls": {
+                "process": 1,
+                "retain": 0,
+                "blocked": 0,
+                "unbalanced": 0
+              },
+              "pendingWork": true,
+              "gpuDirty": false
+            },
+            {
+              "frame": 63,
+              "holes": 1458,
+              "framesSinceChange": 0,
+              "changes": [
+                "+9/262/181"
+              ],
+              "changeCount": 1,
+              "selected": 82,
+              "uncoveredVisible": [
+                "9/263/182 ready anc 8/131/91 under 0 new-place 9/263/182:A0@4.9 8/131/91:A0@12.7 7/65/45:A0@27.1 6/32/22:A0@60.8",
+                "10/528/367 ready anc 9/264/183 under 2 new-place 10/528/367:A0@3.5 9/264/183:A0@8.7 8/132/91:A0@27.3 7/66/45:A0@156.6",
+                "10/528/366 ready anc 9/264/183 under 2 new-place 10/528/366:A0@3.1 9/264/183:A0@8.7 8/132/91:A0@27.3 7/66/45:A0@156.6"
+              ],
+              "uncoveredCount": 3,
+              "selectedWithoutDem": [],
+              "withoutDemCount": 0,
+              "calls": {
+                "process": 1,
+                "retain": 0,
+                "blocked": 0,
+                "unbalanced": 0
+              },
+              "pendingWork": false,
+              "gpuDirty": false
+            }
+          ],
+          "jumps": {
+            "closures": 335,
+            "failed": 0,
+            "failedWithoutJump": 0,
+            "pairs": 0,
+            "bySse": 0,
+            "byReadiness": 0,
+            "levels": {},
+            "samples": []
+          },
+          "waits": [],
+          "stillWaiting": [],
+          "concurrency": 12
+        },
+        "probeDetects": true,
+        "lod": {
+          "shown": 531,
+          "hidden": 470,
+          "returns": 258,
+          "quickReturns": 126,
+          "quickReturnsInView": 126,
+          "tilesReturning": 177,
+          "mostReturns": 3,
+          "mostReturningTile": "0/11/1063/730",
+          "mostReturningHistory": [
+            "798 ms shown, visible, parent visible refining",
+            "1214 ms hidden, visible refining, parent visible refining",
+            "1748 ms shown, visible, parent visible refining",
+            "2285 ms hidden, inactive, parent visible",
+            "4163 ms shown, visible, parent visible refining",
+            "4615 ms hidden, visible refining, parent visible refining",
+            "7703 ms shown, visible, parent visible refining",
+            "8037 ms hidden, inactive, parent visible"
+          ],
+          "meanThresholdScale": 1,
+          "changesAtRest": 0,
+          "presentedAtRest": 74,
+          "worstErrorAtRest": 8.58,
+          "meanErrorAtRest": 4.99,
+          "selectedAtRest": 74,
+          "errorsAbove10AtRest": 0
+        },
+        "settleSeconds": 0.1,
+        "holesAtRest": 0,
+        "worstSharedEdgeAtRestMetres": 4413.264,
+        "worstPairAtRest": {
+          "gap": 4413.263671874725,
+          "a": {
+            "address": {
+              "lod": 10,
+              "x": 531,
+              "y": 364
+            },
+            "terrain": {
+              "lod": 10,
+              "x": 531,
+              "y": 364
+            },
+            "terrainLevel": 10,
+            "finer": 0,
+            "coarser": 1,
+            "demOfTerrain": {
+              "lod": 10,
+              "x": 531,
+              "y": 364
+            }
+          },
+          "aLattice": [
+            68,
+            128
+          ],
+          "aHeight": 240.01171875,
+          "b": {
+            "address": {
+              "lod": 10,
+              "x": 531,
+              "y": 365
+            },
+            "terrain": {
+              "lod": 10,
+              "x": 531,
+              "y": 365
+            },
+            "terrainLevel": 10,
+            "finer": 0,
+            "coarser": 0,
+            "demOfTerrain": {
+              "lod": 10,
+              "x": 531,
+              "y": 365
+            }
+          },
+          "bLattice": [
+            68,
+            0
+          ],
+          "bHeight": 4653.275390625,
+          "aReference": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "bReference": [
+            0,
+            0,
+            1,
+            82
+          ]
+        },
+        "frames": 312,
+        "framesWithHoles": 11,
+        "worstHoles": 1458,
+        "edgeChecks": 16,
+        "sharedVerticesPerCheck": 12340,
+        "worstSharedEdgeMetres": 4281.609,
+        "worstOutOfViewEdgeMetres": 4953.75,
+        "worstPair": {
+          "gap": 4281.609374999661,
+          "a": {
+            "address": {
+              "lod": 12,
+              "x": 2126,
+              "y": 1460
+            },
+            "terrain": {
+              "lod": 12,
+              "x": 2126,
+              "y": 1460
+            },
+            "terrainLevel": 12,
+            "finer": 0,
+            "coarser": 9,
+            "demOfTerrain": {
+              "lod": 12,
+              "x": 2126,
+              "y": 1460
+            }
+          },
+          "aLattice": [
+            18,
+            0
+          ],
+          "aHeight": 426.2841796875,
+          "b": {
+            "address": {
+              "lod": 11,
+              "x": 1063,
+              "y": 729
+            },
+            "terrain": {
+              "lod": 11,
+              "x": 1063,
+              "y": 729
+            },
+            "terrainLevel": 11,
+            "finer": 4,
+            "coarser": 0,
+            "demOfTerrain": {
+              "lod": 11,
+              "x": 1063,
+              "y": 729
+            }
+          },
+          "bLattice": [
+            9,
+            128
+          ],
+          "bHeight": 4707.8935546875,
+          "aReference": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "bReference": [
+            0,
+            0,
+            1,
+            35
+          ]
+        },
+        "tileRequests": 1936,
+        "distinctTileRequests": 1527,
+        "tileHosts": [
+          "s3.amazonaws.com"
+        ],
+        "loadSeconds": 4.6
+      }
+    }
+  ]
+}

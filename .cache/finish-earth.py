@@ -1,0 +1,11 @@
+from pathlib import Path
+root=Path('C:/Users/GuillaumePelletier/Documents/GitHub/Gaume/spacexr-rendering')
+f=root/'examples/babylon-earth/src/main.ts';s=f.read_text().replace('DemPyramid,DemDecoder,','DemPyramid,LocalDemDecoder,').replace('new DemDecoder()','new LocalDemDecoder()');f.write_text(s)
+f=root/'packages/babylon-earth/src/earth-runtime.ts';s=f.read_text()
+s=s.replace('let dateRevision = 0;','let dateRevision = 0;\n    let atmosphereEnabled = true;\n    let exposure = options.atmosphere === false ? 12 : options.atmosphere?.exposure ?? 12;')
+s=s.replace('if (scene.activeCamera === ownedCamera)','if (scene.activeCamera === camera)')
+s=s.replace('sky = replacement;','sky = replacement;\n                sky?.setEnabled(atmosphereEnabled);\n                sky?.setExposure(exposure);')
+s=s.replace('sky?.setEnabled(value);','atmosphereEnabled = value;\n                sky?.setEnabled(value);')
+s=s.replace('sky?.setExposure(value);','if (!Number.isFinite(value) || value <= 0) throw new RangeError("Exposure must be positive.");\n                exposure = value;\n                sky?.setExposure(value);')
+f.write_text(s)
+print('Updated sample decoder and retained atmosphere settings.')

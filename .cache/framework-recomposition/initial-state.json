@@ -1,0 +1,30 @@
+{
+  "3d-tiles-core": {
+    "head": "75a99c2abe8b5346f84dd015febb9f48e528916d",
+    "status": "A  node/packages/runtime/tests/quadtree-touches.test.ts\nA  node/packages/runtime/tests/tile-activity.test.ts"
+  },
+  "3d-tiles-babylon": {
+    "head": "863c75ccf33fab2f1b99ca80f38c68bbf21e25b4",
+    "status": "?? examples/babylon-implicit-grid-mapzen/public/\n?? examples/babylon-implicit-grid-mapzen/scripts/\n?? packages/core/tests/gpu-terrain-rebuild.test.ts\n?? packages/tools/rapport.json"
+  },
+  "terrain-core": {
+    "head": "HEAD",
+    "status": ""
+  },
+  "spacexr-rendering": {
+    "head": "HEAD",
+    "status": ""
+  },
+  "spacexr-explorer": {
+    "head": "887a4c5bc91f62a5735deaa41579a46663f050d1",
+    "status": "M README.md\n?? docs/spatial-awareness.md"
+  },
+  "spacexr-tile-service": {
+    "head": "16792ef303ef47d984fab6e023e0bd0ee34292bf",
+    "status": "M tools/r2/README.md\n?? docs/mars/\n?? tools/r2/cube-upload-worker.ts\n?? tools/r2/publish-generated-cube.ts"
+  },
+  "geomodels-babylon": {
+    "head": "07d15adcb837452d9b46df352fa3ba9a50c32868",
+    "status": "M packages/dev/web/prototypes/terrain/README.md\n M packages/dev/web/prototypes/terrain/src/main.ts\n M packages/dev/web/prototypes/terrain/vite.config.ts\n?? docs/3d-tiles-engine-reports.md\n?? docs/immersive-explorer-gap-analysis.md\n?? docs/specifications/Brief_design_explorateur_minier_AR.docx\n?? packages/dev/web/prototypes/terrain/src/ground-xray.ts\n?? packages/dev/web/prototypes/terrain/src/imagery-sources.ts"
+  }
+}

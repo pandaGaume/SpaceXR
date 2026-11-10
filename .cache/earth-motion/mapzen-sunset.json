@@ -1,0 +1,15 @@
+{
+  "errors": [],
+  "state": {
+    "status": "Terre et atmosphère spectrale actives",
+    "stats": "webgpu | SSE 20 px | 37 tuiles implicites | 120 FPS",
+    "time": "19:29",
+    "workers": 16,
+    "gpuErrors": [],
+    "errors": [],
+    "renderWidth": 1200
+  },
+  "decoderWorkers": 2,
+  "demRequests": 408,
+  "allMapzenTerrarium": true
+}

@@ -1,0 +1,1151 @@
+SpaceXR — MCP Functional & Contract Specification
+Version 1.0 · Draft contract · 6 November 2026
+Complete topic and method catalog, JSON Schema parameters, grammar rules, resource surfaces, user experiences and operational semantics. Prepared for implementation with @cyanmycelium/mcp-core.
+PART I — MCP CONTRACT
+1. Topics / namespaces
+Topic
+Methods
+Purpose
+universe
+6
+Celestial catalog and capabilities
+ephemeris
+6
+Positions, epochs, visibility
+observer
+8
+Perception and camera context
+navigation
+12
+Travel, flyby, orbit, landing
+surface
+9
+Scientific terrain exploration
+scene
+10
+Annotations, objects, layers
+time
+8
+Astronomical simulation clock
+mission
+10
+Persistent explorations and replay
+tv
+12
+Autonomous ambient exploration
+control
+6
+Operations, permissions, discovery
+2. Naming, grammar and type conventions
+Canonical MCP tool names use snake_case: namespace_method (e.g. navigation_flyBy). The human-facing conceptual name is namespace.method. This is an authored contract, not an assertion about an existing runtime.
+Tool inputs use JSON Schema objects with additionalProperties=false and explicit required keys. ISO timestamps use date-time. Distances are meters, durations seconds, angles degrees unless otherwise stated.
+A target descriptor is a tagged object: {kind: "body"|"landmark"|"position"|"object", bodyId?, landmarkId?, position?, objectId?}. A position includes bodyId, latitudeDegrees, longitudeDegrees, altitudeMeters?, coordinateConvention?, datum?.
+time="now" evaluates the actual astronomical epoch; time="simulation" uses the currently selected epoch; an ISO instant fixes a historical/future epoch. experience duration is always distinct from astronomical time.
+Long-running actions return status="accepted" and operationId. Poll control_getOperation or read spacexr://operation/{operationId}. MCP tasks/progress are not assumed supported by mcp-core.
+Every scientific result should expose sourceId, epoch, resolution/coverage, quality and uncertainty when available. Unknown must remain unknown; no synthetic precision.
+Mutating actions require an authorized mode. The user can interrupt navigation at any time. Public screens must not expose private mission or user data.
+3. Complete methods and parameter contracts
+UNIVERSE
+universe.listBodies
+List known celestial bodies.
+Parameter
+Type / required
+Meaning
+parentId
+string
+Filter by parent body
+type
+string
+Body category
+limit
+integer
+Maximum results
+cursor
+string
+Pagination cursor
+Tool name: universe_listBodies · Output: {status, data?, operationId?, error?}
+universe.findBodies
+Search celestial bodies by name or classification.
+Parameter
+Type / required
+Meaning
+query
+string *
+Search terms
+type
+string
+Body type
+hasSurface
+boolean
+Require a navigable surface
+Tool name: universe_findBodies · Output: {status, data?, operationId?, error?}
+universe.getBody
+Get identity, physical characteristics and parent hierarchy.
+Parameter
+Type / required
+Meaning
+bodyId
+string *
+Canonical body identifier
+Tool name: universe_getBody · Output: {status, data?, operationId?, error?}
+universe.getChildren
+List satellites or child bodies.
+Parameter
+Type / required
+Meaning
+bodyId
+string *
+Parent body identifier
+Tool name: universe_getChildren · Output: {status, data?, operationId?, error?}
+universe.getDestinations
+List named landmarks available on a body.
+Parameter
+Type / required
+Meaning
+bodyId
+string *
+Celestial body identifier
+category
+string
+Landmark category
+limit
+integer
+Maximum results
+Tool name: universe_getDestinations · Output: {status, data?, operationId?, error?}
+universe.getCapabilities
+Discover available rendering, terrain, ephemeris and analysis capabilities.
+Parameter
+Type / required
+Meaning
+bodyId
+string *
+Celestial body identifier
+Tool name: universe_getCapabilities · Output: {status, data?, operationId?, error?}
+EPHEMERIS
+ephemeris.getPosition
+Return body position in a declared reference frame.
+Parameter
+Type / required
+Meaning
+bodyId
+string *
+Body identifier
+relativeTo
+string
+Origin body or barycenter
+time
+string
+now, simulation, or ISO timestamp
+frame
+string
+Reference frame identifier
+Tool name: ephemeris_getPosition · Output: {status, data?, operationId?, error?}
+ephemeris.getState
+Return position, velocity, attitude and epoch.
+Parameter
+Type / required
+Meaning
+bodyId
+string *
+Body identifier
+relativeTo
+string
+Reference origin
+time
+string
+Epoch selector
+frame
+string
+Reference frame
+Tool name: ephemeris_getState · Output: {status, data?, operationId?, error?}
+ephemeris.getRelativePosition
+Get relative vector between two bodies.
+Parameter
+Type / required
+Meaning
+fromBodyId
+string *
+Origin body
+toBodyId
+string *
+Destination body
+time
+string
+Epoch selector
+frame
+string
+Reference frame
+Tool name: ephemeris_getRelativePosition · Output: {status, data?, operationId?, error?}
+ephemeris.getDistance
+Get distance between celestial bodies.
+Parameter
+Type / required
+Meaning
+fromBodyId
+string *
+First body
+toBodyId
+string *
+Second body
+time
+string
+Epoch selector
+Tool name: ephemeris_getDistance · Output: {status, data?, operationId?, error?}
+ephemeris.getVisibility
+Evaluate target visibility from a specified observer.
+Parameter
+Type / required
+Meaning
+targetBodyId
+string *
+Target body
+observer
+object *
+Observer position and reference
+time
+string
+Epoch selector
+includeOcclusion
+boolean
+Account for occultation
+Tool name: ephemeris_getVisibility · Output: {status, data?, operationId?, error?}
+ephemeris.getEvents
+Find celestial events within a time window.
+Parameter
+Type / required
+Meaning
+startTime
+string *
+Beginning of interval
+endTime
+string *
+End of interval
+bodyIds
+array
+Bodies to consider
+eventTypes
+array
+Event categories
+Tool name: ephemeris_getEvents · Output: {status, data?, operationId?, error?}
+OBSERVER
+observer.getContext
+Return current camera, body, simulation time, selected target and active scene.
+Parameter
+Type / required
+Meaning
+includeLayers
+boolean
+Include layer state
+Tool name: observer_getContext · Output: {status, data?, operationId?, error?}
+observer.getVisibleBodies
+List bodies visible in current camera frustum.
+Parameter
+Type / required
+Meaning
+minApparentSize
+number
+Minimum angular size threshold
+Tool name: observer_getVisibleBodies · Output: {status, data?, operationId?, error?}
+observer.getVisibleObjects
+List visible scene objects and annotations.
+Parameter
+Type / required
+Meaning
+category
+string
+Object category
+limit
+integer
+Maximum objects
+Tool name: observer_getVisibleObjects · Output: {status, data?, operationId?, error?}
+observer.getTarget
+Return current selected or tracked target.
+Input: {} (no parameters)
+Tool name: observer_getTarget · Output: {status, data?, operationId?, error?}
+observer.getView
+Read current camera pose, projection and framing.
+Input: {} (no parameters)
+Tool name: observer_getView · Output: {status, data?, operationId?, error?}
+observer.captureView
+Capture the current rendered viewport.
+Parameter
+Type / required
+Meaning
+width
+integer
+Requested width
+ height
+integer
+Requested height
+format
+string
+Image encoding
+Tool name: observer_captureView · Output: {status, data?, operationId?, error?}
+observer.pick
+Resolve a screen pixel to terrain, body or scene object.
+Parameter
+Type / required
+Meaning
+x
+number *
+Normalized screen coordinate from 0 to 1
+y
+number *
+Normalized screen coordinate from 0 to 1
+Tool name: observer_pick · Output: {status, data?, operationId?, error?}
+observer.getHistory
+Get recent navigation and selection events.
+Parameter
+Type / required
+Meaning
+limit
+integer
+Maximum events
+Tool name: observer_getHistory · Output: {status, data?, operationId?, error?}
+NAVIGATION
+navigation.flyTo
+Fly to a celestial body, landmark or position and settle into a stable view.
+Parameter
+Type / required
+Meaning
+target
+object *
+Typed destination descriptor
+durationSeconds
+number
+Experience duration
+time
+string
+now, simulation or ISO epoch
+cameraStyle
+string
+Camera framing preset
+arrivalAltitudeMeters
+number
+Desired altitude above surface
+Tool name: navigation_flyTo · Output: {status, data?, operationId?, error?}
+navigation.flyBy
+Perform a cinematic non-stopping pass of a target.
+Parameter
+Type / required
+Meaning
+target
+object *
+Typed flyby destination
+durationSeconds
+number
+Experience duration
+time
+string
+now, simulation or ISO epoch
+cameraStyle
+string
+Camera framing preset
+closestApproachMeters
+number
+Minimum desired distance
+side
+string
+Passing side
+Tool name: navigation_flyBy · Output: {status, data?, operationId?, error?}
+navigation.flyByAtCurrentTime
+Convenience flyby at current astronomical epoch; does not simulate physical transfer.
+Parameter
+Type / required
+Meaning
+target
+object *
+Typed flyby destination
+durationSeconds
+number
+Animation duration
+closestApproachMeters
+number
+Closest approach
+Tool name: navigation_flyByAtCurrentTime · Output: {status, data?, operationId?, error?}
+navigation.orbit
+Orbit camera around a target for a bounded experience.
+Parameter
+Type / required
+Meaning
+target
+object *
+Orbit center
+radiusMeters
+number
+Orbit radius
+revolutions
+number
+Number of turns
+durationSeconds
+number
+Animation duration
+inclinationDegrees
+number
+Visual inclination
+Tool name: navigation_orbit · Output: {status, data?, operationId?, error?}
+navigation.land
+Descend to a surface location.
+Parameter
+Type / required
+Meaning
+target
+object *
+Surface destination
+durationSeconds
+number
+Animation duration
+eyeHeightMeters
+number
+Final observer height
+Tool name: navigation_land · Output: {status, data?, operationId?, error?}
+navigation.takeOff
+Ascend from a planetary surface.
+Parameter
+Type / required
+Meaning
+altitudeMeters
+number
+Desired final altitude
+durationSeconds
+number
+Animation duration
+Tool name: navigation_takeOff · Output: {status, data?, operationId?, error?}
+navigation.lookAt
+Orient the camera toward a target.
+Parameter
+Type / required
+Meaning
+target
+object *
+Target descriptor
+durationSeconds
+number
+Transition duration
+Tool name: navigation_lookAt · Output: {status, data?, operationId?, error?}
+navigation.follow
+Track a moving body or object.
+Parameter
+Type / required
+Meaning
+target
+object *
+Moving target
+distanceMeters
+number
+Following distance
+mode
+string
+Tracking mode
+Tool name: navigation_follow · Output: {status, data?, operationId?, error?}
+navigation.returnToPrevious
+Return to the previous recorded view.
+Parameter
+Type / required
+Meaning
+steps
+integer
+History steps to go back
+Tool name: navigation_returnToPrevious · Output: {status, data?, operationId?, error?}
+navigation.stop
+Stop the current camera action.
+Parameter
+Type / required
+Meaning
+operationId
+string
+Optional action identifier
+Tool name: navigation_stop · Output: {status, data?, operationId?, error?}
+navigation.getStatus
+Read current navigation operation and progress.
+Parameter
+Type / required
+Meaning
+operationId
+string
+Operation identifier
+Tool name: navigation_getStatus · Output: {status, data?, operationId?, error?}
+navigation.preview
+Preview a navigation plan without moving the camera.
+Parameter
+Type / required
+Meaning
+action
+string *
+Action type
+target
+object *
+Target destination
+durationSeconds
+number
+Desired duration
+time
+string
+Epoch selector
+Tool name: navigation_preview · Output: {status, data?, operationId?, error?}
+SURFACE
+surface.findLocation
+Find named geographic features on a body.
+Parameter
+Type / required
+Meaning
+bodyId
+string *
+Body identifier
+query
+string *
+Location search
+limit
+integer
+Maximum results
+Tool name: surface_findLocation · Output: {status, data?, operationId?, error?}
+surface.getElevation
+Read surface elevation and source quality at a position.
+Parameter
+Type / required
+Meaning
+position
+object *
+Planetary geodetic or planetocentric location
+datasetId
+string
+DEM source identifier
+Tool name: surface_getElevation · Output: {status, data?, operationId?, error?}
+surface.getSlope
+Measure local slope and terrain aspect.
+Parameter
+Type / required
+Meaning
+position
+object *
+Surface location
+radiusMeters
+number
+Analysis radius
+Tool name: surface_getSlope · Output: {status, data?, operationId?, error?}
+surface.getProfile
+Sample elevation along a path.
+Parameter
+Type / required
+Meaning
+path
+array *
+Ordered surface positions
+sampleCount
+integer
+Number of samples
+Tool name: surface_getProfile · Output: {status, data?, operationId?, error?}
+surface.measureDistance
+Measure surface or straight-line distance.
+Parameter
+Type / required
+Meaning
+from
+object *
+Start location
+to
+object *
+End location
+mode
+string
+Distance convention
+Tool name: surface_measureDistance · Output: {status, data?, operationId?, error?}
+surface.getIllumination
+Compute or retrieve site illumination over an interval.
+Parameter
+Type / required
+Meaning
+position
+object *
+Surface position
+startTime
+string *
+Start epoch
+endTime
+string *
+End epoch
+samplingMinutes
+number
+Temporal sampling interval
+Tool name: surface_getIllumination · Output: {status, data?, operationId?, error?}
+surface.getAvailableLayers
+List scientific and terrain layers for a body.
+Parameter
+Type / required
+Meaning
+bodyId
+string *
+Body identifier
+Tool name: surface_getAvailableLayers · Output: {status, data?, operationId?, error?}
+surface.findCandidates
+Search candidate regions using declared scientific criteria.
+Parameter
+Type / required
+Meaning
+bodyId
+string *
+Body identifier
+region
+object *
+Search boundary
+criteria
+object *
+Selection constraints
+maxResults
+integer
+Maximum candidate sites
+Tool name: surface_findCandidates · Output: {status, data?, operationId?, error?}
+surface.compareSites
+Compare candidate sites under a declared criteria set.
+Parameter
+Type / required
+Meaning
+sites
+array *
+Site descriptors
+criteria
+object *
+Comparison weights and measures
+includeUncertainty
+boolean
+Include data quality and unknowns
+Tool name: surface_compareSites · Output: {status, data?, operationId?, error?}
+SCENE
+scene.addMarker
+Create a location marker.
+Parameter
+Type / required
+Meaning
+position
+object *
+Marker position
+label
+string
+Visible label
+style
+object
+Visual styling
+scope
+string
+Persistence scope
+Tool name: scene_addMarker · Output: {status, data?, operationId?, error?}
+scene.addAnnotation
+Attach explanatory content to a location or object.
+Parameter
+Type / required
+Meaning
+target
+object *
+Annotation anchor
+text
+string *
+Annotation text
+scope
+string
+Persistence scope
+Tool name: scene_addAnnotation · Output: {status, data?, operationId?, error?}
+scene.addPolyline
+Draw a georeferenced line or route.
+Parameter
+Type / required
+Meaning
+points
+array *
+Ordered positions
+style
+object
+Line appearance
+scope
+string
+Persistence scope
+Tool name: scene_addPolyline · Output: {status, data?, operationId?, error?}
+scene.addRegion
+Outline a geographic region.
+Parameter
+Type / required
+Meaning
+polygon
+array *
+Polygon vertices
+label
+string
+Region label
+style
+object
+Region style
+Tool name: scene_addRegion · Output: {status, data?, operationId?, error?}
+scene.addModel
+Place a glTF or GLB asset on a surface or in space.
+Parameter
+Type / required
+Meaning
+assetUri
+string *
+Allowed asset URI
+transform
+object *
+Position rotation and scale
+label
+string
+Object label
+scope
+string
+Persistence scope
+Tool name: scene_addModel · Output: {status, data?, operationId?, error?}
+scene.setLayerVisibility
+Show or hide a scientific or graphical layer.
+Parameter
+Type / required
+Meaning
+layerId
+string *
+Layer identifier
+visible
+boolean *
+Visibility state
+Tool name: scene_setLayerVisibility · Output: {status, data?, operationId?, error?}
+scene.highlight
+Highlight a selected scene object.
+Parameter
+Type / required
+Meaning
+objectId
+string *
+Object identifier
+durationSeconds
+number
+Highlight duration
+Tool name: scene_highlight · Output: {status, data?, operationId?, error?}
+scene.clearAgentObjects
+Remove agent-created temporary scene elements.
+Parameter
+Type / required
+Meaning
+scope
+string
+Scope to clear
+agentId
+string
+Agent identifier
+Tool name: scene_clearAgentObjects · Output: {status, data?, operationId?, error?}
+scene.saveView
+Save the current view as a named bookmark.
+Parameter
+Type / required
+Meaning
+name
+string *
+Bookmark name
+missionId
+string
+Associated mission
+Tool name: scene_saveView · Output: {status, data?, operationId?, error?}
+scene.compareViews
+Present two or three synchronized saved views.
+Parameter
+Type / required
+Meaning
+views
+array *
+View descriptors
+synchronizeTime
+boolean
+Synchronize epochs
+synchronizeScale
+boolean
+Synchronize scale
+Tool name: scene_compareViews · Output: {status, data?, operationId?, error?}
+TIME
+time.get
+Read current simulated epoch and playback state.
+Input: {} (no parameters)
+Tool name: time_get · Output: {status, data?, operationId?, error?}
+time.set
+Set simulation epoch.
+Parameter
+Type / required
+Meaning
+time
+string *
+ISO 8601 instant
+Tool name: time_set · Output: {status, data?, operationId?, error?}
+time.setNow
+Synchronize simulation epoch with current real time.
+Input: {} (no parameters)
+Tool name: time_setNow · Output: {status, data?, operationId?, error?}
+time.play
+Start simulation-time playback.
+Parameter
+Type / required
+Meaning
+rate
+number
+Simulation seconds per wall second
+Tool name: time_play · Output: {status, data?, operationId?, error?}
+time.pause
+Pause simulation time.
+Input: {} (no parameters)
+Tool name: time_pause · Output: {status, data?, operationId?, error?}
+time.setRate
+Set time playback speed.
+Parameter
+Type / required
+Meaning
+rate
+number *
+Simulation seconds per wall second
+Tool name: time_setRate · Output: {status, data?, operationId?, error?}
+time.getLocalSolarTime
+Get local solar time at a surface location.
+Parameter
+Type / required
+Meaning
+position
+object *
+Planetary surface location
+time
+string
+Epoch selector
+Tool name: time_getLocalSolarTime · Output: {status, data?, operationId?, error?}
+time.animateRange
+Animate simulation epoch over a bounded interval.
+Parameter
+Type / required
+Meaning
+startTime
+string *
+First epoch
+endTime
+string *
+Last epoch
+durationSeconds
+number *
+Wall-clock animation duration
+loop
+boolean
+Repeat animation
+Tool name: time_animateRange · Output: {status, data?, operationId?, error?}
+MISSION
+mission.create
+Create a persistent exploration mission.
+Parameter
+Type / required
+Meaning
+title
+string *
+Mission title
+description
+string
+Mission purpose
+visibility
+string
+Visibility
+Tool name: mission_create · Output: {status, data?, operationId?, error?}
+mission.addWaypoint
+Add a destination to a mission itinerary.
+Parameter
+Type / required
+Meaning
+missionId
+string *
+Mission identifier
+target
+object *
+Waypoint destination
+label
+string
+Step label
+order
+integer
+Sequence index
+Tool name: mission_addWaypoint · Output: {status, data?, operationId?, error?}
+mission.addAction
+Add an executable experience action to a mission step.
+Parameter
+Type / required
+Meaning
+missionId
+string *
+Mission identifier
+action
+object *
+Typed action definition
+afterWaypointId
+string
+Anchor waypoint identifier
+Tool name: mission_addAction · Output: {status, data?, operationId?, error?}
+mission.execute
+Run a mission itinerary.
+Parameter
+Type / required
+Meaning
+missionId
+string *
+Mission identifier
+fromStep
+integer
+Start index
+Tool name: mission_execute · Output: {status, data?, operationId?, error?}
+mission.pause
+Pause the active mission.
+Parameter
+Type / required
+Meaning
+missionId
+string *
+Mission identifier
+Tool name: mission_pause · Output: {status, data?, operationId?, error?}
+mission.resume
+Resume a paused mission.
+Parameter
+Type / required
+Meaning
+missionId
+string *
+Mission identifier
+Tool name: mission_resume · Output: {status, data?, operationId?, error?}
+mission.getStatus
+Read mission state, current step and progress.
+Parameter
+Type / required
+Meaning
+missionId
+string *
+Mission identifier
+Tool name: mission_getStatus · Output: {status, data?, operationId?, error?}
+mission.save
+Persist the current mission state.
+Parameter
+Type / required
+Meaning
+missionId
+string *
+Mission identifier
+Tool name: mission_save · Output: {status, data?, operationId?, error?}
+mission.share
+Create a shareable mission link subject to access policy.
+Parameter
+Type / required
+Meaning
+missionId
+string *
+Mission identifier
+access
+string
+Share access
+Tool name: mission_share · Output: {status, data?, operationId?, error?}
+mission.replay
+Replay a recorded mission.
+Parameter
+Type / required
+Meaning
+missionId
+string *
+Mission identifier
+speed
+number
+Replay speed
+Tool name: mission_replay · Output: {status, data?, operationId?, error?}
+TV
+tv.start
+Start autonomous ambient planetary exploration.
+Parameter
+Type / required
+Meaning
+mode
+string
+TV programming mode
+profileId
+string
+Saved preference profile
+Tool name: tv_start · Output: {status, data?, operationId?, error?}
+tv.stop
+Stop ambient mode and restore interactive navigation.
+Input: {} (no parameters)
+Tool name: tv_stop · Output: {status, data?, operationId?, error?}
+tv.setMode
+Change ambient exploration mode.
+Parameter
+Type / required
+Meaning
+mode
+string *
+TV programming mode
+Tool name: tv_setMode · Output: {status, data?, operationId?, error?}
+tv.setPreferences
+Configure TV destinations, labels and pacing.
+Parameter
+Type / required
+Meaning
+preferences
+object *
+TV preferences and allowed bodies
+Tool name: tv_setPreferences · Output: {status, data?, operationId?, error?}
+tv.getStatus
+Read TV playback status and active scene.
+Input: {} (no parameters)
+Tool name: tv_getStatus · Output: {status, data?, operationId?, error?}
+tv.nextScene
+Skip to next programmed scene.
+Input: {} (no parameters)
+Tool name: tv_nextScene · Output: {status, data?, operationId?, error?}
+tv.enqueue
+Queue a destination or cinematic scene.
+Parameter
+Type / required
+Meaning
+scene
+object *
+Destination and presentation parameters
+priority
+integer
+Queue priority
+Tool name: tv_enqueue · Output: {status, data?, operationId?, error?}
+tv.getPlaylist
+Read upcoming ambient scenes.
+Parameter
+Type / required
+Meaning
+limit
+integer
+Maximum entries
+Tool name: tv_getPlaylist · Output: {status, data?, operationId?, error?}
+tv.takeOver
+Suspend TV mode and hand control to user.
+Input: {} (no parameters)
+Tool name: tv_takeOver · Output: {status, data?, operationId?, error?}
+tv.setSchedule
+Define scheduled ambient playback windows.
+Parameter
+Type / required
+Meaning
+schedule
+object *
+Local time windows and timezone
+enabled
+boolean
+Enable schedule
+Tool name: tv_setSchedule · Output: {status, data?, operationId?, error?}
+tv.getNowPlaying
+Return public-friendly current destination and share context.
+Input: {} (no parameters)
+Tool name: tv_getNowPlaying · Output: {status, data?, operationId?, error?}
+tv.setOverlay
+Configure labels, QR code and scientific overlays.
+Parameter
+Type / required
+Meaning
+overlay
+object *
+Overlay configuration
+Tool name: tv_setOverlay · Output: {status, data?, operationId?, error?}
+CONTROL
+control.getCapabilities
+Discover active session features and supported tools.
+Input: {} (no parameters)
+Tool name: control_getCapabilities · Output: {status, data?, operationId?, error?}
+control.getOperation
+Get status of an asynchronous operation.
+Parameter
+Type / required
+Meaning
+operationId
+string *
+Operation identifier
+Tool name: control_getOperation · Output: {status, data?, operationId?, error?}
+control.cancelOperation
+Request cancellation of an operation.
+Parameter
+Type / required
+Meaning
+operationId
+string *
+Operation identifier
+Tool name: control_cancelOperation · Output: {status, data?, operationId?, error?}
+control.listOperations
+List recent or active operations.
+Parameter
+Type / required
+Meaning
+status
+string
+Operation status
+Tool name: control_listOperations · Output: {status, data?, operationId?, error?}
+control.getPermissions
+Read agent authorization scope and user-control mode.
+Input: {} (no parameters)
+Tool name: control_getPermissions · Output: {status, data?, operationId?, error?}
+control.setAgentMode
+Set agent autonomy with appropriate user authorization.
+Parameter
+Type / required
+Meaning
+mode
+string *
+Requested agent mode
+Tool name: control_setAgentMode · Output: {status, data?, operationId?, error?}
+4. Resources and resource templates
+spacexr://session/context — Active observer context
+spacexr://universe/bodies — Celestial body catalog
+spacexr://navigation/current — Active navigation state
+spacexr://time/state — Simulation clock
+spacexr://tv/state — Ambient mode state
+spacexr://missions — Mission index
+spacexr://permissions — Current session permissions
+spacexr://body/{bodyId} — Celestial body state
+spacexr://mission/{missionId} — Mission state
+spacexr://operation/{operationId} — Asynchronous operation state
+spacexr://scene/object/{objectId} — Scene object state
+5. Grammar and mcp-core integration
+Behavior: declare MCP tools, inputSchema, outputSchema, resource definitions and templates. Adapter: implement execution, capability filtering and resource-change events. State: return read-only snapshots. Grammar: client/locale wording in McpGrammar.fromJSON compatible files.
+The grammar.default.en.json and grammar.default.fr.json files use server, tools, properties and phrases sections. Their descriptions can be loaded as a grammar layer. They are not a replacement for the Behavior schemas.
+The namespace catalogs (*.tools.json) are design-time JSON files that must be converted into McpTool[] in _buildTools(). Do not pass these catalogs directly to McpGrammar.fromJSON.
+mcp-core currently exposes resource subscriptions and structuredContent; its README lists progress, cancellation and MCP tasks as not yet implemented. SpaceXR operation IDs are therefore an application-level pattern.
+Use a broker when multiple servers, a browser tunnel or centralized access control are needed. mcp-core alone suffices for an individual MCP server.
+PART II — FUNCTIONAL EXPERIENCES
+Continuous interplanetary travel
+Leave Earth, travel to the Moon, descend to Shackleton, depart for Mars without a scene-selection screen.
+Illustrative tool sequence: universe_findBodies → ephemeris_getState → navigation_preview → navigation_flyTo → navigation_land
+Autonomous scientific site comparison
+Find three candidate sites near Shackleton, inspect illumination, slope and proximity to candidate resources, present side-by-side views and tradeoffs.
+Illustrative tool sequence: surface_findCandidates → surface_compareSites → scene_addMarker → scene_compareViews → time_animateRange
+Show me why
+When an agent recommends a site, replay a visual explanation with source and uncertainty, and allow immediate interruption.
+Illustrative tool sequence: mission_create → mission_addWaypoint → mission_addAction → mission_execute
+Historical mission replay
+Replay lunar or Martian mission itineraries with contextual annotations and user-controlled time.
+Illustrative tool sequence: mission_replay → time_set → navigation_follow
+Cosmic scale comparison
+Compare Olympus Mons with Everest or a lunar crater with a city using a common visual scale.
+Illustrative tool sequence: surface_getProfile → scene_addAnnotation → scene_compareViews
+AI copiloting
+Guide, copilot and autonomous modes; user can always reclaim control.
+Illustrative tool sequence: control_getPermissions → control_setAgentMode → navigation_stop
+SpaceXR TV
+Use idle displays for endless explorer, orbital window, grand tour or cosmic relax, with no blank/loading screen.
+Illustrative tool sequence: tv_start → tv_setPreferences → tv_enqueue → tv_getNowPlaying → tv_nextScene
+TV to interactive handoff
+A viewer clicks the screen or scans a QR code to open the current location and epoch.
+Illustrative tool sequence: tv_getNowPlaying → tv_takeOver → observer_getContext
+Shared persistent mission
+Save and share itinerary, viewpoints, annotations, assumptions and decisions for replay by another user or agent.
+Illustrative tool sequence: mission_save → mission_share → mission_replay
+PART III — CONTRACT EXAMPLES AND ACCEPTANCE
+flyByAtCurrentTime
+{  "name": "navigation_flyByAtCurrentTime",  "arguments": {    "target": {      "kind": "body",      "bodyId": "mars"    },    "durationSeconds": 20,    "closestApproachMeters": 1500000  }}
+Compare Shackleton candidates
+{  "name": "surface_findCandidates",  "arguments": {    "bodyId": "moon",    "region": {      "kind": "named-region",      "landmarkId": "shackleton"    },    "criteria": {      "maxSlopeDegrees": 8,      "maxResults": 3    },    "maxResults": 3  }}
+Start TV
+{  "name": "tv_start",  "arguments": {    "mode": "endless"  }}
+Observe context
+{  "name": "observer_getContext",  "arguments": {}}
+Acceptance criteria
+No missing tiles are deliberately exposed as finished content in TV mode; retain prior shot or choose another.
+Every navigation operation can be queried and stopped using an operationId; user input takes precedence.
+The agent discovers capabilities before promising a landing or scientific measurement.
+A time-fixed flyby is not falsely described as a physically simulated transfer.
+Scientific comparisons preserve provenance and uncertainty; an attractive visualization is not scientific proof.
+A mission can be saved, replayed, inspected and shared according to permissions.
+All JSON files parse, all method names are unique and every declared required parameter exists in properties.
+Sources and scope
+mcp-core repository: https://github.com/pandaGaume/mcp-core (README reviewed 6 November 2026). This is a proposed SpaceXR interface and must be validated against runtime capabilities before implementation.

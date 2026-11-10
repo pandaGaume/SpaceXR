@@ -1,0 +1,1 @@
+Legacy Earth visual asset reused from spacexr-explorer/public/textures/earth_map.jpg, originally SpaceXR/packages/host/www/images/planets/earth_map.jpg. Acquisition date, original source and registration are unverified. Demonstration imagery only, not a DEM or scientific reference. No external asset was fetched.

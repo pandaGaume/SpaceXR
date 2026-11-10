@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="theme-color" content="#07152d" />
+        <title>SpaceXR Babylon.js and Google 3D Tiles</title>
+    </head>
+    <body>
+        <canvas id="render-canvas" aria-label="Google Photorealistic 3D Tiles viewer"></canvas>
+        <aside id="runtime-panel" aria-live="polite">
+            <strong>SpaceXR 3D Tiles Runtime</strong>
+            <span id="runtime-status">Starting...</span>
+            <span id="runtime-statistics"></span>
+        </aside>
+        <footer id="google-attribution" aria-label="Map attribution">
+            <strong>Google Maps</strong>
+            <span id="data-attribution"></span>
+        </footer>
+        <script type="module" src="/src/main.ts"></script>
+    </body>
+</html>

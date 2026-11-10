@@ -1,0 +1,14 @@
+{
+    "mont-blanc": {
+        "name": "Mont Blanc summit",
+        "latitude": 45.832622,
+        "longitude": 6.865175,
+        "height": 4808
+    },
+    "yosemite": {
+        "name": "Half Dome, Yosemite",
+        "latitude": 37.74595,
+        "longitude": -119.5332,
+        "height": 2694
+    }
+}

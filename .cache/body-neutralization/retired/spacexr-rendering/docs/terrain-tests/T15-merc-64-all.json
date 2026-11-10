@@ -1,0 +1,62 @@
+{
+  "label": "T15-merc-64-all",
+  "date": "2026-11-06T22:11:17.865Z",
+  "seconds": 8,
+  "results": [
+    {
+      "id": "mont-blanc/gpu",
+      "url": "http://localhost:5174/?engine=gpu&solid=1&imagery=none&radius=25000&pitch=60",
+      "errors": [],
+      "performance": {
+        "engine": "gpu",
+        "framesPerSecond": 95.3,
+        "terrainCpuMs": 1.51,
+        "renderCpuMs": 0.38,
+        "runtimeFrameMs": 3.7,
+        "gpuMs": 5.31,
+        "instances": 138,
+        "drawCalls": 1,
+        "trianglesPerFrame": 1042297,
+        "uploadKiBPerFrame": 314.2,
+        "uploadCallsPerFrame": 4.2,
+        "gpuMiB": 52.6,
+        "cpuMiB": 0,
+        "demTiles": 1179,
+        "tileRequests": 1179,
+        "distinctTileRequests": 1179,
+        "tileHosts": [
+          "s3.amazonaws.com"
+        ],
+        "loadSeconds": 9.4
+      },
+      "integrity": {
+        "lod": {
+          "shown": 470,
+          "hidden": 438,
+          "returns": 89,
+          "quickReturns": 25,
+          "tilesReturning": 88,
+          "mostReturns": 2,
+          "mostReturningTile": "0/12/2123/1461",
+          "changesAtRest": 0
+        },
+        "settleSeconds": 0.1,
+        "holesAtRest": 0,
+        "worstSharedEdgeAtRestMetres": 0,
+        "frames": 239,
+        "framesWithHoles": 7,
+        "worstHoles": 16,
+        "edgeChecks": 16,
+        "sharedVerticesPerCheck": 7345,
+        "worstSharedEdgeMetres": 0,
+        "worstOutOfViewEdgeMetres": 0,
+        "tileRequests": 1183,
+        "distinctTileRequests": 1183,
+        "tileHosts": [
+          "s3.amazonaws.com"
+        ],
+        "loadSeconds": 7
+      }
+    }
+  ]
+}

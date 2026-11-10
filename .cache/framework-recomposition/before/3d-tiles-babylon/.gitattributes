@@ -1,0 +1,21 @@
+* text=auto eol=lf
+
+*.png    binary
+*.jpg    binary
+*.jpeg   binary
+*.ico    binary
+*.pdf    binary
+*.zip    binary
+*.gz     binary
+*.glb    binary
+*.bin    binary
+*.subtree binary
+*.dll    binary
+*.exe    binary
+
+*.cs     text eol=lf diff=csharp
+*.sln    text eol=crlf
+*.csproj text eol=crlf
+
+# Generated from the shader file beside them.
+packages/core/src/**/shaders/**/*.ts linguist-generated=true

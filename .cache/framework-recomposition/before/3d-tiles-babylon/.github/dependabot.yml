@@ -1,0 +1,19 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      node-development:
+        dependency-type: development
+        update-types: [minor, patch]
+    # Major updates of the shared toolchain (TypeScript, ESLint, Vitest) must be migrated
+    # across every workspace at once, so they are planned manually instead of proposed here.
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly

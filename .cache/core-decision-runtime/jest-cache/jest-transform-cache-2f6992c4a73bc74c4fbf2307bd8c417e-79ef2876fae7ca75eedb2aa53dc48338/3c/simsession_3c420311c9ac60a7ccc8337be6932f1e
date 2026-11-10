@@ -1,0 +1,47 @@
+476731fc05c3a3346990b3d56806f45c
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.SimSession = void 0;
+const execution_session_1 = require("../execution/execution.session");
+const sim_interfaces_1 = require("./sim.interfaces");
+/**
+ * Sim session: extends the generic Session with a phase iteration
+ * loop. At each tick the SimSession walks its declared phases in
+ * order, setting currentPhase before each underlying Session.run(t).
+ * The execution scheduler stays phase-agnostic; phase awareness is
+ * pulled into nodes that implement ISupportsPhasing (typically via
+ * the PhasedNode base class).
+ *
+ * Default phases is [Step], which makes SimSession behave identically
+ * to a plain Session for graphs that do not need a pre/post pass.
+ */
+class SimSession extends execution_session_1.Session {
+    constructor(graph, phases = [sim_interfaces_1.SimPhase.Step]) {
+        super(graph);
+        this.currentPhase = sim_interfaces_1.SimPhase.Step;
+        this.phases = phases;
+        this.currentPhase = phases[0] ?? sim_interfaces_1.SimPhase.Step;
+    }
+    /**
+     * Full tick: iterate self.phases, set currentPhase, dispatch the
+     * underlying scheduler for each phase. The scheduler picks
+     * RunDynamic or RunStatic based on graph.mode.
+     */
+    run(t) {
+        for (const phase of this.phases) {
+            this.currentPhase = phase;
+            super.run(t);
+        }
+    }
+    /**
+     * Run a single named phase. Useful for testing and for callers that
+     * want fine-grained control over the phase iteration (e.g. injecting
+     * external state between phases).
+     */
+    runPhase(phase, t) {
+        this.currentPhase = phase;
+        super.run(t);
+    }
+}
+exports.SimSession = SimSession;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiQzpcXFVzZXJzXFxHdWlsbGF1bWVQZWxsZXRpZXJcXERvY3VtZW50c1xcR2l0SHViXFxzcGlreXBhbmRhXFxwYWNrYWdlc1xcZGV2XFxjb3JlXFxzcmNcXHNpbVxcc2ltLnNlc3Npb24udHMiLCJtYXBwaW5ncyI6Ijs7O0FBQ0Esc0VBQXlEO0FBQ3pELHFEQUF5RDtBQUV6RDs7Ozs7Ozs7OztHQVVHO0FBQ0gsTUFBYSxVQUFXLFNBQVEsMkJBQU87SUFJbkMsWUFBbUIsS0FBb0IsRUFBRSxTQUFrQyxDQUFDLHlCQUFRLENBQUMsSUFBSSxDQUFDO1FBQ3RGLEtBQUssQ0FBQyxLQUFLLENBQUMsQ0FBQztRQUhWLGlCQUFZLEdBQWEseUJBQVEsQ0FBQyxJQUFJLENBQUM7UUFJMUMsSUFBSSxDQUFDLE1BQU0sR0FBRyxNQUFNLENBQUM7UUFDckIsSUFBSSxDQUFDLFlBQVksR0FBRyxNQUFNLENBQUMsQ0FBQyxDQUFDLElBQUkseUJBQVEsQ0FBQyxJQUFJLENBQUM7SUFDbkQsQ0FBQztJQUVEOzs7O09BSUc7SUFDYSxHQUFHLENBQUMsQ0FBUztRQUN6QixLQUFLLE1BQU0sS0FBSyxJQUFJLElBQUksQ0FBQyxNQUFNLEVBQUUsQ0FBQztZQUM5QixJQUFJLENBQUMsWUFBWSxHQUFHLEtBQUssQ0FBQztZQUMxQixLQUFLLENBQUMsR0FBRyxDQUFDLENBQUMsQ0FBQyxDQUFDO1FBQ2pCLENBQUM7SUFDTCxDQUFDO0lBRUQ7Ozs7T0FJRztJQUNJLFFBQVEsQ0FBQyxLQUFlLEVBQUUsQ0FBUztRQUN0QyxJQUFJLENBQUMsWUFBWSxHQUFHLEtBQUssQ0FBQztRQUMxQixLQUFLLENBQUMsR0FBRyxDQUFDLENBQUMsQ0FBQyxDQUFDO0lBQ2pCLENBQUM7Q0FDSjtBQS9CRCxnQ0ErQkMiLCJuYW1lcyI6W10sInNvdXJjZXMiOlsiQzpcXFVzZXJzXFxHdWlsbGF1bWVQZWxsZXRpZXJcXERvY3VtZW50c1xcR2l0SHViXFxzcGlreXBhbmRhXFxwYWNrYWdlc1xcZGV2XFxjb3JlXFxzcmNcXHNpbVxcc2ltLnNlc3Npb24udHMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgSVJ1bnRpbWVHcmFwaCB9IGZyb20gXCIuLi9leGVjdXRpb24vZXhlY3V0aW9uLmludGVyZmFjZXNcIjtcclxuaW1wb3J0IHsgU2Vzc2lvbiB9IGZyb20gXCIuLi9leGVjdXRpb24vZXhlY3V0aW9uLnNlc3Npb25cIjtcclxuaW1wb3J0IHsgSVNpbVNlc3Npb24sIFNpbVBoYXNlIH0gZnJvbSBcIi4vc2ltLmludGVyZmFjZXNcIjtcclxuXHJcbi8qKlxyXG4gKiBTaW0gc2Vzc2lvbjogZXh0ZW5kcyB0aGUgZ2VuZXJpYyBTZXNzaW9uIHdpdGggYSBwaGFzZSBpdGVyYXRpb25cclxuICogbG9vcC4gQXQgZWFjaCB0aWNrIHRoZSBTaW1TZXNzaW9uIHdhbGtzIGl0cyBkZWNsYXJlZCBwaGFzZXMgaW5cclxuICogb3JkZXIsIHNldHRpbmcgY3VycmVudFBoYXNlIGJlZm9yZSBlYWNoIHVuZGVybHlpbmcgU2Vzc2lvbi5ydW4odCkuXHJcbiAqIFRoZSBleGVjdXRpb24gc2NoZWR1bGVyIHN0YXlzIHBoYXNlLWFnbm9zdGljOyBwaGFzZSBhd2FyZW5lc3MgaXNcclxuICogcHVsbGVkIGludG8gbm9kZXMgdGhhdCBpbXBsZW1lbnQgSVN1cHBvcnRzUGhhc2luZyAodHlwaWNhbGx5IHZpYVxyXG4gKiB0aGUgUGhhc2VkTm9kZSBiYXNlIGNsYXNzKS5cclxuICpcclxuICogRGVmYXVsdCBwaGFzZXMgaXMgW1N0ZXBdLCB3aGljaCBtYWtlcyBTaW1TZXNzaW9uIGJlaGF2ZSBpZGVudGljYWxseVxyXG4gKiB0byBhIHBsYWluIFNlc3Npb24gZm9yIGdyYXBocyB0aGF0IGRvIG5vdCBuZWVkIGEgcHJlL3Bvc3QgcGFzcy5cclxuICovXHJcbmV4cG9ydCBjbGFzcyBTaW1TZXNzaW9uIGV4dGVuZHMgU2Vzc2lvbiBpbXBsZW1lbnRzIElTaW1TZXNzaW9uIHtcclxuICAgIHB1YmxpYyByZWFkb25seSBwaGFzZXM6IFJlYWRvbmx5QXJyYXk8U2ltUGhhc2U+O1xyXG4gICAgcHVibGljIGN1cnJlbnRQaGFzZTogU2ltUGhhc2UgPSBTaW1QaGFzZS5TdGVwO1xyXG5cclxuICAgIHB1YmxpYyBjb25zdHJ1Y3RvcihncmFwaDogSVJ1bnRpbWVHcmFwaCwgcGhhc2VzOiBSZWFkb25seUFycmF5PFNpbVBoYXNlPiA9IFtTaW1QaGFzZS5TdGVwXSkge1xyXG4gICAgICAgIHN1cGVyKGdyYXBoKTtcclxuICAgICAgICB0aGlzLnBoYXNlcyA9IHBoYXNlcztcclxuICAgICAgICB0aGlzLmN1cnJlbnRQaGFzZSA9IHBoYXNlc1swXSA/PyBTaW1QaGFzZS5TdGVwO1xyXG4gICAgfVxyXG5cclxuICAgIC8qKlxyXG4gICAgICogRnVsbCB0aWNrOiBpdGVyYXRlIHNlbGYucGhhc2VzLCBzZXQgY3VycmVudFBoYXNlLCBkaXNwYXRjaCB0aGVcclxuICAgICAqIHVuZGVybHlpbmcgc2NoZWR1bGVyIGZvciBlYWNoIHBoYXNlLiBUaGUgc2NoZWR1bGVyIHBpY2tzXHJcbiAgICAgKiBSdW5EeW5hbWljIG9yIFJ1blN0YXRpYyBiYXNlZCBvbiBncmFwaC5tb2RlLlxyXG4gICAgICovXHJcbiAgICBwdWJsaWMgb3ZlcnJpZGUgcnVuKHQ6IG51bWJlcik6IHZvaWQge1xyXG4gICAgICAgIGZvciAoY29uc3QgcGhhc2Ugb2YgdGhpcy5waGFzZXMpIHtcclxuICAgICAgICAgICAgdGhpcy5jdXJyZW50UGhhc2UgPSBwaGFzZTtcclxuICAgICAgICAgICAgc3VwZXIucnVuKHQpO1xyXG4gICAgICAgIH1cclxuICAgIH1cclxuXHJcbiAgICAvKipcclxuICAgICAqIFJ1biBhIHNpbmdsZSBuYW1lZCBwaGFzZS4gVXNlZnVsIGZvciB0ZXN0aW5nIGFuZCBmb3IgY2FsbGVycyB0aGF0XHJcbiAgICAgKiB3YW50IGZpbmUtZ3JhaW5lZCBjb250cm9sIG92ZXIgdGhlIHBoYXNlIGl0ZXJhdGlvbiAoZS5nLiBpbmplY3RpbmdcclxuICAgICAqIGV4dGVybmFsIHN0YXRlIGJldHdlZW4gcGhhc2VzKS5cclxuICAgICAqL1xyXG4gICAgcHVibGljIHJ1blBoYXNlKHBoYXNlOiBTaW1QaGFzZSwgdDogbnVtYmVyKTogdm9pZCB7XHJcbiAgICAgICAgdGhpcy5jdXJyZW50UGhhc2UgPSBwaGFzZTtcclxuICAgICAgICBzdXBlci5ydW4odCk7XHJcbiAgICB9XHJcbn1cclxuIl0sInZlcnNpb24iOjN9

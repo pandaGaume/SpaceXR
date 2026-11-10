@@ -1,0 +1,86 @@
+{
+  "version": 1,
+  "sourceRepository": "https://github.com/pandaGaume/co2-scrubber-governed-agent",
+  "sourceRevision": "62a8e6c",
+  "sourceLicense": "Apache-2.0",
+  "description": "Portable mechanisms from the executable application; no domain model or archived topology is promoted.",
+  "files": [
+    {
+      "source": "harness/core/claims.ts",
+      "target": "src/acquired/claims.ts",
+      "sourceSha256": "27db2517a6940b38ec09b0e39570e83195bf6f17f408446e9a0b25c582b667d5",
+      "adaptations": [
+        "Interface names use the I prefix.",
+        "JSON values reuse the active graph contract.",
+        "Forbidden punctuation is normalized."
+      ]
+    },
+    {
+      "source": "harness/core/problems.ts",
+      "target": "src/acquired/problems.ts",
+      "sourceSha256": "887dabf4f84923274986ba79d9f1c1c650d8a3b39022bcbffc01fb7afe980d36",
+      "adaptations": [
+        "Interface names use the I prefix.",
+        "JSON values reuse the active graph contract.",
+        "Forbidden punctuation is normalized."
+      ]
+    },
+    {
+      "source": "harness/core/episodes.ts",
+      "target": "src/acquired/episodes.ts",
+      "sourceSha256": "9da9b8f905b26f57815adbe3cab7999f42d34a1b41604e7f9146e2be971d2eaf",
+      "adaptations": [
+        "Interface names use the I prefix.",
+        "JSON values reuse the active graph contract.",
+        "Forbidden punctuation is normalized."
+      ]
+    },
+    {
+      "source": "harness/lib/execution-errors.ts",
+      "target": "src/acquired/execution-errors.ts",
+      "sourceSha256": "e088b0c99c0e7cde0252f0afcc820827b30e73b6fe9adbeb4acd3551f2e844cc",
+      "adaptations": [
+        "Interface names use the I prefix.",
+        "JSON values reuse the active graph contract.",
+        "Forbidden punctuation is normalized."
+      ]
+    },
+    {
+      "source": "lib/ordered-delivery.ts",
+      "target": "src/acquired/ordered-delivery.ts",
+      "sourceSha256": "c6cf2c8148bfaef20a98a0af7f33d6c6e6e336f66f22b006f22f6a8fdde54ed5",
+      "adaptations": [
+        "Interface names use the I prefix.",
+        "JSON values reuse the active graph contract.",
+        "Forbidden punctuation is normalized."
+      ]
+    },
+    {
+      "source": "tests/claims.test.ts",
+      "target": "tests/acquired-claims.test.mjs",
+      "sourceSha256": "eb6c3df721be1bf8c94d93034fafe2300c0db5585fb80cfbe6577201282b77db",
+      "adaptations": [
+        "Test transpiled to the existing node:test layout.",
+        "Imports target the transferred active module."
+      ]
+    },
+    {
+      "source": "tests/problems.test.ts",
+      "target": "tests/acquired-problems.test.mjs",
+      "sourceSha256": "23bc71488c9a7127fa57a01894e3a6ce6c056b51d14529e153595bedbecab089",
+      "adaptations": [
+        "Test transpiled to the existing node:test layout.",
+        "Imports target the transferred active module."
+      ]
+    },
+    {
+      "source": "tests/ordered-delivery.test.ts",
+      "target": "tests/acquired-delivery.test.mjs",
+      "sourceSha256": "9f44f00ce5ef5e8eb5f80266877f6f91f59c55211e8f4a7d0d563be992e53c44",
+      "adaptations": [
+        "Test transpiled to the existing node:test layout.",
+        "Imports target the transferred active module."
+      ]
+    }
+  ]
+}

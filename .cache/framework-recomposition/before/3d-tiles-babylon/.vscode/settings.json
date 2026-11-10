@@ -1,0 +1,5 @@
+{
+    "files.exclude": {
+        "packages/core/src/**/shaders/**/*.ts": true
+    }
+}

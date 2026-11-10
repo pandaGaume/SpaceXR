@@ -1,0 +1,46 @@
+2fbef3603d512fb1da8c61e7f69da53d
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.VitSynapse = void 0;
+const tslib_1 = require("tslib");
+const graph_1 = require("../../../graph");
+const vit_interfaces_1 = require("./vit.interfaces");
+/// <summary>
+/// Vision Transformer synapse.
+///
+/// For QKV synapses: stores 3 weights [wQ, wK, wV] similar to how
+/// RnnSynapse stores per-gate weights.
+///
+/// For all other types (Embed, Projection, MLP, Head): stores a single weight.
+///
+/// Residual synapses have weight = 1 and are not trainable.
+///
+/// The base ISynapse.weight property maps to weights[0] for compatibility
+/// with the existing optimizer infrastructure.
+/// </summary>
+class VitSynapse extends graph_1.GraphOLink {
+    constructor(oini, ofin, synapseType = vit_interfaces_1.VitSynapseType.MLP, numWeights = 1) {
+        super(oini, ofin);
+        this.synapseType = synapseType;
+        this.weights = new Array(numWeights).fill(0);
+    }
+    /// <summary>
+    /// Compatibility accessor - maps to weights[0].
+    /// </summary>
+    get weight() {
+        return this.weights[0];
+    }
+    set weight(v) {
+        this.weights[0] = v;
+    }
+}
+exports.VitSynapse = VitSynapse;
+tslib_1.__decorate([
+    graph_1.cloneable,
+    tslib_1.__metadata("design:type", String)
+], VitSynapse.prototype, "synapseType", void 0);
+tslib_1.__decorate([
+    graph_1.cloneable,
+    tslib_1.__metadata("design:type", Array)
+], VitSynapse.prototype, "weights", void 0);
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiQzpcXFVzZXJzXFxHdWlsbGF1bWVQZWxsZXRpZXJcXERvY3VtZW50c1xcR2l0SHViXFxzcGlreXBhbmRhXFxwYWNrYWdlc1xcZGV2XFxjb3JlXFxzcmNcXG5ldXJhbG5ldHdvcmtcXHRyYW5zZm9ybWVyXFx2aXRcXHZpdC5zeW5hcHNlLnRzIiwibWFwcGluZ3MiOiI7Ozs7QUFBQSwwQ0FBOEQ7QUFDOUQscURBQStEO0FBRS9ELGFBQWE7QUFDYiwrQkFBK0I7QUFDL0IsR0FBRztBQUNILGtFQUFrRTtBQUNsRSx1Q0FBdUM7QUFDdkMsR0FBRztBQUNILCtFQUErRTtBQUMvRSxHQUFHO0FBQ0gsNERBQTREO0FBQzVELEdBQUc7QUFDSCwwRUFBMEU7QUFDMUUsK0NBQStDO0FBQy9DLGNBQWM7QUFDZCxNQUFhLFVBQVcsU0FBUSxrQkFBVTtJQUl0QyxZQUFtQixJQUFXLEVBQUUsSUFBVyxFQUFFLGNBQThCLCtCQUFjLENBQUMsR0FBRyxFQUFFLGFBQXFCLENBQUM7UUFDakgsS0FBSyxDQUFDLElBQUksRUFBRSxJQUFJLENBQUMsQ0FBQztRQUNsQixJQUFJLENBQUMsV0FBVyxHQUFHLFdBQVcsQ0FBQztRQUMvQixJQUFJLENBQUMsT0FBTyxHQUFHLElBQUksS0FBSyxDQUFDLFVBQVUsQ0FBQyxDQUFDLElBQUksQ0FBQyxDQUFDLENBQUMsQ0FBQztJQUNqRCxDQUFDO0lBRUQsYUFBYTtJQUNiLGdEQUFnRDtJQUNoRCxjQUFjO0lBQ2QsSUFBVyxNQUFNO1FBQ2IsT0FBTyxJQUFJLENBQUMsT0FBTyxDQUFDLENBQUMsQ0FBQyxDQUFDO0lBQzNCLENBQUM7SUFDRCxJQUFXLE1BQU0sQ0FBQyxDQUFTO1FBQ3ZCLElBQUksQ0FBQyxPQUFPLENBQUMsQ0FBQyxDQUFDLEdBQUcsQ0FBQyxDQUFDO0lBQ3hCLENBQUM7Q0FDSjtBQW5CRCxnQ0FtQkM7QUFsQnFCO0lBQWpCLGlCQUFTOzsrQ0FBb0M7QUFDNUI7SUFBakIsaUJBQVM7OzJDQUEwQiIsIm5hbWVzIjpbXSwic291cmNlcyI6WyJDOlxcVXNlcnNcXEd1aWxsYXVtZVBlbGxldGllclxcRG9jdW1lbnRzXFxHaXRIdWJcXHNwaWt5cGFuZGFcXHBhY2thZ2VzXFxkZXZcXGNvcmVcXHNyY1xcbmV1cmFsbmV0d29ya1xcdHJhbnNmb3JtZXJcXHZpdFxcdml0LnN5bmFwc2UudHMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgY2xvbmVhYmxlLCBHcmFwaE9MaW5rLCBJTm9kZSB9IGZyb20gXCIuLi8uLi8uLi9ncmFwaFwiO1xyXG5pbXBvcnQgeyBJVml0U3luYXBzZSwgVml0U3luYXBzZVR5cGUgfSBmcm9tIFwiLi92aXQuaW50ZXJmYWNlc1wiO1xyXG5cclxuLy8vIDxzdW1tYXJ5PlxyXG4vLy8gVmlzaW9uIFRyYW5zZm9ybWVyIHN5bmFwc2UuXHJcbi8vL1xyXG4vLy8gRm9yIFFLViBzeW5hcHNlczogc3RvcmVzIDMgd2VpZ2h0cyBbd1EsIHdLLCB3Vl0gc2ltaWxhciB0byBob3dcclxuLy8vIFJublN5bmFwc2Ugc3RvcmVzIHBlci1nYXRlIHdlaWdodHMuXHJcbi8vL1xyXG4vLy8gRm9yIGFsbCBvdGhlciB0eXBlcyAoRW1iZWQsIFByb2plY3Rpb24sIE1MUCwgSGVhZCk6IHN0b3JlcyBhIHNpbmdsZSB3ZWlnaHQuXHJcbi8vL1xyXG4vLy8gUmVzaWR1YWwgc3luYXBzZXMgaGF2ZSB3ZWlnaHQgPSAxIGFuZCBhcmUgbm90IHRyYWluYWJsZS5cclxuLy8vXHJcbi8vLyBUaGUgYmFzZSBJU3luYXBzZS53ZWlnaHQgcHJvcGVydHkgbWFwcyB0byB3ZWlnaHRzWzBdIGZvciBjb21wYXRpYmlsaXR5XHJcbi8vLyB3aXRoIHRoZSBleGlzdGluZyBvcHRpbWl6ZXIgaW5mcmFzdHJ1Y3R1cmUuXHJcbi8vLyA8L3N1bW1hcnk+XHJcbmV4cG9ydCBjbGFzcyBWaXRTeW5hcHNlIGV4dGVuZHMgR3JhcGhPTGluayBpbXBsZW1lbnRzIElWaXRTeW5hcHNlIHtcclxuICAgIEBjbG9uZWFibGUgcHVibGljIHN5bmFwc2VUeXBlOiBWaXRTeW5hcHNlVHlwZTtcclxuICAgIEBjbG9uZWFibGUgcHVibGljIHdlaWdodHM6IG51bWJlcltdO1xyXG5cclxuICAgIHB1YmxpYyBjb25zdHJ1Y3RvcihvaW5pOiBJTm9kZSwgb2ZpbjogSU5vZGUsIHN5bmFwc2VUeXBlOiBWaXRTeW5hcHNlVHlwZSA9IFZpdFN5bmFwc2VUeXBlLk1MUCwgbnVtV2VpZ2h0czogbnVtYmVyID0gMSkge1xyXG4gICAgICAgIHN1cGVyKG9pbmksIG9maW4pO1xyXG4gICAgICAgIHRoaXMuc3luYXBzZVR5cGUgPSBzeW5hcHNlVHlwZTtcclxuICAgICAgICB0aGlzLndlaWdodHMgPSBuZXcgQXJyYXkobnVtV2VpZ2h0cykuZmlsbCgwKTtcclxuICAgIH1cclxuXHJcbiAgICAvLy8gPHN1bW1hcnk+XHJcbiAgICAvLy8gQ29tcGF0aWJpbGl0eSBhY2Nlc3NvciAtIG1hcHMgdG8gd2VpZ2h0c1swXS5cclxuICAgIC8vLyA8L3N1bW1hcnk+XHJcbiAgICBwdWJsaWMgZ2V0IHdlaWdodCgpOiBudW1iZXIge1xyXG4gICAgICAgIHJldHVybiB0aGlzLndlaWdodHNbMF07XHJcbiAgICB9XHJcbiAgICBwdWJsaWMgc2V0IHdlaWdodCh2OiBudW1iZXIpIHtcclxuICAgICAgICB0aGlzLndlaWdodHNbMF0gPSB2O1xyXG4gICAgfVxyXG59XHJcbiJdLCJ2ZXJzaW9uIjozfQ==

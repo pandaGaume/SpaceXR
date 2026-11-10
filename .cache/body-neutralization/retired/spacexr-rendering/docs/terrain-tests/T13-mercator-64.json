@@ -1,0 +1,117 @@
+{
+  "label": "T13-mercator-64",
+  "date": "2026-11-06T21:40:54.950Z",
+  "seconds": 8,
+  "results": [
+    {
+      "id": "mont-blanc/gpu",
+      "url": "http://localhost:5174/?engine=gpu&solid=1&imagery=none&radius=25000&pitch=60",
+      "errors": [],
+      "performance": {
+        "engine": "gpu",
+        "framesPerSecond": 68.1,
+        "terrainCpuMs": 1.83,
+        "renderCpuMs": 0.39,
+        "runtimeFrameMs": 3.9,
+        "gpuMs": 6.2,
+        "instances": 117,
+        "drawCalls": 1,
+        "trianglesPerFrame": 967056,
+        "uploadKiBPerFrame": 563.9,
+        "uploadCallsPerFrame": 6.1,
+        "gpuMiB": 52.6,
+        "cpuMiB": 0,
+        "demTiles": 512,
+        "tileRequests": 1656,
+        "distinctTileRequests": 1170,
+        "tileHosts": [
+          "s3.amazonaws.com"
+        ],
+        "loadSeconds": 8.7
+      },
+      "integrity": {
+        "settleSeconds": 0.2,
+        "holesAtRest": 0,
+        "worstSharedEdgeAtRestMetres": 0,
+        "frames": 248,
+        "framesWithHoles": 32,
+        "worstHoles": 1418,
+        "edgeChecks": 16,
+        "sharedVerticesPerCheck": 6595,
+        "worstSharedEdgeMetres": 3031.645,
+        "worstOutOfViewEdgeMetres": 3401.807,
+        "worstPair": {
+          "gap": 3031.64453125,
+          "a": {
+            "address": {
+              "lod": 12,
+              "x": 2127,
+              "y": 1457
+            },
+            "terrain": {
+              "lod": 12,
+              "x": 2127,
+              "y": 1457
+            },
+            "terrainLevel": 12,
+            "finer": 4,
+            "coarser": 0,
+            "demOfTerrain": {
+              "lod": 12,
+              "x": 2127,
+              "y": 1457
+            }
+          },
+          "aLattice": [
+            7,
+            32
+          ],
+          "aHeight": 0,
+          "b": {
+            "address": {
+              "lod": 13,
+              "x": 4254,
+              "y": 2916
+            },
+            "terrain": {
+              "lod": 13,
+              "x": 4254,
+              "y": 2916
+            },
+            "terrainLevel": 13,
+            "finer": 0,
+            "coarser": 9,
+            "demOfTerrain": {
+              "lod": 13,
+              "x": 4254,
+              "y": 2916
+            }
+          },
+          "bLattice": [
+            14,
+            0
+          ],
+          "bHeight": 3031.64453125,
+          "aReference": [
+            0,
+            0,
+            1,
+            -1
+          ],
+          "bReference": [
+            0,
+            0,
+            1,
+            102
+          ]
+        },
+        "tileRequests": 1609,
+        "distinctTileRequests": 1182,
+        "tileHosts": [
+          "s3.amazonaws.com"
+        ],
+        "loadSeconds": 4.9
+      }
+    }
+  ]
+}

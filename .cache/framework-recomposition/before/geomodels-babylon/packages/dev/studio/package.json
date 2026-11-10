@@ -1,0 +1,49 @@
+{
+  "name": "@dev/studio",
+  "version": "2.1.0",
+  "private": true,
+  "type": "module",
+  "sideEffects": [
+    "**/*.css",
+    "./src/babylon/main.tsx",
+    "./src/ui/StudioApp.tsx",
+    "./src/babylon/studio-entry.tsx"
+  ],
+  "exports": {
+    ".": "./src/index.ts",
+    "./app": "./src/babylon/main.tsx",
+    "./babylon": "./src/babylon/index.ts",
+    "./ui": "./src/ui/StudioApp.tsx"
+  },
+  "scripts": {
+    "typecheck": "node ../../../node_modules/typescript/lib/tsc.js -p tsconfig.json --noEmit",
+    "test": "node ../../../node_modules/tsx/dist/cli.mjs --test tests/studio.test.ts tests/terrain.test.ts tests/imagery.test.ts"
+  },
+  "dependencies": {
+    "@babylonjs/core": "^9.27.1",
+    "@babylonjs/gui": "^9.27.1",
+    "@babylonjs/loaders": "^9.27.1",
+    "@babylonjs/serializers": "^9.27.1",
+    "@cyanmycelium/mcp-broker-provider": "file:../../../../mcp-broker/node/packages/provider",
+    "@cyanmycelium/mcp-core": "file:../../../../mcp-core",
+    "@dev/core": "*",
+    "@spacexr/3d-tiles-core": "file:../../../../3d-tiles-core/node/packages/core",
+    "@spacexr/dem": "file:../../../../3d-tiles-core/node/packages/dem",
+    "@spacexr/geodesy": "0.4.0",
+    "@spacexr/raster": "file:../../../../3d-tiles-core/node/packages/raster",
+    "@spacexr/tiles": "file:../../../../3d-tiles-core/node/packages/tiles",
+    "@vielzeug/ledger": "^26.10.0",
+    "@zip.js/zip.js": "^2.7.34",
+    "dxf-parser": "1.1.2",
+    "earcut": "^3.2.3",
+    "geotiff": "3.0.5",
+    "leaflet": "1.9.4",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/leaflet": "1.9.12",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1"
+  }
+}

@@ -1,0 +1,1652 @@
+[
+  {
+    "source": "3d-tiles-core/node/packages/raster/.eslintrc.json",
+    "target": "terrain-core/packages/raster/.eslintrc.json",
+    "sha256": "fd558b47c606e3d717ed475661004d6dbb6e8b120bba79dfa8f0f99244d1ebab"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/raster/.npmrc",
+    "target": "terrain-core/packages/raster/.npmrc",
+    "sha256": "af542f2e6e270a65969378049c4f7394c0f3a609730075fe9c4e215aca150bd8"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/raster/.prettierignore",
+    "target": "terrain-core/packages/raster/.prettierignore",
+    "sha256": "1d39739bc7dd19792279e0f3da9c7edc074ac616381f54ee32ba5278e0309b53"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/raster/.prettierrc",
+    "target": "terrain-core/packages/raster/.prettierrc",
+    "sha256": "a4482fd83536b1a2016cb699e5a90af7acba98d9650f335de322b7da597439a9"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/raster/LICENSE",
+    "target": "terrain-core/packages/raster/LICENSE",
+    "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/raster/package.json",
+    "target": "terrain-core/packages/raster/package.json",
+    "sha256": "4cb68040398f978ba50a3e869414747f414f9562accd2a6b26c3da8bb8993755"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/raster/README.md",
+    "target": "terrain-core/packages/raster/README.md",
+    "sha256": "0b3a99a64a919af497678411e641fa2d62f67f74f0ba8205a8cee891a4e775a9"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/raster/tsconfig.json",
+    "target": "terrain-core/packages/raster/tsconfig.json",
+    "sha256": "e2d4003e968638160b6beec194f86eadeeb5d7c1b4a004158e45cfd234ffcf92"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/raster/tsup.config.ts",
+    "target": "terrain-core/packages/raster/tsup.config.ts",
+    "sha256": "a0e38bb7d2461f06a18e4e7368c79713e0864788d9df1f2b87b7a04bd18863ad"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/raster/vitest.config.ts",
+    "target": "terrain-core/packages/raster/vitest.config.ts",
+    "sha256": "29377facebca4c4726e4d3dd1996547cc337daf1e735e3e757760137ca362098"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/raster/src/drape-instances.ts",
+    "target": "terrain-core/packages/raster/src/drape-instances.ts",
+    "sha256": "99ede64380764d9c2e7740339b0eccb0646e2a800b3a50e1c2e1ef9536dda5cc"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/raster/src/draping.ts",
+    "target": "terrain-core/packages/raster/src/draping.ts",
+    "sha256": "c51fda6176abdfcf017a9d619873e159f876dc97fa41e557efed756408170a7a"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/raster/src/image.ts",
+    "target": "terrain-core/packages/raster/src/image.ts",
+    "sha256": "81d6d28bb17d519083dd7cfbcc115699c5b42e5e6a27ab3834af83d8856ffd2e"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/raster/src/index.ts",
+    "target": "terrain-core/packages/raster/src/index.ts",
+    "sha256": "80afbdbd6ce05320cf6b98d982a19ca98f537436ca3623ad94d1f35a9e4a8882"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/raster/src/png-data-decoder.ts",
+    "target": "terrain-core/packages/raster/src/png-data-decoder.ts",
+    "sha256": "30f405bc3ff2f1cbbdfa3298e08cfff331797a7feb924dee6c5165f24c49020b"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/raster/src/raster-grid.ts",
+    "target": "terrain-core/packages/raster/src/raster-grid.ts",
+    "sha256": "5f320b7c9f3bb7e13fe6203a55d60967a3d27ac974ec6fa3dcd8b9b57933563f"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/raster/src/raster-pyramid.ts",
+    "target": "terrain-core/packages/raster/src/raster-pyramid.ts",
+    "sha256": "9889cb6294266657bf4bd766bd1e5ebda5043492147de1bd2d0e432ba69253eb"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/raster/src/resampling.ts",
+    "target": "terrain-core/packages/raster/src/resampling.ts",
+    "sha256": "76b316c7cfe9d9832e4fcd77dc189e018dc3082b2c9b078622cd92badd87ff14"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/raster/src/sampling.ts",
+    "target": "terrain-core/packages/raster/src/sampling.ts",
+    "sha256": "ecdc16f634bf282166ceccee3190d84c733e5733ffca90144c938ff091a50cb4"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/raster/src/stitched-raster-grids.ts",
+    "target": "terrain-core/packages/raster/src/stitched-raster-grids.ts",
+    "sha256": "ffc8b73820c6079cdbe6f927135ee49cb52802dcd658fe1843de8e8bdbfe220b"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/raster/tests/drape-instances-cube.test.ts",
+    "target": "terrain-core/packages/raster/tests/drape-instances-cube.test.ts",
+    "sha256": "c4a3ff0df4f3aace19682e757e032df11407356cdea90177c8c2c47c9af3b0cf"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/raster/tests/drape-instances.test.ts",
+    "target": "terrain-core/packages/raster/tests/drape-instances.test.ts",
+    "sha256": "e58e5707e6c191f89b4005498a56fc7475c4fd3b51284d4093b2d3a5c7d96569"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/raster/tests/draping.test.ts",
+    "target": "terrain-core/packages/raster/tests/draping.test.ts",
+    "sha256": "dd6ddd87ffd81a561cf6d1b650f8329ce06f6f8685c7e70447335a5e17d2c021"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/raster/tests/image.test.ts",
+    "target": "terrain-core/packages/raster/tests/image.test.ts",
+    "sha256": "d8c9defcff48aba343ddb52712b26e14f8ae78e79666eaab00428c503bb2f298"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/raster/tests/png-data-decoder.test.ts",
+    "target": "terrain-core/packages/raster/tests/png-data-decoder.test.ts",
+    "sha256": "cbbf1c442a157b3ac6fa2a079f4e0ac795ce3686ab42f61f1814285d4ac9f952"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/raster/tests/prestitched-rasters.test.ts",
+    "target": "terrain-core/packages/raster/tests/prestitched-rasters.test.ts",
+    "sha256": "bd04bcb9248191f79f062102783834bd3ad7c9ce1645595ce71dcacff7fb9a9d"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/raster/tests/raster-pyramid.test.ts",
+    "target": "terrain-core/packages/raster/tests/raster-pyramid.test.ts",
+    "sha256": "d59326952bb40e3d7993738dda1b9fe17b0c39c85c0bb2694c367cb304e04a3c"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/raster/tests/resampling.test.ts",
+    "target": "terrain-core/packages/raster/tests/resampling.test.ts",
+    "sha256": "89500223442630e168f42a2c1b58be11bb791886b786eb0d8807e259a6a3847c"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/raster/tests/sampling.test.ts",
+    "target": "terrain-core/packages/raster/tests/sampling.test.ts",
+    "sha256": "ffd160ba48648bad9f864cef7af7c4ad950f9eab7886a9119b188d966e3c2c4c"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/raster/tests/stitched-raster-grids.test.ts",
+    "target": "terrain-core/packages/raster/tests/stitched-raster-grids.test.ts",
+    "sha256": "156e2b715e17e8dbdbb7188d31de8c9467d3834521078e60d5ae099dacd0864e"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/raster/tests/terrain-connections.test.ts",
+    "target": "terrain-core/packages/raster/tests/terrain-connections.test.ts",
+    "sha256": "e13f840645f4a21d289a053a1f4126f47c2acb557126273ab91a8fb91e99e9ba"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/raster/tests/fixtures/data-grayscale8.png",
+    "target": "terrain-core/packages/raster/tests/fixtures/data-grayscale8.png",
+    "sha256": "afac4af73b00f5d6bd5f8bc0cccf893b85a0343e7310fd33679411f7e0c4f910"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/raster/tests/fixtures/data-invalid-filter.png",
+    "target": "terrain-core/packages/raster/tests/fixtures/data-invalid-filter.png",
+    "sha256": "820fb493837a2a900f3638dc574bf5b6fffa5e7cbe8d9039f0bdf4fee4caacbe"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/raster/tests/fixtures/data-nonconsecutive-idat.png",
+    "target": "terrain-core/packages/raster/tests/fixtures/data-nonconsecutive-idat.png",
+    "sha256": "e0a5b1fb989bbb3ce68042a2eb31bf91a8f3a1aa926ec94acce0631f0b00bec0"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/raster/tests/fixtures/data-rgb8-filters.png",
+    "target": "terrain-core/packages/raster/tests/fixtures/data-rgb8-filters.png",
+    "sha256": "8d9a00497c77b2913a1c4ea778128b7b85f0a73286797af69dd688fc77919115"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/raster/tests/fixtures/data-rgba16.png",
+    "target": "terrain-core/packages/raster/tests/fixtures/data-rgba16.png",
+    "sha256": "79525027e8e15de99e9507bfa83545b663886bd1c01e9be2e97867cf30f8c990"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/raster/tests/fixtures/data-rgba8-filters.png",
+    "target": "terrain-core/packages/raster/tests/fixtures/data-rgba8-filters.png",
+    "sha256": "0fb757cafeb648e6a20dd1e2cae5c9d266e88f6431b53be1e3677cf18a79c981"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/raster/tests/fixtures/data-rgba8-interlaced.png",
+    "target": "terrain-core/packages/raster/tests/fixtures/data-rgba8-interlaced.png",
+    "sha256": "04520f6ad234dbdc5025a6733ffaed01dd646ea52c867df3151f45b73317264b"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/raster/tests/fixtures/data-rgba8-zero-alpha.png",
+    "target": "terrain-core/packages/raster/tests/fixtures/data-rgba8-zero-alpha.png",
+    "sha256": "476567b141136e43ce31cbb7dd9e39dda91eacff40d017f949c86ae6edb9059e"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/dem/.eslintrc.json",
+    "target": "terrain-core/packages/dem/.eslintrc.json",
+    "sha256": "fd558b47c606e3d717ed475661004d6dbb6e8b120bba79dfa8f0f99244d1ebab"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/dem/.npmrc",
+    "target": "terrain-core/packages/dem/.npmrc",
+    "sha256": "af542f2e6e270a65969378049c4f7394c0f3a609730075fe9c4e215aca150bd8"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/dem/.prettierignore",
+    "target": "terrain-core/packages/dem/.prettierignore",
+    "sha256": "1d39739bc7dd19792279e0f3da9c7edc074ac616381f54ee32ba5278e0309b53"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/dem/.prettierrc",
+    "target": "terrain-core/packages/dem/.prettierrc",
+    "sha256": "a4482fd83536b1a2016cb699e5a90af7acba98d9650f335de322b7da597439a9"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/dem/LICENSE",
+    "target": "terrain-core/packages/dem/LICENSE",
+    "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/dem/package.json",
+    "target": "terrain-core/packages/dem/package.json",
+    "sha256": "587b0401c426e934516c8dfa817a25bf020a7fb4605fed49bcc43b78d5af1612"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/dem/README.md",
+    "target": "terrain-core/packages/dem/README.md",
+    "sha256": "e0b2659d2d62fe7cb46b4e8b433e011691b66d88f5f7bcfe1037b90c00a720bf"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/dem/tsconfig.json",
+    "target": "terrain-core/packages/dem/tsconfig.json",
+    "sha256": "4833e230aea85396e483469061f809668062f4e184f5adfa57f11c5ac5d22ba8"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/dem/tsup.config.ts",
+    "target": "terrain-core/packages/dem/tsup.config.ts",
+    "sha256": "37e4f1bc6b1e2430d4cb34fae345f0f858c421f654ed22f4175b6594c201b040"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/dem/vitest.config.ts",
+    "target": "terrain-core/packages/dem/vitest.config.ts",
+    "sha256": "9bc8f058d87b3358e3cf9c0096990bdb35b73a5df9c3f2df711197f14f025501"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/dem/src/index.ts",
+    "target": "terrain-core/packages/dem/src/index.ts",
+    "sha256": "bbfd375039f931e804f9c08171cf0e293932ef28fd81b69575b9dfbbb12ddf7e"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/dem/tests/codecs.test.ts",
+    "target": "terrain-core/packages/dem/tests/codecs.test.ts",
+    "sha256": "57b6b880021fd8b2edd7ca5c12b127d8ff39cc1bc15202c8a80f821c4800e6c4"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/dem/tests/cube-dem.test.ts",
+    "target": "terrain-core/packages/dem/tests/cube-dem.test.ts",
+    "sha256": "fde0a16f11ddc4a7bcf93efcdd5b392a64090188f2f1663eb9599a172778929b"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/dem/tests/dem-decoder.test.ts",
+    "target": "terrain-core/packages/dem/tests/dem-decoder.test.ts",
+    "sha256": "861d549e63da877666fb6561886b1b67f13de9f3300bf6e95cc013b118019950"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/dem/tests/dem-infos.test.ts",
+    "target": "terrain-core/packages/dem/tests/dem-infos.test.ts",
+    "sha256": "e8cfc5c8bee0f9a4607bda5f9a260a566b54dcc19940e54b2f44f80d6b4f794e"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/dem/tests/dem-pyramid.test.ts",
+    "target": "terrain-core/packages/dem/tests/dem-pyramid.test.ts",
+    "sha256": "9a0d3eb485bc9a4d50326a0bb4d7c49fc31da79c2934f0bdb8932f6575de2abb"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/dem/tests/mapzen-normals.test.ts",
+    "target": "terrain-core/packages/dem/tests/mapzen-normals.test.ts",
+    "sha256": "991d6981af639323386ac5bc0e2bfaded5ab1dca4458724dafdb12e97109c138"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/dem/tests/presets.test.ts",
+    "target": "terrain-core/packages/dem/tests/presets.test.ts",
+    "sha256": "803809d8064df0e737e7b8c13b18e4d4ffd5472533660ee7eb8113f41f692267"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/dem/tests/raster-registration.test.ts",
+    "target": "terrain-core/packages/dem/tests/raster-registration.test.ts",
+    "sha256": "f90d168a724ec0f446d850a6da02248d9f18a3c8c09aa429ac22c3e5df42ebbc"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/dem/tests/terrarium-encoder.test.ts",
+    "target": "terrain-core/packages/dem/tests/terrarium-encoder.test.ts",
+    "sha256": "7720e6bf2bec9e54c53208ef4b3a11247a1ef8d2c97db198b1801fe1c53715aa"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/dem/src/codecs/dem-decoder.ts",
+    "target": "terrain-core/packages/dem/src/codecs/dem-decoder.ts",
+    "sha256": "fb23e4160a8bd5dbcf76abfd6f7ec27a6070f3fb13743479dfcaa215b8f73a66"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/dem/src/codecs/dem-infos.ts",
+    "target": "terrain-core/packages/dem/src/codecs/dem-infos.ts",
+    "sha256": "83d868266937df6a13575b51caf7fe74de33a898c52fa50d4b3ac9eba729e67e"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/dem/src/codecs/dem.ts",
+    "target": "terrain-core/packages/dem/src/codecs/dem.ts",
+    "sha256": "7884ffdd13c95bdda8123a0321fe56179cbec0cac15068ab858d7d115ddc6e30"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/dem/src/codecs/index.ts",
+    "target": "terrain-core/packages/dem/src/codecs/index.ts",
+    "sha256": "f333fd23a05834e6c9dfadb12c04950945d1be389dbd2af338999733876ee379"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/dem/src/codecs/mapzen-normals.ts",
+    "target": "terrain-core/packages/dem/src/codecs/mapzen-normals.ts",
+    "sha256": "7abe79178c8e4894cd16e7bcefe4e05a106a2af0d72f584e9c280e6ac0968d42"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/dem/src/codecs/terrarium-encoder.ts",
+    "target": "terrain-core/packages/dem/src/codecs/terrarium-encoder.ts",
+    "sha256": "23c349685fef0c10a999219daf630b0ee7f819c8a1f47859336a1bd33f62f4e9"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/dem/src/pyramid/child-height-ranges.ts",
+    "target": "terrain-core/packages/dem/src/pyramid/child-height-ranges.ts",
+    "sha256": "bf0d113b4fcaa47027ac87ff158a34ed49d5ff2d3bebe0c9a3ac0e6988892df7"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/dem/src/pyramid/dem-pyramid.ts",
+    "target": "terrain-core/packages/dem/src/pyramid/dem-pyramid.ts",
+    "sha256": "731cb76b8d61fce579e8b4755b55ed5dac9555d31807a378ed5dbedf624ca247"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/dem/src/pyramid/index.ts",
+    "target": "terrain-core/packages/dem/src/pyramid/index.ts",
+    "sha256": "dcd770894555385fd53645bd8d2c7c9397ee2036c68016c56998b8ee37b576bc"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/dem/src/pyramid/surface-normal.ts",
+    "target": "terrain-core/packages/dem/src/pyramid/surface-normal.ts",
+    "sha256": "6f4b7e74e10f88ba9bda240910f96e9c860f4798df5e8d643827123323bb91f0"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/dem/src/pyramid/tile-surface-normal.ts",
+    "target": "terrain-core/packages/dem/src/pyramid/tile-surface-normal.ts",
+    "sha256": "273c80f9632f8048bbb3e12dcb2c9ce59d91a6f81085ca55ebe93109f3e192a4"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/dem/src/sources/dem-tile-loader.ts",
+    "target": "terrain-core/packages/dem/src/sources/dem-tile-loader.ts",
+    "sha256": "b142830c5dd4e4746c1b875946b14be314e0ee478e65fb0bd7e066219d71a6f9"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/dem/src/sources/index.ts",
+    "target": "terrain-core/packages/dem/src/sources/index.ts",
+    "sha256": "acd7eceec19100289fd8dc12d4116010233fae6d1ffa2f90e5568ccacc150bf8"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/dem/src/sources/presets.ts",
+    "target": "terrain-core/packages/dem/src/sources/presets.ts",
+    "sha256": "0e19dbdac3a1278c51d896cc5f2e3d50c23e2be74fc55e4852875f2d0fdae988"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/grid/.eslintrc.json",
+    "target": "terrain-core/packages/grid/.eslintrc.json",
+    "sha256": "fd558b47c606e3d717ed475661004d6dbb6e8b120bba79dfa8f0f99244d1ebab"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/grid/.npmrc",
+    "target": "terrain-core/packages/grid/.npmrc",
+    "sha256": "af542f2e6e270a65969378049c4f7394c0f3a609730075fe9c4e215aca150bd8"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/grid/.prettierignore",
+    "target": "terrain-core/packages/grid/.prettierignore",
+    "sha256": "1d39739bc7dd19792279e0f3da9c7edc074ac616381f54ee32ba5278e0309b53"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/grid/.prettierrc",
+    "target": "terrain-core/packages/grid/.prettierrc",
+    "sha256": "a4482fd83536b1a2016cb699e5a90af7acba98d9650f335de322b7da597439a9"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/grid/LICENSE",
+    "target": "terrain-core/packages/grid/LICENSE",
+    "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/grid/package.json",
+    "target": "terrain-core/packages/grid/package.json",
+    "sha256": "5e87805ac3cc66e8d8c781014df519e7d5692678e3854828b1c79b6eec8651c5"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/grid/README.md",
+    "target": "terrain-core/packages/grid/README.md",
+    "sha256": "5d228c242e43e0d5da119e3e24f9b075ad2e73cb86ef47a818c758e0aa6fae79"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/grid/tsconfig.json",
+    "target": "terrain-core/packages/grid/tsconfig.json",
+    "sha256": "e2d4003e968638160b6beec194f86eadeeb5d7c1b4a004158e45cfd234ffcf92"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/grid/tsup.config.ts",
+    "target": "terrain-core/packages/grid/tsup.config.ts",
+    "sha256": "842e875f45915b07bc62de3d6899566744542f7702e502f1573489437279890e"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/grid/vitest.config.ts",
+    "target": "terrain-core/packages/grid/vitest.config.ts",
+    "sha256": "29377facebca4c4726e4d3dd1996547cc337daf1e735e3e757760137ca362098"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/grid/src/grid-lod.ts",
+    "target": "terrain-core/packages/grid/src/grid-lod.ts",
+    "sha256": "e51344785e53fa89020250b4d72b6dcdce2928a8b14de753c6d4b6dcb8c4d066"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/grid/src/grid-tile-geometry.ts",
+    "target": "terrain-core/packages/grid/src/grid-tile-geometry.ts",
+    "sha256": "dd68703e84e4c4e24abe4776bb1486ea5f81b6c6e00f9d5bc6b653feef826b4c"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/grid/src/grid-topology.ts",
+    "target": "terrain-core/packages/grid/src/grid-topology.ts",
+    "sha256": "975d97a80867863559596d8ea59aaf8e0972f8f2ec5fba284e7a356114bdde00"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/grid/src/grid-vertices.ts",
+    "target": "terrain-core/packages/grid/src/grid-vertices.ts",
+    "sha256": "4a011fe410c5984ac362d7defd08943ec6698781de68b0c0594b2f119afb7ec8"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/grid/src/index.ts",
+    "target": "terrain-core/packages/grid/src/index.ts",
+    "sha256": "2951dc60f8803cca8e9af64086ea2073e47e41eaaaa009d92e41c6a02d74b915"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/grid/tests/grid-lod.test.ts",
+    "target": "terrain-core/packages/grid/tests/grid-lod.test.ts",
+    "sha256": "930c55d24f6aa274a3375d0d15b47243e009f837e634a7129daddcb0d1792df0"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/grid/tests/grid-tile-geometry.test.ts",
+    "target": "terrain-core/packages/grid/tests/grid-tile-geometry.test.ts",
+    "sha256": "d469825fe6f7cfddcc9eee4eb2ddb08ab517e7af89d1ba656831fdbf7590fb19"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/grid/tests/grid-topology.test.ts",
+    "target": "terrain-core/packages/grid/tests/grid-topology.test.ts",
+    "sha256": "815c9a2cc2d54a0320bc77ccf0bf48036ee3d6b43641d0d0ce6a54079a687ffb"
+  },
+  {
+    "source": "3d-tiles-core/node/packages/grid/tests/grid-vertices.test.ts",
+    "target": "terrain-core/packages/grid/tests/grid-vertices.test.ts",
+    "sha256": "b87cf64fc4d1c12b3643c764a36af341780b02c70b05833eeae939909d8c16fe"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/.eslintrc.json",
+    "target": "spacexr-rendering/packages/core/.eslintrc.json",
+    "sha256": "7f508184ac86ab3aa0299ee4536216b22a20f41a4cbb27f086a87ecbee9156b4"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/.npmrc",
+    "target": "spacexr-rendering/packages/core/.npmrc",
+    "sha256": "2eeed0e893eb12eb29d92191b22bc2f2de0207e80397ab5e3e1e339a03273a40"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/.prettierignore",
+    "target": "spacexr-rendering/packages/core/.prettierignore",
+    "sha256": "c259b5fc426c6036eb3cde0bb707c14c8fdf13766e260f40ce39297eb9efad62"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/.prettierrc",
+    "target": "spacexr-rendering/packages/core/.prettierrc",
+    "sha256": "454a09b5255da9e4ee1f2d918929278981b16e4ef679688939fdf65f267b31c1"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/LICENSE",
+    "target": "spacexr-rendering/packages/core/LICENSE",
+    "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/package.json",
+    "target": "spacexr-rendering/packages/core/package.json",
+    "sha256": "477c3a24ffede852c6dafa49970ca86815540c207fbd9c41a8c92750ac1c06d1"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/README.md",
+    "target": "spacexr-rendering/packages/core/README.md",
+    "sha256": "a1ce30bcf4b3ed4ebfd160f3df127b671e4227a1a5140ba83e9af59feb17762c"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/tsconfig.json",
+    "target": "spacexr-rendering/packages/core/tsconfig.json",
+    "sha256": "6cb2e7a16b631bb65db725572794eee9204bbdf53080ad8b3f5f96bda3155f0a"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/tsup.config.ts",
+    "target": "spacexr-rendering/packages/core/tsup.config.ts",
+    "sha256": "cc24dae068b385368253874a3fd6792d11591529b760fd72072fb9b7e154a40e"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/vitest.config.ts",
+    "target": "spacexr-rendering/packages/core/vitest.config.ts",
+    "sha256": "6b39b58833d0b025e46cffe99ba48ab41883ea0d814ba7708badab89073c958c"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/tools/.eslintrc.json",
+    "target": "spacexr-rendering/packages/tools/.eslintrc.json",
+    "sha256": "7f508184ac86ab3aa0299ee4536216b22a20f41a4cbb27f086a87ecbee9156b4"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/tools/.prettierignore",
+    "target": "spacexr-rendering/packages/tools/.prettierignore",
+    "sha256": "c259b5fc426c6036eb3cde0bb707c14c8fdf13766e260f40ce39297eb9efad62"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/tools/.prettierrc",
+    "target": "spacexr-rendering/packages/tools/.prettierrc",
+    "sha256": "454a09b5255da9e4ee1f2d918929278981b16e4ef679688939fdf65f267b31c1"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/tools/package.json",
+    "target": "spacexr-rendering/packages/tools/package.json",
+    "sha256": "a4137217847551a2b23afce2244f10b284b193436f6d466f423e3e382cc838f7"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/tools/rapport.json",
+    "target": "spacexr-rendering/packages/tools/rapport.json",
+    "sha256": "3750f1270d6e107e790e8165214ab5180f1a979d3e2680d93cb941dc23efa982"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/tools/README.md",
+    "target": "spacexr-rendering/packages/tools/README.md",
+    "sha256": "721acd442381c562e03ff2a571ae31e4ee83ca405e903c221a8ac16c7acd6492"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/tools/tsconfig.json",
+    "target": "spacexr-rendering/packages/tools/tsconfig.json",
+    "sha256": "07c0bb831e1da181e8e2d5966cd72f00d1e6b22c3b0e72b0235d8b43140c3ef0"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/tools/vitest.config.ts",
+    "target": "spacexr-rendering/packages/tools/vitest.config.ts",
+    "sha256": "e19cc4403f596dfe30037957f22e5356fffdbf39ce60678bed63f12315e5c15c"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/index.ts",
+    "target": "spacexr-rendering/packages/core/src/index.ts",
+    "sha256": "872dff5afa718aab4edc14b2383077273c02ed2408fcc3d61be36d45845941da"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/tests/attributions.test.ts",
+    "target": "spacexr-rendering/packages/core/tests/attributions.test.ts",
+    "sha256": "b3e623a15e9e8fea240c492bb57f319232d41d520c1d929b748fb23523be5dd0"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/tests/body-frame.test.ts",
+    "target": "spacexr-rendering/packages/core/tests/body-frame.test.ts",
+    "sha256": "63a53e45d60c0a988b39ddf6235e94150dd6596f170e0f18d079101861ab83d5"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/tests/camera-frame.test.ts",
+    "target": "spacexr-rendering/packages/core/tests/camera-frame.test.ts",
+    "sha256": "95d6d3046e2cbb5d4e6b32078406d51dc815619f087f105060e6514901f6b343"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/tests/content-format.test.ts",
+    "target": "spacexr-rendering/packages/core/tests/content-format.test.ts",
+    "sha256": "8afc4370d0edadf26e84b9df58f227db91cd03ed7b901be070b5ca322c98d6be"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/tests/copyrights.test.ts",
+    "target": "spacexr-rendering/packages/core/tests/copyrights.test.ts",
+    "sha256": "59417a45844e223254fdae1ab3e775a0dec13b61853f7407a47b78f9b1ff383c"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/tests/displayed-tiles.test.ts",
+    "target": "spacexr-rendering/packages/core/tests/displayed-tiles.test.ts",
+    "sha256": "6af812a8ba00d542ff8656dc4d6b091ffb2cb5d6c251c42f6711c34899337aad"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/tests/geodesic-grid-geometry.test.ts",
+    "target": "spacexr-rendering/packages/core/tests/geodesic-grid-geometry.test.ts",
+    "sha256": "ce1ecf89a14c2c016be38529df2270edfbb35ac200446e0aa2ab44e45aebe9a7"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/tests/geodesic-grid-pipeline.test.ts",
+    "target": "spacexr-rendering/packages/core/tests/geodesic-grid-pipeline.test.ts",
+    "sha256": "d0501f6cebe85ebd1c14a330bae3cc219d11d3c30c10d88b0e8f2aa8e9f5f4b4"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/tests/gltf-tile-adapter.test.ts",
+    "target": "spacexr-rendering/packages/core/tests/gltf-tile-adapter.test.ts",
+    "sha256": "48b85a2127a3acf2e222e5e2fa014aafed56bb731ddd736fe45bd699ae881ff6"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/tests/gpu-normal-pages.test.ts",
+    "target": "spacexr-rendering/packages/core/tests/gpu-normal-pages.test.ts",
+    "sha256": "eca796cd681f2390d769fee4884adcbaab9653d9cce5bc702b9c659d3de871c7"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/tests/gpu-runtime-selection.test.ts",
+    "target": "spacexr-rendering/packages/core/tests/gpu-runtime-selection.test.ts",
+    "sha256": "27819697cfdb16459d5aea801a77d113f6224215c11a8ccf261865ad92af3ca1"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/tests/gpu-terrain-rebuild.test.ts",
+    "target": "spacexr-rendering/packages/core/tests/gpu-terrain-rebuild.test.ts",
+    "sha256": "588b5704782bc0073a7b363c5bf5824cca273b16951e42a72b2a03a4ece72d08"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/tests/grid-shapes.test.ts",
+    "target": "spacexr-rendering/packages/core/tests/grid-shapes.test.ts",
+    "sha256": "14e9f640de518702f22505eb5e70021efa751027e0b8747e3d37ef2e0941e047"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/tests/grid-source.test.ts",
+    "target": "spacexr-rendering/packages/core/tests/grid-source.test.ts",
+    "sha256": "df1c9f61c4d4d4c19a48c0f06833dd9f001d8a2058f331d712cff645f5de3a1b"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/tests/helpers.ts",
+    "target": "spacexr-rendering/packages/core/tests/helpers.ts",
+    "sha256": "d7b63d5dcef65174c0758190648e9b7c15f6afe664ebf37679119163ab21d9e5"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/tests/instanced-grid.test.ts",
+    "target": "spacexr-rendering/packages/core/tests/instanced-grid.test.ts",
+    "sha256": "82fc073c32e178a42e35d25168109274bb35258d74836c248f29e9f85a7a5a7f"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/tests/mercator-isolation.test.ts",
+    "target": "spacexr-rendering/packages/core/tests/mercator-isolation.test.ts",
+    "sha256": "01e5440bcc543406565422a97e4d25549d31bdde26d7ed8ff4a73bfe5e0ea1cb"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/tests/mercator-runtime-geometry.test.ts",
+    "target": "spacexr-rendering/packages/core/tests/mercator-runtime-geometry.test.ts",
+    "sha256": "a807984ffe865758244cd546686d3c9df79ef056964f6cb6d25d0bf90b5249cd"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/tests/motion-refinement.test.ts",
+    "target": "spacexr-rendering/packages/core/tests/motion-refinement.test.ts",
+    "sha256": "fa105d82c0df14d7d81604fde519e74cf8981931986fdf0e0640e75f107c4f9e"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/tests/orbit-frame.test.ts",
+    "target": "spacexr-rendering/packages/core/tests/orbit-frame.test.ts",
+    "sha256": "2600d1bc8c743774ec10a64c88b5a734767893040ac1aa2341c5b626fac0d7db"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/tests/orbital-camera.test.ts",
+    "target": "spacexr-rendering/packages/core/tests/orbital-camera.test.ts",
+    "sha256": "a77f334f515179a0a70b19fc316de3e9d2a40fa1e4e37a7dc89aac89c0e8c42a"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/tests/runtime-driver.test.ts",
+    "target": "spacexr-rendering/packages/core/tests/runtime-driver.test.ts",
+    "sha256": "8904e726bac26c5ffb866d6bc4073977fb281e70243d9dbe9fd9cc4e707e84ed"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/tests/runtime-monitor.test.ts",
+    "target": "spacexr-rendering/packages/core/tests/runtime-monitor.test.ts",
+    "sha256": "a714c62d648e9bafc6cdab8c8d86a746b73e6baf0cac6e76768765c810d5fb3b"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/tests/shader-branch.ts",
+    "target": "spacexr-rendering/packages/core/tests/shader-branch.ts",
+    "sha256": "92d22d8c93a25bf79e9a11a371e09d295b0fbb2d851b07db41222d70d621f4ce"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/tests/tile-matrix.test.ts",
+    "target": "spacexr-rendering/packages/core/tests/tile-matrix.test.ts",
+    "sha256": "66490e772a689a9623e3dc87deec564ade172a599eff5f5d7bf2e04a50185a30"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/camera/camera-change-tracker.ts",
+    "target": "spacexr-rendering/packages/core/src/camera/camera-change-tracker.ts",
+    "sha256": "f230d48215af26e29b65b8945335737f56e9630afd3bce0c36184fe7979da62d"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/camera/geospatial-camera.ts",
+    "target": "spacexr-rendering/packages/core/src/camera/geospatial-camera.ts",
+    "sha256": "01efbf7cc855f7a22bf37271df13dcf254047e7c325f88cc3fe9cb391e5ee796"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/camera/orbit-frame.ts",
+    "target": "spacexr-rendering/packages/core/src/camera/orbit-frame.ts",
+    "sha256": "44864b9d04c9b30253811be7fcfca83cb343c41958cb74ad0beae6e4998b1ab1"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/camera/orbital-camera.ts",
+    "target": "spacexr-rendering/packages/core/src/camera/orbital-camera.ts",
+    "sha256": "f64082049ca40a18114e5d25d91e72657034bcbef867cf103c2071573b9439e1"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/gltf/attributions.ts",
+    "target": "spacexr-rendering/packages/core/src/gltf/attributions.ts",
+    "sha256": "80947e4a710da7ccb68cc4c256d5eda8006272c8a502bb78d3d6a21d9abc84b4"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/gltf/content-format.ts",
+    "target": "spacexr-rendering/packages/core/src/gltf/content-format.ts",
+    "sha256": "346beff0df0b64159b97a4c265dc2e4ffb76323d5334969cf9830007634e31c2"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/gltf/copyrights.ts",
+    "target": "spacexr-rendering/packages/core/src/gltf/copyrights.ts",
+    "sha256": "74e07198097dda0726d750f3ca8aa55a8c4913a0f5301c74bc31150dd7330f5a"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/gltf/gltf-tile-adapter.ts",
+    "target": "spacexr-rendering/packages/core/src/gltf/gltf-tile-adapter.ts",
+    "sha256": "953563f6854118e2a71e96e0c44cea9df4764970d57741704bb41206d26dc29c"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/monitor/runtime-monitor.ts",
+    "target": "spacexr-rendering/packages/core/src/monitor/runtime-monitor.ts",
+    "sha256": "8f770d03903edbf3230580996a7d58723115018e9bf7cfd16346410a01c1e301"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/raster/raster-pages.ts",
+    "target": "spacexr-rendering/packages/core/src/raster/raster-pages.ts",
+    "sha256": "c1fe1e14cd58c0fb18f614782166feab81e13f75671f481998b2367047e9ca70"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/raster/raster-tile-adapter.ts",
+    "target": "spacexr-rendering/packages/core/src/raster/raster-tile-adapter.ts",
+    "sha256": "f3a5f194a8c395af3660abb280477a776a70e97feaf926cfa251cce4053c8a45"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/raster/texture-array-backends.ts",
+    "target": "spacexr-rendering/packages/core/src/raster/texture-array-backends.ts",
+    "sha256": "43d70e29adfc439ad48aecbb81a16b9be44f9de357c23ae582f8699fa20ed653"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/raster/texture-array-pool.ts",
+    "target": "spacexr-rendering/packages/core/src/raster/texture-array-pool.ts",
+    "sha256": "6bf0f1939e81f95d0eae936ec91ded87102031814367f1c8dea50bbbb2eea497"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/runtime/motion-refinement.ts",
+    "target": "spacexr-rendering/packages/core/src/runtime/motion-refinement.ts",
+    "sha256": "a96d1d4e30d5ace7270fb3d864d7fbe7eea996e11e0490609315b78e764356ad"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/runtime/runtime-driver.ts",
+    "target": "spacexr-rendering/packages/core/src/runtime/runtime-driver.ts",
+    "sha256": "ff4ca76f52b23e9f55e4926583fbc7f23af9469ea4a7e951623b6c07b3452246"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/scene/geospatial-scene.ts",
+    "target": "spacexr-rendering/packages/core/src/scene/geospatial-scene.ts",
+    "sha256": "3c8dda61453c23e5f5d86dd269563bc5e20ce1066a357ee151032a9340353265"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/spatial/camera-frame.ts",
+    "target": "spacexr-rendering/packages/core/src/spatial/camera-frame.ts",
+    "sha256": "76a755ff185374e346dd79067ef39941c073490840f3ed9f3f51b91d42ecaaee"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/spatial/tile-matrix.ts",
+    "target": "spacexr-rendering/packages/core/src/spatial/tile-matrix.ts",
+    "sha256": "dc09ac1502f01aacb5a45bd54a34bee09bd7a89888b648373d8b4206998af490"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/terrain/displayed-tiles.ts",
+    "target": "spacexr-rendering/packages/core/src/terrain/displayed-tiles.ts",
+    "sha256": "7d492a306fe2074749a9edbc4c9af9d51da887330b357e9fabb51ef6f2827a22"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/terrain/grid-source.ts",
+    "target": "spacexr-rendering/packages/core/src/terrain/grid-source.ts",
+    "sha256": "dd48574d82f4d04965fbc78f9fea674abe16413745f8b0192c37c5cb8965319a"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/terrain/terrain-config.json",
+    "target": "spacexr-rendering/packages/core/src/terrain/terrain-config.json",
+    "sha256": "acb32b1735bfca48d2dfa21c0307d3f54247162424d6ab63fd167477145defad"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/terrain/terrain-config.ts",
+    "target": "spacexr-rendering/packages/core/src/terrain/terrain-config.ts",
+    "sha256": "ce8c37e5e4542ed2601fdb33940d384416a3d44a338f08166db9dbbc13bb2847"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/terrain/terrain-engine.ts",
+    "target": "spacexr-rendering/packages/core/src/terrain/terrain-engine.ts",
+    "sha256": "dc24bdd0e1a25eecd863434933965396814532de75c7d72c0c2a38d81ead821f"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/terrain/terrain-tile.ts",
+    "target": "spacexr-rendering/packages/core/src/terrain/terrain-tile.ts",
+    "sha256": "497f7508629f299e59285f6d6fd1bccb0c0398c904fe621918438db93923f04b"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/terrain/terrain-tiling.ts",
+    "target": "spacexr-rendering/packages/core/src/terrain/terrain-tiling.ts",
+    "sha256": "b3f30f2bbfa7e5cd91706db6602c79f2da55fca7ef46734f6ae3ae0d7f9ef769"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/draping/mesh/mesh-raster-drape.ts",
+    "target": "spacexr-rendering/packages/core/src/draping/mesh/mesh-raster-drape.ts",
+    "sha256": "d02983b769852bb29fe29833a34628325953460ef193db1f101c04ee23f24489"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/draping/mesh/raster-drape-plugin.ts",
+    "target": "spacexr-rendering/packages/core/src/draping/mesh/raster-drape-plugin.ts",
+    "sha256": "631b2ce0b84192767c6a8200fda9801a653aee1e1aad820ab98a523ed6647caf"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/draping/mesh/shaders/snippets/rasterDrapeFragmentDefinitions.glsl",
+    "target": "spacexr-rendering/packages/core/src/draping/mesh/shaders/snippets/rasterDrapeFragmentDefinitions.glsl",
+    "sha256": "fa2457cc4691efe22e9066a09f01416e3ab47b011f63b1bf492b306d7c14bcaa"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/draping/mesh/shaders/snippets/rasterDrapeFragmentDefinitions.ts",
+    "target": "spacexr-rendering/packages/core/src/draping/mesh/shaders/snippets/rasterDrapeFragmentDefinitions.ts",
+    "sha256": "d07573d1e0061a1f98f89f3daa4162901b9324c727d6b012a8d6263074683e23"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/draping/mesh/shaders/snippets/rasterDrapeFragmentUpdateDiffuse.glsl",
+    "target": "spacexr-rendering/packages/core/src/draping/mesh/shaders/snippets/rasterDrapeFragmentUpdateDiffuse.glsl",
+    "sha256": "a9f988ff2a066d072fb9b16465629966010a76d83a360fa350ac49695b61068e"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/draping/mesh/shaders/snippets/rasterDrapeFragmentUpdateDiffuse.ts",
+    "target": "spacexr-rendering/packages/core/src/draping/mesh/shaders/snippets/rasterDrapeFragmentUpdateDiffuse.ts",
+    "sha256": "7d68cdec8debd79e6ba874666859108dede274bf40ca3a60ba5934ed3487ba5a"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/draping/mesh/shaders/snippets/rasterDrapeUniforms.glsl",
+    "target": "spacexr-rendering/packages/core/src/draping/mesh/shaders/snippets/rasterDrapeUniforms.glsl",
+    "sha256": "124182414c938f1427def1b638308363d63dd64e149a36c7130d06873b56b6d1"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/draping/mesh/shaders/snippets/rasterDrapeUniforms.ts",
+    "target": "spacexr-rendering/packages/core/src/draping/mesh/shaders/snippets/rasterDrapeUniforms.ts",
+    "sha256": "d7d3cbc4d022ef41dd32dd16302197e75114abfadc7680c54c0c0a5bcee19a43"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/draping/mesh/shaders/snippets/rasterDrapeVertexDefinitions.glsl",
+    "target": "spacexr-rendering/packages/core/src/draping/mesh/shaders/snippets/rasterDrapeVertexDefinitions.glsl",
+    "sha256": "432b7088a76cf111e34fa48d9f20718111c16392507bdd6c7e9852f3d5510e75"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/draping/mesh/shaders/snippets/rasterDrapeVertexDefinitions.ts",
+    "target": "spacexr-rendering/packages/core/src/draping/mesh/shaders/snippets/rasterDrapeVertexDefinitions.ts",
+    "sha256": "5e54983647f8347b70995eea2af3bde49a4303cf0e51063f176fd4c9c223d3ac"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/draping/mesh/shaders/snippets/rasterDrapeVertexMainEnd.glsl",
+    "target": "spacexr-rendering/packages/core/src/draping/mesh/shaders/snippets/rasterDrapeVertexMainEnd.glsl",
+    "sha256": "d53786b477a8d2428a753487059af178b293b749d8424f5689a3658c089ede9b"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/draping/mesh/shaders/snippets/rasterDrapeVertexMainEnd.ts",
+    "target": "spacexr-rendering/packages/core/src/draping/mesh/shaders/snippets/rasterDrapeVertexMainEnd.ts",
+    "sha256": "5babdd306e80c1fca7cb09079bbdee0904e31983dc8873d5648e2d7980a19965"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/draping/mesh/shaders/wgsl/snippets/rasterDrapeFragmentDefinitions.ts",
+    "target": "spacexr-rendering/packages/core/src/draping/mesh/shaders/wgsl/snippets/rasterDrapeFragmentDefinitions.ts",
+    "sha256": "f461be13b574968a45c6c6707913829c06fe2965d66422190ab13f71b4ea8df6"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/draping/mesh/shaders/wgsl/snippets/rasterDrapeFragmentDefinitions.wgsl",
+    "target": "spacexr-rendering/packages/core/src/draping/mesh/shaders/wgsl/snippets/rasterDrapeFragmentDefinitions.wgsl",
+    "sha256": "0a5432029c9987d1666e34cde0720aa93e3d6ffe07fb447bb60cd6a790b206be"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/draping/mesh/shaders/wgsl/snippets/rasterDrapeFragmentUpdateDiffuse.ts",
+    "target": "spacexr-rendering/packages/core/src/draping/mesh/shaders/wgsl/snippets/rasterDrapeFragmentUpdateDiffuse.ts",
+    "sha256": "0e73a82c1d436cab8045976c51b6df6f54f2278704b5944ef15a2acb72df27c8"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/draping/mesh/shaders/wgsl/snippets/rasterDrapeFragmentUpdateDiffuse.wgsl",
+    "target": "spacexr-rendering/packages/core/src/draping/mesh/shaders/wgsl/snippets/rasterDrapeFragmentUpdateDiffuse.wgsl",
+    "sha256": "687fdbb7f1ca3b92d43b86a1f445384f2695f46c0157277b55d959b39ac3d4ca"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/draping/mesh/shaders/wgsl/snippets/rasterDrapeUniforms.ts",
+    "target": "spacexr-rendering/packages/core/src/draping/mesh/shaders/wgsl/snippets/rasterDrapeUniforms.ts",
+    "sha256": "2d346b0f7fd9c21a0846f876b3a4e6e3852ff62949cb9471bc165ce5973be36e"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/draping/mesh/shaders/wgsl/snippets/rasterDrapeUniforms.wgsl",
+    "target": "spacexr-rendering/packages/core/src/draping/mesh/shaders/wgsl/snippets/rasterDrapeUniforms.wgsl",
+    "sha256": "d2906dc8518d0337a03fb50724e4f12636b88403bb232044fd5c344391aa278f"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/draping/mesh/shaders/wgsl/snippets/rasterDrapeVertexDefinitions.ts",
+    "target": "spacexr-rendering/packages/core/src/draping/mesh/shaders/wgsl/snippets/rasterDrapeVertexDefinitions.ts",
+    "sha256": "4d31d840b5695248eb29429d5f79951b494ce8f37e61b5ef16863b0aabf78bf7"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/draping/mesh/shaders/wgsl/snippets/rasterDrapeVertexDefinitions.wgsl",
+    "target": "spacexr-rendering/packages/core/src/draping/mesh/shaders/wgsl/snippets/rasterDrapeVertexDefinitions.wgsl",
+    "sha256": "9cafd16d8465d65ee15f552857e77f81bc25a9a2dac2d96cc839f2796d471ba6"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/draping/mesh/shaders/wgsl/snippets/rasterDrapeVertexMainEnd.ts",
+    "target": "spacexr-rendering/packages/core/src/draping/mesh/shaders/wgsl/snippets/rasterDrapeVertexMainEnd.ts",
+    "sha256": "33c1deaf5d60f1db20c464cc05b6949b2534a78d1d4eeb75d32ffc6a6b0ea62c"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/draping/mesh/shaders/wgsl/snippets/rasterDrapeVertexMainEnd.wgsl",
+    "target": "spacexr-rendering/packages/core/src/draping/mesh/shaders/wgsl/snippets/rasterDrapeVertexMainEnd.wgsl",
+    "sha256": "a1af0596623206d8d734d16906ba48825e02b0447e55e7118239e750ab6fbd13"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/terrain/gpu/body-frame.ts",
+    "target": "spacexr-rendering/packages/core/src/terrain/gpu/body-frame.ts",
+    "sha256": "f15b8812f78c0fd1fad2d6fb28019039beb90dda20e4e843a90e18c48fb590da"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/terrain/gpu/elevation-pages.ts",
+    "target": "spacexr-rendering/packages/core/src/terrain/gpu/elevation-pages.ts",
+    "sha256": "dd14725f9c6c7e82b98dcda4ce59beb2f638c86d032ff76901336cb31ca0217d"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/terrain/gpu/gpu-raster-drape.ts",
+    "target": "spacexr-rendering/packages/core/src/terrain/gpu/gpu-raster-drape.ts",
+    "sha256": "34c51dbce50e23508e9fb7538bc016999ec00dd2b0a124274722161bd8b51fb7"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/terrain/gpu/gpu-terrain-engine.ts",
+    "target": "spacexr-rendering/packages/core/src/terrain/gpu/gpu-terrain-engine.ts",
+    "sha256": "64fd637120df5ecebf87b59f0808414146ba509474d7de7228348afaa775bbb5"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/terrain/gpu/gpu-terrain-normals.ts",
+    "target": "spacexr-rendering/packages/core/src/terrain/gpu/gpu-terrain-normals.ts",
+    "sha256": "892b49b10e392322f1fdc0654385e530f13f5012189c3fc118e36bc41534ad1d"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/terrain/gpu/grid-shapes.ts",
+    "target": "spacexr-rendering/packages/core/src/terrain/gpu/grid-shapes.ts",
+    "sha256": "1d9e45296c64a3657058b9db50c3c1da9b3f17f43bf0b0326cc032dc5eb26791"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/terrain/gpu/instanced-grid.ts",
+    "target": "spacexr-rendering/packages/core/src/terrain/gpu/instanced-grid.ts",
+    "sha256": "9e5bc2d3044a982582310d02b5e6503c093806edff0fb3872f29db744514faaf"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/terrain/gpu/pick-surface.ts",
+    "target": "spacexr-rendering/packages/core/src/terrain/gpu/pick-surface.ts",
+    "sha256": "a5d00f920f7ae3a326c2744525f1e0c2ab77d502e98efc70e654cc8bec6b45e5"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/terrain/mesh/geodesic-grid-geometry.ts",
+    "target": "spacexr-rendering/packages/core/src/terrain/mesh/geodesic-grid-geometry.ts",
+    "sha256": "8ab5382d7a649256fbea483157218a6c5e02ca0f1e0505aa3cab09cd4d5cedf8"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/terrain/mesh/geodesic-grid-pipeline.ts",
+    "target": "spacexr-rendering/packages/core/src/terrain/mesh/geodesic-grid-pipeline.ts",
+    "sha256": "d0347ff083b609e2eeeac36d05aef013923611305db4d723de98ac19259be475"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/terrain/mesh/mesh-terrain-engine.ts",
+    "target": "spacexr-rendering/packages/core/src/terrain/mesh/mesh-terrain-engine.ts",
+    "sha256": "f77ec27cfbd86df87fd3e7b514f94b8eb892b3ee7a26ce7cb24359939e5b9cb8"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/terrain/gpu/shaders/instancedGrid.fragment.glsl",
+    "target": "spacexr-rendering/packages/core/src/terrain/gpu/shaders/instancedGrid.fragment.glsl",
+    "sha256": "a22cd414f2b4c9330850c8b9e17adb3953f27236314dfcf05aae33b8e4f5a323"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/terrain/gpu/shaders/instancedGrid.fragment.ts",
+    "target": "spacexr-rendering/packages/core/src/terrain/gpu/shaders/instancedGrid.fragment.ts",
+    "sha256": "1427a6a94e43301290c879fdbe4382a2d01be6e43795d3cfbec1896616ca6dcd"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/terrain/gpu/shaders/instancedGrid.vertex.glsl",
+    "target": "spacexr-rendering/packages/core/src/terrain/gpu/shaders/instancedGrid.vertex.glsl",
+    "sha256": "6516600337b913ae4842d487013369f2a38516a290d436809f37752bdadf80f7"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/terrain/gpu/shaders/instancedGrid.vertex.ts",
+    "target": "spacexr-rendering/packages/core/src/terrain/gpu/shaders/instancedGrid.vertex.ts",
+    "sha256": "56c98ab89e042ead28fd11a55e7ab8221fa36bc04a50a307e7c4d138e679effc"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/terrain/gpu/shaders/wgsl/instancedGrid.fragment.ts",
+    "target": "spacexr-rendering/packages/core/src/terrain/gpu/shaders/wgsl/instancedGrid.fragment.ts",
+    "sha256": "f9243cf982a0b319b9da221d1895738cf294f2fd21924feaaf38acf65c456ac2"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/terrain/gpu/shaders/wgsl/instancedGrid.fragment.wgsl",
+    "target": "spacexr-rendering/packages/core/src/terrain/gpu/shaders/wgsl/instancedGrid.fragment.wgsl",
+    "sha256": "b0e2e41d66830478ad2b442fdf23af57ecef0c180cc031319f5a84323978ccd1"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/terrain/gpu/shaders/wgsl/instancedGrid.vertex.ts",
+    "target": "spacexr-rendering/packages/core/src/terrain/gpu/shaders/wgsl/instancedGrid.vertex.ts",
+    "sha256": "35571cbf35fe248b5224d31067694c797d847e5effffbe47f5876c32ecebde37"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/core/src/terrain/gpu/shaders/wgsl/instancedGrid.vertex.wgsl",
+    "target": "spacexr-rendering/packages/core/src/terrain/gpu/shaders/wgsl/instancedGrid.vertex.wgsl",
+    "sha256": "1ad695f4d4dadd9bd33b3724e153575fd521f0049704afeb8e1515bba3e9eb77"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/tools/src/build-shaders.ts",
+    "target": "spacexr-rendering/packages/tools/src/build-shaders.ts",
+    "sha256": "226ce505f09dd34aa2c870452166ed95996e90f693a276fbb867128f5029dc57"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/tools/src/cli.ts",
+    "target": "spacexr-rendering/packages/tools/src/cli.ts",
+    "sha256": "132a65d3618b4dc2c9008bbb407a6560046b200a32b929cdf197af2ecbbdd869"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/tools/src/index.ts",
+    "target": "spacexr-rendering/packages/tools/src/index.ts",
+    "sha256": "a80fe864a426b0a3021285da01ff2cd2f4af53e346dc557def542005ae5e8ac7"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/tools/tests/build-shaders.test.ts",
+    "target": "spacexr-rendering/packages/tools/tests/build-shaders.test.ts",
+    "sha256": "ec7d094de06c506923bfb0e890f7992ae2f0ec5dbe5d23f1570185c6200db775"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/tools/tests/generated-shaders.test.ts",
+    "target": "spacexr-rendering/packages/tools/tests/generated-shaders.test.ts",
+    "sha256": "b7ad094e05b85d9ed578521b824a73ab9f9d2b8963fde0c8123e4355eeeedb3d"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/tools/tests/renderer-compare.test.ts",
+    "target": "spacexr-rendering/packages/tools/tests/renderer-compare.test.ts",
+    "sha256": "92a8e642afd4e84ad266939de8d2662eafabb6bbef578daa52b4a830e59ea5de"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/tools/tests/terrain-bench.test.ts",
+    "target": "spacexr-rendering/packages/tools/tests/terrain-bench.test.ts",
+    "sha256": "954878bce7f8e39d5d05772c206e4d22b042a5d2e553657eb91fe71a88a17e5f"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/tools/src/terrain-bench/browser.ts",
+    "target": "spacexr-rendering/packages/tools/src/terrain-bench/browser.ts",
+    "sha256": "55129d2ce41b8db5d312bd285f67baba95be29b239b942c1f704370584faf327"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/tools/src/terrain-bench/cli.ts",
+    "target": "spacexr-rendering/packages/tools/src/terrain-bench/cli.ts",
+    "sha256": "75ee2d61313a82ed5dd3adde19de89d302996d1b08ae10b2004677d800e1d9c8"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/tools/src/terrain-bench/page-probe.js",
+    "target": "spacexr-rendering/packages/tools/src/terrain-bench/page-probe.js",
+    "sha256": "87172e99de2b3fdbd8654a8e54e78bcf083671bbd0a4740055190105e4a7606b"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/tools/src/terrain-bench/pixels.ts",
+    "target": "spacexr-rendering/packages/tools/src/terrain-bench/pixels.ts",
+    "sha256": "240b75c745fb6aa2f0f2378fd2ef5739d9f2160bfc52423a26cfff8d5bf5d965"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/tools/src/terrain-bench/png.ts",
+    "target": "spacexr-rendering/packages/tools/src/terrain-bench/png.ts",
+    "sha256": "bc86838ea3325214a03d40fc7675b357c34b2634adf644c0927a03d6ea895456"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/tools/src/terrain-bench/renderers.ts",
+    "target": "spacexr-rendering/packages/tools/src/terrain-bench/renderers.ts",
+    "sha256": "5da7c89f36c228c3a5ba26f4242b5ac97698cd2f9ca28db3792a0c72fb7afddd"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/tools/src/terrain-bench/report.ts",
+    "target": "spacexr-rendering/packages/tools/src/terrain-bench/report.ts",
+    "sha256": "3c5e3d5ae8374019e16c13b45cf3017adbd86208016f9a5460e5ec09275c6617"
+  },
+  {
+    "source": "3d-tiles-babylon/packages/tools/src/terrain-bench/scenarios.ts",
+    "target": "spacexr-rendering/packages/tools/src/terrain-bench/scenarios.ts",
+    "sha256": "7939f267b478456d91671c7caf64a97c1f13cded03bb4ea58b54d78c5de7e4df"
+  },
+  {
+    "source": "3d-tiles-babylon/examples/babylon-google-3d-tiles/.eslintrc.json",
+    "target": "spacexr-rendering/examples/babylon-google-3d-tiles/.eslintrc.json",
+    "sha256": "130a5a5602957349637cb927b4081fc31ee8bb1e35decd064d8e3ace8c96ee0c"
+  },
+  {
+    "source": "3d-tiles-babylon/examples/babylon-google-3d-tiles/.prettierignore",
+    "target": "spacexr-rendering/examples/babylon-google-3d-tiles/.prettierignore",
+    "sha256": "d965a8c325cce04d2f36e7329e41c35a43f650bc01aa44060c97d3514be6dbb5"
+  },
+  {
+    "source": "3d-tiles-babylon/examples/babylon-google-3d-tiles/.prettierrc",
+    "target": "spacexr-rendering/examples/babylon-google-3d-tiles/.prettierrc",
+    "sha256": "454a09b5255da9e4ee1f2d918929278981b16e4ef679688939fdf65f267b31c1"
+  },
+  {
+    "source": "3d-tiles-babylon/examples/babylon-google-3d-tiles/index.html",
+    "target": "spacexr-rendering/examples/babylon-google-3d-tiles/index.html",
+    "sha256": "66f8ce11f642f9038d77e07ba49dfbb322cff9a7360ea1bc810b80bd69160f4d"
+  },
+  {
+    "source": "3d-tiles-babylon/examples/babylon-google-3d-tiles/package.json",
+    "target": "spacexr-rendering/examples/babylon-google-3d-tiles/package.json",
+    "sha256": "1effa17e624bb773c25652b6fb7f6c898e990800feefca257dea963c300ebcf5"
+  },
+  {
+    "source": "3d-tiles-babylon/examples/babylon-google-3d-tiles/README.md",
+    "target": "spacexr-rendering/examples/babylon-google-3d-tiles/README.md",
+    "sha256": "adfdc5de9ea66cf3f3e7583331191d4a5b77faca12d66b982ebcfd85b5d9bd8e"
+  },
+  {
+    "source": "3d-tiles-babylon/examples/babylon-google-3d-tiles/tsconfig.json",
+    "target": "spacexr-rendering/examples/babylon-google-3d-tiles/tsconfig.json",
+    "sha256": "ff7a12459732a74243aaf38132bf22586aae37e798e88d4f26b71ad046c69e41"
+  },
+  {
+    "source": "3d-tiles-babylon/examples/babylon-google-3d-tiles/vite.config.ts",
+    "target": "spacexr-rendering/examples/babylon-google-3d-tiles/vite.config.ts",
+    "sha256": "b694cf5f7dfca0f30f7d5c1e407eaf475923e5260bcf201213e2a096d334b819"
+  },
+  {
+    "source": "3d-tiles-babylon/examples/babylon-google-3d-tiles/vitest.config.ts",
+    "target": "spacexr-rendering/examples/babylon-google-3d-tiles/vitest.config.ts",
+    "sha256": "475b51e74260102f3317920ed2cb0c3bdc10938806ba6ff2a401120da29f3a0f"
+  },
+  {
+    "source": "3d-tiles-babylon/examples/babylon-implicit-grid-mapzen/.eslintrc.json",
+    "target": "spacexr-rendering/examples/babylon-implicit-grid-mapzen/.eslintrc.json",
+    "sha256": "fdf3215d1f364c3305c125cb42e31f422e45145bd35f8d94e93eac459f12d681"
+  },
+  {
+    "source": "3d-tiles-babylon/examples/babylon-implicit-grid-mapzen/index.html",
+    "target": "spacexr-rendering/examples/babylon-implicit-grid-mapzen/index.html",
+    "sha256": "df3eacca21432648f96b2d56a354e600b411b4b5428ad0567aff3094a18b68c9"
+  },
+  {
+    "source": "3d-tiles-babylon/examples/babylon-implicit-grid-mapzen/package.json",
+    "target": "spacexr-rendering/examples/babylon-implicit-grid-mapzen/package.json",
+    "sha256": "ac02716652497b33eadddaa68e42dcf94659e986e890ac7364ad2260af9d7da6"
+  },
+  {
+    "source": "3d-tiles-babylon/examples/babylon-implicit-grid-mapzen/README.md",
+    "target": "spacexr-rendering/examples/babylon-implicit-grid-mapzen/README.md",
+    "sha256": "501d61502e83e47ea534b296ba627984ce4440c4efe235d5ffbd209c86ed752a"
+  },
+  {
+    "source": "3d-tiles-babylon/examples/babylon-implicit-grid-mapzen/tsconfig.json",
+    "target": "spacexr-rendering/examples/babylon-implicit-grid-mapzen/tsconfig.json",
+    "sha256": "8ad4b8b24a0a3db4d1d681a7809d2db7699edde5ce640933c83d2c3295ef4c1d"
+  },
+  {
+    "source": "3d-tiles-babylon/examples/babylon-implicit-grid-mapzen/vite.config.ts",
+    "target": "spacexr-rendering/examples/babylon-implicit-grid-mapzen/vite.config.ts",
+    "sha256": "268701ca1bdc7005d4835b21b384918f0d6551946acf6e2e09dcd36d38b98512"
+  },
+  {
+    "source": "3d-tiles-babylon/examples/babylon-google-3d-tiles/src/config.ts",
+    "target": "spacexr-rendering/examples/babylon-google-3d-tiles/src/config.ts",
+    "sha256": "f64b5ae2e0bc3e11ba554ab2f55056144683d3a59a8c48389e8993fe681aa798"
+  },
+  {
+    "source": "3d-tiles-babylon/examples/babylon-google-3d-tiles/src/google-tiles.ts",
+    "target": "spacexr-rendering/examples/babylon-google-3d-tiles/src/google-tiles.ts",
+    "sha256": "ab8e8ac3f03d44b0613fa466725b138863e1eca5b13fdfec287691fb1491f916"
+  },
+  {
+    "source": "3d-tiles-babylon/examples/babylon-google-3d-tiles/src/main.ts",
+    "target": "spacexr-rendering/examples/babylon-google-3d-tiles/src/main.ts",
+    "sha256": "0827b9ed77b766c2a8c381f50f9b7958b50fcb1f2254463ce2cf22c925b1ac96"
+  },
+  {
+    "source": "3d-tiles-babylon/examples/babylon-google-3d-tiles/src/style.css",
+    "target": "spacexr-rendering/examples/babylon-google-3d-tiles/src/style.css",
+    "sha256": "d65d04d3e6fe8ba3840c9dacb2782e55f25332a1b6abc55d24c6022f30037b9c"
+  },
+  {
+    "source": "3d-tiles-babylon/examples/babylon-google-3d-tiles/src/vite-env.d.ts",
+    "target": "spacexr-rendering/examples/babylon-google-3d-tiles/src/vite-env.d.ts",
+    "sha256": "974c4480becdd25df605047506ecddc88b19280f36efe26d6e1ef4b854e6bb70"
+  },
+  {
+    "source": "3d-tiles-babylon/examples/babylon-google-3d-tiles/tests/google-tiles.test.ts",
+    "target": "spacexr-rendering/examples/babylon-google-3d-tiles/tests/google-tiles.test.ts",
+    "sha256": "82d374774d17f64faba68fa9792de4cee533e644449f6f7a3a96fe5fffcedc3e"
+  },
+  {
+    "source": "3d-tiles-babylon/examples/babylon-implicit-grid-mapzen/scripts/export-shackleton-habitat.py",
+    "target": "spacexr-rendering/examples/babylon-implicit-grid-mapzen/scripts/export-shackleton-habitat.py",
+    "sha256": "4d95ab4b1467d7e66945bc9b3c1bd4964ea0e8af3f5e8056e6d114e0c8674a76"
+  },
+  {
+    "source": "3d-tiles-babylon/examples/babylon-implicit-grid-mapzen/src/debug-imagery.ts",
+    "target": "spacexr-rendering/examples/babylon-implicit-grid-mapzen/src/debug-imagery.ts",
+    "sha256": "e42b9ba84be1e090806eb475cbada2392d060926d8bf747f798948e392c2f6a3"
+  },
+  {
+    "source": "3d-tiles-babylon/examples/babylon-implicit-grid-mapzen/src/dem-decoder.worker.ts",
+    "target": "spacexr-rendering/examples/babylon-implicit-grid-mapzen/src/dem-decoder.worker.ts",
+    "sha256": "c1e2fb87189779d4fca8696f8b39488959bc2d44fddcbf0ba3ff294118f7e1ed"
+  },
+  {
+    "source": "3d-tiles-babylon/examples/babylon-implicit-grid-mapzen/src/local-imagery.ts",
+    "target": "spacexr-rendering/examples/babylon-implicit-grid-mapzen/src/local-imagery.ts",
+    "sha256": "d61e5e65bfc48437149f1c3a02309caeba9c034f131c07ed068f08df6dc4dfa3"
+  },
+  {
+    "source": "3d-tiles-babylon/examples/babylon-implicit-grid-mapzen/src/main.ts",
+    "target": "spacexr-rendering/examples/babylon-implicit-grid-mapzen/src/main.ts",
+    "sha256": "3917970dd0fa2358c888b20d19cb1eff87124d3474f5bdc52de41fe05b1746e8"
+  },
+  {
+    "source": "3d-tiles-babylon/examples/babylon-implicit-grid-mapzen/src/monitor-panel.ts",
+    "target": "spacexr-rendering/examples/babylon-implicit-grid-mapzen/src/monitor-panel.ts",
+    "sha256": "447e6009a5a487d570e171a69876fa0539e97eef13e606f54028a1337614c3b2"
+  },
+  {
+    "source": "3d-tiles-babylon/examples/babylon-implicit-grid-mapzen/src/places.json",
+    "target": "spacexr-rendering/examples/babylon-implicit-grid-mapzen/src/places.json",
+    "sha256": "3de391b0234225767094df5dbc26236634cea11b203c287c2f07bbfd639783c6"
+  },
+  {
+    "source": "3d-tiles-babylon/examples/babylon-implicit-grid-mapzen/src/style.css",
+    "target": "spacexr-rendering/examples/babylon-implicit-grid-mapzen/src/style.css",
+    "sha256": "0b4fce07303912a026bd70595315c93889795e0252062b7ab7ea5267cbcfea8c"
+  },
+  {
+    "source": "3d-tiles-babylon/examples/babylon-implicit-grid-mapzen/src/vite-env.d.ts",
+    "target": "spacexr-rendering/examples/babylon-implicit-grid-mapzen/src/vite-env.d.ts",
+    "sha256": "65996936fbb042915f7b74a200fcdde7e410f32a669b1ab9597cfaa4b0faddb5"
+  },
+  {
+    "source": "3d-tiles-babylon/examples/babylon-implicit-grid-mapzen/public/moon-sites/shackleton/rover.glb",
+    "target": "spacexr-rendering/examples/babylon-implicit-grid-mapzen/public/moon-sites/shackleton/rover.glb",
+    "sha256": "80816860281d9abacd053e91dc392fa09632f6b1449e43ede3981c585cbd9e7b"
+  },
+  {
+    "source": "3d-tiles-babylon/examples/babylon-implicit-grid-mapzen/public/moon-sites/shackleton/station.glb",
+    "target": "spacexr-rendering/examples/babylon-implicit-grid-mapzen/public/moon-sites/shackleton/station.glb",
+    "sha256": "a4828d9914b6d64c407d0c8c308591a7344867ac13bc6516274510a7e2315322"
+  },
+  {
+    "source": "3d-tiles-babylon/examples/babylon-implicit-grid-mapzen/public/moon-sites/shackleton/tileset.json",
+    "target": "spacexr-rendering/examples/babylon-implicit-grid-mapzen/public/moon-sites/shackleton/tileset.json",
+    "sha256": "84de595dec4b63b2c4e1c566d13b1bf0e304679951e377f4a9738cb29459c2c9"
+  },
+  {
+    "source": "3d-tiles-babylon/examples/babylon-implicit-grid-mapzen/src/local/google.imagery.ts",
+    "target": "spacexr-rendering/examples/babylon-implicit-grid-mapzen/src/local/google.imagery.ts",
+    "sha256": "46711cf427ec6b51e37b7daa68d3d693ff535fc071ded1b9079b896352ae65eb"
+  },
+  {
+    "source": "3d-tiles-babylon/docs/terrain-settings.md",
+    "target": "spacexr-rendering/docs/terrain-settings.md",
+    "sha256": "c702113a260b5d5bb2ac0ccaa02a6076ea7cd371536431ad60dcf324eb53a1b6"
+  },
+  {
+    "source": "3d-tiles-babylon/.vscode/extensions.json",
+    "target": "spacexr-rendering/.vscode/extensions.json",
+    "sha256": "07f3950c733fa436705388babaa8916a607ea02997244852aa39617a13b5ce33"
+  },
+  {
+    "source": "3d-tiles-babylon/.vscode/settings.json",
+    "target": "spacexr-rendering/.vscode/settings.json",
+    "sha256": "a3bfd0c5e8caa76945c438fdc2db6748863e6bee013029ce2ce0a0c672727113"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T10-first-grid-16.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T10-first-grid-16.json",
+    "sha256": "6c1036f2dae76a00713bdea9bf202f69d8677157377380a387cad94384fc15a4"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T10-first-grid-256.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T10-first-grid-256.json",
+    "sha256": "4255cd512363ff073ab51ff66b0069b677c484d2fe5dc310883ccaee7aa7566f"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T10-first-grid-32.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T10-first-grid-32.json",
+    "sha256": "a40c68c9fbb2687a768bb4a57d1d373801323a9f0c772610c1d0b7b6ee61a344"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T10-grid-16-run2.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T10-grid-16-run2.json",
+    "sha256": "dae0315d6be732d0e2b44e15a135cd2e6c7bc12164521ce923c8c1e4bacb5dff"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T10-grid-16.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T10-grid-16.json",
+    "sha256": "9f9149f7873e84025bc4eeb10c83ce55468a38727200d29ac06b01472b22bec9"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T10-grid-256.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T10-grid-256.json",
+    "sha256": "ed1f4e942cdc503ff96bb0bff4a3cb7c4f6d28090c6ad27948780a7be703ea68"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T10-grid-32-run2.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T10-grid-32-run2.json",
+    "sha256": "81d40faf29efe3ec3e5bacee1ed7f9cc77802afd783965b8899e562fd4e9ff35"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T10-grid-32.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T10-grid-32.json",
+    "sha256": "c3269dcdeedfbc4ee7cc52d33a0f143396c7d0ce3bdaadd57af58afcf54de5df"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T10-grid-64-run2.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T10-grid-64-run2.json",
+    "sha256": "86c48618849c43fff5bf2415b83b233f86ac9d8481256c379bff5d2a290022df"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T10-grid-64.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T10-grid-64.json",
+    "sha256": "ba66b284a107b9086287f031509d8e6b52bd9b061c3901ad673c4ce50db62292"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T10-views-pole-16-32-64.png",
+    "target": "spacexr-rendering/docs/terrain-tests/T10-views-pole-16-32-64.png",
+    "sha256": "da1528f62c1843c5b66b1739800229dc6862e5f0bf0479cde25f847682678342"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T10-views-tycho-16-32-64.png",
+    "target": "spacexr-rendering/docs/terrain-tests/T10-views-tycho-16-32-64.png",
+    "sha256": "16979a2033063a2814ba20d1a26fd996b2fe9e927cacb6e89fec8bd492d6bab9"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T11-moon-64.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T11-moon-64.json",
+    "sha256": "35822f30956733d97fbe5970d989ed692aee6d86ab541084075edcb3e2ce8174"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T13-mercator-64.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T13-mercator-64.json",
+    "sha256": "6eef792b054bf20aa1120ad88167790934bc3da7f50062b4446311b81f56a74b"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T14-grid16-2048.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T14-grid16-2048.json",
+    "sha256": "512871a55fe956026d04dddc5ca922245d40e37655e943c1121dc6abf78027a9"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T14-pole-2048a.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T14-pole-2048a.json",
+    "sha256": "02002979f22e573cfba4d6410c441ad1380534d7649079d5d649e1e3466544b5"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T14-pole-2048b.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T14-pole-2048b.json",
+    "sha256": "b10c5b1b215326bade110d71c511aa835ecd1c45533a84b9f10b0e03ec5f01ae"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T14-pole-512a.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T14-pole-512a.json",
+    "sha256": "b5b84c429323ef8b9496fc5e28a1ff9c01718f04d9d96417e4b45877a8808b39"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T14-pole-512b.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T14-pole-512b.json",
+    "sha256": "f8ca0d5759cb28b831b1611d5136d333497b45f0d35a7aa052dc1316e15e9857"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T15-merc-256.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T15-merc-256.json",
+    "sha256": "ad728c5e134f9b1d32489a065ccd5323df7baedc814fcb093da7af1011809543"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T15-merc-64-all.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T15-merc-64-all.json",
+    "sha256": "6bc352dd0d69250de35da6fdfdabd9594a721067ef450df757d8323be5a8f9c6"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T15-merc-64-cache.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T15-merc-64-cache.json",
+    "sha256": "f05d3d51d4e71e26936998af0eae23c25fdac44137d272150e6b3369367e3bac"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T15-merc-64-hysteresis.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T15-merc-64-hysteresis.json",
+    "sha256": "5b2fe4923620095a6c5c4649ad62a3e77bcf1c27a72a2b9ad2d9ac2638a915e9"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T15-merc-64-sse16.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T15-merc-64-sse16.json",
+    "sha256": "5e121b515e329577fb19b8022e452e049a4e7ad740b03bef5dc1d0c24ca9780b"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T15-merc-64.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T15-merc-64.json",
+    "sha256": "6e0c32bb5086746d59443c91108681a4e7f8ae313f453ef024b0e49b28e63f51"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T15-moon-default.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T15-moon-default.json",
+    "sha256": "93e56cb97ecf9392ec7884b27cf106eaf23dd3d56239464d16d6326ce02689e4"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T15-moon-delay-0.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T15-moon-delay-0.json",
+    "sha256": "a190fb26977ac8c3152d05828da850e83f3e5060fddb206fa7dda412e4a4f11d"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T15-moon-delay-120.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T15-moon-delay-120.json",
+    "sha256": "9514c9781601ef75320ad74843702d268ced8db462276c9c1cae76159a437b53"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T15-moon-grid-16.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T15-moon-grid-16.json",
+    "sha256": "4577d18313e2419e90a5e04c7704f765b880092cb879b2a1180c1369772352e0"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T15-moon-hysteresis-0.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T15-moon-hysteresis-0.json",
+    "sha256": "5559599963536bc6d70e3992bd195aaf04891413cd463bec1876946cd55d5459"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T15-moon-hysteresis-40.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T15-moon-hysteresis-40.json",
+    "sha256": "1cc5abca14da9f03ec03ef077abaeec4df29c5dde1b3c3727fcca2509a804266"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T16-sse-10.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T16-sse-10.json",
+    "sha256": "3bee6853646a11c60a34011d82019a0a136efa451f55e046d06eb62e61a26baa"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T16-sse-20.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T16-sse-20.json",
+    "sha256": "05e629f9d6b1a9cb73fc20b0fbe5b565c7085f62edf9a7607e12882370ee9763"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T16-sse-40.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T16-sse-40.json",
+    "sha256": "e9fac0d28f05c9597bab65348c5ae979101e5d6fb8d771f568c712f14b3d4d8b"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T16-views-mercator-25km-10-20-40.png",
+    "target": "spacexr-rendering/docs/terrain-tests/T16-views-mercator-25km-10-20-40.png",
+    "sha256": "90752ddd52de83ee08f1a400486df54c972f03f875ec73bb44b65a58990a3d49"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T16-views-mercator-6km-10-20-40.png",
+    "target": "spacexr-rendering/docs/terrain-tests/T16-views-mercator-6km-10-20-40.png",
+    "sha256": "28f6cef977c534b398a19002b2dbfa957ad31235ef7ed53f155fdeba2786fddd"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T16-views-moon-pole-10-20-40.png",
+    "target": "spacexr-rendering/docs/terrain-tests/T16-views-moon-pole-10-20-40.png",
+    "sha256": "659b12f3b906655381bb279c63f417223b7f316856e7dfc4c6f7aa96878c6173"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T16-views-moon-tycho-10-20-40.png",
+    "target": "spacexr-rendering/docs/terrain-tests/T16-views-moon-tycho-10-20-40.png",
+    "sha256": "e0b44536fb4da53589b5c9521f24ca1b46d11915b8c2a478f57fe6f03642b79b"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T17-fixed-a.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T17-fixed-a.json",
+    "sha256": "b02d18a19a8cff6b30e385d402bace00555803be01ac83e507f110e86ffc7c85"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T17-fixed-b.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T17-fixed-b.json",
+    "sha256": "31b17dbb3b1d55cc656b51887ba896320e6c5d25ca22e8824590a740fe80d5e3"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T17-motion-a.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T17-motion-a.json",
+    "sha256": "1c935a75a063d947f7a6dc58d28bdf660fdb008b3d85489e5251aef862f6f018"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T17-motion-b.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T17-motion-b.json",
+    "sha256": "41e36683c98452b8195ef24390e35f95cfb2fc18bc7daae1bfda3839c5d3e2a6"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T17-rest-fixed.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T17-rest-fixed.json",
+    "sha256": "0674b615aca5d726913073105096608d9fb79d6cdb9f9bc68207e30f31d89b66"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T17-rest-motion.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T17-rest-motion.json",
+    "sha256": "5bf501adc949ad3a4a5e870b96078f44b8c90380953fcc3a94a9f1658c11e9f8"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T18-after-review.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T18-after-review.json",
+    "sha256": "be739ab2d12732abdd77bf7499bcb589007f2910b1e328a9dc89757e4055a2d9"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T19-fixed.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T19-fixed.json",
+    "sha256": "4c8ac523972f937983b026780ca75a327561dd85f96ec9d1bf67d8de6d8ea75e"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T19-following.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T19-following.json",
+    "sha256": "d482a4f80e6ef2d2a74fab3eb5c5c45d920e5d1f4758c42bb4308cdbf542e815"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T19-views-mont-blanc-fixed-following.png",
+    "target": "spacexr-rendering/docs/terrain-tests/T19-views-mont-blanc-fixed-following.png",
+    "sha256": "2132270c33d18515bfe8e326013230a7adfde81cd044dff8af7a478bb6458577"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T19-views-plain-zoom-fixed-following.png",
+    "target": "spacexr-rendering/docs/terrain-tests/T19-views-plain-zoom-fixed-following.png",
+    "sha256": "4e8a34f029358a2afc1f6a3d8b73d07f36932d29afb3cf9be1b57c8f70e6a4f0"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T20-delay-0-a.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T20-delay-0-a.json",
+    "sha256": "ec1dbd4e42d0cb3796f0b652e0c153a005bc0e04ff02611bc7d33280e4d07381"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T20-delay-0-b.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T20-delay-0-b.json",
+    "sha256": "e92bb091d68517534b6d7854dac0c782a0d2e5072d7b1610d4bccc238286122b"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T20-delay-2000-a.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T20-delay-2000-a.json",
+    "sha256": "a00342082d6a713af66722ef7ea8a2461ab9da213be5e76431d36edbf58d4330"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T20-delay-2000-b.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T20-delay-2000-b.json",
+    "sha256": "dc20995e5d23c09d7a8a3b410ae55c319e9752df9194c0dee1a5f8ce57d47627"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T20-delay-500-a.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T20-delay-500-a.json",
+    "sha256": "237b9723d3cfbd2f4153f714f25f98d7eeac60205bb57ac58e8750073fcbef5e"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T20-delay-500-b.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T20-delay-500-b.json",
+    "sha256": "a469210d68c2bdf858d42c76cb1fb80e545d8298cc35af92d82720210eee58f3"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T22-ground-0-b.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T22-ground-0-b.json",
+    "sha256": "71b03f138bc6e05d569aa059204ebd5e65d6616f5ae094a74e54e73f727c0e9c"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T22-ground-025-a.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T22-ground-025-a.json",
+    "sha256": "1a7eab5e714733ac8403466221b75cd76b43408b1038532e5a99d959474d3786"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T22-hysteresis-0.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T22-hysteresis-0.json",
+    "sha256": "c26c5b66e65e1d642b2b88aaa8bcaf094d9876581daa76a4005b9a9bc80deabe"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T22-hysteresis-025.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T22-hysteresis-025.json",
+    "sha256": "97fe6b37716d2d30e9ce9f52ff579e83c7130415190799bce416ae515aca7648"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T23-active-habitat.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T23-active-habitat.json",
+    "sha256": "1ddeed8f7771ec9a3479240344b067ec949ff28529f2fcc2421238f573333991"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T23-active-mont-blanc-2.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T23-active-mont-blanc-2.json",
+    "sha256": "07ea53c26b718142baee4517b97d42cf88c40ced61f63b25cbf7b2098a492fae"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T23-active.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T23-active.json",
+    "sha256": "7454931a7d8381ca8469c73a482edea95e5fa01a76d31e0a89f5843bfd9c1867"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T28-main-stale-probe.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T28-main-stale-probe.json",
+    "sha256": "b3c42d53e9e82f2fb055782bff702e6566d56dd33e9ff0d6656f7f78b5067849"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T28-main.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T28-main.json",
+    "sha256": "4e756260b320ededdca04bd8678d7c4f04e4d536cb0a56622c1e2c7bd397d237"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T6-main-a080a35.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T6-main-a080a35.json",
+    "sha256": "67771b5d763db7b2acdee68bef5868bf2892989f9f0061c6585a272296826af3"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T7-at-rest-too-early.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T7-at-rest-too-early.json",
+    "sha256": "339a57a71983d423a9c16ed244ad6c11b0d1981304717400693abfa1e8b67fb9"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T7-mesh-first.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T7-mesh-first.json",
+    "sha256": "fba6d5e8ef737eb5185baef1c5ad8ce733ecad781f5243abb29a60fd561f5f7a"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T7-settled.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T7-settled.json",
+    "sha256": "9783c9146e795d062c21ff143c245ffc86fc0253103170db478fe0a2da7e5bd6"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T8-mercator-256.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T8-mercator-256.json",
+    "sha256": "b150c4cb90f03c61d8627508c1b7b7da5d56b8a2067a61d49f27f2d8f52188d4"
+  },
+  {
+    "source": "3d-tiles-core/docs/terrain-tests/T9-mercator-16.json",
+    "target": "spacexr-rendering/docs/terrain-tests/T9-mercator-16.json",
+    "sha256": "8316add3f45fd293c5c8390180896962c143dd5d12762c0a35402a6a23351ebc"
+  },
+  {
+    "source": "3d-tiles-core/docs/images/grid-junction-variants.svg",
+    "target": "spacexr-rendering/docs/images/grid-junction-variants.svg",
+    "sha256": "8dee59faa1b3b847070bc15d32858508dc12c1be3e167a9d8bca0977bba278e4"
+  },
+  {
+    "source": "3d-tiles-core/docs/images/grid-lod-connections.png",
+    "target": "spacexr-rendering/docs/images/grid-lod-connections.png",
+    "sha256": "bf8c3a1594fa2489740a505caba126430515d3350706aafe916c078445789ec0"
+  },
+  {
+    "source": "3d-tiles-core/docs/images/Logo pixel-art SpaceXR Component.png",
+    "target": "spacexr-rendering/docs/images/Logo pixel-art SpaceXR Component.png",
+    "sha256": "3d3f8a875ad3d1111edbc998b5528fa948dfadb31629a1ef654222f5746f5ed9"
+  },
+  {
+    "source": "3d-tiles-core/assets/brand/3d-tiles-core-icon.png",
+    "target": "terrain-core/assets/brand/3d-tiles-core-icon.png",
+    "sha256": "327c5fc5a1432df986facf188168f1790890242de9fbf47243254b1bbd69020a"
+  },
+  {
+    "source": "3d-tiles-core/assets/brand/3d-tiles-core-logo.png",
+    "target": "terrain-core/assets/brand/3d-tiles-core-logo.png",
+    "sha256": "a3648e5a20c771edd14d35bc0690461da5b3d7f330aeec7bbf29d41bfbda1a5b"
+  },
+  {
+    "source": "3d-tiles-core/assets/brand/spacexr-component.png",
+    "target": "terrain-core/assets/brand/spacexr-component.png",
+    "sha256": "6ac0be731f4b7dc0cc5f5f71e9ef4b8e4bf0fcad7aed9d8249f6fd6dad320560"
+  }
+]

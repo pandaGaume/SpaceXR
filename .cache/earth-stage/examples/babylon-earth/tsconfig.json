@@ -1,0 +1,38 @@
+{
+    "compilerOptions": {
+        "target": "ES2022",
+        "useDefineForClassFields": true,
+        "module": "ESNext",
+        "moduleResolution": "Bundler",
+        "lib": [
+            "ES2022",
+            "DOM",
+            "DOM.Iterable"
+        ],
+        "strict": true,
+        "noImplicitOverride": true,
+        "exactOptionalPropertyTypes": true,
+        "forceConsistentCasingInFileNames": true,
+        "skipLibCheck": true,
+        "resolveJsonModule": true,
+        "isolatedModules": true,
+        "noEmit": true,
+        "baseUrl": ".",
+        "paths": {
+            "@spacexr/babylon-earth": [
+                "../../packages/babylon-earth/src/index.ts"
+            ],
+            "@spacexr/3d-tiles-babylon": [
+                "../../packages/core/src/index.ts"
+            ]
+        },
+        "types": [
+            "vite/client"
+        ],
+        "preserveSymlinks": true
+    },
+    "include": [
+        "src/**/*.ts",
+        "vite.config.ts"
+    ]
+}

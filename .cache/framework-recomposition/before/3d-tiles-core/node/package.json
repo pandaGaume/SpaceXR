@@ -1,0 +1,29 @@
+{
+    "name": "@spacexr/3d-tiles-workspace",
+    "version": "0.0.0",
+    "private": true,
+    "description": "npm workspace for the SpaceXR implementation of 3D Tiles core contracts and codecs.",
+    "license": "Apache-2.0",
+    "author": "Guillaume Pelletier (SpaceXR)",
+    "type": "module",
+    "engines": {
+        "node": ">=20.11.0"
+    },
+    "workspaces": [
+        "packages/*"
+    ],
+    "overrides": {
+        "esbuild": "0.28.2"
+    },
+    "scripts": {
+        "build": "npm run build --workspaces --if-present",
+        "clean": "npm run clean --workspaces --if-present",
+        "typecheck": "npm run typecheck --workspaces --if-present",
+        "test": "npm run test --workspaces --if-present",
+        "lint": "npm run lint --workspaces --if-present",
+        "lint:fix": "npm run lint:fix --workspaces --if-present",
+        "format": "npm run format --workspaces --if-present",
+        "format:fix": "npm run format:fix --workspaces --if-present",
+        "check": "npm run format && npm run lint && npm run typecheck && npm run test && npm run build"
+    }
+}

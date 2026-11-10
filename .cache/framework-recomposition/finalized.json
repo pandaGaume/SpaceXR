@@ -1,0 +1,10 @@
+{
+  "unchanged_source_and_test_files": 182,
+  "retired_paths": [
+    "3d-tiles-core\\node\\packages\\raster",
+    "3d-tiles-core\\node\\packages\\dem",
+    "3d-tiles-core\\node\\packages\\grid",
+    "3d-tiles-babylon\\packages",
+    "3d-tiles-babylon\\examples"
+  ]
+}

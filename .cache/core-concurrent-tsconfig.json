@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "paths": {
+      "@spiky-panda/core": [
+        "C:\\Users\\GuillaumePelletier\\Documents\\GitHub\\SpaceXR\\.cache\\core-concurrent-transfer/src/index.ts"
+      ],
+      "spikypanda-core": [
+        "C:\\Users\\GuillaumePelletier\\Documents\\GitHub\\SpaceXR\\.cache\\core-concurrent-transfer/src/index.ts"
+      ]
+    }
+  },
+  "extends": "C:/Users/GuillaumePelletier/Documents/GitHub/spikypanda/tsconfig.build.json"
+}

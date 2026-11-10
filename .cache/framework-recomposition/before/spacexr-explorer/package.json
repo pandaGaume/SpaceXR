@@ -1,0 +1,62 @@
+{
+  "name": "@spacexr/explorer",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "SpaceXR application API and live-session MCP provider",
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./persistence/node": {
+      "types": "./dist/node/persistence.d.ts",
+      "import": "./dist/node/persistence.js"
+    },
+    "./world": {
+      "types": "./dist/world/index.d.ts",
+      "import": "./dist/world/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src/contracts/*.json"
+  ],
+  "scripts": {
+    "start": "npm run build && node examples/provider.mjs",
+    "example:checkpoint": "npm run build && node examples/checkpoint.mjs",
+    "generate": "node scripts/generate.mjs",
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "npm run build && node --test test/*.test.mjs",
+    "dev": "vite --host 127.0.0.1",
+    "build:web": "vite build",
+    "preview": "vite preview --host 127.0.0.1"
+  },
+  "dependencies": {
+    "@cyanmycelium/mcp-core": "file:../mcp-core",
+    "@cyanmycelium/mcp-broker-provider": "file:../mcp-broker/node/packages/provider",
+    "@cyanmycelium/mcp-persistence": "file:../mcp-persistence",
+    "ajv": "^6.14.0",
+    "@babylonjs/core": "9.33.1",
+    "@spacexr/celestial-core": "file:../celestial-core",
+    "quantia": "file:../quantia",
+    "@spacexr/geodesy": "file:../geodesy_ts",
+    "@spacexr/3d-tiles-babylon": "file:../3d-tiles-babylon/packages/core",
+    "@spacexr/3d-tiles-core": "file:../3d-tiles-core/node/packages/core",
+    "@spacexr/3d-tiles-runtime": "file:../3d-tiles-core/node/packages/runtime",
+    "@spacexr/tiles": "file:../3d-tiles-core/node/packages/tiles",
+    "@spacexr/grid": "file:../3d-tiles-core/node/packages/grid",
+    "@spacexr/raster": "file:../3d-tiles-core/node/packages/raster",
+    "@spacexr/dem": "file:../3d-tiles-core/node/packages/dem"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3",
+    "@cyanmycelium/mcp-broker": "file:../mcp-broker/node/packages/broker",
+    "@cyanmycelium/mcp-uns": "0.1.0",
+    "vite": "6.4.5"
+  }
+}

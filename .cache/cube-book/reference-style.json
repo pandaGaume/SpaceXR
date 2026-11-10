@@ -1,0 +1,45 @@
+{
+  "sha256": "740d6778dc0c89957397bd2da80710091afd1ce881777448d06463eb0594bd3c",
+  "sections": [
+    {
+      "width": 21.00086111111111,
+      "height": 29.70036111111111,
+      "left": 1.7268472222222222,
+      "right": 1.7268472222222222,
+      "top": 2.54,
+      "bottom": 2.54
+    }
+  ],
+  "styles": [
+    {
+      "name": "Normal",
+      "font": null,
+      "size": null
+    },
+    {
+      "name": "Heading 1",
+      "font": null,
+      "size": 16.0
+    },
+    {
+      "name": "Heading 2",
+      "font": null,
+      "size": 13.0
+    },
+    {
+      "name": "Heading 3",
+      "font": null,
+      "size": 12.0
+    },
+    {
+      "name": "Title",
+      "font": null,
+      "size": 28.0
+    },
+    {
+      "name": "Caption",
+      "font": null,
+      "size": 9.0
+    }
+  ]
+}

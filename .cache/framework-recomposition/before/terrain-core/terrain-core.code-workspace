@@ -1,0 +1,287 @@
+{
+    "folders": [
+        {
+            "name": "3D Tiles",
+            "path": "../3d-tiles-core"
+        },
+        {
+            "name": "Terrain",
+            "path": "."
+        },
+        {
+            "name": "Rendering",
+            "path": "../spacexr-rendering"
+        },
+        {
+            "name": "Geodesy",
+            "path": "../geodesy_ts"
+        }
+    ],
+    "settings": {
+        "files.exclude": {
+            "**/node_modules": true,
+            "**/dist": true,
+            "**/coverage": true
+        },
+        "search.exclude": {
+            "**/node_modules": true,
+            "**/dist": true,
+            "**/coverage": true
+        },
+        "typescript.tsdk": "node_modules/typescript/lib",
+        "eslint.workingDirectories": [
+            {
+                "mode": "auto"
+            }
+        ],
+        "files.eol": "\n"
+    },
+    "extensions": {
+        "recommendations": [
+            "dbaeumer.vscode-eslint",
+            "esbenp.prettier-vscode",
+            "editorconfig.editorconfig"
+        ]
+    },
+    "tasks": {
+        "version": "2.0.0",
+        "tasks": [
+            {
+                "label": "Framework: install",
+                "type": "shell",
+                "command": "npm",
+                "args": [
+                    "run",
+                    "framework:install"
+                ],
+                "options": {
+                    "cwd": "${workspaceFolder:Rendering}"
+                },
+                "problemMatcher": []
+            },
+            {
+                "label": "Framework: build",
+                "type": "shell",
+                "command": "npm",
+                "args": [
+                    "run",
+                    "framework:build"
+                ],
+                "options": {
+                    "cwd": "${workspaceFolder:Rendering}"
+                },
+                "problemMatcher": [],
+                "group": {
+                    "kind": "build",
+                    "isDefault": true
+                }
+            },
+            {
+                "label": "Framework: check",
+                "type": "shell",
+                "command": "npm",
+                "args": [
+                    "run",
+                    "framework:check"
+                ],
+                "options": {
+                    "cwd": "${workspaceFolder:Rendering}"
+                },
+                "problemMatcher": [],
+                "group": "test"
+            },
+            {
+                "label": "Framework: verify links",
+                "type": "shell",
+                "command": "npm",
+                "args": [
+                    "run",
+                    "framework:verify"
+                ],
+                "options": {
+                    "cwd": "${workspaceFolder:Rendering}"
+                },
+                "problemMatcher": []
+            },
+            {
+                "label": "Terrain example: dev",
+                "type": "shell",
+                "command": "npm",
+                "args": [
+                    "run",
+                    "example:implicit-grid"
+                ],
+                "options": {
+                    "cwd": "${workspaceFolder:Rendering}"
+                },
+                "problemMatcher": [],
+                "isBackground": true
+            },
+            {
+                "label": "3D Tiles example: dev",
+                "type": "shell",
+                "command": "npm",
+                "args": [
+                    "run",
+                    "example:google-3d-tiles"
+                ],
+                "options": {
+                    "cwd": "${workspaceFolder:Rendering}"
+                },
+                "problemMatcher": [],
+                "isBackground": true
+            },
+            {
+                "label": "3D Tiles: check",
+                "type": "shell",
+                "command": "npm",
+                "args": [
+                    "run",
+                    "check"
+                ],
+                "options": {
+                    "cwd": "${workspaceFolder:3D Tiles}/node"
+                },
+                "problemMatcher": []
+            },
+            {
+                "label": "Terrain: check",
+                "type": "shell",
+                "command": "npm",
+                "args": [
+                    "run",
+                    "check"
+                ],
+                "options": {
+                    "cwd": "${workspaceFolder:Terrain}"
+                },
+                "problemMatcher": []
+            },
+            {
+                "label": "Rendering: check",
+                "type": "shell",
+                "command": "npm",
+                "args": [
+                    "run",
+                    "check"
+                ],
+                "options": {
+                    "cwd": "${workspaceFolder:Rendering}"
+                },
+                "problemMatcher": []
+            },
+            {
+                "label": "Watch: 3d-tiles-core",
+                "type": "shell",
+                "command": "npm",
+                "args": [
+                    "run",
+                    "watch",
+                    "--workspace",
+                    "@spacexr/3d-tiles-core"
+                ],
+                "options": {
+                    "cwd": "${workspaceFolder:3D Tiles}/node"
+                },
+                "problemMatcher": [],
+                "isBackground": true
+            },
+            {
+                "label": "Watch: tiles",
+                "type": "shell",
+                "command": "npm",
+                "args": [
+                    "run",
+                    "watch",
+                    "--workspace",
+                    "@spacexr/tiles"
+                ],
+                "options": {
+                    "cwd": "${workspaceFolder:3D Tiles}/node"
+                },
+                "problemMatcher": [],
+                "isBackground": true
+            },
+            {
+                "label": "Watch: 3d-tiles-runtime",
+                "type": "shell",
+                "command": "npm",
+                "args": [
+                    "run",
+                    "watch",
+                    "--workspace",
+                    "@spacexr/3d-tiles-runtime"
+                ],
+                "options": {
+                    "cwd": "${workspaceFolder:3D Tiles}/node"
+                },
+                "problemMatcher": [],
+                "isBackground": true
+            },
+            {
+                "label": "Watch: raster",
+                "type": "shell",
+                "command": "npm",
+                "args": [
+                    "run",
+                    "watch",
+                    "--workspace",
+                    "@spacexr/raster"
+                ],
+                "options": {
+                    "cwd": "${workspaceFolder:Terrain}"
+                },
+                "problemMatcher": [],
+                "isBackground": true
+            },
+            {
+                "label": "Watch: dem",
+                "type": "shell",
+                "command": "npm",
+                "args": [
+                    "run",
+                    "watch",
+                    "--workspace",
+                    "@spacexr/dem"
+                ],
+                "options": {
+                    "cwd": "${workspaceFolder:Terrain}"
+                },
+                "problemMatcher": [],
+                "isBackground": true
+            },
+            {
+                "label": "Watch: grid",
+                "type": "shell",
+                "command": "npm",
+                "args": [
+                    "run",
+                    "watch",
+                    "--workspace",
+                    "@spacexr/grid"
+                ],
+                "options": {
+                    "cwd": "${workspaceFolder:Terrain}"
+                },
+                "problemMatcher": [],
+                "isBackground": true
+            },
+            {
+                "label": "Watch: 3d-tiles-babylon",
+                "type": "shell",
+                "command": "npm",
+                "args": [
+                    "run",
+                    "watch",
+                    "--workspace",
+                    "@spacexr/3d-tiles-babylon"
+                ],
+                "options": {
+                    "cwd": "${workspaceFolder:Rendering}"
+                },
+                "problemMatcher": [],
+                "isBackground": true
+            }
+        ]
+    }
+}

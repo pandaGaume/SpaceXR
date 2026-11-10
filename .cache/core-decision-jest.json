@@ -1,0 +1,24 @@
+{
+  "cacheDirectory": "C:\\Users\\GuillaumePelletier\\Documents\\GitHub\\SpaceXR\\.cache\\core-decision-runtime/jest-cache",
+  "testRegex": ".*\\.test\\.ts$",
+  "testEnvironment": "node",
+  "transform": {
+    "^.+\\.ts$": [
+      "C:/Users/GuillaumePelletier/Documents/GitHub/spikypanda/node_modules/ts-jest",
+      {
+        "tsconfig": "C:/Users/GuillaumePelletier/Documents/GitHub/spikypanda/tsconfig.build.json"
+      }
+    ]
+  },
+  "rootDir": "C:/Users/GuillaumePelletier/Documents/GitHub/spikypanda",
+  "moduleNameMapper": {
+    "^@spiky-panda/core$": "C:\\Users\\GuillaumePelletier\\Documents\\GitHub\\SpaceXR\\.cache\\core-decision-runtime\\src\\index.ts",
+    "^spikypanda-core$": "C:\\Users\\GuillaumePelletier\\Documents\\GitHub\\SpaceXR\\.cache\\core-decision-runtime\\src\\index.ts",
+    "^(\\.{1,2}/.*)\\.js$": "$1"
+  },
+  "roots": [
+    "C:/Users/GuillaumePelletier/Documents/GitHub/spikypanda/packages/tests/execution",
+    "C:\\Users\\GuillaumePelletier\\Documents\\GitHub\\SpaceXR\\.cache\\core-decision-runtime"
+  ],
+  "maxWorkers": 1
+}

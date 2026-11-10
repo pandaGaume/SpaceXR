@@ -1,0 +1,176 @@
+{
+  "roots": [
+    "C:/Users/GuillaumePelletier/Documents/GitHub/Gaume/spikypanda-harness",
+    "C:/Users/GuillaumePelletier/Documents/GitHub/spikypanda"
+  ],
+  "files": [
+    {
+      "source": "C:\\Users\\GuillaumePelletier\\Documents\\GitHub\\SpaceXR\\.cache\\harness-conduct-transfer\\README.md",
+      "destination": "C:/Users/GuillaumePelletier/Documents/GitHub/Gaume/spikypanda-harness/README.md",
+      "before": "a4416058ce0f0ed569124306cb3f7dd98e897a4dfe7fad0645453a3c1e99506a",
+      "after": "93517294ed322ca4679d4e7a8efd44a5a0544f94e1e7275b268a5facf06b1b57"
+    },
+    {
+      "source": "C:\\Users\\GuillaumePelletier\\Documents\\GitHub\\SpaceXR\\.cache\\harness-conduct-transfer\\package.json",
+      "destination": "C:/Users/GuillaumePelletier/Documents/GitHub/Gaume/spikypanda-harness/package.json",
+      "before": "42438039b9b9ac7e530f19374b6331e736a49160c1f9fdcc9103388d3428cf2d",
+      "after": "1fe13bca56be8be8c23e2e9fa577b1488bd505d647c4db46dd553b2e0d96f45c"
+    },
+    {
+      "source": "C:\\Users\\GuillaumePelletier\\Documents\\GitHub\\SpaceXR\\.cache\\harness-conduct-transfer\\src\\index.ts",
+      "destination": "C:/Users/GuillaumePelletier/Documents/GitHub/Gaume/spikypanda-harness/src/index.ts",
+      "before": "619e3178774aeb2bd904dfd15803877e1bed11cf03b52b4927d0bda64af31488",
+      "after": "500f4df33107f2ce009c222e463365a3e779cbbe61b62445e1621a16ac16c5df"
+    },
+    {
+      "source": "C:\\Users\\GuillaumePelletier\\Documents\\GitHub\\SpaceXR\\.cache\\harness-conduct-transfer\\src\\decision\\contracts.ts",
+      "destination": "C:/Users/GuillaumePelletier/Documents/GitHub/Gaume/spikypanda-harness/src/decision/contracts.ts",
+      "before": "8b5a8f92febeb8d193bed9d2ce6b6127e3667ca8ce13e6f4616fe9a41f7f3682",
+      "after": "057aeeab3c7d5342994697ef04e42ca1a99a8281f3e66302a6329b4c91a8bb9e"
+    },
+    {
+      "source": "C:\\Users\\GuillaumePelletier\\Documents\\GitHub\\SpaceXR\\.cache\\harness-conduct-transfer\\src\\decision\\session.ts",
+      "destination": "C:/Users/GuillaumePelletier/Documents/GitHub/Gaume/spikypanda-harness/src/decision/session.ts",
+      "before": "679120960b29380444891c2542196603885cb0bee0ee80c64136f17f4558627b",
+      "after": "fd5e3d0dc13ea582183931f736940f33d073628d6251d28d5eb25f120adcbc19"
+    },
+    {
+      "source": "C:\\Users\\GuillaumePelletier\\Documents\\GitHub\\SpaceXR\\.cache\\harness-conduct-transfer\\src\\decision\\nodes.ts",
+      "destination": "C:/Users/GuillaumePelletier/Documents/GitHub/Gaume/spikypanda-harness/src/decision/nodes.ts",
+      "before": "22479fbef13f734b0f18a428ecfd704078e79dd66b87c56cecd4502fb32f814f",
+      "after": "ee092ff045e83990f9949d0a99d82733d8d9e429f6c26e972406e1fbaa286c9b"
+    },
+    {
+      "source": "C:\\Users\\GuillaumePelletier\\Documents\\GitHub\\SpaceXR\\.cache\\harness-conduct-transfer\\src\\conduct\\contracts.ts",
+      "destination": "C:/Users/GuillaumePelletier/Documents/GitHub/Gaume/spikypanda-harness/src/conduct/contracts.ts",
+      "before": null,
+      "after": "d26bdee58b31bc789a544fdda3e2a563c055049e6e243d3374cb9a05cc7df224"
+    },
+    {
+      "source": "C:\\Users\\GuillaumePelletier\\Documents\\GitHub\\SpaceXR\\.cache\\harness-conduct-transfer\\src\\conduct\\nodes.ts",
+      "destination": "C:/Users/GuillaumePelletier/Documents/GitHub/Gaume/spikypanda-harness/src/conduct/nodes.ts",
+      "before": null,
+      "after": "9be16047cb0b70a20b6159e0f3a5d0b56e233ec9d302cbc2d8d0a276af28f791"
+    },
+    {
+      "source": "C:\\Users\\GuillaumePelletier\\Documents\\GitHub\\SpaceXR\\.cache\\harness-conduct-transfer\\src\\agents\\contracts.ts",
+      "destination": "C:/Users/GuillaumePelletier/Documents/GitHub/Gaume/spikypanda-harness/src/agents/contracts.ts",
+      "before": null,
+      "after": "1d53ca59d3b5362751adaa5394ce97ad6d06d37dd9bcced8c4a9f36414577bbd"
+    },
+    {
+      "source": "C:\\Users\\GuillaumePelletier\\Documents\\GitHub\\SpaceXR\\.cache\\harness-conduct-transfer\\src\\agents\\session.ts",
+      "destination": "C:/Users/GuillaumePelletier/Documents/GitHub/Gaume/spikypanda-harness/src/agents/session.ts",
+      "before": null,
+      "after": "cd9cfca7a2c2e09b83b56468652dfa94c9587afca4d4ce3dc540151b232e4fb1"
+    },
+    {
+      "source": "C:\\Users\\GuillaumePelletier\\Documents\\GitHub\\SpaceXR\\.cache\\harness-conduct-transfer\\src\\agents\\nodes.ts",
+      "destination": "C:/Users/GuillaumePelletier/Documents/GitHub/Gaume/spikypanda-harness/src/agents/nodes.ts",
+      "before": null,
+      "after": "afe7411523f6bd53000b5982c5e7264502299aba519ad167a057363db39900d9"
+    },
+    {
+      "source": "C:\\Users\\GuillaumePelletier\\Documents\\GitHub\\SpaceXR\\.cache\\harness-conduct-transfer\\src\\agents\\links.ts",
+      "destination": "C:/Users/GuillaumePelletier/Documents/GitHub/Gaume/spikypanda-harness/src/agents/links.ts",
+      "before": null,
+      "after": "33822fda22e4d8e64ea345ded52165d07254a0bd52341d94249f8490cab266eb"
+    },
+    {
+      "source": "C:\\Users\\GuillaumePelletier\\Documents\\GitHub\\SpaceXR\\.cache\\harness-conduct-transfer\\src\\agents\\factory.ts",
+      "destination": "C:/Users/GuillaumePelletier/Documents/GitHub/Gaume/spikypanda-harness/src/agents/factory.ts",
+      "before": null,
+      "after": "0b8d8c235b3890c0a3093616fcfd76dc0b2f8bc9691895399262790afb9b5d19"
+    },
+    {
+      "source": "C:\\Users\\GuillaumePelletier\\Documents\\GitHub\\SpaceXR\\.cache\\harness-conduct-transfer\\src\\agents\\index.ts",
+      "destination": "C:/Users/GuillaumePelletier/Documents/GitHub/Gaume/spikypanda-harness/src/agents/index.ts",
+      "before": null,
+      "after": "acbea04309c166b57c8d234f94b4e4289ebf5ddb9cf70b1e5f929f85915b730f"
+    },
+    {
+      "source": "C:\\Users\\GuillaumePelletier\\Documents\\GitHub\\SpaceXR\\.cache\\harness-conduct-transfer\\src\\graphs\\agents.json",
+      "destination": "C:/Users/GuillaumePelletier/Documents/GitHub/Gaume/spikypanda-harness/src/graphs/agents.json",
+      "before": null,
+      "after": "51cf814f784742bda300bef96bb31dbe333ceef32b16c0890f86be2e4b6a3da1"
+    },
+    {
+      "source": "C:\\Users\\GuillaumePelletier\\Documents\\GitHub\\SpaceXR\\.cache\\harness-conduct-transfer\\src\\graphs\\agents.ts",
+      "destination": "C:/Users/GuillaumePelletier/Documents/GitHub/Gaume/spikypanda-harness/src/graphs/agents.ts",
+      "before": null,
+      "after": "b243a34e32a9468f2138e1e472f8e57d7d18c72650398992adeb5c23d478e2e3"
+    },
+    {
+      "source": "C:\\Users\\GuillaumePelletier\\Documents\\GitHub\\SpaceXR\\.cache\\harness-conduct-transfer\\tests\\agent-fixture.mjs",
+      "destination": "C:/Users/GuillaumePelletier/Documents/GitHub/Gaume/spikypanda-harness/tests/agent-fixture.mjs",
+      "before": null,
+      "after": "d8e1d4afecc33f7e068b0bc0456167e89b8811bddf2cfaaa067e252abd7acb49"
+    },
+    {
+      "source": "C:\\Users\\GuillaumePelletier\\Documents\\GitHub\\SpaceXR\\.cache\\harness-conduct-transfer\\tests\\conduct-delegation.test.mjs",
+      "destination": "C:/Users/GuillaumePelletier/Documents/GitHub/Gaume/spikypanda-harness/tests/conduct-delegation.test.mjs",
+      "before": null,
+      "after": "a06ec756cc56d6a523c6f5d64b60286d821abe462248a11c357e676bc9c92793"
+    },
+    {
+      "source": "C:\\Users\\GuillaumePelletier\\Documents\\GitHub\\SpaceXR\\.cache\\harness-conduct-transfer\\tests\\delegation-broker.test.mjs",
+      "destination": "C:/Users/GuillaumePelletier/Documents/GitHub/Gaume/spikypanda-harness/tests/delegation-broker.test.mjs",
+      "before": null,
+      "after": "2ac00557920edda204f937a2e326ca81f5f7a46166fd61a7663af8f997b1fa11"
+    },
+    {
+      "source": "C:\\Users\\GuillaumePelletier\\Documents\\GitHub\\SpaceXR\\.cache\\harness-conduct-transfer\\doc\\graphe-decision-executable.md",
+      "destination": "C:/Users/GuillaumePelletier/Documents/GitHub/Gaume/spikypanda-harness/doc/graphe-decision-executable.md",
+      "before": "68b8fe7a0318b02602655cf1861778726f781b8f61dc9d24e9116ecdc2c5ed15",
+      "after": "080252d1803e3d6bd9101503ad5878aad0eb71d6ed318f84e0bbb6cca503436d"
+    },
+    {
+      "source": "C:\\Users\\GuillaumePelletier\\Documents\\GitHub\\SpaceXR\\.cache\\harness-conduct-transfer\\doc\\reprise-conduite-delegation.md",
+      "destination": "C:/Users/GuillaumePelletier/Documents/GitHub/Gaume/spikypanda-harness/doc/reprise-conduite-delegation.md",
+      "before": null,
+      "after": "3d1384cb4db60ea324ecd517e5cb03795081995faf2b859aeed8e2659ea22539"
+    },
+    {
+      "source": "C:\\Users\\GuillaumePelletier\\Documents\\GitHub\\SpaceXR\\.cache\\harness-conduct-transfer\\doc\\slots-reprise.md",
+      "destination": "C:/Users/GuillaumePelletier/Documents/GitHub/Gaume/spikypanda-harness/doc/slots-reprise.md",
+      "before": null,
+      "after": "33781b3ffbde6c2385d810351f563c0cacc10a9c1b4bf6bd116d7bddd6fc6003"
+    },
+    {
+      "source": "C:\\Users\\GuillaumePelletier\\Documents\\GitHub\\SpaceXR\\.cache\\core-concurrent-transfer\\src\\execution\\execution.interfaces.ts",
+      "destination": "C:/Users/GuillaumePelletier/Documents/GitHub/spikypanda/packages/dev/core/src/execution/execution.interfaces.ts",
+      "before": "1aa4ec588782ac6603bb69a45bcd27e0460d030caea672715be99b9f0da395a7",
+      "after": "7c83f4703cd9ac679caa34c4afc5d0f053d9c932587d36cfab35bc7327b2e503"
+    },
+    {
+      "source": "C:\\Users\\GuillaumePelletier\\Documents\\GitHub\\SpaceXR\\.cache\\core-concurrent-transfer\\src\\execution\\execution.scheduler.ts",
+      "destination": "C:/Users/GuillaumePelletier/Documents/GitHub/spikypanda/packages/dev/core/src/execution/execution.scheduler.ts",
+      "before": "5f33e377f0373ee39da51051bcfbda64e5c3cd6f0e816db2baa57bcf051b8888",
+      "after": "c759b133a2f9458079a55045ec7d330200c535e8141bfd6268d3ba171772baaa"
+    },
+    {
+      "source": "C:\\Users\\GuillaumePelletier\\Documents\\GitHub\\SpaceXR\\.cache\\core-concurrent-transfer\\src\\execution\\execution.session.ts",
+      "destination": "C:/Users/GuillaumePelletier/Documents/GitHub/spikypanda/packages/dev/core/src/execution/execution.session.ts",
+      "before": "cba2dcf72d46b24e82c24aac1e6dc0c6bf269c93e3a6bea390433a93dc6d41b9",
+      "after": "80384cc1d6dca616bc5df3917e4faa2ae7cbd2f9ac852ad6562f74de38d3fa5d"
+    },
+    {
+      "source": "C:\\Users\\GuillaumePelletier\\Documents\\GitHub\\SpaceXR\\.cache\\core-concurrent-transfer\\src\\execution\\execution.node.ts",
+      "destination": "C:/Users/GuillaumePelletier/Documents/GitHub/spikypanda/packages/dev/core/src/execution/execution.node.ts",
+      "before": "a6489edbef712f654266264128dafc944d93e931b3542d6979e3b810b01c5239",
+      "after": "8333844b9c156b63e5c9bd838a8599f5fb0d98c750217b42710c8d962bfa2307"
+    },
+    {
+      "source": "C:\\Users\\GuillaumePelletier\\Documents\\GitHub\\SpaceXR\\.cache\\core-concurrent-transfer\\dynamic-async.test.ts",
+      "destination": "C:/Users/GuillaumePelletier/Documents/GitHub/spikypanda/packages/tests/execution/dynamic-async.test.ts",
+      "before": "d42b1609530e378b7df387d204171c495ba3b787fb565a061cfb29edd8f1ebaa",
+      "after": "67d09805c3fd0a94a4ec054b5eedbf13facd68b6db4c8afeef72b51c9c1bd817"
+    },
+    {
+      "source": "C:\\Users\\GuillaumePelletier\\Documents\\GitHub\\SpaceXR\\.cache\\core-concurrent-transfer\\async-dynamic-traversal.md",
+      "destination": "C:/Users/GuillaumePelletier/Documents/GitHub/spikypanda/docs/architecture/async-dynamic-traversal.md",
+      "before": "fb81b3ec9f70b02d6f41dc253b8a57061f693e91e9c23e1630d2a7a7ed0254ec",
+      "after": "1c098edebd1b79980df3620b81392a650d39529f54df9980a8f733c47d81d1d3"
+    }
+  ]
+}

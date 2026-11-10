@@ -1,0 +1,127 @@
+{
+  "label": "T15-merc-64-sse16",
+  "date": "2026-11-06T22:10:33.933Z",
+  "seconds": 8,
+  "results": [
+    {
+      "id": "mont-blanc/gpu",
+      "url": "http://localhost:5174/?engine=gpu&solid=1&imagery=none&radius=25000&pitch=60",
+      "errors": [],
+      "performance": {
+        "engine": "gpu",
+        "framesPerSecond": 113,
+        "terrainCpuMs": 0.76,
+        "renderCpuMs": 0.32,
+        "runtimeFrameMs": 2.3,
+        "gpuMs": 3.71,
+        "instances": 76,
+        "drawCalls": 1,
+        "trianglesPerFrame": 610898,
+        "uploadKiBPerFrame": 239.9,
+        "uploadCallsPerFrame": 3.1,
+        "gpuMiB": 40.5,
+        "cpuMiB": 0,
+        "demTiles": 512,
+        "tileRequests": 963,
+        "distinctTileRequests": 756,
+        "tileHosts": [
+          "s3.amazonaws.com"
+        ],
+        "loadSeconds": 7.7
+      },
+      "integrity": {
+        "lod": {
+          "shown": 269,
+          "hidden": 259,
+          "returns": 79,
+          "quickReturns": 26,
+          "tilesReturning": 78,
+          "mostReturns": 2,
+          "mostReturningTile": "0/12/2123/1461",
+          "changesAtRest": 0
+        },
+        "settleSeconds": 0,
+        "holesAtRest": 0,
+        "worstSharedEdgeAtRestMetres": 0,
+        "frames": 545,
+        "framesWithHoles": 10,
+        "worstHoles": 1811,
+        "edgeChecks": 16,
+        "sharedVerticesPerCheck": 3693,
+        "worstSharedEdgeMetres": 4443.722,
+        "worstOutOfViewEdgeMetres": 4443.722,
+        "worstPair": {
+          "gap": 4443.7216796875,
+          "a": {
+            "address": {
+              "lod": 11,
+              "x": 1062,
+              "y": 729
+            },
+            "terrain": {
+              "lod": 11,
+              "x": 1062,
+              "y": 729
+            },
+            "terrainLevel": 11,
+            "finer": 2,
+            "coarser": 0,
+            "demOfTerrain": {
+              "lod": 11,
+              "x": 1062,
+              "y": 729
+            }
+          },
+          "aLattice": [
+            32,
+            30
+          ],
+          "aHeight": 0,
+          "b": {
+            "address": {
+              "lod": 12,
+              "x": 2126,
+              "y": 1459
+            },
+            "terrain": {
+              "lod": 12,
+              "x": 2126,
+              "y": 1459
+            },
+            "terrainLevel": 12,
+            "finer": 0,
+            "coarser": 8,
+            "demOfTerrain": {
+              "lod": 12,
+              "x": 2126,
+              "y": 1459
+            }
+          },
+          "bLattice": [
+            0,
+            28
+          ],
+          "bHeight": 4443.7216796875,
+          "aReference": [
+            0,
+            0,
+            1,
+            -1
+          ],
+          "bReference": [
+            0,
+            0,
+            1,
+            13
+          ]
+        },
+        "tileRequests": 938,
+        "distinctTileRequests": 756,
+        "tileHosts": [
+          "s3.amazonaws.com"
+        ],
+        "loadSeconds": 4.4
+      }
+    }
+  ]
+}

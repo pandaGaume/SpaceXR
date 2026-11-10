@@ -1,0 +1,463 @@
+{
+  "label": "T17-fixed-b",
+  "date": "2026-11-06T23:06:26.075Z",
+  "seconds": 8,
+  "results": [
+    {
+      "id": "mont-blanc/gpu",
+      "url": "http://localhost:5174/?engine=gpu&solid=1&imagery=none&radius=25000&pitch=60",
+      "errors": [],
+      "performance": {
+        "engine": "gpu",
+        "framesPerSecond": 74.1,
+        "terrainCpuMs": 2.01,
+        "renderCpuMs": 0.45,
+        "runtimeFrameMs": 5,
+        "gpuMs": 7.81,
+        "instances": 118,
+        "drawCalls": 1,
+        "trianglesPerFrame": 955963,
+        "uploadKiBPerFrame": 383.3,
+        "uploadCallsPerFrame": 5,
+        "gpuMiB": 52.6,
+        "cpuMiB": 0,
+        "demTiles": 1171,
+        "tileRequests": 1171,
+        "distinctTileRequests": 1171,
+        "tileHosts": [
+          "s3.amazonaws.com"
+        ],
+        "loadSeconds": 10
+      },
+      "integrity": {
+        "lod": {
+          "shown": 478,
+          "hidden": 472,
+          "returns": 118,
+          "quickReturns": 44,
+          "tilesReturning": 113,
+          "mostReturns": 2,
+          "mostReturningTile": "0/12/2126/1462",
+          "meanThresholdScale": 1,
+          "changesAtRest": 5,
+          "presentedAtRest": 118
+        },
+        "settleSeconds": 0,
+        "holesAtRest": 0,
+        "worstSharedEdgeAtRestMetres": 0,
+        "frames": 356,
+        "framesWithHoles": 3,
+        "worstHoles": 55,
+        "edgeChecks": 16,
+        "sharedVerticesPerCheck": 6593,
+        "worstSharedEdgeMetres": 0,
+        "worstOutOfViewEdgeMetres": 0,
+        "tileRequests": 1180,
+        "distinctTileRequests": 1180,
+        "tileHosts": [
+          "s3.amazonaws.com"
+        ],
+        "loadSeconds": 5.5
+      }
+    },
+    {
+      "id": "mont-blanc-zoom/gpu",
+      "url": "http://localhost:5174/?engine=gpu&solid=1&imagery=none&radius=400000&pitch=60",
+      "errors": [],
+      "performance": {
+        "engine": "gpu",
+        "framesPerSecond": 95.7,
+        "terrainCpuMs": 1.33,
+        "renderCpuMs": 0.33,
+        "runtimeFrameMs": 3,
+        "gpuMs": 4.23,
+        "instances": 141,
+        "drawCalls": 1,
+        "trianglesPerFrame": 986751,
+        "uploadKiBPerFrame": 588.8,
+        "uploadCallsPerFrame": 6.7,
+        "gpuMiB": 70.7,
+        "cpuMiB": 0,
+        "demTiles": 1176,
+        "tileRequests": 1176,
+        "distinctTileRequests": 1176,
+        "tileHosts": [
+          "s3.amazonaws.com"
+        ],
+        "loadSeconds": 4.3
+      },
+      "integrity": {
+        "lod": {
+          "shown": 836,
+          "hidden": 738,
+          "returns": 380,
+          "quickReturns": 217,
+          "tilesReturning": 272,
+          "mostReturns": 4,
+          "mostReturningTile": "0/11/1061/728",
+          "meanThresholdScale": 1,
+          "changesAtRest": 60,
+          "presentedAtRest": 137
+        },
+        "settleSeconds": 0.1,
+        "holesAtRest": 0,
+        "worstSharedEdgeAtRestMetres": 0,
+        "frames": 269,
+        "framesWithHoles": 22,
+        "worstHoles": 669,
+        "edgeChecks": 16,
+        "sharedVerticesPerCheck": 6978,
+        "worstSharedEdgeMetres": 0,
+        "worstOutOfViewEdgeMetres": 0,
+        "tileRequests": 1188,
+        "distinctTileRequests": 1188,
+        "tileHosts": [
+          "s3.amazonaws.com"
+        ],
+        "loadSeconds": 4.1
+      }
+    },
+    {
+      "id": "plain/gpu",
+      "url": "http://localhost:5174/?body=moon&dataset=http://127.0.0.1:8793&engine=gpu&solid=1&imagery=none&lat=35&lon=-15&radius=40000&pitch=70",
+      "errors": [],
+      "performance": {
+        "engine": "gpu",
+        "framesPerSecond": 92.6,
+        "terrainCpuMs": 3.88,
+        "renderCpuMs": 0.39,
+        "runtimeFrameMs": 1.7,
+        "gpuMs": 7.69,
+        "instances": 213,
+        "drawCalls": 1,
+        "trianglesPerFrame": 1760707,
+        "uploadKiBPerFrame": 361.3,
+        "uploadCallsPerFrame": 3.4,
+        "gpuMiB": 118.6,
+        "cpuMiB": 0,
+        "demTiles": 262,
+        "tileRequests": 264,
+        "distinctTileRequests": 264,
+        "tileHosts": [
+          "127.0.0.1:8793"
+        ],
+        "loadSeconds": 5
+      },
+      "integrity": {
+        "lod": {
+          "shown": 247,
+          "hidden": 228,
+          "returns": 71,
+          "quickReturns": 20,
+          "tilesReturning": 64,
+          "mostReturns": 2,
+          "mostReturningTile": "0/8/83/28",
+          "meanThresholdScale": 1,
+          "changesAtRest": 0,
+          "presentedAtRest": 84
+        },
+        "settleSeconds": 0,
+        "holesAtRest": 0,
+        "worstSharedEdgeAtRestMetres": 0,
+        "frames": 327,
+        "framesWithHoles": 0,
+        "worstHoles": 0,
+        "edgeChecks": 15,
+        "sharedVerticesPerCheck": 12846,
+        "worstSharedEdgeMetres": 0,
+        "worstOutOfViewEdgeMetres": 0,
+        "tileRequests": 264,
+        "distinctTileRequests": 264,
+        "tileHosts": [
+          "127.0.0.1:8793"
+        ],
+        "loadSeconds": 5.3
+      }
+    },
+    {
+      "id": "plain-zoom/gpu",
+      "url": "http://localhost:5174/?body=moon&dataset=http://127.0.0.1:8793&engine=gpu&solid=1&imagery=none&lat=35&lon=-15&radius=400000&pitch=70",
+      "errors": [],
+      "performance": {
+        "engine": "gpu",
+        "framesPerSecond": 50.8,
+        "terrainCpuMs": 12.99,
+        "renderCpuMs": 0.42,
+        "runtimeFrameMs": 2,
+        "gpuMs": 16.02,
+        "instances": 222,
+        "drawCalls": 1,
+        "trianglesPerFrame": 1698795,
+        "uploadKiBPerFrame": 1102.6,
+        "uploadCallsPerFrame": 8.3,
+        "gpuMiB": 136.8,
+        "cpuMiB": 0,
+        "demTiles": 265,
+        "tileRequests": 267,
+        "distinctTileRequests": 267,
+        "tileHosts": [
+          "127.0.0.1:8793"
+        ],
+        "loadSeconds": 4.1
+      },
+      "integrity": {
+        "lod": {
+          "shown": 503,
+          "hidden": 381,
+          "returns": 229,
+          "quickReturns": 102,
+          "tilesReturning": 180,
+          "mostReturns": 3,
+          "mostReturningTile": "0/8/86/26",
+          "meanThresholdScale": 1,
+          "changesAtRest": 110,
+          "presentedAtRest": 99
+        },
+        "settleSeconds": 0,
+        "holesAtRest": 0,
+        "worstSharedEdgeAtRestMetres": 0,
+        "frames": 271,
+        "framesWithHoles": 0,
+        "worstHoles": 0,
+        "edgeChecks": 14,
+        "sharedVerticesPerCheck": 11625,
+        "worstSharedEdgeMetres": 0,
+        "worstOutOfViewEdgeMetres": 0,
+        "tileRequests": 266,
+        "distinctTileRequests": 266,
+        "tileHosts": [
+          "127.0.0.1:8793"
+        ],
+        "loadSeconds": 3.6
+      }
+    },
+    {
+      "id": "turned-edge/gpu",
+      "url": "http://localhost:5174/?body=moon&dataset=http://127.0.0.1:8793&engine=gpu&solid=1&imagery=none&lat=45&lon=90&radius=40000&pitch=60",
+      "errors": [],
+      "performance": {
+        "engine": "gpu",
+        "framesPerSecond": 105.1,
+        "terrainCpuMs": 3.15,
+        "renderCpuMs": 0.34,
+        "runtimeFrameMs": 1.7,
+        "gpuMs": 4.49,
+        "instances": 270,
+        "drawCalls": 1,
+        "trianglesPerFrame": 2243984,
+        "uploadKiBPerFrame": 311.9,
+        "uploadCallsPerFrame": 3.1,
+        "gpuMiB": 118.6,
+        "cpuMiB": 0,
+        "demTiles": 286,
+        "tileRequests": 288,
+        "distinctTileRequests": 288,
+        "tileHosts": [
+          "127.0.0.1:8793"
+        ],
+        "loadSeconds": 6.1
+      },
+      "integrity": {
+        "lod": {
+          "shown": 271,
+          "hidden": 256,
+          "returns": 86,
+          "quickReturns": 22,
+          "tilesReturning": 82,
+          "mostReturns": 3,
+          "mostReturningTile": "1/8/123/0",
+          "meanThresholdScale": 1,
+          "changesAtRest": 0,
+          "presentedAtRest": 93
+        },
+        "settleSeconds": 0,
+        "holesAtRest": 0,
+        "worstSharedEdgeAtRestMetres": 0,
+        "frames": 357,
+        "framesWithHoles": 0,
+        "worstHoles": 0,
+        "edgeChecks": 16,
+        "sharedVerticesPerCheck": 16341,
+        "worstSharedEdgeMetres": 0,
+        "worstOutOfViewEdgeMetres": 0,
+        "tileRequests": 288,
+        "distinctTileRequests": 288,
+        "tileHosts": [
+          "127.0.0.1:8793"
+        ],
+        "loadSeconds": 6.4
+      }
+    },
+    {
+      "id": "cube-vertex/gpu",
+      "url": "http://localhost:5174/?body=moon&dataset=http://127.0.0.1:8793&engine=gpu&solid=1&imagery=none&lat=35.264&lon=45&radius=40000&pitch=60",
+      "errors": [],
+      "performance": {
+        "engine": "gpu",
+        "framesPerSecond": 100.1,
+        "terrainCpuMs": 2.95,
+        "renderCpuMs": 0.42,
+        "runtimeFrameMs": 2.1,
+        "gpuMs": 4.8,
+        "instances": 225,
+        "drawCalls": 1,
+        "trianglesPerFrame": 1906046,
+        "uploadKiBPerFrame": 268,
+        "uploadCallsPerFrame": 2.8,
+        "gpuMiB": 118.6,
+        "cpuMiB": 0,
+        "demTiles": 246,
+        "tileRequests": 248,
+        "distinctTileRequests": 248,
+        "tileHosts": [
+          "127.0.0.1:8793"
+        ],
+        "loadSeconds": 5.2
+      },
+      "integrity": {
+        "lod": {
+          "shown": 206,
+          "hidden": 195,
+          "returns": 63,
+          "quickReturns": 7,
+          "tilesReturning": 63,
+          "mostReturns": 1,
+          "mostReturningTile": "0/8/252/3",
+          "meanThresholdScale": 1,
+          "changesAtRest": 0,
+          "presentedAtRest": 91
+        },
+        "settleSeconds": 0,
+        "holesAtRest": 0,
+        "worstSharedEdgeAtRestMetres": 0,
+        "frames": 418,
+        "framesWithHoles": 0,
+        "worstHoles": 0,
+        "edgeChecks": 14,
+        "sharedVerticesPerCheck": 14020,
+        "worstSharedEdgeMetres": 0,
+        "worstOutOfViewEdgeMetres": 0,
+        "tileRequests": 248,
+        "distinctTileRequests": 248,
+        "tileHosts": [
+          "127.0.0.1:8793"
+        ],
+        "loadSeconds": 5.2
+      }
+    },
+    {
+      "id": "pole/gpu",
+      "url": "http://localhost:5174/?body=moon&dataset=http://127.0.0.1:8793&engine=gpu&solid=1&imagery=none&lat=-89.67&lon=129.2&radius=8000&pitch=60",
+      "errors": [],
+      "performance": {
+        "engine": "gpu",
+        "framesPerSecond": 46.1,
+        "terrainCpuMs": 14.77,
+        "renderCpuMs": 0.44,
+        "runtimeFrameMs": 3.7,
+        "gpuMs": 6.78,
+        "instances": 300,
+        "drawCalls": 1,
+        "trianglesPerFrame": 2597932,
+        "uploadKiBPerFrame": 1471.2,
+        "uploadCallsPerFrame": 10,
+        "gpuMiB": 205.1,
+        "cpuMiB": 0,
+        "demTiles": 547,
+        "tileRequests": 549,
+        "distinctTileRequests": 549,
+        "tileHosts": [
+          "127.0.0.1:8793"
+        ],
+        "loadSeconds": 6.9
+      },
+      "integrity": {
+        "lod": {
+          "shown": 498,
+          "hidden": 477,
+          "returns": 130,
+          "quickReturns": 57,
+          "tilesReturning": 117,
+          "mostReturns": 3,
+          "mostReturningTile": "5/10/517/515",
+          "meanThresholdScale": 1,
+          "changesAtRest": 18,
+          "presentedAtRest": 112
+        },
+        "settleSeconds": 0.3,
+        "holesAtRest": 0,
+        "worstSharedEdgeAtRestMetres": 0,
+        "frames": 172,
+        "framesWithHoles": 0,
+        "worstHoles": 0,
+        "edgeChecks": 13,
+        "sharedVerticesPerCheck": 19157,
+        "worstSharedEdgeMetres": 0,
+        "worstOutOfViewEdgeMetres": 0,
+        "tileRequests": 565,
+        "distinctTileRequests": 565,
+        "tileHosts": [
+          "127.0.0.1:8793"
+        ],
+        "loadSeconds": 7
+      }
+    },
+    {
+      "id": "cap-border/gpu",
+      "url": "http://localhost:5174/?body=moon&dataset=http://127.0.0.1:8793&engine=gpu&solid=1&imagery=none&lat=-86.6&lon=-90&radius=20000&pitch=60",
+      "errors": [],
+      "performance": {
+        "engine": "gpu",
+        "framesPerSecond": 106,
+        "terrainCpuMs": 2.81,
+        "renderCpuMs": 0.38,
+        "runtimeFrameMs": 2,
+        "gpuMs": 5.03,
+        "instances": 231,
+        "drawCalls": 1,
+        "trianglesPerFrame": 2004029,
+        "uploadKiBPerFrame": 254.1,
+        "uploadCallsPerFrame": 2.9,
+        "gpuMiB": 118.6,
+        "cpuMiB": 0,
+        "demTiles": 309,
+        "tileRequests": 311,
+        "distinctTileRequests": 311,
+        "tileHosts": [
+          "127.0.0.1:8793"
+        ],
+        "loadSeconds": 6.2
+      },
+      "integrity": {
+        "lod": {
+          "shown": 234,
+          "hidden": 223,
+          "returns": 61,
+          "quickReturns": 11,
+          "tilesReturning": 59,
+          "mostReturns": 2,
+          "mostReturningTile": "5/9/238/257",
+          "meanThresholdScale": 1,
+          "changesAtRest": 4,
+          "presentedAtRest": 84
+        },
+        "settleSeconds": 0,
+        "holesAtRest": 0,
+        "worstSharedEdgeAtRestMetres": 0,
+        "frames": 487,
+        "framesWithHoles": 0,
+        "worstHoles": 0,
+        "edgeChecks": 16,
+        "sharedVerticesPerCheck": 14366,
+        "worstSharedEdgeMetres": 0,
+        "worstOutOfViewEdgeMetres": 0,
+        "tileRequests": 311,
+        "distinctTileRequests": 311,
+        "tileHosts": [
+          "127.0.0.1:8793"
+        ],
+        "loadSeconds": 6
+      }
+    }
+  ]
+}

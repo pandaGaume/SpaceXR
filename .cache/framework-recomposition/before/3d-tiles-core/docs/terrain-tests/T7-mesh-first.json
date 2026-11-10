@@ -1,0 +1,97 @@
+{
+  "label": "mesh-cube",
+  "date": "2026-11-06T17:25:53.526Z",
+  "seconds": 6,
+  "results": [
+    {
+      "id": "plain/mesh",
+      "url": "http://localhost:5174/?body=moon&dataset=http://127.0.0.1:8793&engine=mesh&solid=1&imagery=none&lat=35&lon=-15&radius=40000&pitch=70",
+      "errors": [],
+      "performance": {
+        "engine": "mesh",
+        "framesPerSecond": 14.6,
+        "terrainCpuMs": 7.75,
+        "renderCpuMs": 4.63,
+        "runtimeFrameMs": 22.5,
+        "gpuMs": 23.63,
+        "instances": 365,
+        "drawCalls": 441,
+        "trianglesPerFrame": 225391,
+        "uploadKiBPerFrame": 172.9,
+        "uploadCallsPerFrame": 52.3,
+        "gpuMiB": 16,
+        "cpuMiB": 23.3,
+        "demTiles": 512
+      },
+      "integrity": {
+        "frames": 76,
+        "framesWithHoles": 1,
+        "worstHoles": 1,
+        "edgeChecks": 12,
+        "sharedVerticesPerCheck": 13203,
+        "worstSharedEdgeMetres": 117.574,
+        "worstOutOfViewEdgeMetres": 203.285
+      }
+    },
+    {
+      "id": "cube-vertex/mesh",
+      "url": "http://localhost:5174/?body=moon&dataset=http://127.0.0.1:8793&engine=mesh&solid=1&imagery=none&lat=35.264&lon=45&radius=40000&pitch=60",
+      "errors": [],
+      "performance": {
+        "engine": "mesh",
+        "framesPerSecond": 14.4,
+        "terrainCpuMs": 8.26,
+        "renderCpuMs": 5,
+        "runtimeFrameMs": 24.2,
+        "gpuMs": 28.6,
+        "instances": 352,
+        "drawCalls": 402.7,
+        "trianglesPerFrame": 205635,
+        "uploadKiBPerFrame": 159.3,
+        "uploadCallsPerFrame": 48.8,
+        "gpuMiB": 15.4,
+        "cpuMiB": 22.4,
+        "demTiles": 512
+      },
+      "integrity": {
+        "frames": 82,
+        "framesWithHoles": 44,
+        "worstHoles": 5,
+        "edgeChecks": 12,
+        "sharedVerticesPerCheck": 12913,
+        "worstSharedEdgeMetres": 201.176,
+        "worstOutOfViewEdgeMetres": 351.684
+      }
+    },
+    {
+      "id": "cap-border/mesh",
+      "url": "http://localhost:5174/?body=moon&dataset=http://127.0.0.1:8793&engine=mesh&solid=1&imagery=none&lat=-86.6&lon=-90&radius=20000&pitch=60",
+      "errors": [],
+      "performance": {
+        "engine": "mesh",
+        "framesPerSecond": 16.1,
+        "terrainCpuMs": 8.08,
+        "renderCpuMs": 4.29,
+        "runtimeFrameMs": 23.3,
+        "gpuMs": 25.84,
+        "instances": 202,
+        "drawCalls": 307.5,
+        "trianglesPerFrame": 156942,
+        "uploadKiBPerFrame": 116.8,
+        "uploadCallsPerFrame": 38.1,
+        "gpuMiB": 15,
+        "cpuMiB": 21.7,
+        "demTiles": 512
+      },
+      "integrity": {
+        "frames": 108,
+        "framesWithHoles": 41,
+        "worstHoles": 3,
+        "edgeChecks": 12,
+        "sharedVerticesPerCheck": 10043,
+        "worstSharedEdgeMetres": 124.227,
+        "worstOutOfViewEdgeMetres": 571.922
+      }
+    }
+  ]
+}

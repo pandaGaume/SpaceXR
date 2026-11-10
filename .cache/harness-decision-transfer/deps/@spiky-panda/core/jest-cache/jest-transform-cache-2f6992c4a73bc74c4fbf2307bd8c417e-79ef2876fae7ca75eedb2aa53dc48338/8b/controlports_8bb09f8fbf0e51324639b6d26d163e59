@@ -1,0 +1,70 @@
+4b09bc6501cf1f0092596d8e77d2bd4b
+"use strict";
+// ═══════════════════════════════════════════════════════════════════════════
+// Control-port convention
+//
+// Reserved slot names that mark a port as part of the runtime control
+// plane (vs. the domain dataflow). All control slots start with "_".
+// Pairing convention:
+//
+//   verb-style    → input  (drives the action)
+//     "_enable"   carries boolean, sets node.enabled
+//     "_start"    carries trigger, calls IRunnable.start()
+//     "_stop"     carries trigger, calls IRunnable.stop()
+//
+//   adjective/past → output (broadcasts current state)
+//     "_enabled"  carries boolean, current node.enabled state
+//     "_started"  carries trigger, fired after start() succeeds
+//     "_stopped"  carries trigger, fired after stop() succeeds
+//
+// Nodes that need control ports declare them via IDeclaresControlPorts
+// (alongside their data ports declared via IDeclaresPorts). The editor
+// renders the two groups distinctly; the runtime treats them as normal
+// channels carrying typed values, so the wiring is uniform end-to-end.
+// ═══════════════════════════════════════════════════════════════════════════
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.STOPPED_OUTPUT_PORT = exports.STARTED_OUTPUT_PORT = exports.STOP_INPUT_PORT = exports.START_INPUT_PORT = exports.ENABLED_OUTPUT_PORT = exports.ENABLE_INPUT_PORT = exports.CONTROL_PORT_STOPPED = exports.CONTROL_PORT_STARTED = exports.CONTROL_PORT_STOP = exports.CONTROL_PORT_START = exports.CONTROL_PORT_ENABLED = exports.CONTROL_PORT_ENABLE = void 0;
+exports.isControlSlot = isControlSlot;
+exports.publishControlOutput = publishControlOutput;
+exports.CONTROL_PORT_ENABLE = "_enable";
+exports.CONTROL_PORT_ENABLED = "_enabled";
+exports.CONTROL_PORT_START = "_start";
+exports.CONTROL_PORT_STOP = "_stop";
+exports.CONTROL_PORT_STARTED = "_started";
+exports.CONTROL_PORT_STOPPED = "_stopped";
+/** Boolean input: when received, sets node.enabled to the value. */
+exports.ENABLE_INPUT_PORT = { slot: exports.CONTROL_PORT_ENABLE, optional: true, type: "boolean" };
+/** Boolean output: emits node.enabled state changes. */
+exports.ENABLED_OUTPUT_PORT = { slot: exports.CONTROL_PORT_ENABLED, optional: true, type: "boolean" };
+/** Trigger input: calls IRunnable.start() on the host node. */
+exports.START_INPUT_PORT = { slot: exports.CONTROL_PORT_START, optional: true, type: "trigger" };
+/** Trigger input: calls IRunnable.stop() on the host node. */
+exports.STOP_INPUT_PORT = { slot: exports.CONTROL_PORT_STOP, optional: true, type: "trigger" };
+/** Trigger output: fired after IRunnable.start() succeeds. */
+exports.STARTED_OUTPUT_PORT = { slot: exports.CONTROL_PORT_STARTED, optional: true, type: "trigger" };
+/** Trigger output: fired after IRunnable.stop() succeeds. */
+exports.STOPPED_OUTPUT_PORT = { slot: exports.CONTROL_PORT_STOPPED, optional: true, type: "trigger" };
+/** Returns true if the given slot name follows the control-port convention. */
+function isControlSlot(slot) {
+    return typeof slot === "string" && slot.length > 0 && slot.charCodeAt(0) === 95; // "_"
+}
+/**
+ * Free function (not a class method) that publishes `value` on every
+ * outgoing channel of `node` whose slot matches `controlSlot`. Kept
+ * standalone so RuntimeNode, RuntimeGraph, and any future IRuntimeNode
+ * implementation can reuse it without coupling to a base class.
+ */
+function publishControlOutput(node, session, controlSlot, value) {
+    const links = session.graph.links;
+    for (const link of node.onsc()) {
+        if (link.slot !== controlSlot)
+            continue;
+        if (!link.enabled)
+            continue;
+        const idx = links.indexOf(link);
+        if (idx < 0)
+            continue;
+        session.publish(idx, value);
+    }
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiQzpcXFVzZXJzXFxHdWlsbGF1bWVQZWxsZXRpZXJcXERvY3VtZW50c1xcR2l0SHViXFxzcGlreXBhbmRhXFxwYWNrYWdlc1xcZGV2XFxjb3JlXFxzcmNcXGV4ZWN1dGlvblxcY29udHJvbC1wb3J0cy50cyIsIm1hcHBpbmdzIjoiO0FBQUEsOEVBQThFO0FBQzlFLDBCQUEwQjtBQUMxQixFQUFFO0FBQ0Ysc0VBQXNFO0FBQ3RFLHFFQUFxRTtBQUNyRSxzQkFBc0I7QUFDdEIsRUFBRTtBQUNGLCtDQUErQztBQUMvQyxxREFBcUQ7QUFDckQsMkRBQTJEO0FBQzNELDBEQUEwRDtBQUMxRCxFQUFFO0FBQ0YsdURBQXVEO0FBQ3ZELDhEQUE4RDtBQUM5RCxnRUFBZ0U7QUFDaEUsK0RBQStEO0FBQy9ELEVBQUU7QUFDRix1RUFBdUU7QUFDdkUsdUVBQXVFO0FBQ3ZFLHVFQUF1RTtBQUN2RSx1RUFBdUU7QUFDdkUsOEVBQThFOzs7QUF5QjlFLHNDQUVDO0FBUUQsb0RBU0M7QUF4Q1ksUUFBQSxtQkFBbUIsR0FBRyxTQUFTLENBQUM7QUFDaEMsUUFBQSxvQkFBb0IsR0FBRyxVQUFVLENBQUM7QUFDbEMsUUFBQSxrQkFBa0IsR0FBRyxRQUFRLENBQUM7QUFDOUIsUUFBQSxpQkFBaUIsR0FBRyxPQUFPLENBQUM7QUFDNUIsUUFBQSxvQkFBb0IsR0FBRyxVQUFVLENBQUM7QUFDbEMsUUFBQSxvQkFBb0IsR0FBRyxVQUFVLENBQUM7QUFFL0Msb0VBQW9FO0FBQ3ZELFFBQUEsaUJBQWlCLEdBQW9CLEVBQUUsSUFBSSxFQUFFLDJCQUFtQixFQUFFLFFBQVEsRUFBRSxJQUFJLEVBQUUsSUFBSSxFQUFFLFNBQVMsRUFBRSxDQUFDO0FBQ2pILHdEQUF3RDtBQUMzQyxRQUFBLG1CQUFtQixHQUFvQixFQUFFLElBQUksRUFBRSw0QkFBb0IsRUFBRSxRQUFRLEVBQUUsSUFBSSxFQUFFLElBQUksRUFBRSxTQUFTLEVBQUUsQ0FBQztBQUNwSCwrREFBK0Q7QUFDbEQsUUFBQSxnQkFBZ0IsR0FBb0IsRUFBRSxJQUFJLEVBQUUsMEJBQWtCLEVBQUUsUUFBUSxFQUFFLElBQUksRUFBRSxJQUFJLEVBQUUsU0FBUyxFQUFFLENBQUM7QUFDL0csOERBQThEO0FBQ2pELFFBQUEsZUFBZSxHQUFvQixFQUFFLElBQUksRUFBRSx5QkFBaUIsRUFBRSxRQUFRLEVBQUUsSUFBSSxFQUFFLElBQUksRUFBRSxTQUFTLEVBQUUsQ0FBQztBQUM3Ryw4REFBOEQ7QUFDakQsUUFBQSxtQkFBbUIsR0FBb0IsRUFBRSxJQUFJLEVBQUUsNEJBQW9CLEVBQUUsUUFBUSxFQUFFLElBQUksRUFBRSxJQUFJLEVBQUUsU0FBUyxFQUFFLENBQUM7QUFDcEgsNkRBQTZEO0FBQ2hELFFBQUEsbUJBQW1CLEdBQW9CLEVBQUUsSUFBSSxFQUFFLDRCQUFvQixFQUFFLFFBQVEsRUFBRSxJQUFJLEVBQUUsSUFBSSxFQUFFLFNBQVMsRUFBRSxDQUFDO0FBRXBILCtFQUErRTtBQUMvRSxTQUFnQixhQUFhLENBQUMsSUFBcUI7SUFDL0MsT0FBTyxPQUFPLElBQUksS0FBSyxRQUFRLElBQUksSUFBSSxDQUFDLE1BQU0sR0FBRyxDQUFDLElBQUksSUFBSSxDQUFDLFVBQVUsQ0FBQyxDQUFDLENBQUMsS0FBSyxFQUFFLENBQUMsQ0FBQyxNQUFNO0FBQzNGLENBQUM7QUFFRDs7Ozs7R0FLRztBQUNILFNBQWdCLG9CQUFvQixDQUFDLElBQWtCLEVBQUUsT0FBaUIsRUFBRSxXQUFtQixFQUFFLEtBQWM7SUFDM0csTUFBTSxLQUFLLEdBQUcsT0FBTyxDQUFDLEtBQUssQ0FBQyxLQUFnQyxDQUFDO0lBQzdELEtBQUssTUFBTSxJQUFJLElBQUksSUFBSSxDQUFDLElBQUksRUFBWSxFQUFFLENBQUM7UUFDdkMsSUFBSSxJQUFJLENBQUMsSUFBSSxLQUFLLFdBQVc7WUFBRSxTQUFTO1FBQ3hDLElBQUksQ0FBQyxJQUFJLENBQUMsT0FBTztZQUFFLFNBQVM7UUFDNUIsTUFBTSxHQUFHLEdBQUcsS0FBSyxDQUFDLE9BQU8sQ0FBQyxJQUFJLENBQUMsQ0FBQztRQUNoQyxJQUFJLEdBQUcsR0FBRyxDQUFDO1lBQUUsU0FBUztRQUN0QixPQUFPLENBQUMsT0FBTyxDQUFDLEdBQUcsRUFBRSxLQUFLLENBQUMsQ0FBQztJQUNoQyxDQUFDO0FBQ0wsQ0FBQyIsIm5hbWVzIjpbXSwic291cmNlcyI6WyJDOlxcVXNlcnNcXEd1aWxsYXVtZVBlbGxldGllclxcRG9jdW1lbnRzXFxHaXRIdWJcXHNwaWt5cGFuZGFcXHBhY2thZ2VzXFxkZXZcXGNvcmVcXHNyY1xcZXhlY3V0aW9uXFxjb250cm9sLXBvcnRzLnRzIl0sInNvdXJjZXNDb250ZW50IjpbIi8vIOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkFxyXG4vLyBDb250cm9sLXBvcnQgY29udmVudGlvblxyXG4vL1xyXG4vLyBSZXNlcnZlZCBzbG90IG5hbWVzIHRoYXQgbWFyayBhIHBvcnQgYXMgcGFydCBvZiB0aGUgcnVudGltZSBjb250cm9sXHJcbi8vIHBsYW5lICh2cy4gdGhlIGRvbWFpbiBkYXRhZmxvdykuIEFsbCBjb250cm9sIHNsb3RzIHN0YXJ0IHdpdGggXCJfXCIuXHJcbi8vIFBhaXJpbmcgY29udmVudGlvbjpcclxuLy9cclxuLy8gICB2ZXJiLXN0eWxlICAgIOKGkiBpbnB1dCAgKGRyaXZlcyB0aGUgYWN0aW9uKVxyXG4vLyAgICAgXCJfZW5hYmxlXCIgICBjYXJyaWVzIGJvb2xlYW4sIHNldHMgbm9kZS5lbmFibGVkXHJcbi8vICAgICBcIl9zdGFydFwiICAgIGNhcnJpZXMgdHJpZ2dlciwgY2FsbHMgSVJ1bm5hYmxlLnN0YXJ0KClcclxuLy8gICAgIFwiX3N0b3BcIiAgICAgY2FycmllcyB0cmlnZ2VyLCBjYWxscyBJUnVubmFibGUuc3RvcCgpXHJcbi8vXHJcbi8vICAgYWRqZWN0aXZlL3Bhc3Qg4oaSIG91dHB1dCAoYnJvYWRjYXN0cyBjdXJyZW50IHN0YXRlKVxyXG4vLyAgICAgXCJfZW5hYmxlZFwiICBjYXJyaWVzIGJvb2xlYW4sIGN1cnJlbnQgbm9kZS5lbmFibGVkIHN0YXRlXHJcbi8vICAgICBcIl9zdGFydGVkXCIgIGNhcnJpZXMgdHJpZ2dlciwgZmlyZWQgYWZ0ZXIgc3RhcnQoKSBzdWNjZWVkc1xyXG4vLyAgICAgXCJfc3RvcHBlZFwiICBjYXJyaWVzIHRyaWdnZXIsIGZpcmVkIGFmdGVyIHN0b3AoKSBzdWNjZWVkc1xyXG4vL1xyXG4vLyBOb2RlcyB0aGF0IG5lZWQgY29udHJvbCBwb3J0cyBkZWNsYXJlIHRoZW0gdmlhIElEZWNsYXJlc0NvbnRyb2xQb3J0c1xyXG4vLyAoYWxvbmdzaWRlIHRoZWlyIGRhdGEgcG9ydHMgZGVjbGFyZWQgdmlhIElEZWNsYXJlc1BvcnRzKS4gVGhlIGVkaXRvclxyXG4vLyByZW5kZXJzIHRoZSB0d28gZ3JvdXBzIGRpc3RpbmN0bHk7IHRoZSBydW50aW1lIHRyZWF0cyB0aGVtIGFzIG5vcm1hbFxyXG4vLyBjaGFubmVscyBjYXJyeWluZyB0eXBlZCB2YWx1ZXMsIHNvIHRoZSB3aXJpbmcgaXMgdW5pZm9ybSBlbmQtdG8tZW5kLlxyXG4vLyDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZBcclxuXHJcbmltcG9ydCB0eXBlIHsgSUNoYW5uZWwsIElQb3J0RGVzY3JpcHRvciwgSVJ1bnRpbWVOb2RlLCBJU2Vzc2lvbiB9IGZyb20gXCIuL2V4ZWN1dGlvbi5pbnRlcmZhY2VzXCI7XHJcblxyXG5leHBvcnQgY29uc3QgQ09OVFJPTF9QT1JUX0VOQUJMRSA9IFwiX2VuYWJsZVwiO1xyXG5leHBvcnQgY29uc3QgQ09OVFJPTF9QT1JUX0VOQUJMRUQgPSBcIl9lbmFibGVkXCI7XHJcbmV4cG9ydCBjb25zdCBDT05UUk9MX1BPUlRfU1RBUlQgPSBcIl9zdGFydFwiO1xyXG5leHBvcnQgY29uc3QgQ09OVFJPTF9QT1JUX1NUT1AgPSBcIl9zdG9wXCI7XHJcbmV4cG9ydCBjb25zdCBDT05UUk9MX1BPUlRfU1RBUlRFRCA9IFwiX3N0YXJ0ZWRcIjtcclxuZXhwb3J0IGNvbnN0IENPTlRST0xfUE9SVF9TVE9QUEVEID0gXCJfc3RvcHBlZFwiO1xyXG5cclxuLyoqIEJvb2xlYW4gaW5wdXQ6IHdoZW4gcmVjZWl2ZWQsIHNldHMgbm9kZS5lbmFibGVkIHRvIHRoZSB2YWx1ZS4gKi9cclxuZXhwb3J0IGNvbnN0IEVOQUJMRV9JTlBVVF9QT1JUOiBJUG9ydERlc2NyaXB0b3IgPSB7IHNsb3Q6IENPTlRST0xfUE9SVF9FTkFCTEUsIG9wdGlvbmFsOiB0cnVlLCB0eXBlOiBcImJvb2xlYW5cIiB9O1xyXG4vKiogQm9vbGVhbiBvdXRwdXQ6IGVtaXRzIG5vZGUuZW5hYmxlZCBzdGF0ZSBjaGFuZ2VzLiAqL1xyXG5leHBvcnQgY29uc3QgRU5BQkxFRF9PVVRQVVRfUE9SVDogSVBvcnREZXNjcmlwdG9yID0geyBzbG90OiBDT05UUk9MX1BPUlRfRU5BQkxFRCwgb3B0aW9uYWw6IHRydWUsIHR5cGU6IFwiYm9vbGVhblwiIH07XHJcbi8qKiBUcmlnZ2VyIGlucHV0OiBjYWxscyBJUnVubmFibGUuc3RhcnQoKSBvbiB0aGUgaG9zdCBub2RlLiAqL1xyXG5leHBvcnQgY29uc3QgU1RBUlRfSU5QVVRfUE9SVDogSVBvcnREZXNjcmlwdG9yID0geyBzbG90OiBDT05UUk9MX1BPUlRfU1RBUlQsIG9wdGlvbmFsOiB0cnVlLCB0eXBlOiBcInRyaWdnZXJcIiB9O1xyXG4vKiogVHJpZ2dlciBpbnB1dDogY2FsbHMgSVJ1bm5hYmxlLnN0b3AoKSBvbiB0aGUgaG9zdCBub2RlLiAqL1xyXG5leHBvcnQgY29uc3QgU1RPUF9JTlBVVF9QT1JUOiBJUG9ydERlc2NyaXB0b3IgPSB7IHNsb3Q6IENPTlRST0xfUE9SVF9TVE9QLCBvcHRpb25hbDogdHJ1ZSwgdHlwZTogXCJ0cmlnZ2VyXCIgfTtcclxuLyoqIFRyaWdnZXIgb3V0cHV0OiBmaXJlZCBhZnRlciBJUnVubmFibGUuc3RhcnQoKSBzdWNjZWVkcy4gKi9cclxuZXhwb3J0IGNvbnN0IFNUQVJURURfT1VUUFVUX1BPUlQ6IElQb3J0RGVzY3JpcHRvciA9IHsgc2xvdDogQ09OVFJPTF9QT1JUX1NUQVJURUQsIG9wdGlvbmFsOiB0cnVlLCB0eXBlOiBcInRyaWdnZXJcIiB9O1xyXG4vKiogVHJpZ2dlciBvdXRwdXQ6IGZpcmVkIGFmdGVyIElSdW5uYWJsZS5zdG9wKCkgc3VjY2VlZHMuICovXHJcbmV4cG9ydCBjb25zdCBTVE9QUEVEX09VVFBVVF9QT1JUOiBJUG9ydERlc2NyaXB0b3IgPSB7IHNsb3Q6IENPTlRST0xfUE9SVF9TVE9QUEVELCBvcHRpb25hbDogdHJ1ZSwgdHlwZTogXCJ0cmlnZ2VyXCIgfTtcclxuXHJcbi8qKiBSZXR1cm5zIHRydWUgaWYgdGhlIGdpdmVuIHNsb3QgbmFtZSBmb2xsb3dzIHRoZSBjb250cm9sLXBvcnQgY29udmVudGlvbi4gKi9cclxuZXhwb3J0IGZ1bmN0aW9uIGlzQ29udHJvbFNsb3Qoc2xvdDogc3RyaW5nIHwgbnVtYmVyKTogYm9vbGVhbiB7XHJcbiAgICByZXR1cm4gdHlwZW9mIHNsb3QgPT09IFwic3RyaW5nXCIgJiYgc2xvdC5sZW5ndGggPiAwICYmIHNsb3QuY2hhckNvZGVBdCgwKSA9PT0gOTU7IC8vIFwiX1wiXHJcbn1cclxuXHJcbi8qKlxyXG4gKiBGcmVlIGZ1bmN0aW9uIChub3QgYSBjbGFzcyBtZXRob2QpIHRoYXQgcHVibGlzaGVzIGB2YWx1ZWAgb24gZXZlcnlcclxuICogb3V0Z29pbmcgY2hhbm5lbCBvZiBgbm9kZWAgd2hvc2Ugc2xvdCBtYXRjaGVzIGBjb250cm9sU2xvdGAuIEtlcHRcclxuICogc3RhbmRhbG9uZSBzbyBSdW50aW1lTm9kZSwgUnVudGltZUdyYXBoLCBhbmQgYW55IGZ1dHVyZSBJUnVudGltZU5vZGVcclxuICogaW1wbGVtZW50YXRpb24gY2FuIHJldXNlIGl0IHdpdGhvdXQgY291cGxpbmcgdG8gYSBiYXNlIGNsYXNzLlxyXG4gKi9cclxuZXhwb3J0IGZ1bmN0aW9uIHB1Ymxpc2hDb250cm9sT3V0cHV0KG5vZGU6IElSdW50aW1lTm9kZSwgc2Vzc2lvbjogSVNlc3Npb24sIGNvbnRyb2xTbG90OiBzdHJpbmcsIHZhbHVlOiB1bmtub3duKTogdm9pZCB7XHJcbiAgICBjb25zdCBsaW5rcyA9IHNlc3Npb24uZ3JhcGgubGlua3MgYXMgUmVhZG9ubHlBcnJheTxJQ2hhbm5lbD47XHJcbiAgICBmb3IgKGNvbnN0IGxpbmsgb2Ygbm9kZS5vbnNjPElDaGFubmVsPigpKSB7XHJcbiAgICAgICAgaWYgKGxpbmsuc2xvdCAhPT0gY29udHJvbFNsb3QpIGNvbnRpbnVlO1xyXG4gICAgICAgIGlmICghbGluay5lbmFibGVkKSBjb250aW51ZTtcclxuICAgICAgICBjb25zdCBpZHggPSBsaW5rcy5pbmRleE9mKGxpbmspO1xyXG4gICAgICAgIGlmIChpZHggPCAwKSBjb250aW51ZTtcclxuICAgICAgICBzZXNzaW9uLnB1Ymxpc2goaWR4LCB2YWx1ZSk7XHJcbiAgICB9XHJcbn1cclxuIl0sInZlcnNpb24iOjN9

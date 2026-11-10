@@ -7230,6 +7230,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Mass: () => (/* reexport safe */ _math_index__WEBPACK_IMPORTED_MODULE_8__.Mass),
 /* harmony export */   MedianFilter: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.MedianFilter),
 /* harmony export */   MemoryCache: () => (/* reexport safe */ _cache_index__WEBPACK_IMPORTED_MODULE_11__.MemoryCache),
+/* harmony export */   MetricsImplicitTilesetProvider: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.MetricsImplicitTilesetProvider),
 /* harmony export */   NeighborsAddress: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.NeighborsAddress),
 /* harmony export */   NeighborsIndex: () => (/* reexport safe */ _tiles_index__WEBPACK_IMPORTED_MODULE_9__.NeighborsIndex),
 /* harmony export */   ObjectPool: () => (/* reexport safe */ _utils_index__WEBPACK_IMPORTED_MODULE_10__.ObjectPool),
@@ -12001,6 +12002,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   ActiveContext: () => (/* reexport safe */ _tile3d_stream_engine__WEBPACK_IMPORTED_MODULE_0__.ActiveContext),
 /* harmony export */   DefaultScreenSpaceError: () => (/* reexport safe */ _tile3d_stream_engine__WEBPACK_IMPORTED_MODULE_0__.DefaultScreenSpaceError),
+/* harmony export */   MetricsImplicitTilesetProvider: () => (/* reexport safe */ _tile3d_implicit_provider__WEBPACK_IMPORTED_MODULE_4__.MetricsImplicitTilesetProvider),
 /* harmony export */   TILE3D_NODE_CONTENT_TYPE: () => (/* reexport safe */ _tile3d_stream_source__WEBPACK_IMPORTED_MODULE_2__.TILE3D_NODE_CONTENT_TYPE),
 /* harmony export */   TILE3D_TILESET_CONTENT_TYPE: () => (/* reexport safe */ _tile3d_stream_source__WEBPACK_IMPORTED_MODULE_2__.TILE3D_TILESET_CONTENT_TYPE),
 /* harmony export */   Tile3dMaxPriority: () => (/* reexport safe */ _tile3d_stream_engine__WEBPACK_IMPORTED_MODULE_0__.Tile3dMaxPriority),
@@ -12018,11 +12020,74 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _tile3d_stream_client__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tile3d.stream.client */ "../core/dist/tiles/3d/engine/tile3d.stream.client.js");
 /* harmony import */ var _tile3d_stream_source__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tile3d.stream.source */ "../core/dist/tiles/3d/engine/tile3d.stream.source.js");
 /* harmony import */ var _tile3d_stream_binding__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./tile3d.stream.binding */ "../core/dist/tiles/3d/engine/tile3d.stream.binding.js");
+/* harmony import */ var _tile3d_implicit_provider__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./tile3d.implicit.provider */ "../core/dist/tiles/3d/engine/tile3d.implicit.provider.js");
+
 
 
 
 
 //# sourceMappingURL=index.js.map
+
+/***/ },
+
+/***/ "../core/dist/tiles/3d/engine/tile3d.implicit.provider.js"
+/*!****************************************************************!*\
+  !*** ../core/dist/tiles/3d/engine/tile3d.implicit.provider.js ***!
+  \****************************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   MetricsImplicitTilesetProvider: () => (/* binding */ MetricsImplicitTilesetProvider)
+/* harmony export */ });
+/* harmony import */ var _math_math__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../math/math */ "../core/dist/math/math.js");
+
+/**
+ * Wraps any `ITileMetrics` (EPSG3857, a geographic quadtree, a custom scheme)
+ * as an implicit 3D Tiles provider.
+ *
+ * The region of a node is computed FROM THE METRICS (its two opposite corners
+ * via `getTileXYToLatLon`), not by linear subdivision of the parent region, so
+ * non-linear schemes like Web Mercator are handled exactly: the implicit
+ * STRUCTURE (quadtree, dense availability, template content) stays standard
+ * while the region function stays faithful to the underlying pyramid.
+ */
+class MetricsImplicitTilesetProvider {
+    constructor(options) {
+        this.subdivisionScheme = "QUADTREE";
+        this._metrics = options.metrics;
+        this._contentUri = options.contentUri;
+        this.availableLevels = options.availableLevels ?? options.metrics.maxLOD + 1;
+        this._minHeight = options.minHeight ?? 0;
+        this._maxHeight = options.maxHeight ?? 0;
+        this.rootLevel = options.rootLevel ?? 0;
+        this.rootX = options.rootX ?? 0;
+        this.rootY = options.rootY ?? 0;
+    }
+    get metrics() {
+        return this._metrics;
+    }
+    regionOf(level, x, y) {
+        // y grows southward (XYZ slippy scheme): (x, y) is the north-west corner,
+        // (x+1, y+1) the south-east corner.
+        const nw = this._metrics.getTileXYToLatLon(x, y, level);
+        const se = this._metrics.getTileXYToLatLon(x + 1, y + 1, level);
+        const west = nw.lon * _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD;
+        const east = se.lon * _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD;
+        const north = nw.lat * _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD;
+        const south = se.lat * _math_math__WEBPACK_IMPORTED_MODULE_0__.Scalar.DEG2RAD;
+        return [west, south, east, north, this._minHeight, this._maxHeight];
+    }
+    geometricErrorOf(level, _x, _y) {
+        // Same convention as TileAddress.GeometricError / TilePyramidStreamSource:
+        // the tile's ground span at the equator for this level. Halves each level.
+        return this._metrics.groundResolution(0, level) * this._metrics.tileSize;
+    }
+    contentUriOf(level, x, y) {
+        return this._contentUri(level, x, y);
+    }
+}
+//# sourceMappingURL=tile3d.implicit.provider.js.map
 
 /***/ },
 
@@ -12117,9 +12182,12 @@ class Tile3dStreamBinding extends _pipeline__WEBPACK_IMPORTED_MODULE_0__.SourceB
                 tile.contentStatus = _tile3d_stream_engine__WEBPACK_IMPORTED_MODULE_1__.TileContentStatus.idle; // re-enqueued by the next traversal
             }
         }
-        // Re-traverse so load completions open REPLACE gates / trigger swaps,
-        // then let sinks react to the tiles' new status.
-        this._source.invalidate();
+        // Mark stale rather than re-traversing here: the next frame's
+        // setContext picks it up, so one frame does ONE traversal and the
+        // per-frame refine budget actually holds. Re-traversing synchronously
+        // on every settled load makes each load open the next level in the
+        // same frame, which stalls navigation.
+        this._source.markDirty();
         this.notifyUpdated(tiles, -1, this, this);
     }
     dispose() {
@@ -12733,6 +12801,10 @@ class Tile3dNodeSource {
  *  - ADD refinement emits parents and children together.
  *  - External tilesets (`content.uri` ending in .json) are grafted lazily the
  *    first time refinement needs them, then traversal resumes.
+ *  - Implicit tilesets (`implicitProvider` option) grow their QUADTREE lazily:
+ *    children are materialized on demand from the provider, so a whole global
+ *    z/x/y pyramid is navigated as standard 3D Tiles implicit tiling without a
+ *    tileset document. Dense availability only (real binary subtrees pending).
  *  - Tiles without renderable content are structural: traversal passes
  *    through them without emitting.
  *
@@ -12741,8 +12813,8 @@ class Tile3dNodeSource {
  * finishes loading (Tile3dStreamBinding does this automatically).
  *
  * Known v1 limits: the REPLACE render gate is shared across views (correct
- * for a single view); `viewerRequestVolume` is not honored; implicit tiling
- * and binary tile formats are out of scope.
+ * for a single view); `viewerRequestVolume` is not honored; binary tile
+ * formats and sparse (binary-subtree) implicit availability are out of scope.
  */
 class Tile3dStreamSource extends _streaming_streaming_engine__WEBPACK_IMPORTED_MODULE_4__.StreamingEngine {
     constructor(options) {
@@ -12758,14 +12830,18 @@ class Tile3dStreamSource extends _streaming_streaming_engine__WEBPACK_IMPORTED_M
         this._root = null;
         this._rootPromise = null;
         this._rootAttempts = 0;
+        this._refreshing = false;
+        this._refreshPending = false;
+        this._dirty = false;
         this._sources = new Map();
         this._renderStateChanged = [];
         this.id = options.id;
         this.contentType = options.contentType ?? TILE3D_TILESET_CONTENT_TYPE;
         this.encumbrance = _geometry_geometry_bounds__WEBPACK_IMPORTED_MODULE_2__.Bounds.Zero();
-        this._uri = options.uri;
-        this._baseUri = _utils__WEBPACK_IMPORTED_MODULE_7__.PathUtils.GetBaseUrl(options.uri);
+        this._uri = options.uri ?? "";
+        this._baseUri = options.uri ? _utils__WEBPACK_IMPORTED_MODULE_7__.PathUtils.GetBaseUrl(options.uri) : "";
         this._tilesetLoader = options.tilesetLoader;
+        this._implicitProvider = options.implicitProvider;
         this._budget = (0,_streaming_streaming_visibility_budget__WEBPACK_IMPORTED_MODULE_5__.ResolveSSEBudget)(options.maxScreenSpaceError ?? Tile3dStreamSource.DefaultMaxScreenSpaceError);
         this._maxSSEFn = options.maxScreenSpaceErrorFn;
         const ellipsoid = options.ellipsoid ?? _geodesy__WEBPACK_IMPORTED_MODULE_1__.Ellipsoid.WGS84;
@@ -12791,10 +12867,27 @@ class Tile3dStreamSource extends _streaming_streaming_engine__WEBPACK_IMPORTED_M
      * it (setContext already refreshes).
      */
     invalidate() {
+        this._dirty = false;
         for (const [viewId, ctx] of this._views) {
             if (ctx.camera)
                 this._refresh(viewId, ctx);
         }
+    }
+    /**
+     * Marks the traversal stale WITHOUT re-running it, so the work happens at
+     * most once per frame on the next `setContext`.
+     *
+     * Content loads must use this rather than `invalidate()`: re-traversing
+     * synchronously on every settled load defeats the per-frame refine budget
+     * and, with implicit tiling, lets one frame open level after level (each
+     * load notifying the next), which stalls navigation.
+     */
+    markDirty() {
+        this._dirty = true;
+    }
+    /** True while a load settled since the last traversal, or budgets left work queued. */
+    get hasPendingWork() {
+        return this._dirty || super.hasPendingWork;
     }
     dispose() {
         super.dispose();
@@ -12820,18 +12913,38 @@ class Tile3dStreamSource extends _streaming_streaming_engine__WEBPACK_IMPORTED_M
     }
     // ───────── traversal ─────────
     _refresh(viewId, ctx) {
-        this._renderStateChanged.length = 0;
-        super._refresh(viewId, ctx);
-        if (this._renderStateChanged.length) {
-            const updated = [];
-            for (const t of this._renderStateChanged) {
-                const s = this._sources.get(t);
-                if (s)
-                    updated.push(s);
-            }
-            this._renderStateChanged.length = 0;
-            if (updated.length)
-                this.notifyUpdated(updated, -1, this, this);
+        // Re-entrancy guard: a content load that settles WHILE a refresh is
+        // running (a synchronous or batched loader, or an observer that calls
+        // back in) would otherwise re-enter _refresh and, with implicit tiling,
+        // cascade the whole subtree. Defer it and drain iteratively (a loop,
+        // not a tail call, so the stack never grows with tree depth).
+        if (this._refreshing) {
+            this._refreshPending = true;
+            return;
+        }
+        this._refreshing = true;
+        this._dirty = false; // this traversal consumes any pending load notification
+        try {
+            do {
+                this._refreshPending = false;
+                this._renderStateChanged.length = 0;
+                super._refresh(viewId, ctx);
+                if (this._renderStateChanged.length) {
+                    const updated = [];
+                    for (const t of this._renderStateChanged) {
+                        const s = this._sources.get(t);
+                        if (s)
+                            updated.push(s);
+                    }
+                    this._renderStateChanged.length = 0;
+                    if (updated.length)
+                        this.notifyUpdated(updated, -1, this, this);
+                }
+            } while (this._refreshPending);
+        }
+        finally {
+            this._refreshing = false;
+            this._refreshPending = false;
         }
     }
     _traverse(camera, ctx, _parentsOut, _frontierOut, entriesOut) {
@@ -12851,10 +12964,18 @@ class Tile3dStreamSource extends _streaming_streaming_engine__WEBPACK_IMPORTED_M
         const sse = this._computeSSE(tile, camera);
         tile.sse = sse;
         const effMaxSSE = this._maxSSEFn?.(tile.depth) ?? maxSSE;
-        const children = tile.children;
-        const hasChildren = !!(children && children.length);
         // Structural tiles must always try to reach renderable descendants.
         const wantRefine = sse > effMaxSSE || !tile.hasContent;
+        // Implicit tilesets grow lazily: materialize this node's children only
+        // when the traversal actually intends to descend into them. A tile that
+        // is still waiting for its own content does not expand yet, otherwise a
+        // zoom would open every level at once (4^n nodes and requests) instead
+        // of one level per refresh.
+        if (wantRefine && (!tile.hasContent || tile.contentStatus === _tile3d_stream_engine__WEBPACK_IMPORTED_MODULE_11__.TileContentStatus.ready)) {
+            this._ensureImplicitChildren(tile);
+        }
+        const children = tile.children;
+        const hasChildren = !!(children && children.length);
         if (wantRefine && tile.hasExternal && !hasChildren) {
             // Refinement requires the external tileset; graft it, render own
             // content (if any) meanwhile.
@@ -12876,6 +12997,11 @@ class Tile3dStreamSource extends _streaming_streaming_engine__WEBPACK_IMPORTED_M
         // REPLACE refinement, hole-free: descend only once the whole visible
         // replacement front is fetched; until then keep the parent and stream
         // the front in load-gated state.
+        //
+        // The front is the FIRST renderable level below this tile, and the
+        // traversal stops there while it loads: descending further would
+        // materialize (and request) level after level of an implicit tree that
+        // is not renderable yet, growing 4^n per refresh.
         const front = [];
         let ready = true;
         for (const c of children) {
@@ -12891,6 +13017,7 @@ class Tile3dStreamSource extends _streaming_streaming_engine__WEBPACK_IMPORTED_M
         for (const f of front) {
             this._emit(f, this._computeSSE(f, camera), out, false);
         }
+        return;
     }
     /**
      * Walks a REPLACE front rooted at `c`: pushes every visible renderable
@@ -12915,6 +13042,11 @@ class Tile3dStreamSource extends _streaming_streaming_engine__WEBPACK_IMPORTED_M
             front.push(c);
             return c.contentStatus === _tile3d_stream_engine__WEBPACK_IMPORTED_MODULE_11__.TileContentStatus.ready;
         }
+        // Structural node: reach through it to the next renderable level. For an
+        // implicit tileset this is where its children get materialized, so it
+        // must happen ONLY while walking the front (one level at a time), never
+        // as a side effect of a deeper speculative descent.
+        this._ensureImplicitChildren(c);
         if (c.children?.length) {
             let ready = true;
             for (const k of c.children) {
@@ -12988,13 +13120,20 @@ class Tile3dStreamSource extends _streaming_streaming_engine__WEBPACK_IMPORTED_M
     }
     // ───────── tree initialization ─────────
     _ensureRoot() {
+        if (this._implicitProvider) {
+            this._buildImplicitRoot();
+            return;
+        }
         if (this._rootPromise)
             return;
         if (this._rootAttempts >= Tile3dStreamSource.MaxLoadAttempts)
             return;
+        if (!this._tilesetLoader)
+            return;
+        const loader = this._tilesetLoader;
         this._rootAttempts++;
         this.status = _streaming_streaming_datasource_interfaces__WEBPACK_IMPORTED_MODULE_3__.StreamSourceStatus.loading;
-        this._rootPromise = this._tilesetLoader
+        this._rootPromise = loader
             .loadTileSetAsync(this._uri)
             .then((ts) => {
             if (!ts?.root) {
@@ -13031,15 +13170,16 @@ class Tile3dStreamSource extends _streaming_streaming_engine__WEBPACK_IMPORTED_M
             if ((tile.externalAttempts ?? 0) >= Tile3dStreamSource.MaxLoadAttempts)
                 return;
         }
-        tile.externalAttempts = (tile.externalAttempts ?? 0) + 1;
+        const loader = this._tilesetLoader;
         const jsonContents = (tile.contents ?? []).filter((c) => c.uri && _utils__WEBPACK_IMPORTED_MODULE_7__.PathUtils.EndsWith(c.uri, ".json"));
-        if (!jsonContents.length) {
+        if (!loader || !jsonContents.length) {
             tile.externalStatus = _tile3d_stream_engine__WEBPACK_IMPORTED_MODULE_11__.TileContentStatus.error;
             return;
         }
+        tile.externalAttempts = (tile.externalAttempts ?? 0) + 1;
         tile.externalStatus = _tile3d_stream_engine__WEBPACK_IMPORTED_MODULE_11__.TileContentStatus.loading;
         Promise.all(jsonContents.map(async (c) => {
-            const ts = await this._tilesetLoader.loadTileSetAsync(c.uri);
+            const ts = await loader.loadTileSetAsync(c.uri);
             if (ts?.root) {
                 const index = tile.children?.length ?? 0;
                 this._initializeTile(ts.root, tile, _utils__WEBPACK_IMPORTED_MODULE_7__.PathUtils.GetBaseUrl(c.uri), index);
@@ -13073,6 +13213,22 @@ class Tile3dStreamSource extends _streaming_streaming_engine__WEBPACK_IMPORTED_M
      * document (not the root's).
      */
     _initializeTile(tile, parent, baseUri, index) {
+        this._initializeNode(tile, parent, baseUri, index);
+        if (tile.children) {
+            for (let i = 0; i < tile.children.length; i++) {
+                this._initializeTile(tile.children[i], tile, baseUri, i);
+            }
+        }
+    }
+    /**
+     * Per-node setup (no recursion into children): parent link, uid, depth,
+     * refine inheritance, world transform chain, transform-scaled geometric
+     * error, world bounding volumes (raw ECEF) and absolute content uris.
+     *
+     * Shared by the explicit-tree walk (`_initializeTile`) and lazy implicit
+     * child materialization (`_ensureImplicitChildren`).
+     */
+    _initializeNode(tile, parent, baseUri, index) {
         tile.parent = parent;
         tile.uid = parent ? `${parent.uid}/${index}` : this.id;
         tile.contentStatus = _tile3d_stream_engine__WEBPACK_IMPORTED_MODULE_11__.TileContentStatus.idle;
@@ -13115,10 +13271,60 @@ class Tile3dStreamSource extends _streaming_streaming_engine__WEBPACK_IMPORTED_M
                     tile.hasContent = true;
             }
         }
-        if (tile.children) {
-            for (let i = 0; i < tile.children.length; i++) {
-                this._initializeTile(tile.children[i], tile, baseUri, i);
+    }
+    // ───────── implicit tiling ─────────
+    /** Synthesizes and links the root of an implicit tileset (no document fetch). */
+    _buildImplicitRoot() {
+        if (this._root || !this._implicitProvider)
+            return;
+        const p = this._implicitProvider;
+        const rootTile = this._makeImplicitTile(p.rootLevel, p.rootX, p.rootY);
+        this._initializeNode(rootTile, undefined, this._baseUri, 0);
+        const ts = { asset: { version: "1.1" }, geometricError: rootTile.geometricError, root: rootTile };
+        this._root = ts;
+        if (rootTile.worldAabb) {
+            this.boundingBox = rootTile.worldAabb;
+            this.encumbrance = rootTile.worldAabb;
+        }
+        if (rootTile.worldSphere)
+            this.boundingSphere = rootTile.worldSphere;
+        this.status = _streaming_streaming_datasource_interfaces__WEBPACK_IMPORTED_MODULE_3__.StreamSourceStatus.ready;
+        this._rootReadyObservable?.notifyObservers(ts, -1, this, this);
+        this.invalidate();
+    }
+    /** Builds one implicit node (not yet initialized) from its quadtree coordinates. */
+    _makeImplicitTile(level, x, y) {
+        const p = this._implicitProvider;
+        const uri = p.contentUriOf(level, x, y);
+        return {
+            boundingVolume: { region: p.regionOf(level, x, y) },
+            geometricError: p.geometricErrorOf(level, x, y),
+            refine: "REPLACE",
+            content: uri ? { uri } : undefined,
+            implicitCoords: { level, x, y },
+        };
+    }
+    /**
+     * Materializes the four QUADTREE children of an implicit node on demand.
+     * No-op for explicit tiles, already-expanded nodes, or nodes at the last
+     * available level.
+     */
+    _ensureImplicitChildren(tile) {
+        const p = this._implicitProvider;
+        if (!p || tile.children || !tile.implicitCoords)
+            return;
+        const { level, x, y } = tile.implicitCoords;
+        if (level + 1 >= p.availableLevels)
+            return; // leaf level reached
+        const kids = [];
+        for (let j = 0; j < 2; j++) {
+            for (let i = 0; i < 2; i++) {
+                kids.push(this._makeImplicitTile(level + 1, 2 * x + i, 2 * y + j));
             }
+        }
+        tile.children = kids;
+        for (let k = 0; k < kids.length; k++) {
+            this._initializeNode(kids[k], tile, this._baseUri, k);
         }
     }
     /**
@@ -13177,6 +13383,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   GetTile3dContents: () => (/* reexport safe */ _interfaces__WEBPACK_IMPORTED_MODULE_0__.GetTile3dContents),
 /* harmony export */   IsITileset: () => (/* reexport safe */ _interfaces__WEBPACK_IMPORTED_MODULE_0__.IsITileset),
 /* harmony export */   IsTile3d: () => (/* reexport safe */ _interfaces__WEBPACK_IMPORTED_MODULE_0__.IsTile3d),
+/* harmony export */   MetricsImplicitTilesetProvider: () => (/* reexport safe */ _engine__WEBPACK_IMPORTED_MODULE_1__.MetricsImplicitTilesetProvider),
 /* harmony export */   RegionToBoxECEF: () => (/* reexport safe */ _interfaces__WEBPACK_IMPORTED_MODULE_0__.RegionToBoxECEF),
 /* harmony export */   RegionToSphereECEF: () => (/* reexport safe */ _interfaces__WEBPACK_IMPORTED_MODULE_0__.RegionToSphereECEF),
 /* harmony export */   TILE3D_NODE_CONTENT_TYPE: () => (/* reexport safe */ _engine__WEBPACK_IMPORTED_MODULE_1__.TILE3D_NODE_CONTENT_TYPE),
@@ -15275,6 +15482,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   MapZenNormalsDecoder: () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_1__.MapZenNormalsDecoder),
 /* harmony export */   MapzenAltitudeDecoder: () => (/* reexport safe */ _vendors_index__WEBPACK_IMPORTED_MODULE_1__.MapzenAltitudeDecoder),
 /* harmony export */   MedianFilter: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_2__.MedianFilter),
+/* harmony export */   MetricsImplicitTilesetProvider: () => (/* reexport safe */ _3d_index__WEBPACK_IMPORTED_MODULE_0__.MetricsImplicitTilesetProvider),
 /* harmony export */   NeighborsAddress: () => (/* reexport safe */ _tiles_interfaces__WEBPACK_IMPORTED_MODULE_11__.NeighborsAddress),
 /* harmony export */   NeighborsIndex: () => (/* reexport safe */ _address_index__WEBPACK_IMPORTED_MODULE_7__.NeighborsIndex),
 /* harmony export */   RGBATileCodec: () => (/* reexport safe */ _codecs_index__WEBPACK_IMPORTED_MODULE_2__.RGBATileCodec),
@@ -26400,6 +26608,273 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ },
 
+/***/ "./dist/tiles/3d/imagery/ellipsoid.imagery.loader.js"
+/*!***********************************************************!*\
+  !*** ./dist/tiles/3d/imagery/ellipsoid.imagery.loader.js ***!
+  \***********************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   EllipsoidImageryTileLoader: () => (/* binding */ EllipsoidImageryTileLoader)
+/* harmony export */ });
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var core_tiles__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/tiles */ "../core/dist/tiles/pipeline/tiles.pipeline.sourceblock.js");
+/* harmony import */ var core_tiles_3d_engine__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core/tiles/3d/engine */ "../core/dist/tiles/3d/engine/tile3d.stream.engine.js");
+
+
+
+/**
+ * Minimal ITile3dContentLoader for the implicit-surface test: fetches each
+ * tile's imagery raster as a Babylon texture and flips the tile to `ready`
+ * (which opens the REPLACE gate so the traversal descends).
+ *
+ * It is the raster counterpart of Tile3dContentLoader (glTF): same lifecycle
+ * (idle -> loading -> ready/error, cancel, notifyUpdated), no mesh loading.
+ * `loadTileSetAsync` is unused (implicit tilesets carry no external documents).
+ */
+class EllipsoidImageryTileLoader extends core_tiles__WEBPACK_IMPORTED_MODULE_1__.SourceBlock {
+    constructor(scene) {
+        super();
+        this._scene = scene;
+    }
+    load(tile) {
+        if (tile.contentStatus !== core_tiles_3d_engine__WEBPACK_IMPORTED_MODULE_2__.TileContentStatus.idle)
+            return;
+        const content = (tile.contents ?? []).find((c) => !!c.uri);
+        if (!content) {
+            tile.contentStatus = core_tiles_3d_engine__WEBPACK_IMPORTED_MODULE_2__.TileContentStatus.error;
+            this.notifyUpdated([tile], -1, this, this);
+            return;
+        }
+        tile.contentStatus = core_tiles_3d_engine__WEBPACK_IMPORTED_MODULE_2__.TileContentStatus.loading;
+        const texture = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Texture(content.uri, this._scene, true, // no mipmap: one tile == one screen patch
+        true, // invertY: slippy tiles are top-left origin
+        _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Texture.BILINEAR_SAMPLINGMODE, () => {
+            content.texture = texture;
+            // Guard against a settle that cancelled us mid-flight.
+            if (tile.contentStatus === core_tiles_3d_engine__WEBPACK_IMPORTED_MODULE_2__.TileContentStatus.loading) {
+                tile.contentStatus = core_tiles_3d_engine__WEBPACK_IMPORTED_MODULE_2__.TileContentStatus.ready;
+                this.notifyUpdated([tile], -1, this, this);
+            }
+        }, () => {
+            texture.dispose();
+            if (tile.contentStatus === core_tiles_3d_engine__WEBPACK_IMPORTED_MODULE_2__.TileContentStatus.loading) {
+                tile.contentStatus = core_tiles_3d_engine__WEBPACK_IMPORTED_MODULE_2__.TileContentStatus.error;
+                this.notifyUpdated([tile], -1, this, this);
+            }
+        });
+        texture.wrapU = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Texture.CLAMP_ADDRESSMODE;
+        texture.wrapV = _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Texture.CLAMP_ADDRESSMODE;
+    }
+    /**
+     * Called by the binding when a tile leaves the cut. Evicts the tile's
+     * imagery: disposes the GPU texture and resets the content to `idle` so a
+     * later re-entry reloads cleanly (the HTTP layer usually serves it from
+     * cache). Without eviction the textures of every tile ever visited would
+     * accumulate on the GPU and navigation would slow down over time.
+     */
+    cancel(tile) {
+        for (const c of tile.contents ?? []) {
+            if (c.texture) {
+                c.texture.dispose();
+                c.texture = undefined;
+            }
+        }
+        tile.contentStatus = core_tiles_3d_engine__WEBPACK_IMPORTED_MODULE_2__.TileContentStatus.idle;
+    }
+    loadTileSetAsync(_uri) {
+        return Promise.resolve(null);
+    }
+}
+//# sourceMappingURL=ellipsoid.imagery.loader.js.map
+
+/***/ },
+
+/***/ "./dist/tiles/3d/imagery/ellipsoid.patch.scene.js"
+/*!********************************************************!*\
+  !*** ./dist/tiles/3d/imagery/ellipsoid.patch.scene.js ***!
+  \********************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   EllipsoidTilePatchScene: () => (/* binding */ EllipsoidTilePatchScene)
+/* harmony export */ });
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babylonjs/core */ "@babylonjs/core");
+/* harmony import */ var _babylonjs_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babylonjs_core__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var core_geodesy__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/geodesy */ "../core/dist/geodesy/geodesy.ellipsoid.js");
+/* harmony import */ var core_geodesy__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core/geodesy */ "../core/dist/geodesy/geodesy.system.js");
+/* harmony import */ var core_tiles_3d_interfaces__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core/tiles/3d/interfaces */ "../core/dist/tiles/3d/interfaces/tile3d.js");
+
+
+
+/**
+ * Renders the active cut of an implicit surface tileset as curved imagery
+ * patches sitting on the ellipsoid, in RAW ECEF (matching GeodeticCamera).
+ *
+ * This is the minimal surface counterpart of Tile3dScene: it validates the
+ * implicit traversal visually (tiles refine/coarsen as you navigate the globe)
+ * without the DEM displacement shader. Each tile's `boundingVolume.region` is
+ * tessellated into a grid, projected to ECEF via the ellipsoid, and textured
+ * with the tile's imagery. Gated exactly like Tile3dScene: a tile shows only
+ * when `renderable` is open and its texture has loaded.
+ */
+class EllipsoidTilePatchScene extends _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.TransformNode {
+    constructor(name, scene, ellipsoid = core_geodesy__WEBPACK_IMPORTED_MODULE_1__.Ellipsoid.WGS84, options) {
+        super(name, scene);
+        this._patches = new Map();
+        this._system = new core_geodesy__WEBPACK_IMPORTED_MODULE_2__.GeodeticSystem(ellipsoid);
+        this._tessellation = Math.max(1, options?.tessellation ?? 8);
+        this._wireframe = options?.wireframe ?? false;
+    }
+    getClassName() {
+        return "EllipsoidTilePatchScene";
+    }
+    /** Tile outlines. Applies to existing patches and every patch built after. */
+    get wireframe() {
+        return this._wireframe;
+    }
+    set wireframe(value) {
+        this._wireframe = value;
+        for (const m of this._patches.values()) {
+            if (m.material)
+                m.material.wireframe = value;
+        }
+    }
+    added(eventData, _eventState) {
+        for (const t of eventData)
+            if (t)
+                this._update(t);
+    }
+    updated(eventData, _eventState) {
+        for (const t of eventData)
+            if (t)
+                this._update(t);
+    }
+    removed(eventData, _eventState) {
+        for (const t of eventData)
+            if (t)
+                this._remove(t);
+    }
+    dispose(doNotRecurse, disposeMaterialAndTextures) {
+        for (const m of this._patches.values())
+            this._disposePatch(m);
+        this._patches.clear();
+        super.dispose(doNotRecurse, disposeMaterialAndTextures);
+    }
+    _update(tile) {
+        // Present only when the engine's render gate is open and the imagery is in.
+        if (tile.renderable === false) {
+            this._remove(tile);
+            return;
+        }
+        const texture = (0,core_tiles_3d_interfaces__WEBPACK_IMPORTED_MODULE_3__.GetTile3dContents)(tile)?.find((c) => c.texture)?.texture;
+        if (!texture)
+            return;
+        const id = tile.uid ?? "";
+        if (this._patches.has(id))
+            return; // already built
+        this._patches.set(id, this._buildPatch(tile, texture));
+    }
+    _remove(tile) {
+        const id = tile.uid ?? "";
+        const mesh = this._patches.get(id);
+        if (mesh) {
+            this._disposePatch(mesh);
+            this._patches.delete(id);
+        }
+    }
+    /**
+     * Frees a patch's own resources: its unique geometry and material. The
+     * texture is NOT disposed here, it belongs to the tile content and is
+     * evicted by the loader (EllipsoidImageryTileLoader.cancel), so this
+     * material must be disposed WITHOUT its textures.
+     */
+    _disposePatch(mesh) {
+        mesh.material?.dispose(true, false);
+        mesh.dispose(false, false);
+    }
+    /** Tessellated ellipsoidal patch spanning the tile's geographic region. */
+    _buildPatch(tile, texture) {
+        const region = tile.boundingVolume.region;
+        const RAD2DEG = 180 / Math.PI;
+        const west = region[0] * RAD2DEG;
+        const south = region[1] * RAD2DEG;
+        const east = region[2] * RAD2DEG;
+        const north = region[3] * RAD2DEG;
+        const n = this._tessellation;
+        const positions = [];
+        const uvs = [];
+        const indices = [];
+        const scratch = { x: 0, y: 0, z: 0 };
+        for (let j = 0; j <= n; j++) {
+            const fy = j / n; // 0 = north edge, 1 = south edge
+            const lat = north + (south - north) * fy;
+            for (let i = 0; i <= n; i++) {
+                const fx = i / n; // 0 = west edge, 1 = east edge
+                const lon = west + (east - west) * fx;
+                this._system.geodeticFloatToCartesianToRef(lat, lon, 0, scratch);
+                positions.push(scratch.x, scratch.y, scratch.z);
+                uvs.push(fx, 1 - fy); // texture origin top-left (north-west)
+            }
+        }
+        const row = n + 1;
+        for (let j = 0; j < n; j++) {
+            for (let i = 0; i < n; i++) {
+                const a = j * row + i;
+                const b = a + 1;
+                const c = a + row;
+                const d = c + 1;
+                indices.push(a, c, b, b, c, d);
+            }
+        }
+        const mesh = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.Mesh(`patch ${tile.uid}`, this.getScene());
+        const data = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexData();
+        data.positions = positions;
+        data.uvs = uvs;
+        data.indices = indices;
+        const normals = [];
+        _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.VertexData.ComputeNormals(positions, indices, normals);
+        data.normals = normals;
+        data.applyToMesh(mesh);
+        const material = new _babylonjs_core__WEBPACK_IMPORTED_MODULE_0__.StandardMaterial(`patchMat ${tile.uid}`, this.getScene());
+        material.diffuseTexture = texture;
+        material.emissiveTexture = texture; // unlit look: readable without a light rig
+        material.disableLighting = true;
+        material.backFaceCulling = false; // double-sided: winding-independent for the test
+        material.useLogarithmicDepth = true; // planet-scale depth precision
+        material.wireframe = this._wireframe;
+        mesh.material = material;
+        mesh.parent = this;
+        mesh.alwaysSelectAsActiveMesh = true;
+        return mesh;
+    }
+}
+//# sourceMappingURL=ellipsoid.patch.scene.js.map
+
+/***/ },
+
+/***/ "./dist/tiles/3d/imagery/index.js"
+/*!****************************************!*\
+  !*** ./dist/tiles/3d/imagery/index.js ***!
+  \****************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   EllipsoidImageryTileLoader: () => (/* reexport safe */ _ellipsoid_imagery_loader__WEBPACK_IMPORTED_MODULE_0__.EllipsoidImageryTileLoader),
+/* harmony export */   EllipsoidTilePatchScene: () => (/* reexport safe */ _ellipsoid_patch_scene__WEBPACK_IMPORTED_MODULE_1__.EllipsoidTilePatchScene)
+/* harmony export */ });
+/* harmony import */ var _ellipsoid_imagery_loader__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./ellipsoid.imagery.loader */ "./dist/tiles/3d/imagery/ellipsoid.imagery.loader.js");
+/* harmony import */ var _ellipsoid_patch_scene__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./ellipsoid.patch.scene */ "./dist/tiles/3d/imagery/ellipsoid.patch.scene.js");
+
+
+//# sourceMappingURL=index.js.map
+
+/***/ },
+
 /***/ "./dist/tiles/3d/index.js"
 /*!********************************!*\
   !*** ./dist/tiles/3d/index.js ***!
@@ -26408,8 +26883,10 @@ __webpack_require__.r(__webpack_exports__);
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   GoogleTile3dErrorFn: () => (/* reexport safe */ _vendors__WEBPACK_IMPORTED_MODULE_3__.GoogleTile3dErrorFn),
-/* harmony export */   GoogleTiles3dUriResolver: () => (/* reexport safe */ _vendors__WEBPACK_IMPORTED_MODULE_3__.GoogleTiles3dUriResolver),
+/* harmony export */   EllipsoidImageryTileLoader: () => (/* reexport safe */ _imagery__WEBPACK_IMPORTED_MODULE_3__.EllipsoidImageryTileLoader),
+/* harmony export */   EllipsoidTilePatchScene: () => (/* reexport safe */ _imagery__WEBPACK_IMPORTED_MODULE_3__.EllipsoidTilePatchScene),
+/* harmony export */   GoogleTile3dErrorFn: () => (/* reexport safe */ _vendors__WEBPACK_IMPORTED_MODULE_4__.GoogleTile3dErrorFn),
+/* harmony export */   GoogleTiles3dUriResolver: () => (/* reexport safe */ _vendors__WEBPACK_IMPORTED_MODULE_4__.GoogleTiles3dUriResolver),
 /* harmony export */   Map3DViewer: () => (/* reexport safe */ _tile3d_viewer__WEBPACK_IMPORTED_MODULE_2__.Map3DViewer),
 /* harmony export */   Tile3dContentLoader: () => (/* reexport safe */ _tile3d_loader__WEBPACK_IMPORTED_MODULE_1__.Tile3dContentLoader),
 /* harmony export */   Tile3dScene: () => (/* reexport safe */ _tile3d_scene__WEBPACK_IMPORTED_MODULE_0__.Tile3dScene)
@@ -26417,7 +26894,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _tile3d_scene__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tile3d.scene */ "./dist/tiles/3d/tile3d.scene.js");
 /* harmony import */ var _tile3d_loader__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tile3d.loader */ "./dist/tiles/3d/tile3d.loader.js");
 /* harmony import */ var _tile3d_viewer__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tile3d.viewer */ "./dist/tiles/3d/tile3d.viewer.js");
-/* harmony import */ var _vendors__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./vendors */ "./dist/tiles/3d/vendors/index.js");
+/* harmony import */ var _imagery__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./imagery */ "./dist/tiles/3d/imagery/index.js");
+/* harmony import */ var _vendors__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./vendors */ "./dist/tiles/3d/vendors/index.js");
+
 
 
 
@@ -27002,6 +27481,8 @@ __webpack_require__.r(__webpack_exports__);
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   EllipsoidImageryTileLoader: () => (/* reexport safe */ _3d_index__WEBPACK_IMPORTED_MODULE_0__.EllipsoidImageryTileLoader),
+/* harmony export */   EllipsoidTilePatchScene: () => (/* reexport safe */ _3d_index__WEBPACK_IMPORTED_MODULE_0__.EllipsoidTilePatchScene),
 /* harmony export */   GoogleTile3dErrorFn: () => (/* reexport safe */ _3d_index__WEBPACK_IMPORTED_MODULE_0__.GoogleTile3dErrorFn),
 /* harmony export */   GoogleTiles3dUriResolver: () => (/* reexport safe */ _3d_index__WEBPACK_IMPORTED_MODULE_0__.GoogleTiles3dUriResolver),
 /* harmony export */   Map3DViewer: () => (/* reexport safe */ _3d_index__WEBPACK_IMPORTED_MODULE_0__.Map3DViewer),
@@ -28204,6 +28685,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   ElevationLayer: () => (/* reexport safe */ _dem__WEBPACK_IMPORTED_MODULE_3__.ElevationLayer),
 /* harmony export */   ElevationLayerView: () => (/* reexport safe */ _map__WEBPACK_IMPORTED_MODULE_2__.ElevationLayerView),
 /* harmony export */   Ellipsoid: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Ellipsoid),
+/* harmony export */   EllipsoidImageryTileLoader: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_7__.EllipsoidImageryTileLoader),
+/* harmony export */   EllipsoidTilePatchScene: () => (/* reexport safe */ _tiles__WEBPACK_IMPORTED_MODULE_7__.EllipsoidTilePatchScene),
 /* harmony export */   EllipsoidalMapMaterial: () => (/* reexport safe */ _materials__WEBPACK_IMPORTED_MODULE_0__.EllipsoidalMapMaterial),
 /* harmony export */   EmptyTileBounds: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.EmptyTileBounds),
 /* harmony export */   Envelope: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.Envelope),
@@ -28328,6 +28811,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   MatrixFormatter: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.MatrixFormatter),
 /* harmony export */   MedianFilter: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.MedianFilter),
 /* harmony export */   MemoryCache: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.MemoryCache),
+/* harmony export */   MetricsImplicitTilesetProvider: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.MetricsImplicitTilesetProvider),
 /* harmony export */   ModelFileName: () => (/* reexport safe */ _serializers__WEBPACK_IMPORTED_MODULE_8__.ModelFileName),
 /* harmony export */   NeighborsAddress: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.NeighborsAddress),
 /* harmony export */   NeighborsIndex: () => (/* reexport safe */ core_index__WEBPACK_IMPORTED_MODULE_9__.NeighborsIndex),

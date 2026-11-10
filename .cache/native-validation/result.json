@@ -1,0 +1,64 @@
+{
+  "errors": [],
+  "on": {
+    "fps": "120 FPS",
+    "hud": "ON",
+    "checked": true,
+    "post": 0,
+    "apply": false,
+    "nativeSurface": true,
+    "atmosphereSamplers": [
+      "earthAerialLight",
+      "earthAerialTransmission"
+    ],
+    "sameRuntime": true,
+    "sameCamera": true,
+    "errors": [],
+    "gpuErrors": []
+  },
+  "off": {
+    "fps": "120 FPS",
+    "hud": "OFF",
+    "checked": false,
+    "post": 0,
+    "apply": false,
+    "nativeSurface": false,
+    "atmosphereSamplers": [],
+    "sameRuntime": true,
+    "sameCamera": true,
+    "errors": [],
+    "gpuErrors": []
+  },
+  "restored": {
+    "fps": "120 FPS",
+    "hud": "ON",
+    "checked": true,
+    "post": 0,
+    "apply": false,
+    "nativeSurface": true,
+    "atmosphereSamplers": [
+      "earthAerialLight",
+      "earthAerialTransmission"
+    ],
+    "sameRuntime": true,
+    "sameCamera": true,
+    "errors": [],
+    "gpuErrors": []
+  },
+  "changed": {
+    "fps": "63 FPS",
+    "hud": "ON",
+    "checked": true,
+    "post": 0,
+    "apply": false,
+    "nativeSurface": true,
+    "atmosphereSamplers": [
+      "earthAerialLight",
+      "earthAerialTransmission"
+    ],
+    "sameRuntime": true,
+    "sameCamera": true,
+    "errors": [],
+    "gpuErrors": []
+  }
+}

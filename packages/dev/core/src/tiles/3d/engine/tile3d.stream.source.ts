@@ -16,6 +16,7 @@ import { PathUtils } from "../../../utils";
 import { BoxType, CreateTileSphereFromBox, ITile3d, ITileset, SphereType } from "../interfaces";
 import { IDENTITY44, IsSphereInFrustum, IsTileSphereBeyondHorizon, Mat44MultToRef, Mat44Type, TransformBoxToRef, TransformSphereToRef } from "../interfaces/math/math";
 import { RegionToBoxECEF } from "../interfaces/math/region";
+import { IImplicitTilesetProvider } from "./tile3d.implicit.provider";
 import { MaxScreenSpaceErrorFn, Tile3dMaxPriority, Tile3dMinPriority, Tile3dNormalPriority, Tile3dRefineType, TileContentStatus } from "./tile3d.stream.engine";
 
 /**
@@ -64,6 +65,8 @@ declare module "../interfaces/tile3d" {
         worldSphere?: IBoundingSphere;
         /** geometricError scaled by the transform chain's maximum scale factor (spec). */
         worldGeometricError?: number;
+        /** Quadtree coordinates of an implicitly-tiled node (see IImplicitTilesetProvider). */
+        implicitCoords?: { level: number; x: number; y: number };
     }
 }
 
@@ -156,10 +159,17 @@ export class Tile3dNodeSource implements IStreamSource<ITile3d> {
 export interface ITile3dStreamSourceOptions {
     /** Unique id; also the namespace prefix of every emitted tile id. */
     id: string;
-    /** Root tileset uri (credential injection happens inside the tilesetLoader). */
-    uri: string;
-    /** Loads tileset JSON documents (root + external references). */
-    tilesetLoader: ITilesetLoader;
+    /** Root tileset uri (credential injection happens inside the tilesetLoader). Omit when `implicitProvider` is set. */
+    uri?: string;
+    /** Loads tileset JSON documents (root + external references). Omit when `implicitProvider` is set. */
+    tilesetLoader?: ITilesetLoader;
+    /**
+     * Drives the source from an implicitly-tiled tileset (a global z/x/y
+     * pyramid encapsulated as 3D Tiles implicit tiling) instead of a fetched
+     * tileset document. Children are materialized on demand during traversal.
+     * Mutually exclusive with `uri` / `tilesetLoader`.
+     */
+    implicitProvider?: IImplicitTilesetProvider;
     /**
      * Max pixel screen-space error before a tile is refined. A number for a
      * constant threshold or an IScreenSpaceErrorBudget for altitude-varying
@@ -198,6 +208,10 @@ export interface ITile3dStreamSourceOptions {
  *  - ADD refinement emits parents and children together.
  *  - External tilesets (`content.uri` ending in .json) are grafted lazily the
  *    first time refinement needs them, then traversal resumes.
+ *  - Implicit tilesets (`implicitProvider` option) grow their QUADTREE lazily:
+ *    children are materialized on demand from the provider, so a whole global
+ *    z/x/y pyramid is navigated as standard 3D Tiles implicit tiling without a
+ *    tileset document. Dense availability only (real binary subtrees pending).
  *  - Tiles without renderable content are structural: traversal passes
  *    through them without emitting.
  *
@@ -206,8 +220,8 @@ export interface ITile3dStreamSourceOptions {
  * finishes loading (Tile3dStreamBinding does this automatically).
  *
  * Known v1 limits: the REPLACE render gate is shared across views (correct
- * for a single view); `viewerRequestVolume` is not honored; implicit tiling
- * and binary tile formats are out of scope.
+ * for a single view); `viewerRequestVolume` is not honored; binary tile
+ * formats and sparse (binary-subtree) implicit availability are out of scope.
  */
 export class Tile3dStreamSource extends StreamingEngine implements IStreamSubEngine<IStreamSource<unknown>> {
     public static readonly DefaultMaxScreenSpaceError = 16;
@@ -227,7 +241,8 @@ export class Tile3dStreamSource extends StreamingEngine implements IStreamSubEng
 
     private readonly _uri: string;
     private readonly _baseUri: string;
-    private readonly _tilesetLoader: ITilesetLoader;
+    private readonly _tilesetLoader?: ITilesetLoader;
+    private readonly _implicitProvider?: IImplicitTilesetProvider;
     private readonly _budget: IScreenSpaceErrorBudget;
     private readonly _maxSSEFn?: MaxScreenSpaceErrorFn;
     private readonly _planetRadius: number;
@@ -239,6 +254,9 @@ export class Tile3dStreamSource extends StreamingEngine implements IStreamSubEng
     private _root: Nullable<ITileset> = null;
     private _rootPromise: Nullable<Promise<void>> = null;
     private _rootAttempts: number = 0;
+    private _refreshing: boolean = false;
+    private _refreshPending: boolean = false;
+    private _dirty: boolean = false;
     private _rootReadyObservable?: Observable<ITileset>;
     private readonly _sources: Map<ITile3d, Tile3dNodeSource> = new Map();
     private readonly _renderStateChanged: Array<ITile3d> = [];
@@ -252,9 +270,10 @@ export class Tile3dStreamSource extends StreamingEngine implements IStreamSubEng
         this.id = options.id;
         this.contentType = options.contentType ?? TILE3D_TILESET_CONTENT_TYPE;
         this.encumbrance = Bounds.Zero();
-        this._uri = options.uri;
-        this._baseUri = PathUtils.GetBaseUrl(options.uri);
+        this._uri = options.uri ?? "";
+        this._baseUri = options.uri ? PathUtils.GetBaseUrl(options.uri) : "";
         this._tilesetLoader = options.tilesetLoader;
+        this._implicitProvider = options.implicitProvider;
         this._budget = ResolveSSEBudget(options.maxScreenSpaceError ?? Tile3dStreamSource.DefaultMaxScreenSpaceError);
         this._maxSSEFn = options.maxScreenSpaceErrorFn;
         const ellipsoid = options.ellipsoid ?? Ellipsoid.WGS84;
@@ -282,9 +301,28 @@ export class Tile3dStreamSource extends StreamingEngine implements IStreamSubEng
      * it (setContext already refreshes).
      */
     public invalidate(): void {
+        this._dirty = false;
         for (const [viewId, ctx] of this._views) {
             if (ctx.camera) this._refresh(viewId, ctx);
         }
+    }
+
+    /**
+     * Marks the traversal stale WITHOUT re-running it, so the work happens at
+     * most once per frame on the next `setContext`.
+     *
+     * Content loads must use this rather than `invalidate()`: re-traversing
+     * synchronously on every settled load defeats the per-frame refine budget
+     * and, with implicit tiling, lets one frame open level after level (each
+     * load notifying the next), which stalls navigation.
+     */
+    public markDirty(): void {
+        this._dirty = true;
+    }
+
+    /** True while a load settled since the last traversal, or budgets left work queued. */
+    public override get hasPendingWork(): boolean {
+        return this._dirty || super.hasPendingWork;
     }
 
     public override dispose(): void {
@@ -313,16 +351,35 @@ export class Tile3dStreamSource extends StreamingEngine implements IStreamSubEng
     // ───────── traversal ─────────
 
     protected override _refresh(viewId: string, ctx: StreamActiveContext): void {
-        this._renderStateChanged.length = 0;
-        super._refresh(viewId, ctx);
-        if (this._renderStateChanged.length) {
-            const updated: Array<IStreamSource<unknown>> = [];
-            for (const t of this._renderStateChanged) {
-                const s = this._sources.get(t);
-                if (s) updated.push(s);
-            }
-            this._renderStateChanged.length = 0;
-            if (updated.length) this.notifyUpdated(updated, -1, this, this);
+        // Re-entrancy guard: a content load that settles WHILE a refresh is
+        // running (a synchronous or batched loader, or an observer that calls
+        // back in) would otherwise re-enter _refresh and, with implicit tiling,
+        // cascade the whole subtree. Defer it and drain iteratively (a loop,
+        // not a tail call, so the stack never grows with tree depth).
+        if (this._refreshing) {
+            this._refreshPending = true;
+            return;
+        }
+        this._refreshing = true;
+        this._dirty = false; // this traversal consumes any pending load notification
+        try {
+            do {
+                this._refreshPending = false;
+                this._renderStateChanged.length = 0;
+                super._refresh(viewId, ctx);
+                if (this._renderStateChanged.length) {
+                    const updated: Array<IStreamSource<unknown>> = [];
+                    for (const t of this._renderStateChanged) {
+                        const s = this._sources.get(t);
+                        if (s) updated.push(s);
+                    }
+                    this._renderStateChanged.length = 0;
+                    if (updated.length) this.notifyUpdated(updated, -1, this, this);
+                }
+            } while (this._refreshPending);
+        } finally {
+            this._refreshing = false;
+            this._refreshPending = false;
         }
     }
 
@@ -349,11 +406,21 @@ export class Tile3dStreamSource extends StreamingEngine implements IStreamSubEng
         const sse = this._computeSSE(tile, camera);
         tile.sse = sse;
         const effMaxSSE = this._maxSSEFn?.(tile.depth) ?? maxSSE;
-        const children = tile.children;
-        const hasChildren = !!(children && children.length);
 
         // Structural tiles must always try to reach renderable descendants.
         const wantRefine = sse > effMaxSSE || !tile.hasContent;
+
+        // Implicit tilesets grow lazily: materialize this node's children only
+        // when the traversal actually intends to descend into them. A tile that
+        // is still waiting for its own content does not expand yet, otherwise a
+        // zoom would open every level at once (4^n nodes and requests) instead
+        // of one level per refresh.
+        if (wantRefine && (!tile.hasContent || tile.contentStatus === TileContentStatus.ready)) {
+            this._ensureImplicitChildren(tile);
+        }
+
+        const children = tile.children;
+        const hasChildren = !!(children && children.length);
 
         if (wantRefine && tile.hasExternal && !hasChildren) {
             // Refinement requires the external tileset; graft it, render own
@@ -378,6 +445,11 @@ export class Tile3dStreamSource extends StreamingEngine implements IStreamSubEng
         // REPLACE refinement, hole-free: descend only once the whole visible
         // replacement front is fetched; until then keep the parent and stream
         // the front in load-gated state.
+        //
+        // The front is the FIRST renderable level below this tile, and the
+        // traversal stops there while it loads: descending further would
+        // materialize (and request) level after level of an implicit tree that
+        // is not renderable yet, growing 4^n per refresh.
         const front: Array<ITile3d> = [];
         let ready = true;
         for (const c of children!) {
@@ -391,6 +463,7 @@ export class Tile3dStreamSource extends StreamingEngine implements IStreamSubEng
         for (const f of front) {
             this._emit(f, this._computeSSE(f, camera), out, false);
         }
+        return;
     }
 
     /**
@@ -417,6 +490,11 @@ export class Tile3dStreamSource extends StreamingEngine implements IStreamSubEng
             return c.contentStatus === TileContentStatus.ready;
         }
 
+        // Structural node: reach through it to the next renderable level. For an
+        // implicit tileset this is where its children get materialized, so it
+        // must happen ONLY while walking the front (one level at a time), never
+        // as a side effect of a deeper speculative descent.
+        this._ensureImplicitChildren(c);
         if (c.children?.length) {
             let ready = true;
             for (const k of c.children) {
@@ -491,11 +569,17 @@ export class Tile3dStreamSource extends StreamingEngine implements IStreamSubEng
     // ───────── tree initialization ─────────
 
     private _ensureRoot(): void {
+        if (this._implicitProvider) {
+            this._buildImplicitRoot();
+            return;
+        }
         if (this._rootPromise) return;
         if (this._rootAttempts >= Tile3dStreamSource.MaxLoadAttempts) return;
+        if (!this._tilesetLoader) return;
+        const loader = this._tilesetLoader;
         this._rootAttempts++;
         this.status = StreamSourceStatus.loading;
-        this._rootPromise = this._tilesetLoader
+        this._rootPromise = loader
             .loadTileSetAsync(this._uri)
             .then((ts) => {
                 if (!ts?.root) {
@@ -530,16 +614,17 @@ export class Tile3dStreamSource extends StreamingEngine implements IStreamSubEng
         if (tile.externalStatus === TileContentStatus.error) {
             if ((tile.externalAttempts ?? 0) >= Tile3dStreamSource.MaxLoadAttempts) return;
         }
-        tile.externalAttempts = (tile.externalAttempts ?? 0) + 1;
+        const loader = this._tilesetLoader;
         const jsonContents = (tile.contents ?? []).filter((c) => c.uri && PathUtils.EndsWith(c.uri, ".json"));
-        if (!jsonContents.length) {
+        if (!loader || !jsonContents.length) {
             tile.externalStatus = TileContentStatus.error;
             return;
         }
+        tile.externalAttempts = (tile.externalAttempts ?? 0) + 1;
         tile.externalStatus = TileContentStatus.loading;
         Promise.all(
             jsonContents.map(async (c) => {
-                const ts = await this._tilesetLoader.loadTileSetAsync(c.uri);
+                const ts = await loader.loadTileSetAsync(c.uri);
                 if (ts?.root) {
                     const index = tile.children?.length ?? 0;
                     this._initializeTile(ts.root, tile, PathUtils.GetBaseUrl(c.uri), index);
@@ -573,6 +658,23 @@ export class Tile3dStreamSource extends StreamingEngine implements IStreamSubEng
      * document (not the root's).
      */
     private _initializeTile(tile: ITile3d, parent: ITile3d | undefined, baseUri: string, index: number): void {
+        this._initializeNode(tile, parent, baseUri, index);
+        if (tile.children) {
+            for (let i = 0; i < tile.children.length; i++) {
+                this._initializeTile(tile.children[i], tile, baseUri, i);
+            }
+        }
+    }
+
+    /**
+     * Per-node setup (no recursion into children): parent link, uid, depth,
+     * refine inheritance, world transform chain, transform-scaled geometric
+     * error, world bounding volumes (raw ECEF) and absolute content uris.
+     *
+     * Shared by the explicit-tree walk (`_initializeTile`) and lazy implicit
+     * child materialization (`_ensureImplicitChildren`).
+     */
+    private _initializeNode(tile: ITile3d, parent: ITile3d | undefined, baseUri: string, index: number): void {
         tile.parent = parent;
         tile.uid = parent ? `${parent.uid}/${index}` : this.id;
         tile.contentStatus = TileContentStatus.idle;
@@ -614,11 +716,60 @@ export class Tile3dStreamSource extends StreamingEngine implements IStreamSubEng
                 else tile.hasContent = true;
             }
         }
+    }
 
-        if (tile.children) {
-            for (let i = 0; i < tile.children.length; i++) {
-                this._initializeTile(tile.children[i], tile, baseUri, i);
+    // ───────── implicit tiling ─────────
+
+    /** Synthesizes and links the root of an implicit tileset (no document fetch). */
+    private _buildImplicitRoot(): void {
+        if (this._root || !this._implicitProvider) return;
+        const p = this._implicitProvider;
+        const rootTile = this._makeImplicitTile(p.rootLevel, p.rootX, p.rootY);
+        this._initializeNode(rootTile, undefined, this._baseUri, 0);
+        const ts: ITileset = { asset: { version: "1.1" }, geometricError: rootTile.geometricError, root: rootTile } as ITileset;
+        this._root = ts;
+        if (rootTile.worldAabb) {
+            this.boundingBox = rootTile.worldAabb;
+            this.encumbrance = rootTile.worldAabb;
+        }
+        if (rootTile.worldSphere) this.boundingSphere = rootTile.worldSphere;
+        this.status = StreamSourceStatus.ready;
+        this._rootReadyObservable?.notifyObservers(ts, -1, this, this);
+        this.invalidate();
+    }
+
+    /** Builds one implicit node (not yet initialized) from its quadtree coordinates. */
+    private _makeImplicitTile(level: number, x: number, y: number): ITile3d {
+        const p = this._implicitProvider!;
+        const uri = p.contentUriOf(level, x, y);
+        return {
+            boundingVolume: { region: p.regionOf(level, x, y) },
+            geometricError: p.geometricErrorOf(level, x, y),
+            refine: "REPLACE",
+            content: uri ? { uri } : undefined,
+            implicitCoords: { level, x, y },
+        } as ITile3d;
+    }
+
+    /**
+     * Materializes the four QUADTREE children of an implicit node on demand.
+     * No-op for explicit tiles, already-expanded nodes, or nodes at the last
+     * available level.
+     */
+    private _ensureImplicitChildren(tile: ITile3d): void {
+        const p = this._implicitProvider;
+        if (!p || tile.children || !tile.implicitCoords) return;
+        const { level, x, y } = tile.implicitCoords;
+        if (level + 1 >= p.availableLevels) return; // leaf level reached
+        const kids: ITile3d[] = [];
+        for (let j = 0; j < 2; j++) {
+            for (let i = 0; i < 2; i++) {
+                kids.push(this._makeImplicitTile(level + 1, 2 * x + i, 2 * y + j));
             }
+        }
+        tile.children = kids as [ITile3d, ...ITile3d[]];
+        for (let k = 0; k < kids.length; k++) {
+            this._initializeNode(kids[k], tile, this._baseUri, k);
         }
     }
 

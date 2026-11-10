@@ -1,0 +1,934 @@
+[
+  {
+    "id": "@spacexr/3d-tiles-core@0.1.0",
+    "name": "@spacexr/3d-tiles-core",
+    "version": "0.1.0",
+    "size": 66563,
+    "unpackedSize": 353173,
+    "shasum": "e17d9aa07af34c9d98a82ebd8608cec55879b107",
+    "integrity": "sha512-jfFEi56ywKnCP2tnbhnV3BKKtuTTyxVDWrD0FSPc4/uVpo+S6JF46qC1EpKLsGQXfzkgjd2qCbEgi7jbwgWRxw==",
+    "filename": "spacexr-3d-tiles-core-0.1.0.tgz",
+    "files": [
+      {
+        "path": "LICENSE",
+        "size": 11357,
+        "mode": 420
+      },
+      {
+        "path": "README.md",
+        "size": 2348,
+        "mode": 420
+      },
+      {
+        "path": "dist/codecs/index.d.ts",
+        "size": 1584,
+        "mode": 420
+      },
+      {
+        "path": "dist/codecs/index.js",
+        "size": 26212,
+        "mode": 420
+      },
+      {
+        "path": "dist/codecs/index.js.map",
+        "size": 64289,
+        "mode": 420
+      },
+      {
+        "path": "dist/diagnostic-DLyZJ6gA.d.ts",
+        "size": 350,
+        "mode": 420
+      },
+      {
+        "path": "dist/extensions/index.d.ts",
+        "size": 2123,
+        "mode": 420
+      },
+      {
+        "path": "dist/extensions/index.js",
+        "size": 2497,
+        "mode": 420
+      },
+      {
+        "path": "dist/extensions/index.js.map",
+        "size": 9281,
+        "mode": 420
+      },
+      {
+        "path": "dist/index.d.ts",
+        "size": 1767,
+        "mode": 420
+      },
+      {
+        "path": "dist/index.js",
+        "size": 27955,
+        "mode": 420
+      },
+      {
+        "path": "dist/index.js.map",
+        "size": 65712,
+        "mode": 420
+      },
+      {
+        "path": "dist/model/index.d.ts",
+        "size": 1161,
+        "mode": 420
+      },
+      {
+        "path": "dist/model/index.js",
+        "size": 209,
+        "mode": 420
+      },
+      {
+        "path": "dist/model/index.js.map",
+        "size": 2338,
+        "mode": 420
+      },
+      {
+        "path": "dist/subtree-DqsFmODv.d.ts",
+        "size": 1790,
+        "mode": 420
+      },
+      {
+        "path": "dist/tileset-BvTx71cR.d.ts",
+        "size": 5750,
+        "mode": 420
+      },
+      {
+        "path": "dist/utm-bounding-volume-nHXqirak.d.ts",
+        "size": 2270,
+        "mode": 420
+      },
+      {
+        "path": "dist/validation/index.d.ts",
+        "size": 887,
+        "mode": 420
+      },
+      {
+        "path": "dist/validation/index.js",
+        "size": 21623,
+        "mode": 420
+      },
+      {
+        "path": "dist/validation/index.js.map",
+        "size": 52821,
+        "mode": 420
+      },
+      {
+        "path": "package.json",
+        "size": 3006,
+        "mode": 420
+      },
+      {
+        "path": "src/codecs/codec.ts",
+        "size": 308,
+        "mode": 420
+      },
+      {
+        "path": "src/codecs/index.ts",
+        "size": 96,
+        "mode": 420
+      },
+      {
+        "path": "src/codecs/subtree.codec.ts",
+        "size": 4239,
+        "mode": 420
+      },
+      {
+        "path": "src/codecs/tileset-json.codec.ts",
+        "size": 2037,
+        "mode": 420
+      },
+      {
+        "path": "src/extensions/index.ts",
+        "size": 39,
+        "mode": 420
+      },
+      {
+        "path": "src/extensions/utm-bounding-volume.ts",
+        "size": 4249,
+        "mode": 420
+      },
+      {
+        "path": "src/index.ts",
+        "size": 111,
+        "mode": 420
+      },
+      {
+        "path": "src/model/bounding-volume.ts",
+        "size": 610,
+        "mode": 420
+      },
+      {
+        "path": "src/model/common.ts",
+        "size": 545,
+        "mode": 420
+      },
+      {
+        "path": "src/model/implicit-tiling.ts",
+        "size": 373,
+        "mode": 420
+      },
+      {
+        "path": "src/model/index.ts",
+        "size": 217,
+        "mode": 420
+      },
+      {
+        "path": "src/model/metadata.ts",
+        "size": 2649,
+        "mode": 420
+      },
+      {
+        "path": "src/model/subtree.ts",
+        "size": 1665,
+        "mode": 420
+      },
+      {
+        "path": "src/model/tileset.ts",
+        "size": 1571,
+        "mode": 420
+      },
+      {
+        "path": "src/model/utm-bounding-volume.ts",
+        "size": 2110,
+        "mode": 420
+      },
+      {
+        "path": "src/validation/diagnostic.ts",
+        "size": 289,
+        "mode": 420
+      },
+      {
+        "path": "src/validation/index.ts",
+        "size": 116,
+        "mode": 420
+      },
+      {
+        "path": "src/validation/shared.ts",
+        "size": 1201,
+        "mode": 420
+      },
+      {
+        "path": "src/validation/tileset.validator.ts",
+        "size": 16082,
+        "mode": 420
+      },
+      {
+        "path": "src/validation/utm-bounding-volume.validator.ts",
+        "size": 7336,
+        "mode": 420
+      }
+    ],
+    "entryCount": 42,
+    "bundled": []
+  },
+  {
+    "id": "@spacexr/tiles@0.1.0",
+    "name": "@spacexr/tiles",
+    "version": "0.1.0",
+    "size": 187734,
+    "unpackedSize": 801128,
+    "shasum": "c64e6d8cbb49a95c6b7b17e93b3a5df432c8dc36",
+    "integrity": "sha512-hG+IwH70/DmInCI+lM2GR5+LkjXtnQztoQrSdhOj8MjCVWRM9VYdEVMerTnglTXIX3qEQqp8THtySnLcLPDmIA==",
+    "filename": "spacexr-tiles-0.1.0.tgz",
+    "files": [
+      {
+        "path": "LICENSE",
+        "size": 11357,
+        "mode": 420
+      },
+      {
+        "path": "README.md",
+        "size": 6421,
+        "mode": 420
+      },
+      {
+        "path": "dist/addressing/index.d.ts",
+        "size": 3356,
+        "mode": 420
+      },
+      {
+        "path": "dist/addressing/index.js",
+        "size": 13478,
+        "mode": 420
+      },
+      {
+        "path": "dist/addressing/index.js.map",
+        "size": 43187,
+        "mode": 420
+      },
+      {
+        "path": "dist/cube/index.d.ts",
+        "size": 13556,
+        "mode": 420
+      },
+      {
+        "path": "dist/cube/index.js",
+        "size": 27334,
+        "mode": 420
+      },
+      {
+        "path": "dist/cube/index.js.map",
+        "size": 86868,
+        "mode": 420
+      },
+      {
+        "path": "dist/index.d.ts",
+        "size": 3265,
+        "mode": 420
+      },
+      {
+        "path": "dist/index.js",
+        "size": 63003,
+        "mode": 420
+      },
+      {
+        "path": "dist/index.js.map",
+        "size": 192546,
+        "mode": 420
+      },
+      {
+        "path": "dist/metrics-CQGdAzmV.d.ts",
+        "size": 3425,
+        "mode": 420
+      },
+      {
+        "path": "dist/pyramid/index.d.ts",
+        "size": 7203,
+        "mode": 420
+      },
+      {
+        "path": "dist/pyramid/index.js",
+        "size": 9922,
+        "mode": 420
+      },
+      {
+        "path": "dist/pyramid/index.js.map",
+        "size": 34541,
+        "mode": 420
+      },
+      {
+        "path": "dist/raster-registration-BvVPeIud.d.ts",
+        "size": 1021,
+        "mode": 420
+      },
+      {
+        "path": "dist/reference-surface-Bq3KfH2A.d.ts",
+        "size": 2949,
+        "mode": 420
+      },
+      {
+        "path": "dist/reprojection/index.d.ts",
+        "size": 13167,
+        "mode": 420
+      },
+      {
+        "path": "dist/reprojection/index.js",
+        "size": 16529,
+        "mode": 420
+      },
+      {
+        "path": "dist/reprojection/index.js.map",
+        "size": 64450,
+        "mode": 420
+      },
+      {
+        "path": "dist/sources/index.d.ts",
+        "size": 4535,
+        "mode": 420
+      },
+      {
+        "path": "dist/sources/index.js",
+        "size": 9954,
+        "mode": 420
+      },
+      {
+        "path": "dist/sources/index.js.map",
+        "size": 32919,
+        "mode": 420
+      },
+      {
+        "path": "dist/tile-address-kuLpLW5y.d.ts",
+        "size": 3345,
+        "mode": 420
+      },
+      {
+        "path": "dist/tile-http-client-BHZOtGX7.d.ts",
+        "size": 3348,
+        "mode": 420
+      },
+      {
+        "path": "dist/tile-neighbors-BPr8-ba2.d.ts",
+        "size": 2450,
+        "mode": 420
+      },
+      {
+        "path": "dist/tile-topology-BXjtG07w.d.ts",
+        "size": 4934,
+        "mode": 420
+      },
+      {
+        "path": "package.json",
+        "size": 3351,
+        "mode": 420
+      },
+      {
+        "path": "src/addressing/index.ts",
+        "size": 221,
+        "mode": 420
+      },
+      {
+        "path": "src/addressing/metrics.ts",
+        "size": 6944,
+        "mode": 420
+      },
+      {
+        "path": "src/addressing/raster-registration.ts",
+        "size": 1171,
+        "mode": 420
+      },
+      {
+        "path": "src/addressing/tile-address.ts",
+        "size": 5435,
+        "mode": 420
+      },
+      {
+        "path": "src/addressing/tile-neighbors.ts",
+        "size": 3176,
+        "mode": 420
+      },
+      {
+        "path": "src/addressing/tile-surface.ts",
+        "size": 3925,
+        "mode": 420
+      },
+      {
+        "path": "src/addressing/tile-topology.ts",
+        "size": 3466,
+        "mode": 420
+      },
+      {
+        "path": "src/addressing/tile.ts",
+        "size": 2999,
+        "mode": 420
+      },
+      {
+        "path": "src/cube/celestial-dataset.ts",
+        "size": 8928,
+        "mode": 420
+      },
+      {
+        "path": "src/cube/cube-face.ts",
+        "size": 2229,
+        "mode": 420
+      },
+      {
+        "path": "src/cube/cube-mapping.ts",
+        "size": 6126,
+        "mode": 420
+      },
+      {
+        "path": "src/cube/cube-neighbors.ts",
+        "size": 9247,
+        "mode": 420
+      },
+      {
+        "path": "src/cube/cube-tile-surface.ts",
+        "size": 1455,
+        "mode": 420
+      },
+      {
+        "path": "src/cube/index.ts",
+        "size": 206,
+        "mode": 420
+      },
+      {
+        "path": "src/cube/reference-surface.ts",
+        "size": 5153,
+        "mode": 420
+      },
+      {
+        "path": "src/index.ts",
+        "size": 140,
+        "mode": 420
+      },
+      {
+        "path": "src/pyramid/index.ts",
+        "size": 66,
+        "mode": 420
+      },
+      {
+        "path": "src/pyramid/resident-tiles.ts",
+        "size": 3342,
+        "mode": 420
+      },
+      {
+        "path": "src/pyramid/tile-pyramid.ts",
+        "size": 11772,
+        "mode": 420
+      },
+      {
+        "path": "src/reprojection/cube-resampling.ts",
+        "size": 7814,
+        "mode": 420
+      },
+      {
+        "path": "src/reprojection/index.ts",
+        "size": 147,
+        "mode": 420
+      },
+      {
+        "path": "src/reprojection/source-projection.ts",
+        "size": 8931,
+        "mode": 420
+      },
+      {
+        "path": "src/reprojection/source-tile-matrix.ts",
+        "size": 3852,
+        "mode": 420
+      },
+      {
+        "path": "src/reprojection/wmts-capabilities.ts",
+        "size": 6504,
+        "mode": 420
+      },
+      {
+        "path": "src/sources/index.ts",
+        "size": 103,
+        "mode": 420
+      },
+      {
+        "path": "src/sources/tile-http-client.ts",
+        "size": 7786,
+        "mode": 420
+      },
+      {
+        "path": "src/sources/url-template.ts",
+        "size": 4104,
+        "mode": 420
+      },
+      {
+        "path": "src/sources/web-tile-source.ts",
+        "size": 3472,
+        "mode": 420
+      }
+    ],
+    "entryCount": 56,
+    "bundled": []
+  },
+  {
+    "id": "@spacexr/3d-tiles-runtime@0.1.0",
+    "name": "@spacexr/3d-tiles-runtime",
+    "version": "0.1.0",
+    "size": 219817,
+    "unpackedSize": 1045861,
+    "shasum": "78465db94a0bdb22cd0b170a826d9e099ed430f1",
+    "integrity": "sha512-vgoOHkwwws6Flf87c91PKwJ614XsMzg6E5aoWnpW4lhuKnxfD8HreSvWlWv/h1Kc3m0aqwemCbRZVJVzqc1u+g==",
+    "filename": "spacexr-3d-tiles-runtime-0.1.0.tgz",
+    "files": [
+      {
+        "path": "LICENSE",
+        "size": 11357,
+        "mode": 420
+      },
+      {
+        "path": "README.md",
+        "size": 6163,
+        "mode": 420
+      },
+      {
+        "path": "dist/chunk-5HEI4YCB.js",
+        "size": 22791,
+        "mode": 420
+      },
+      {
+        "path": "dist/chunk-5HEI4YCB.js.map",
+        "size": 60160,
+        "mode": 420
+      },
+      {
+        "path": "dist/chunk-A7L6CXUM.js",
+        "size": 20992,
+        "mode": 420
+      },
+      {
+        "path": "dist/chunk-A7L6CXUM.js.map",
+        "size": 53281,
+        "mode": 420
+      },
+      {
+        "path": "dist/chunk-BLFB7CV6.js",
+        "size": 9703,
+        "mode": 420
+      },
+      {
+        "path": "dist/chunk-BLFB7CV6.js.map",
+        "size": 23347,
+        "mode": 420
+      },
+      {
+        "path": "dist/chunk-G2RITW2F.js",
+        "size": 7710,
+        "mode": 420
+      },
+      {
+        "path": "dist/chunk-G2RITW2F.js.map",
+        "size": 16179,
+        "mode": 420
+      },
+      {
+        "path": "dist/chunk-G7YVZYMR.js",
+        "size": 670,
+        "mode": 420
+      },
+      {
+        "path": "dist/chunk-G7YVZYMR.js.map",
+        "size": 2486,
+        "mode": 420
+      },
+      {
+        "path": "dist/chunk-Q2AL6LWU.js",
+        "size": 86,
+        "mode": 420
+      },
+      {
+        "path": "dist/chunk-Q2AL6LWU.js.map",
+        "size": 78,
+        "mode": 420
+      },
+      {
+        "path": "dist/implicit/index.d.ts",
+        "size": 8078,
+        "mode": 420
+      },
+      {
+        "path": "dist/implicit/index.js",
+        "size": 623,
+        "mode": 420
+      },
+      {
+        "path": "dist/implicit/index.js.map",
+        "size": 69,
+        "mode": 420
+      },
+      {
+        "path": "dist/index-DKRHbJLP.d.ts",
+        "size": 15137,
+        "mode": 420
+      },
+      {
+        "path": "dist/index.d.ts",
+        "size": 36559,
+        "mode": 420
+      },
+      {
+        "path": "dist/index.js",
+        "size": 115839,
+        "mode": 420
+      },
+      {
+        "path": "dist/index.js.map",
+        "size": 292477,
+        "mode": 420
+      },
+      {
+        "path": "dist/metadata/index.d.ts",
+        "size": 904,
+        "mode": 420
+      },
+      {
+        "path": "dist/metadata/index.js",
+        "size": 154,
+        "mode": 420
+      },
+      {
+        "path": "dist/metadata/index.js.map",
+        "size": 69,
+        "mode": 420
+      },
+      {
+        "path": "dist/pipeline/index.d.ts",
+        "size": 696,
+        "mode": 420
+      },
+      {
+        "path": "dist/pipeline/index.js",
+        "size": 302,
+        "mode": 420
+      },
+      {
+        "path": "dist/pipeline/index.js.map",
+        "size": 69,
+        "mode": 420
+      },
+      {
+        "path": "dist/ports/index.d.ts",
+        "size": 4154,
+        "mode": 420
+      },
+      {
+        "path": "dist/ports/index.js",
+        "size": 158,
+        "mode": 420
+      },
+      {
+        "path": "dist/ports/index.js.map",
+        "size": 69,
+        "mode": 420
+      },
+      {
+        "path": "dist/resource-DH72MRMN.d.ts",
+        "size": 1219,
+        "mode": 420
+      },
+      {
+        "path": "dist/spatial-3IDPbyv4.d.ts",
+        "size": 1221,
+        "mode": 420
+      },
+      {
+        "path": "dist/spatial/index.d.ts",
+        "size": 17856,
+        "mode": 420
+      },
+      {
+        "path": "dist/spatial/index.js",
+        "size": 348,
+        "mode": 420
+      },
+      {
+        "path": "dist/spatial/index.js.map",
+        "size": 69,
+        "mode": 420
+      },
+      {
+        "path": "dist/types-0XhPvEoX.d.ts",
+        "size": 9413,
+        "mode": 420
+      },
+      {
+        "path": "dist/types-Dn5i8Uqg.d.ts",
+        "size": 2660,
+        "mode": 420
+      },
+      {
+        "path": "package.json",
+        "size": 3320,
+        "mode": 420
+      },
+      {
+        "path": "src/implicit/availability.ts",
+        "size": 2776,
+        "mode": 420
+      },
+      {
+        "path": "src/implicit/coordinates.ts",
+        "size": 8391,
+        "mode": 420
+      },
+      {
+        "path": "src/implicit/dense-subtree-loader.ts",
+        "size": 1121,
+        "mode": 420
+      },
+      {
+        "path": "src/implicit/index.ts",
+        "size": 261,
+        "mode": 420
+      },
+      {
+        "path": "src/implicit/metrics.ts",
+        "size": 278,
+        "mode": 420
+      },
+      {
+        "path": "src/implicit/standard-subtree-loader.ts",
+        "size": 3140,
+        "mode": 420
+      },
+      {
+        "path": "src/implicit/tile-data-source.ts",
+        "size": 4608,
+        "mode": 420
+      },
+      {
+        "path": "src/implicit/types.ts",
+        "size": 5846,
+        "mode": 420
+      },
+      {
+        "path": "src/implicit/web-map.ts",
+        "size": 11099,
+        "mode": 420
+      },
+      {
+        "path": "src/index.ts",
+        "size": 163,
+        "mode": 420
+      },
+      {
+        "path": "src/metadata/index.ts",
+        "size": 62,
+        "mode": 420
+      },
+      {
+        "path": "src/metadata/metadata-resolver.ts",
+        "size": 12540,
+        "mode": 420
+      },
+      {
+        "path": "src/metadata/types.ts",
+        "size": 2424,
+        "mode": 420
+      },
+      {
+        "path": "src/pipeline/index.ts",
+        "size": 112,
+        "mode": 420
+      },
+      {
+        "path": "src/pipeline/metadata-store.ts",
+        "size": 1537,
+        "mode": 420
+      },
+      {
+        "path": "src/pipeline/ports.ts",
+        "size": 2378,
+        "mode": 420
+      },
+      {
+        "path": "src/pipeline/states.ts",
+        "size": 1036,
+        "mode": 420
+      },
+      {
+        "path": "src/pipeline/tile-3d.ts",
+        "size": 6463,
+        "mode": 420
+      },
+      {
+        "path": "src/ports/camera.ts",
+        "size": 454,
+        "mode": 420
+      },
+      {
+        "path": "src/ports/content.ts",
+        "size": 3075,
+        "mode": 420
+      },
+      {
+        "path": "src/ports/glyph.ts",
+        "size": 723,
+        "mode": 420
+      },
+      {
+        "path": "src/ports/index.ts",
+        "size": 1558,
+        "mode": 420
+      },
+      {
+        "path": "src/ports/resource.ts",
+        "size": 1577,
+        "mode": 420
+      },
+      {
+        "path": "src/ports/spatial.ts",
+        "size": 1148,
+        "mode": 420
+      },
+      {
+        "path": "src/ports/telemetry.ts",
+        "size": 1172,
+        "mode": 420
+      },
+      {
+        "path": "src/runtime/cache.ts",
+        "size": 4949,
+        "mode": 420
+      },
+      {
+        "path": "src/runtime/contracts.ts",
+        "size": 2573,
+        "mode": 420
+      },
+      {
+        "path": "src/runtime/events.ts",
+        "size": 2970,
+        "mode": 420
+      },
+      {
+        "path": "src/runtime/hooks.ts",
+        "size": 4818,
+        "mode": 420
+      },
+      {
+        "path": "src/runtime/index.ts",
+        "size": 208,
+        "mode": 420
+      },
+      {
+        "path": "src/runtime/instrumentation.ts",
+        "size": 4798,
+        "mode": 420
+      },
+      {
+        "path": "src/runtime/priority-scheduler.ts",
+        "size": 2986,
+        "mode": 420
+      },
+      {
+        "path": "src/runtime/quadtree-balance.ts",
+        "size": 9462,
+        "mode": 420
+      },
+      {
+        "path": "src/runtime/tile-runtime.ts",
+        "size": 149307,
+        "mode": 420
+      },
+      {
+        "path": "src/spatial/bounding-volumes.ts",
+        "size": 8120,
+        "mode": 420
+      },
+      {
+        "path": "src/spatial/ecef-types.ts",
+        "size": 4651,
+        "mode": 420
+      },
+      {
+        "path": "src/spatial/ecef.ts",
+        "size": 9704,
+        "mode": 420
+      },
+      {
+        "path": "src/spatial/index.ts",
+        "size": 147,
+        "mode": 420
+      },
+      {
+        "path": "src/spatial/matrix.ts",
+        "size": 1921,
+        "mode": 420
+      },
+      {
+        "path": "src/spatial/utm-bounds.ts",
+        "size": 9297,
+        "mode": 420
+      },
+      {
+        "path": "src/spatial/utm-types.ts",
+        "size": 3668,
+        "mode": 420
+      },
+      {
+        "path": "src/spatial/vertical-scale.ts",
+        "size": 5874,
+        "mode": 420
+      }
+    ],
+    "entryCount": 80,
+    "bundled": []
+  }
+]

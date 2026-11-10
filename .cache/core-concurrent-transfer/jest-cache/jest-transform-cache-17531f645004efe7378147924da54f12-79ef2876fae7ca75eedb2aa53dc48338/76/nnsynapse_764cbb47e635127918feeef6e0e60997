@@ -1,0 +1,19 @@
+07959bf1471ad4d958a5859957c06b92
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Synapse = void 0;
+const tslib_1 = require("tslib");
+const graph_1 = require("../graph");
+class Synapse extends graph_1.GraphOLink {
+    constructor(oini, ofin, weight = 0) {
+        super(oini, ofin);
+        this.weight = 0;
+        this.weight = weight;
+    }
+}
+exports.Synapse = Synapse;
+tslib_1.__decorate([
+    graph_1.cloneable,
+    tslib_1.__metadata("design:type", Number)
+], Synapse.prototype, "weight", void 0);
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiQzpcXFVzZXJzXFxHdWlsbGF1bWVQZWxsZXRpZXJcXERvY3VtZW50c1xcR2l0SHViXFxTcGFjZVhSXFwuY2FjaGVcXGNvcmUtY29uY3VycmVudC10cmFuc2Zlclxcc3JjXFxuZXVyYWxuZXR3b3JrXFxubi5zeW5hcHNlLnRzIiwibWFwcGluZ3MiOiI7Ozs7QUFBQSxvQ0FBd0Q7QUFHeEQsTUFBYSxPQUFxQixTQUFRLGtCQUFhO0lBRW5ELFlBQW1CLElBQVcsRUFBRSxJQUFXLEVBQUUsU0FBaUIsQ0FBQztRQUMzRCxLQUFLLENBQUMsSUFBSSxFQUFFLElBQUksQ0FBQyxDQUFDO1FBRkosV0FBTSxHQUFXLENBQUMsQ0FBQztRQUdqQyxJQUFJLENBQUMsTUFBTSxHQUFHLE1BQU0sQ0FBQztJQUN6QixDQUFDO0NBQ0o7QUFORCwwQkFNQztBQUxxQjtJQUFqQixpQkFBUzs7dUNBQTJCIiwibmFtZXMiOltdLCJzb3VyY2VzIjpbIkM6XFxVc2Vyc1xcR3VpbGxhdW1lUGVsbGV0aWVyXFxEb2N1bWVudHNcXEdpdEh1YlxcU3BhY2VYUlxcLmNhY2hlXFxjb3JlLWNvbmN1cnJlbnQtdHJhbnNmZXJcXHNyY1xcbmV1cmFsbmV0d29ya1xcbm4uc3luYXBzZS50cyJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgeyBjbG9uZWFibGUsIEdyYXBoT0xpbmssIElOb2RlIH0gZnJvbSBcIi4uL2dyYXBoXCI7XHJcbmltcG9ydCB7IElTeW5hcHNlIH0gZnJvbSBcIi4vbm4uaW50ZXJmYWNlc1wiO1xyXG5cclxuZXhwb3J0IGNsYXNzIFN5bmFwc2U8QiA9IHVua25vd24+IGV4dGVuZHMgR3JhcGhPTGluazxCPiBpbXBsZW1lbnRzIElTeW5hcHNlPEI+IHtcclxuICAgIEBjbG9uZWFibGUgcHVibGljIHdlaWdodDogbnVtYmVyID0gMDtcclxuICAgIHB1YmxpYyBjb25zdHJ1Y3RvcihvaW5pOiBJTm9kZSwgb2ZpbjogSU5vZGUsIHdlaWdodDogbnVtYmVyID0gMCkge1xyXG4gICAgICAgIHN1cGVyKG9pbmksIG9maW4pO1xyXG4gICAgICAgIHRoaXMud2VpZ2h0ID0gd2VpZ2h0O1xyXG4gICAgfVxyXG59XHJcbiJdLCJ2ZXJzaW9uIjozfQ==

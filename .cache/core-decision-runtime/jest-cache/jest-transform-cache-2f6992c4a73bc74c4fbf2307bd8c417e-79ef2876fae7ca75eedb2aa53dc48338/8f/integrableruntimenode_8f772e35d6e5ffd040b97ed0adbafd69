@@ -1,0 +1,152 @@
+63a3ab5ac223146468aa4524a31308cc
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.IntegrableRuntimeNode = void 0;
+const tslib_1 = require("tslib");
+const graph_interfaces_1 = require("../graph/graph.interfaces");
+const graph_editor_1 = require("../graph/graph.editor");
+const execution_node_1 = require("../execution/execution.node");
+/**
+ * `IntegrableRuntimeNode` — base for any RuntimeNode that participates
+ * in physics-style time integration and therefore wants to advertise a
+ * required sample rate to the enclosing SimGraphNode.
+ *
+ * Bundles three concerns so subclasses (motors, gates, atmospheres,
+ * sensors, ...) don't re-implement them:
+ *
+ *   1. IDeclaresPorts — inherited from RuntimeNode (already provides
+ *      inputPorts / outputPorts arrays + the @port-style metadata).
+ *
+ *   2. IIntegrable — declared structurally by the subclass. The base
+ *      class does NOT add stateSize / gatherState / writeState / rhs:
+ *      those are node-specific and remain on the leaf. Non-IIntegrable
+ *      participants in the sim (e.g. AtmosphereGate after the 2026-06-09
+ *      refactor, which forward-Eulers on session.dt) still extend this
+ *      class because the sample-rate plumbing is what they share.
+ *
+ *   3. IHasSampleRateRequirement — fully implemented here, with the
+ *      following two-state model:
+ *
+ *      - `computeRequiredHz()` (protected, virtual). The PARAMETER-
+ *        DERIVED minimum sample rate. Default returns 100 Hz; nodes
+ *        with dynamics that scale with physical parameters override
+ *        this. For example, DcMotorDynamicNode computes from L/R
+ *        (electrical time constant) and J/b (mechanical time constant)
+ *        so the editor's effectiveHz tracks the user's parameter edits
+ *        automatically.
+ *
+ *      - The user can PIN a manual value via the `requiredSampleRateHz` editable.
+ *        While pinned, `requiredHz` returns the manual value regardless
+ *        of what `computeRequiredHz()` would say. To unpin, the user
+ *        enters 0 (or any non-positive / NaN value): `requiredSampleRateHz` then
+ *        reverts to the computed value, and the panel will track it as
+ *        parameters change.
+ *
+ *        The `requiredSampleRateHzUserDefined` viewable surfaces the pinned
+ *        state to the property panel so the user knows whether the
+ *        displayed value is locked.
+ *
+ * Subclasses that already have a strict deeper base class (e.g. motors
+ * extending `FaultableNode` extending `TransformNode`) cannot extend
+ * this class directly; for those cases the boilerplate is duplicated
+ * per node. AtmosphereLayerNode + AtmosphereGateNode extend
+ * `RuntimeNode` directly and benefit from the migration.
+ */
+class IntegrableRuntimeNode extends execution_node_1.RuntimeNode {
+    constructor() {
+        super(...arguments);
+        // ── User-override state ────────────────────────────────────────
+        //
+        // _requiredHzValue is the manually-pinned rate; 0 means "no pin,
+        // use computed". _requiredHzUserDefined is the explicit toggle:
+        // we keep it separate so a future config-load can restore pinned
+        // state distinct from a transient default.
+        this._requiredHzValue = 0;
+        this._requiredHzUserDefined = false;
+    }
+    /**
+     * Default required sample rate when the user has not pinned a
+     * manual value. Subclasses override to derive from their physical
+     * parameters (L/R for motors, residence time for gates, ...).
+     * Default = 100 Hz, a sensible floor for slow integrators.
+     */
+    computeRequiredHz() {
+        return 100;
+    }
+    /**
+     * Effective required sample rate. Branches on user-pin state:
+     *   pinned + positive value  → return the pinned value
+     *   otherwise                → return computeRequiredHz()
+     */
+    get requiredHz() {
+        if (this._requiredHzUserDefined && this._requiredHzValue > 0) {
+            return this._requiredHzValue;
+        }
+        return this.computeRequiredHz();
+    }
+    /**
+     * Property-panel viewable: read returns the effective requiredHz
+     * (pinned value or computed). Write either pins a new value or
+     * unpins (when a non-positive / NaN value is entered).
+     */
+    get requiredSampleRateHz() {
+        return this.requiredHz;
+    }
+    set requiredSampleRateHz(v) {
+        if (!Number.isFinite(v) || v <= 0) {
+            // Unpin: revert to computed.
+            if (this._requiredHzUserDefined || this._requiredHzValue !== 0) {
+                const prev = this.requiredHz;
+                this._requiredHzUserDefined = false;
+                this._requiredHzValue = 0;
+                this.notifyPropertyChanged("requiredSampleRateHz", prev, this.requiredHz);
+            }
+            return;
+        }
+        const prev = this.requiredHz;
+        if (this._requiredHzValue !== v || !this._requiredHzUserDefined) {
+            this._requiredHzValue = v;
+            this._requiredHzUserDefined = true;
+            this.notifyPropertyChanged("requiredSampleRateHz", prev, v);
+        }
+    }
+    /**
+     * Panel-only flag: true when the user has pinned a manual value.
+     * Lets the panel render a "(pinned)" badge or a reset button next
+     * to requiredSampleRateHz.
+     */
+    get requiredSampleRateHzUserDefined() {
+        return this._requiredHzUserDefined;
+    }
+    /**
+     * Subclass hook: call after a parameter that affects
+     * computeRequiredHz() changes, so the panel re-reads the
+     * effective rate. No-op when the value is pinned (the displayed
+     * value doesn't depend on the computed one in that case).
+     */
+    notifyComputedRequiredHzMayHaveChanged() {
+        if (this._requiredHzUserDefined && this._requiredHzValue > 0)
+            return;
+        this.notifyPropertyChanged("requiredSampleRateHz", null, this.requiredHz);
+    }
+}
+exports.IntegrableRuntimeNode = IntegrableRuntimeNode;
+tslib_1.__decorate([
+    graph_interfaces_1.cloneable,
+    tslib_1.__metadata("design:type", Number)
+], IntegrableRuntimeNode.prototype, "_requiredHzValue", void 0);
+tslib_1.__decorate([
+    graph_interfaces_1.cloneable,
+    tslib_1.__metadata("design:type", Boolean)
+], IntegrableRuntimeNode.prototype, "_requiredHzUserDefined", void 0);
+tslib_1.__decorate([
+    (0, graph_editor_1.editable)("number", { unit: { quantity: "Frequency", unit: "Hz" } }),
+    tslib_1.__metadata("design:type", Number),
+    tslib_1.__metadata("design:paramtypes", [Number])
+], IntegrableRuntimeNode.prototype, "requiredSampleRateHz", null);
+tslib_1.__decorate([
+    (0, graph_editor_1.viewable)("boolean"),
+    tslib_1.__metadata("design:type", Boolean),
+    tslib_1.__metadata("design:paramtypes", [])
+], IntegrableRuntimeNode.prototype, "requiredSampleRateHzUserDefined", null);
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiQzpcXFVzZXJzXFxHdWlsbGF1bWVQZWxsZXRpZXJcXERvY3VtZW50c1xcR2l0SHViXFxzcGlreXBhbmRhXFxwYWNrYWdlc1xcZGV2XFxjb3JlXFxzcmNcXHNpbVxcaW50ZWdyYWJsZS1ydW50aW1lLm5vZGUudHMiLCJtYXBwaW5ncyI6Ijs7OztBQUFBLGdFQUFzRDtBQUN0RCx3REFBMkQ7QUFDM0QsZ0VBQTBEO0FBRzFEOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7R0E2Q0c7QUFDSCxNQUFhLHFCQUFtQyxTQUFRLDRCQUFjO0lBQXRFOztRQUNJLGtFQUFrRTtRQUNsRSxFQUFFO1FBQ0YsaUVBQWlFO1FBQ2pFLGdFQUFnRTtRQUNoRSxpRUFBaUU7UUFDakUsMkNBQTJDO1FBQ3RCLHFCQUFnQixHQUFXLENBQUMsQ0FBQztRQUM3QiwyQkFBc0IsR0FBWSxLQUFLLENBQUM7SUF3RWpFLENBQUM7SUF0RUc7Ozs7O09BS0c7SUFDTyxpQkFBaUI7UUFDdkIsT0FBTyxHQUFHLENBQUM7SUFDZixDQUFDO0lBRUQ7Ozs7T0FJRztJQUNILElBQVcsVUFBVTtRQUNqQixJQUFJLElBQUksQ0FBQyxzQkFBc0IsSUFBSSxJQUFJLENBQUMsZ0JBQWdCLEdBQUcsQ0FBQyxFQUFFLENBQUM7WUFDM0QsT0FBTyxJQUFJLENBQUMsZ0JBQWdCLENBQUM7UUFDakMsQ0FBQztRQUNELE9BQU8sSUFBSSxDQUFDLGlCQUFpQixFQUFFLENBQUM7SUFDcEMsQ0FBQztJQUVEOzs7O09BSUc7SUFDSCxJQUNXLG9CQUFvQjtRQUMzQixPQUFPLElBQUksQ0FBQyxVQUFVLENBQUM7SUFDM0IsQ0FBQztJQUNELElBQVcsb0JBQW9CLENBQUMsQ0FBUztRQUNyQyxJQUFJLENBQUMsTUFBTSxDQUFDLFFBQVEsQ0FBQyxDQUFDLENBQUMsSUFBSSxDQUFDLElBQUksQ0FBQyxFQUFFLENBQUM7WUFDaEMsNkJBQTZCO1lBQzdCLElBQUksSUFBSSxDQUFDLHNCQUFzQixJQUFJLElBQUksQ0FBQyxnQkFBZ0IsS0FBSyxDQUFDLEVBQUUsQ0FBQztnQkFDN0QsTUFBTSxJQUFJLEdBQUcsSUFBSSxDQUFDLFVBQVUsQ0FBQztnQkFDN0IsSUFBSSxDQUFDLHNCQUFzQixHQUFHLEtBQUssQ0FBQztnQkFDcEMsSUFBSSxDQUFDLGdCQUFnQixHQUFHLENBQUMsQ0FBQztnQkFDMUIsSUFBSSxDQUFDLHFCQUFxQixDQUFDLHNCQUFzQixFQUFFLElBQUksRUFBRSxJQUFJLENBQUMsVUFBVSxDQUFDLENBQUM7WUFDOUUsQ0FBQztZQUNELE9BQU87UUFDWCxDQUFDO1FBQ0QsTUFBTSxJQUFJLEdBQUcsSUFBSSxDQUFDLFVBQVUsQ0FBQztRQUM3QixJQUFJLElBQUksQ0FBQyxnQkFBZ0IsS0FBSyxDQUFDLElBQUksQ0FBQyxJQUFJLENBQUMsc0JBQXNCLEVBQUUsQ0FBQztZQUM5RCxJQUFJLENBQUMsZ0JBQWdCLEdBQUcsQ0FBQyxDQUFDO1lBQzFCLElBQUksQ0FBQyxzQkFBc0IsR0FBRyxJQUFJLENBQUM7WUFDbkMsSUFBSSxDQUFDLHFCQUFxQixDQUFDLHNCQUFzQixFQUFFLElBQUksRUFBRSxDQUFDLENBQUMsQ0FBQztRQUNoRSxDQUFDO0lBQ0wsQ0FBQztJQUVEOzs7O09BSUc7SUFDSCxJQUNXLCtCQUErQjtRQUN0QyxPQUFPLElBQUksQ0FBQyxzQkFBc0IsQ0FBQztJQUN2QyxDQUFDO0lBRUQ7Ozs7O09BS0c7SUFDTyxzQ0FBc0M7UUFDNUMsSUFBSSxJQUFJLENBQUMsc0JBQXNCLElBQUksSUFBSSxDQUFDLGdCQUFnQixHQUFHLENBQUM7WUFBRSxPQUFPO1FBQ3JFLElBQUksQ0FBQyxxQkFBcUIsQ0FBQyxzQkFBc0IsRUFBRSxJQUFJLEVBQUUsSUFBSSxDQUFDLFVBQVUsQ0FBQyxDQUFDO0lBQzlFLENBQUM7Q0FDSjtBQWhGRCxzREFnRkM7QUF6RXdCO0lBQXBCLDRCQUFTOzsrREFBd0M7QUFDN0I7SUFBcEIsNEJBQVM7O3FFQUFtRDtBQTZCN0Q7SUFBQyxJQUFBLHVCQUFRLEVBQUMsUUFBUSxFQUFFLEVBQUUsSUFBSSxFQUFFLEVBQUUsUUFBUSxFQUFFLFdBQVcsRUFBRSxJQUFJLEVBQUUsSUFBSSxFQUFFLEVBQUUsQ0FBQzs7O2lFQUduRTtBQXlCRDtJQUFDLElBQUEsdUJBQVEsRUFBQyxTQUFTLENBQUM7Ozs0RUFHbkIiLCJuYW1lcyI6W10sInNvdXJjZXMiOlsiQzpcXFVzZXJzXFxHdWlsbGF1bWVQZWxsZXRpZXJcXERvY3VtZW50c1xcR2l0SHViXFxzcGlreXBhbmRhXFxwYWNrYWdlc1xcZGV2XFxjb3JlXFxzcmNcXHNpbVxcaW50ZWdyYWJsZS1ydW50aW1lLm5vZGUudHMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgY2xvbmVhYmxlIH0gZnJvbSBcIi4uL2dyYXBoL2dyYXBoLmludGVyZmFjZXNcIjtcclxuaW1wb3J0IHsgZWRpdGFibGUsIHZpZXdhYmxlIH0gZnJvbSBcIi4uL2dyYXBoL2dyYXBoLmVkaXRvclwiO1xyXG5pbXBvcnQgeyBSdW50aW1lTm9kZSB9IGZyb20gXCIuLi9leGVjdXRpb24vZXhlY3V0aW9uLm5vZGVcIjtcclxuaW1wb3J0IHR5cGUgeyBJSGFzU2FtcGxlUmF0ZVJlcXVpcmVtZW50IH0gZnJvbSBcIi4vc2ltLmludGVyZmFjZXNcIjtcclxuXHJcbi8qKlxyXG4gKiBgSW50ZWdyYWJsZVJ1bnRpbWVOb2RlYCDigJQgYmFzZSBmb3IgYW55IFJ1bnRpbWVOb2RlIHRoYXQgcGFydGljaXBhdGVzXHJcbiAqIGluIHBoeXNpY3Mtc3R5bGUgdGltZSBpbnRlZ3JhdGlvbiBhbmQgdGhlcmVmb3JlIHdhbnRzIHRvIGFkdmVydGlzZSBhXHJcbiAqIHJlcXVpcmVkIHNhbXBsZSByYXRlIHRvIHRoZSBlbmNsb3NpbmcgU2ltR3JhcGhOb2RlLlxyXG4gKlxyXG4gKiBCdW5kbGVzIHRocmVlIGNvbmNlcm5zIHNvIHN1YmNsYXNzZXMgKG1vdG9ycywgZ2F0ZXMsIGF0bW9zcGhlcmVzLFxyXG4gKiBzZW5zb3JzLCAuLi4pIGRvbid0IHJlLWltcGxlbWVudCB0aGVtOlxyXG4gKlxyXG4gKiAgIDEuIElEZWNsYXJlc1BvcnRzIOKAlCBpbmhlcml0ZWQgZnJvbSBSdW50aW1lTm9kZSAoYWxyZWFkeSBwcm92aWRlc1xyXG4gKiAgICAgIGlucHV0UG9ydHMgLyBvdXRwdXRQb3J0cyBhcnJheXMgKyB0aGUgQHBvcnQtc3R5bGUgbWV0YWRhdGEpLlxyXG4gKlxyXG4gKiAgIDIuIElJbnRlZ3JhYmxlIOKAlCBkZWNsYXJlZCBzdHJ1Y3R1cmFsbHkgYnkgdGhlIHN1YmNsYXNzLiBUaGUgYmFzZVxyXG4gKiAgICAgIGNsYXNzIGRvZXMgTk9UIGFkZCBzdGF0ZVNpemUgLyBnYXRoZXJTdGF0ZSAvIHdyaXRlU3RhdGUgLyByaHM6XHJcbiAqICAgICAgdGhvc2UgYXJlIG5vZGUtc3BlY2lmaWMgYW5kIHJlbWFpbiBvbiB0aGUgbGVhZi4gTm9uLUlJbnRlZ3JhYmxlXHJcbiAqICAgICAgcGFydGljaXBhbnRzIGluIHRoZSBzaW0gKGUuZy4gQXRtb3NwaGVyZUdhdGUgYWZ0ZXIgdGhlIDIwMjYtMDYtMDlcclxuICogICAgICByZWZhY3Rvciwgd2hpY2ggZm9yd2FyZC1FdWxlcnMgb24gc2Vzc2lvbi5kdCkgc3RpbGwgZXh0ZW5kIHRoaXNcclxuICogICAgICBjbGFzcyBiZWNhdXNlIHRoZSBzYW1wbGUtcmF0ZSBwbHVtYmluZyBpcyB3aGF0IHRoZXkgc2hhcmUuXHJcbiAqXHJcbiAqICAgMy4gSUhhc1NhbXBsZVJhdGVSZXF1aXJlbWVudCDigJQgZnVsbHkgaW1wbGVtZW50ZWQgaGVyZSwgd2l0aCB0aGVcclxuICogICAgICBmb2xsb3dpbmcgdHdvLXN0YXRlIG1vZGVsOlxyXG4gKlxyXG4gKiAgICAgIC0gYGNvbXB1dGVSZXF1aXJlZEh6KClgIChwcm90ZWN0ZWQsIHZpcnR1YWwpLiBUaGUgUEFSQU1FVEVSLVxyXG4gKiAgICAgICAgREVSSVZFRCBtaW5pbXVtIHNhbXBsZSByYXRlLiBEZWZhdWx0IHJldHVybnMgMTAwIEh6OyBub2Rlc1xyXG4gKiAgICAgICAgd2l0aCBkeW5hbWljcyB0aGF0IHNjYWxlIHdpdGggcGh5c2ljYWwgcGFyYW1ldGVycyBvdmVycmlkZVxyXG4gKiAgICAgICAgdGhpcy4gRm9yIGV4YW1wbGUsIERjTW90b3JEeW5hbWljTm9kZSBjb21wdXRlcyBmcm9tIEwvUlxyXG4gKiAgICAgICAgKGVsZWN0cmljYWwgdGltZSBjb25zdGFudCkgYW5kIEovYiAobWVjaGFuaWNhbCB0aW1lIGNvbnN0YW50KVxyXG4gKiAgICAgICAgc28gdGhlIGVkaXRvcidzIGVmZmVjdGl2ZUh6IHRyYWNrcyB0aGUgdXNlcidzIHBhcmFtZXRlciBlZGl0c1xyXG4gKiAgICAgICAgYXV0b21hdGljYWxseS5cclxuICpcclxuICogICAgICAtIFRoZSB1c2VyIGNhbiBQSU4gYSBtYW51YWwgdmFsdWUgdmlhIHRoZSBgcmVxdWlyZWRTYW1wbGVSYXRlSHpgIGVkaXRhYmxlLlxyXG4gKiAgICAgICAgV2hpbGUgcGlubmVkLCBgcmVxdWlyZWRIemAgcmV0dXJucyB0aGUgbWFudWFsIHZhbHVlIHJlZ2FyZGxlc3NcclxuICogICAgICAgIG9mIHdoYXQgYGNvbXB1dGVSZXF1aXJlZEh6KClgIHdvdWxkIHNheS4gVG8gdW5waW4sIHRoZSB1c2VyXHJcbiAqICAgICAgICBlbnRlcnMgMCAob3IgYW55IG5vbi1wb3NpdGl2ZSAvIE5hTiB2YWx1ZSk6IGByZXF1aXJlZFNhbXBsZVJhdGVIemAgdGhlblxyXG4gKiAgICAgICAgcmV2ZXJ0cyB0byB0aGUgY29tcHV0ZWQgdmFsdWUsIGFuZCB0aGUgcGFuZWwgd2lsbCB0cmFjayBpdCBhc1xyXG4gKiAgICAgICAgcGFyYW1ldGVycyBjaGFuZ2UuXHJcbiAqXHJcbiAqICAgICAgICBUaGUgYHJlcXVpcmVkU2FtcGxlUmF0ZUh6VXNlckRlZmluZWRgIHZpZXdhYmxlIHN1cmZhY2VzIHRoZSBwaW5uZWRcclxuICogICAgICAgIHN0YXRlIHRvIHRoZSBwcm9wZXJ0eSBwYW5lbCBzbyB0aGUgdXNlciBrbm93cyB3aGV0aGVyIHRoZVxyXG4gKiAgICAgICAgZGlzcGxheWVkIHZhbHVlIGlzIGxvY2tlZC5cclxuICpcclxuICogU3ViY2xhc3NlcyB0aGF0IGFscmVhZHkgaGF2ZSBhIHN0cmljdCBkZWVwZXIgYmFzZSBjbGFzcyAoZS5nLiBtb3RvcnNcclxuICogZXh0ZW5kaW5nIGBGYXVsdGFibGVOb2RlYCBleHRlbmRpbmcgYFRyYW5zZm9ybU5vZGVgKSBjYW5ub3QgZXh0ZW5kXHJcbiAqIHRoaXMgY2xhc3MgZGlyZWN0bHk7IGZvciB0aG9zZSBjYXNlcyB0aGUgYm9pbGVycGxhdGUgaXMgZHVwbGljYXRlZFxyXG4gKiBwZXIgbm9kZS4gQXRtb3NwaGVyZUxheWVyTm9kZSArIEF0bW9zcGhlcmVHYXRlTm9kZSBleHRlbmRcclxuICogYFJ1bnRpbWVOb2RlYCBkaXJlY3RseSBhbmQgYmVuZWZpdCBmcm9tIHRoZSBtaWdyYXRpb24uXHJcbiAqL1xyXG5leHBvcnQgY2xhc3MgSW50ZWdyYWJsZVJ1bnRpbWVOb2RlPEIgPSB1bmtub3duPiBleHRlbmRzIFJ1bnRpbWVOb2RlPEI+IGltcGxlbWVudHMgSUhhc1NhbXBsZVJhdGVSZXF1aXJlbWVudCB7XHJcbiAgICAvLyDilIDilIAgVXNlci1vdmVycmlkZSBzdGF0ZSDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIBcclxuICAgIC8vXHJcbiAgICAvLyBfcmVxdWlyZWRIelZhbHVlIGlzIHRoZSBtYW51YWxseS1waW5uZWQgcmF0ZTsgMCBtZWFucyBcIm5vIHBpbixcclxuICAgIC8vIHVzZSBjb21wdXRlZFwiLiBfcmVxdWlyZWRIelVzZXJEZWZpbmVkIGlzIHRoZSBleHBsaWNpdCB0b2dnbGU6XHJcbiAgICAvLyB3ZSBrZWVwIGl0IHNlcGFyYXRlIHNvIGEgZnV0dXJlIGNvbmZpZy1sb2FkIGNhbiByZXN0b3JlIHBpbm5lZFxyXG4gICAgLy8gc3RhdGUgZGlzdGluY3QgZnJvbSBhIHRyYW5zaWVudCBkZWZhdWx0LlxyXG4gICAgQGNsb25lYWJsZSBwcm90ZWN0ZWQgX3JlcXVpcmVkSHpWYWx1ZTogbnVtYmVyID0gMDtcclxuICAgIEBjbG9uZWFibGUgcHJvdGVjdGVkIF9yZXF1aXJlZEh6VXNlckRlZmluZWQ6IGJvb2xlYW4gPSBmYWxzZTtcclxuXHJcbiAgICAvKipcclxuICAgICAqIERlZmF1bHQgcmVxdWlyZWQgc2FtcGxlIHJhdGUgd2hlbiB0aGUgdXNlciBoYXMgbm90IHBpbm5lZCBhXHJcbiAgICAgKiBtYW51YWwgdmFsdWUuIFN1YmNsYXNzZXMgb3ZlcnJpZGUgdG8gZGVyaXZlIGZyb20gdGhlaXIgcGh5c2ljYWxcclxuICAgICAqIHBhcmFtZXRlcnMgKEwvUiBmb3IgbW90b3JzLCByZXNpZGVuY2UgdGltZSBmb3IgZ2F0ZXMsIC4uLikuXHJcbiAgICAgKiBEZWZhdWx0ID0gMTAwIEh6LCBhIHNlbnNpYmxlIGZsb29yIGZvciBzbG93IGludGVncmF0b3JzLlxyXG4gICAgICovXHJcbiAgICBwcm90ZWN0ZWQgY29tcHV0ZVJlcXVpcmVkSHooKTogbnVtYmVyIHtcclxuICAgICAgICByZXR1cm4gMTAwO1xyXG4gICAgfVxyXG5cclxuICAgIC8qKlxyXG4gICAgICogRWZmZWN0aXZlIHJlcXVpcmVkIHNhbXBsZSByYXRlLiBCcmFuY2hlcyBvbiB1c2VyLXBpbiBzdGF0ZTpcclxuICAgICAqICAgcGlubmVkICsgcG9zaXRpdmUgdmFsdWUgIOKGkiByZXR1cm4gdGhlIHBpbm5lZCB2YWx1ZVxyXG4gICAgICogICBvdGhlcndpc2UgICAgICAgICAgICAgICAg4oaSIHJldHVybiBjb21wdXRlUmVxdWlyZWRIeigpXHJcbiAgICAgKi9cclxuICAgIHB1YmxpYyBnZXQgcmVxdWlyZWRIeigpOiBudW1iZXIge1xyXG4gICAgICAgIGlmICh0aGlzLl9yZXF1aXJlZEh6VXNlckRlZmluZWQgJiYgdGhpcy5fcmVxdWlyZWRIelZhbHVlID4gMCkge1xyXG4gICAgICAgICAgICByZXR1cm4gdGhpcy5fcmVxdWlyZWRIelZhbHVlO1xyXG4gICAgICAgIH1cclxuICAgICAgICByZXR1cm4gdGhpcy5jb21wdXRlUmVxdWlyZWRIeigpO1xyXG4gICAgfVxyXG5cclxuICAgIC8qKlxyXG4gICAgICogUHJvcGVydHktcGFuZWwgdmlld2FibGU6IHJlYWQgcmV0dXJucyB0aGUgZWZmZWN0aXZlIHJlcXVpcmVkSHpcclxuICAgICAqIChwaW5uZWQgdmFsdWUgb3IgY29tcHV0ZWQpLiBXcml0ZSBlaXRoZXIgcGlucyBhIG5ldyB2YWx1ZSBvclxyXG4gICAgICogdW5waW5zICh3aGVuIGEgbm9uLXBvc2l0aXZlIC8gTmFOIHZhbHVlIGlzIGVudGVyZWQpLlxyXG4gICAgICovXHJcbiAgICBAZWRpdGFibGUoXCJudW1iZXJcIiwgeyB1bml0OiB7IHF1YW50aXR5OiBcIkZyZXF1ZW5jeVwiLCB1bml0OiBcIkh6XCIgfSB9KVxyXG4gICAgcHVibGljIGdldCByZXF1aXJlZFNhbXBsZVJhdGVIeigpOiBudW1iZXIge1xyXG4gICAgICAgIHJldHVybiB0aGlzLnJlcXVpcmVkSHo7XHJcbiAgICB9XHJcbiAgICBwdWJsaWMgc2V0IHJlcXVpcmVkU2FtcGxlUmF0ZUh6KHY6IG51bWJlcikge1xyXG4gICAgICAgIGlmICghTnVtYmVyLmlzRmluaXRlKHYpIHx8IHYgPD0gMCkge1xyXG4gICAgICAgICAgICAvLyBVbnBpbjogcmV2ZXJ0IHRvIGNvbXB1dGVkLlxyXG4gICAgICAgICAgICBpZiAodGhpcy5fcmVxdWlyZWRIelVzZXJEZWZpbmVkIHx8IHRoaXMuX3JlcXVpcmVkSHpWYWx1ZSAhPT0gMCkge1xyXG4gICAgICAgICAgICAgICAgY29uc3QgcHJldiA9IHRoaXMucmVxdWlyZWRIejtcclxuICAgICAgICAgICAgICAgIHRoaXMuX3JlcXVpcmVkSHpVc2VyRGVmaW5lZCA9IGZhbHNlO1xyXG4gICAgICAgICAgICAgICAgdGhpcy5fcmVxdWlyZWRIelZhbHVlID0gMDtcclxuICAgICAgICAgICAgICAgIHRoaXMubm90aWZ5UHJvcGVydHlDaGFuZ2VkKFwicmVxdWlyZWRTYW1wbGVSYXRlSHpcIiwgcHJldiwgdGhpcy5yZXF1aXJlZEh6KTtcclxuICAgICAgICAgICAgfVxyXG4gICAgICAgICAgICByZXR1cm47XHJcbiAgICAgICAgfVxyXG4gICAgICAgIGNvbnN0IHByZXYgPSB0aGlzLnJlcXVpcmVkSHo7XHJcbiAgICAgICAgaWYgKHRoaXMuX3JlcXVpcmVkSHpWYWx1ZSAhPT0gdiB8fCAhdGhpcy5fcmVxdWlyZWRIelVzZXJEZWZpbmVkKSB7XHJcbiAgICAgICAgICAgIHRoaXMuX3JlcXVpcmVkSHpWYWx1ZSA9IHY7XHJcbiAgICAgICAgICAgIHRoaXMuX3JlcXVpcmVkSHpVc2VyRGVmaW5lZCA9IHRydWU7XHJcbiAgICAgICAgICAgIHRoaXMubm90aWZ5UHJvcGVydHlDaGFuZ2VkKFwicmVxdWlyZWRTYW1wbGVSYXRlSHpcIiwgcHJldiwgdik7XHJcbiAgICAgICAgfVxyXG4gICAgfVxyXG5cclxuICAgIC8qKlxyXG4gICAgICogUGFuZWwtb25seSBmbGFnOiB0cnVlIHdoZW4gdGhlIHVzZXIgaGFzIHBpbm5lZCBhIG1hbnVhbCB2YWx1ZS5cclxuICAgICAqIExldHMgdGhlIHBhbmVsIHJlbmRlciBhIFwiKHBpbm5lZClcIiBiYWRnZSBvciBhIHJlc2V0IGJ1dHRvbiBuZXh0XHJcbiAgICAgKiB0byByZXF1aXJlZFNhbXBsZVJhdGVIei5cclxuICAgICAqL1xyXG4gICAgQHZpZXdhYmxlKFwiYm9vbGVhblwiKVxyXG4gICAgcHVibGljIGdldCByZXF1aXJlZFNhbXBsZVJhdGVIelVzZXJEZWZpbmVkKCk6IGJvb2xlYW4ge1xyXG4gICAgICAgIHJldHVybiB0aGlzLl9yZXF1aXJlZEh6VXNlckRlZmluZWQ7XHJcbiAgICB9XHJcblxyXG4gICAgLyoqXHJcbiAgICAgKiBTdWJjbGFzcyBob29rOiBjYWxsIGFmdGVyIGEgcGFyYW1ldGVyIHRoYXQgYWZmZWN0c1xyXG4gICAgICogY29tcHV0ZVJlcXVpcmVkSHooKSBjaGFuZ2VzLCBzbyB0aGUgcGFuZWwgcmUtcmVhZHMgdGhlXHJcbiAgICAgKiBlZmZlY3RpdmUgcmF0ZS4gTm8tb3Agd2hlbiB0aGUgdmFsdWUgaXMgcGlubmVkICh0aGUgZGlzcGxheWVkXHJcbiAgICAgKiB2YWx1ZSBkb2Vzbid0IGRlcGVuZCBvbiB0aGUgY29tcHV0ZWQgb25lIGluIHRoYXQgY2FzZSkuXHJcbiAgICAgKi9cclxuICAgIHByb3RlY3RlZCBub3RpZnlDb21wdXRlZFJlcXVpcmVkSHpNYXlIYXZlQ2hhbmdlZCgpOiB2b2lkIHtcclxuICAgICAgICBpZiAodGhpcy5fcmVxdWlyZWRIelVzZXJEZWZpbmVkICYmIHRoaXMuX3JlcXVpcmVkSHpWYWx1ZSA+IDApIHJldHVybjtcclxuICAgICAgICB0aGlzLm5vdGlmeVByb3BlcnR5Q2hhbmdlZChcInJlcXVpcmVkU2FtcGxlUmF0ZUh6XCIsIG51bGwsIHRoaXMucmVxdWlyZWRIeik7XHJcbiAgICB9XHJcbn1cclxuIl0sInZlcnNpb24iOjN9

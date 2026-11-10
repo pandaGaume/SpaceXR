@@ -1,0 +1,978 @@
+{
+  "version": 4,
+  "harness": {
+    "id": "decision-system",
+    "version": "executable.1",
+    "entries": {
+      "question": "start",
+      "procedure-request": "start",
+      "alarm": "start",
+      "telemetry": "start",
+      "equipment-discovered": "start",
+      "external-response": "start",
+      "authorization-result": "start",
+      "async-result": "start",
+      "deadline": "start",
+      "source-invalidated": "start",
+      "cancel": "start"
+    }
+  },
+  "model": {
+    "nodes": [
+      {
+        "id": "start",
+        "typeId": "harness.decision",
+        "data": {
+          "region": "decision",
+          "resolver": "decision.start",
+          "inputPorts": [],
+          "outputPorts": [
+            {
+              "slot": "out",
+              "optional": false
+            },
+            {
+              "slot": "fault",
+              "optional": false
+            }
+          ],
+          "activation": "each-message",
+          "needs": [],
+          "config": {}
+        }
+      },
+      {
+        "id": "loop",
+        "typeId": "harness.decision",
+        "data": {
+          "region": "decision",
+          "resolver": "decision.loop",
+          "inputPorts": [
+            {
+              "slot": "in",
+              "optional": false
+            }
+          ],
+          "outputPorts": [
+            {
+              "slot": "body",
+              "optional": false
+            },
+            {
+              "slot": "done",
+              "optional": false
+            },
+            {
+              "slot": "exhausted",
+              "optional": false
+            },
+            {
+              "slot": "fault",
+              "optional": false
+            }
+          ],
+          "activation": "each-message",
+          "needs": [],
+          "config": {
+            "maxDecisions": 8
+          }
+        }
+      },
+      {
+        "id": "observe",
+        "typeId": "harness.decision",
+        "data": {
+          "region": "decision",
+          "resolver": "decision.observe",
+          "inputPorts": [
+            {
+              "slot": "in",
+              "optional": false
+            }
+          ],
+          "outputPorts": [
+            {
+              "slot": "out",
+              "optional": false
+            },
+            {
+              "slot": "fault",
+              "optional": false
+            }
+          ],
+          "activation": "each-message",
+          "needs": [],
+          "config": {}
+        }
+      },
+      {
+        "id": "context",
+        "typeId": "harness.decision",
+        "data": {
+          "region": "decision",
+          "resolver": "decision.context",
+          "inputPorts": [
+            {
+              "slot": "in",
+              "optional": false
+            }
+          ],
+          "outputPorts": [
+            {
+              "slot": "out",
+              "optional": false
+            },
+            {
+              "slot": "fault",
+              "optional": false
+            }
+          ],
+          "activation": "each-message",
+          "needs": [],
+          "config": {}
+        }
+      },
+      {
+        "id": "lookup",
+        "typeId": "harness.decision",
+        "data": {
+          "region": "decision",
+          "resolver": "decision.lookup",
+          "inputPorts": [
+            {
+              "slot": "in",
+              "optional": false
+            }
+          ],
+          "outputPorts": [
+            {
+              "slot": "out",
+              "optional": false
+            },
+            {
+              "slot": "fault",
+              "optional": false
+            }
+          ],
+          "activation": "each-message",
+          "needs": [],
+          "config": {}
+        }
+      },
+      {
+        "id": "gate",
+        "typeId": "harness.decision",
+        "data": {
+          "region": "decision",
+          "resolver": "decision.gate",
+          "inputPorts": [
+            {
+              "slot": "in",
+              "optional": false
+            }
+          ],
+          "outputPorts": [
+            {
+              "slot": "policy",
+              "optional": false
+            },
+            {
+              "slot": "reason",
+              "optional": false
+            },
+            {
+              "slot": "fault",
+              "optional": false
+            }
+          ],
+          "activation": "each-message",
+          "needs": [],
+          "config": {}
+        }
+      },
+      {
+        "id": "request",
+        "typeId": "harness.decision",
+        "data": {
+          "region": "decision",
+          "resolver": "decision.request",
+          "inputPorts": [
+            {
+              "slot": "in",
+              "optional": false
+            }
+          ],
+          "outputPorts": [
+            {
+              "slot": "out",
+              "optional": false
+            },
+            {
+              "slot": "fault",
+              "optional": false
+            }
+          ],
+          "activation": "each-message",
+          "needs": [],
+          "config": {}
+        }
+      },
+      {
+        "id": "reason",
+        "typeId": "harness.mcp-action",
+        "data": {
+          "region": "capabilities",
+          "resolver": "mcp.reason",
+          "inputPorts": [
+            {
+              "slot": "in",
+              "optional": false
+            }
+          ],
+          "outputPorts": [
+            {
+              "slot": "out",
+              "optional": false
+            },
+            {
+              "slot": "fault",
+              "optional": false
+            }
+          ],
+          "activation": "each-message",
+          "needs": [],
+          "config": {
+            "slot": "reasoner",
+            "tool": "decide"
+          }
+        }
+      },
+      {
+        "id": "merge",
+        "typeId": "harness.decision",
+        "data": {
+          "region": "decision",
+          "resolver": "decision.merge",
+          "inputPorts": [
+            {
+              "slot": "in",
+              "optional": false
+            }
+          ],
+          "outputPorts": [
+            {
+              "slot": "out",
+              "optional": false
+            },
+            {
+              "slot": "fault",
+              "optional": false
+            }
+          ],
+          "activation": "each-message",
+          "needs": [],
+          "config": {}
+        }
+      },
+      {
+        "id": "guard",
+        "typeId": "harness.decision",
+        "data": {
+          "region": "decision",
+          "resolver": "decision.guard",
+          "inputPorts": [
+            {
+              "slot": "in",
+              "optional": false
+            }
+          ],
+          "outputPorts": [
+            {
+              "slot": "out",
+              "optional": false
+            },
+            {
+              "slot": "fault",
+              "optional": false
+            }
+          ],
+          "activation": "each-message",
+          "needs": [],
+          "config": {}
+        }
+      },
+      {
+        "id": "execute",
+        "typeId": "harness.decision",
+        "data": {
+          "region": "decision",
+          "resolver": "decision.dispatch",
+          "inputPorts": [
+            {
+              "slot": "in",
+              "optional": false
+            }
+          ],
+          "outputPorts": [
+            {
+              "slot": "web.search",
+              "optional": false
+            },
+            {
+              "slot": "bypass",
+              "optional": false
+            },
+            {
+              "slot": "fault",
+              "optional": false
+            }
+          ],
+          "activation": "each-message",
+          "needs": [],
+          "config": {}
+        }
+      },
+      {
+        "id": "web.search",
+        "typeId": "harness.mcp-action",
+        "data": {
+          "region": "capabilities",
+          "resolver": "mcp.call",
+          "inputPorts": [
+            {
+              "slot": "in",
+              "optional": false
+            }
+          ],
+          "outputPorts": [
+            {
+              "slot": "out",
+              "optional": false
+            },
+            {
+              "slot": "fault",
+              "optional": false
+            }
+          ],
+          "activation": "each-message",
+          "needs": [],
+          "config": {
+            "slot": "web",
+            "tool": "search"
+          }
+        }
+      },
+      {
+        "id": "observe-after",
+        "typeId": "harness.decision",
+        "data": {
+          "region": "decision",
+          "resolver": "decision.observe-after",
+          "inputPorts": [
+            {
+              "slot": "in",
+              "optional": false
+            }
+          ],
+          "outputPorts": [
+            {
+              "slot": "out",
+              "optional": false
+            },
+            {
+              "slot": "fault",
+              "optional": false
+            }
+          ],
+          "activation": "each-message",
+          "needs": [],
+          "config": {}
+        }
+      },
+      {
+        "id": "evaluate",
+        "typeId": "harness.decision",
+        "data": {
+          "region": "decision",
+          "resolver": "decision.evaluate",
+          "inputPorts": [
+            {
+              "slot": "in",
+              "optional": false
+            }
+          ],
+          "outputPorts": [
+            {
+              "slot": "out",
+              "optional": false
+            },
+            {
+              "slot": "fault",
+              "optional": false
+            }
+          ],
+          "activation": "each-message",
+          "needs": [],
+          "config": {}
+        }
+      },
+      {
+        "id": "record",
+        "typeId": "harness.decision",
+        "data": {
+          "region": "decision",
+          "resolver": "decision.record",
+          "inputPorts": [
+            {
+              "slot": "in",
+              "optional": false
+            }
+          ],
+          "outputPorts": [
+            {
+              "slot": "out",
+              "optional": false
+            },
+            {
+              "slot": "fault",
+              "optional": false
+            }
+          ],
+          "activation": "each-message",
+          "needs": [],
+          "config": {}
+        }
+      },
+      {
+        "id": "end",
+        "typeId": "harness.decision",
+        "data": {
+          "region": "decision",
+          "resolver": "decision.end",
+          "inputPorts": [
+            {
+              "slot": "in",
+              "optional": false
+            }
+          ],
+          "outputPorts": [],
+          "activation": "each-message",
+          "needs": [],
+          "config": {}
+        }
+      }
+    ],
+    "connections": [
+      {
+        "typeId": "harness.link",
+        "from": {
+          "node": "start",
+          "port": "out"
+        },
+        "to": {
+          "node": "loop",
+          "port": "in"
+        },
+        "data": {
+          "mode": "continue",
+          "context": "project"
+        }
+      },
+      {
+        "typeId": "harness.link",
+        "from": {
+          "node": "loop",
+          "port": "body"
+        },
+        "to": {
+          "node": "observe",
+          "port": "in"
+        },
+        "data": {
+          "mode": "continue",
+          "context": "project"
+        }
+      },
+      {
+        "typeId": "harness.link",
+        "from": {
+          "node": "loop",
+          "port": "done"
+        },
+        "to": {
+          "node": "end",
+          "port": "in"
+        },
+        "data": {
+          "mode": "continue",
+          "context": "project"
+        }
+      },
+      {
+        "typeId": "harness.link",
+        "from": {
+          "node": "loop",
+          "port": "exhausted"
+        },
+        "to": {
+          "node": "end",
+          "port": "in"
+        },
+        "data": {
+          "mode": "continue",
+          "context": "project"
+        }
+      },
+      {
+        "typeId": "harness.link",
+        "from": {
+          "node": "observe",
+          "port": "out"
+        },
+        "to": {
+          "node": "context",
+          "port": "in"
+        },
+        "data": {
+          "mode": "continue",
+          "context": "project"
+        }
+      },
+      {
+        "typeId": "harness.link",
+        "from": {
+          "node": "context",
+          "port": "out"
+        },
+        "to": {
+          "node": "lookup",
+          "port": "in"
+        },
+        "data": {
+          "mode": "continue",
+          "context": "project"
+        }
+      },
+      {
+        "typeId": "harness.link",
+        "from": {
+          "node": "lookup",
+          "port": "out"
+        },
+        "to": {
+          "node": "gate",
+          "port": "in"
+        },
+        "data": {
+          "mode": "continue",
+          "context": "project"
+        }
+      },
+      {
+        "typeId": "harness.link",
+        "from": {
+          "node": "gate",
+          "port": "policy"
+        },
+        "to": {
+          "node": "merge",
+          "port": "in"
+        },
+        "data": {
+          "mode": "continue",
+          "context": "project"
+        }
+      },
+      {
+        "typeId": "harness.link",
+        "from": {
+          "node": "gate",
+          "port": "reason"
+        },
+        "to": {
+          "node": "request",
+          "port": "in"
+        },
+        "data": {
+          "mode": "continue",
+          "context": "project"
+        }
+      },
+      {
+        "typeId": "harness.link",
+        "from": {
+          "node": "request",
+          "port": "out"
+        },
+        "to": {
+          "node": "reason",
+          "port": "in"
+        },
+        "data": {
+          "mode": "continue",
+          "context": "project"
+        }
+      },
+      {
+        "typeId": "harness.link",
+        "from": {
+          "node": "reason",
+          "port": "out"
+        },
+        "to": {
+          "node": "merge",
+          "port": "in"
+        },
+        "data": {
+          "mode": "continue",
+          "context": "project"
+        }
+      },
+      {
+        "typeId": "harness.link",
+        "from": {
+          "node": "merge",
+          "port": "out"
+        },
+        "to": {
+          "node": "guard",
+          "port": "in"
+        },
+        "data": {
+          "mode": "continue",
+          "context": "project"
+        }
+      },
+      {
+        "typeId": "harness.link",
+        "from": {
+          "node": "guard",
+          "port": "out"
+        },
+        "to": {
+          "node": "execute",
+          "port": "in"
+        },
+        "data": {
+          "mode": "continue",
+          "context": "project"
+        }
+      },
+      {
+        "typeId": "harness.link",
+        "from": {
+          "node": "execute",
+          "port": "web.search"
+        },
+        "to": {
+          "node": "web.search",
+          "port": "in"
+        },
+        "data": {
+          "mode": "continue",
+          "context": "project"
+        }
+      },
+      {
+        "typeId": "harness.link",
+        "from": {
+          "node": "execute",
+          "port": "bypass"
+        },
+        "to": {
+          "node": "observe-after",
+          "port": "in"
+        },
+        "data": {
+          "mode": "continue",
+          "context": "project"
+        }
+      },
+      {
+        "typeId": "harness.link",
+        "from": {
+          "node": "web.search",
+          "port": "out"
+        },
+        "to": {
+          "node": "observe-after",
+          "port": "in"
+        },
+        "data": {
+          "mode": "continue",
+          "context": "project"
+        }
+      },
+      {
+        "typeId": "harness.link",
+        "from": {
+          "node": "observe-after",
+          "port": "out"
+        },
+        "to": {
+          "node": "evaluate",
+          "port": "in"
+        },
+        "data": {
+          "mode": "continue",
+          "context": "project"
+        }
+      },
+      {
+        "typeId": "harness.link",
+        "from": {
+          "node": "evaluate",
+          "port": "out"
+        },
+        "to": {
+          "node": "record",
+          "port": "in"
+        },
+        "data": {
+          "mode": "continue",
+          "context": "project"
+        }
+      },
+      {
+        "typeId": "harness.link",
+        "from": {
+          "node": "record",
+          "port": "out"
+        },
+        "to": {
+          "node": "loop",
+          "port": "in"
+        },
+        "data": {
+          "mode": "continue",
+          "context": "project"
+        }
+      },
+      {
+        "typeId": "harness.link",
+        "from": {
+          "node": "start",
+          "port": "fault"
+        },
+        "to": {
+          "node": "end",
+          "port": "in"
+        },
+        "data": {
+          "mode": "continue",
+          "context": "project"
+        }
+      },
+      {
+        "typeId": "harness.link",
+        "from": {
+          "node": "loop",
+          "port": "fault"
+        },
+        "to": {
+          "node": "end",
+          "port": "in"
+        },
+        "data": {
+          "mode": "continue",
+          "context": "project"
+        }
+      },
+      {
+        "typeId": "harness.link",
+        "from": {
+          "node": "observe",
+          "port": "fault"
+        },
+        "to": {
+          "node": "end",
+          "port": "in"
+        },
+        "data": {
+          "mode": "continue",
+          "context": "project"
+        }
+      },
+      {
+        "typeId": "harness.link",
+        "from": {
+          "node": "context",
+          "port": "fault"
+        },
+        "to": {
+          "node": "end",
+          "port": "in"
+        },
+        "data": {
+          "mode": "continue",
+          "context": "project"
+        }
+      },
+      {
+        "typeId": "harness.link",
+        "from": {
+          "node": "lookup",
+          "port": "fault"
+        },
+        "to": {
+          "node": "end",
+          "port": "in"
+        },
+        "data": {
+          "mode": "continue",
+          "context": "project"
+        }
+      },
+      {
+        "typeId": "harness.link",
+        "from": {
+          "node": "gate",
+          "port": "fault"
+        },
+        "to": {
+          "node": "end",
+          "port": "in"
+        },
+        "data": {
+          "mode": "continue",
+          "context": "project"
+        }
+      },
+      {
+        "typeId": "harness.link",
+        "from": {
+          "node": "request",
+          "port": "fault"
+        },
+        "to": {
+          "node": "end",
+          "port": "in"
+        },
+        "data": {
+          "mode": "continue",
+          "context": "project"
+        }
+      },
+      {
+        "typeId": "harness.link",
+        "from": {
+          "node": "reason",
+          "port": "fault"
+        },
+        "to": {
+          "node": "end",
+          "port": "in"
+        },
+        "data": {
+          "mode": "continue",
+          "context": "project"
+        }
+      },
+      {
+        "typeId": "harness.link",
+        "from": {
+          "node": "merge",
+          "port": "fault"
+        },
+        "to": {
+          "node": "end",
+          "port": "in"
+        },
+        "data": {
+          "mode": "continue",
+          "context": "project"
+        }
+      },
+      {
+        "typeId": "harness.link",
+        "from": {
+          "node": "guard",
+          "port": "fault"
+        },
+        "to": {
+          "node": "end",
+          "port": "in"
+        },
+        "data": {
+          "mode": "continue",
+          "context": "project"
+        }
+      },
+      {
+        "typeId": "harness.link",
+        "from": {
+          "node": "execute",
+          "port": "fault"
+        },
+        "to": {
+          "node": "end",
+          "port": "in"
+        },
+        "data": {
+          "mode": "continue",
+          "context": "project"
+        }
+      },
+      {
+        "typeId": "harness.link",
+        "from": {
+          "node": "web.search",
+          "port": "fault"
+        },
+        "to": {
+          "node": "end",
+          "port": "in"
+        },
+        "data": {
+          "mode": "continue",
+          "context": "project"
+        }
+      },
+      {
+        "typeId": "harness.link",
+        "from": {
+          "node": "observe-after",
+          "port": "fault"
+        },
+        "to": {
+          "node": "end",
+          "port": "in"
+        },
+        "data": {
+          "mode": "continue",
+          "context": "project"
+        }
+      },
+      {
+        "typeId": "harness.link",
+        "from": {
+          "node": "evaluate",
+          "port": "fault"
+        },
+        "to": {
+          "node": "end",
+          "port": "in"
+        },
+        "data": {
+          "mode": "continue",
+          "context": "project"
+        }
+      },
+      {
+        "typeId": "harness.link",
+        "from": {
+          "node": "record",
+          "port": "fault"
+        },
+        "to": {
+          "node": "end",
+          "port": "in"
+        },
+        "data": {
+          "mode": "continue",
+          "context": "project"
+        }
+      }
+    ]
+  }
+}

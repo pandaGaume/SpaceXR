@@ -1,0 +1,54 @@
+8eb848eb2c0f94d02535a449b5661744
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.SpectralSynapse = void 0;
+const tslib_1 = require("tslib");
+const graph_1 = require("../graph");
+/**
+ * A spectral edge whose weight is a COMPLEX per-band transfer function
+ * `w_b = gain[b]·e^{i·phase[b]}` (gain AND dephasing), optionally with a
+ * complex cross-band `coupling` term. This is the spectral generalization of
+ * `Synapse` (a single real scalar `weight`): the real case is `phase[b] = 0`.
+ *
+ * Differentiability (prepared for later milestones, not trained here): the
+ * forward pass is superposition (addition) + complex filtering (per-bin
+ * multiply by `w_b`) + coupling (multiply). All three are differentiable — in
+ * the complex domain via Wirtinger calculus, or by treating each complex
+ * number as two reals (re, im) and backpropagating through the FFT, exactly as
+ * the Fourier Neural Operator does with per-mode complex weights. `gain` and
+ * `phase` (or `coupling.re`/`coupling.im`) are the natural learnable leaves.
+ *
+ * Mirrors `nn.synapse.ts` (relative imports, `@cloneable`, generic `<B>`);
+ * `Synapse` is left untouched. The constructor takes all parameters as
+ * optional so that `GraphItem.clone()` (which calls `new ctor()` with no
+ * arguments before copying the `@cloneable` fields) works.
+ */
+class SpectralSynapse extends graph_1.GraphOLink {
+    constructor(oini, ofin, bands = [], gain, phase, coupling) {
+        super(oini, ofin);
+        this.bands = bands;
+        // Default gain = 1 (pass-through) and phase = 0 (real case), so a
+        // freshly-cloned or default-constructed synapse is the identity edge.
+        this.gain = gain ?? bands.map(() => 1);
+        this.phase = phase ?? bands.map(() => 0);
+        this.coupling = coupling;
+    }
+}
+exports.SpectralSynapse = SpectralSynapse;
+tslib_1.__decorate([
+    graph_1.cloneable,
+    tslib_1.__metadata("design:type", Array)
+], SpectralSynapse.prototype, "bands", void 0);
+tslib_1.__decorate([
+    graph_1.cloneable,
+    tslib_1.__metadata("design:type", Array)
+], SpectralSynapse.prototype, "gain", void 0);
+tslib_1.__decorate([
+    graph_1.cloneable,
+    tslib_1.__metadata("design:type", Array)
+], SpectralSynapse.prototype, "phase", void 0);
+tslib_1.__decorate([
+    graph_1.cloneable,
+    tslib_1.__metadata("design:type", Array)
+], SpectralSynapse.prototype, "coupling", void 0);
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiQzpcXFVzZXJzXFxHdWlsbGF1bWVQZWxsZXRpZXJcXERvY3VtZW50c1xcR2l0SHViXFxTcGFjZVhSXFwuY2FjaGVcXGNvcmUtZGVjaXNpb24tcnVudGltZVxcc3JjXFxuZXVyYWxuZXR3b3JrXFxubi5zcGVjdHJhbC5zeW5hcHNlLnRzIiwibWFwcGluZ3MiOiI7Ozs7QUFBQSxvQ0FBd0Q7QUFHeEQ7Ozs7Ozs7Ozs7Ozs7Ozs7OztHQWtCRztBQUNILE1BQWEsZUFBNkIsU0FBUSxrQkFBYTtJQU0zRCxZQUFtQixJQUFZLEVBQUUsSUFBWSxFQUFFLFFBQStCLEVBQUUsRUFBRSxJQUFlLEVBQUUsS0FBZ0IsRUFBRSxRQUF5QztRQUMxSixLQUFLLENBQUMsSUFBSSxFQUFFLElBQUksQ0FBQyxDQUFDO1FBQ2xCLElBQUksQ0FBQyxLQUFLLEdBQUcsS0FBSyxDQUFDO1FBQ25CLGtFQUFrRTtRQUNsRSxzRUFBc0U7UUFDdEUsSUFBSSxDQUFDLElBQUksR0FBRyxJQUFJLElBQUksS0FBSyxDQUFDLEdBQUcsQ0FBQyxHQUFHLEVBQUUsQ0FBQyxDQUFDLENBQUMsQ0FBQztRQUN2QyxJQUFJLENBQUMsS0FBSyxHQUFHLEtBQUssSUFBSSxLQUFLLENBQUMsR0FBRyxDQUFDLEdBQUcsRUFBRSxDQUFDLENBQUMsQ0FBQyxDQUFDO1FBQ3pDLElBQUksQ0FBQyxRQUFRLEdBQUcsUUFBUSxDQUFDO0lBQzdCLENBQUM7Q0FDSjtBQWZELDBDQWVDO0FBZHFCO0lBQWpCLGlCQUFTOzs4Q0FBcUM7QUFDN0I7SUFBakIsaUJBQVM7OzZDQUF1QjtBQUNmO0lBQWpCLGlCQUFTOzs4Q0FBd0I7QUFDaEI7SUFBakIsaUJBQVM7O2lEQUFrRCIsIm5hbWVzIjpbXSwic291cmNlcyI6WyJDOlxcVXNlcnNcXEd1aWxsYXVtZVBlbGxldGllclxcRG9jdW1lbnRzXFxHaXRIdWJcXFNwYWNlWFJcXC5jYWNoZVxcY29yZS1kZWNpc2lvbi1ydW50aW1lXFxzcmNcXG5ldXJhbG5ldHdvcmtcXG5uLnNwZWN0cmFsLnN5bmFwc2UudHMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgY2xvbmVhYmxlLCBHcmFwaE9MaW5rLCBJTm9kZSB9IGZyb20gXCIuLi9ncmFwaFwiO1xyXG5pbXBvcnQgeyBJU3BlY3RyYWxTeW5hcHNlIH0gZnJvbSBcIi4vbm4uc3BlY3RyYWwuaW50ZXJmYWNlc1wiO1xyXG5cclxuLyoqXHJcbiAqIEEgc3BlY3RyYWwgZWRnZSB3aG9zZSB3ZWlnaHQgaXMgYSBDT01QTEVYIHBlci1iYW5kIHRyYW5zZmVyIGZ1bmN0aW9uXHJcbiAqIGB3X2IgPSBnYWluW2JdwrdlXntpwrdwaGFzZVtiXX1gIChnYWluIEFORCBkZXBoYXNpbmcpLCBvcHRpb25hbGx5IHdpdGggYVxyXG4gKiBjb21wbGV4IGNyb3NzLWJhbmQgYGNvdXBsaW5nYCB0ZXJtLiBUaGlzIGlzIHRoZSBzcGVjdHJhbCBnZW5lcmFsaXphdGlvbiBvZlxyXG4gKiBgU3luYXBzZWAgKGEgc2luZ2xlIHJlYWwgc2NhbGFyIGB3ZWlnaHRgKTogdGhlIHJlYWwgY2FzZSBpcyBgcGhhc2VbYl0gPSAwYC5cclxuICpcclxuICogRGlmZmVyZW50aWFiaWxpdHkgKHByZXBhcmVkIGZvciBsYXRlciBtaWxlc3RvbmVzLCBub3QgdHJhaW5lZCBoZXJlKTogdGhlXHJcbiAqIGZvcndhcmQgcGFzcyBpcyBzdXBlcnBvc2l0aW9uIChhZGRpdGlvbikgKyBjb21wbGV4IGZpbHRlcmluZyAocGVyLWJpblxyXG4gKiBtdWx0aXBseSBieSBgd19iYCkgKyBjb3VwbGluZyAobXVsdGlwbHkpLiBBbGwgdGhyZWUgYXJlIGRpZmZlcmVudGlhYmxlIOKAlCBpblxyXG4gKiB0aGUgY29tcGxleCBkb21haW4gdmlhIFdpcnRpbmdlciBjYWxjdWx1cywgb3IgYnkgdHJlYXRpbmcgZWFjaCBjb21wbGV4XHJcbiAqIG51bWJlciBhcyB0d28gcmVhbHMgKHJlLCBpbSkgYW5kIGJhY2twcm9wYWdhdGluZyB0aHJvdWdoIHRoZSBGRlQsIGV4YWN0bHkgYXNcclxuICogdGhlIEZvdXJpZXIgTmV1cmFsIE9wZXJhdG9yIGRvZXMgd2l0aCBwZXItbW9kZSBjb21wbGV4IHdlaWdodHMuIGBnYWluYCBhbmRcclxuICogYHBoYXNlYCAob3IgYGNvdXBsaW5nLnJlYC9gY291cGxpbmcuaW1gKSBhcmUgdGhlIG5hdHVyYWwgbGVhcm5hYmxlIGxlYXZlcy5cclxuICpcclxuICogTWlycm9ycyBgbm4uc3luYXBzZS50c2AgKHJlbGF0aXZlIGltcG9ydHMsIGBAY2xvbmVhYmxlYCwgZ2VuZXJpYyBgPEI+YCk7XHJcbiAqIGBTeW5hcHNlYCBpcyBsZWZ0IHVudG91Y2hlZC4gVGhlIGNvbnN0cnVjdG9yIHRha2VzIGFsbCBwYXJhbWV0ZXJzIGFzXHJcbiAqIG9wdGlvbmFsIHNvIHRoYXQgYEdyYXBoSXRlbS5jbG9uZSgpYCAod2hpY2ggY2FsbHMgYG5ldyBjdG9yKClgIHdpdGggbm9cclxuICogYXJndW1lbnRzIGJlZm9yZSBjb3B5aW5nIHRoZSBgQGNsb25lYWJsZWAgZmllbGRzKSB3b3Jrcy5cclxuICovXHJcbmV4cG9ydCBjbGFzcyBTcGVjdHJhbFN5bmFwc2U8QiA9IHVua25vd24+IGV4dGVuZHMgR3JhcGhPTGluazxCPiBpbXBsZW1lbnRzIElTcGVjdHJhbFN5bmFwc2U8Qj4ge1xyXG4gICAgQGNsb25lYWJsZSBwdWJsaWMgYmFuZHM6IFJlYWRvbmx5QXJyYXk8bnVtYmVyPjtcclxuICAgIEBjbG9uZWFibGUgcHVibGljIGdhaW46IG51bWJlcltdO1xyXG4gICAgQGNsb25lYWJsZSBwdWJsaWMgcGhhc2U6IG51bWJlcltdO1xyXG4gICAgQGNsb25lYWJsZSBwdWJsaWMgY291cGxpbmc/OiB7IHJlOiBudW1iZXI7IGltOiBudW1iZXIgfVtdW107XHJcblxyXG4gICAgcHVibGljIGNvbnN0cnVjdG9yKG9pbmk/OiBJTm9kZSwgb2Zpbj86IElOb2RlLCBiYW5kczogUmVhZG9ubHlBcnJheTxudW1iZXI+ID0gW10sIGdhaW4/OiBudW1iZXJbXSwgcGhhc2U/OiBudW1iZXJbXSwgY291cGxpbmc/OiB7IHJlOiBudW1iZXI7IGltOiBudW1iZXIgfVtdW10pIHtcclxuICAgICAgICBzdXBlcihvaW5pLCBvZmluKTtcclxuICAgICAgICB0aGlzLmJhbmRzID0gYmFuZHM7XHJcbiAgICAgICAgLy8gRGVmYXVsdCBnYWluID0gMSAocGFzcy10aHJvdWdoKSBhbmQgcGhhc2UgPSAwIChyZWFsIGNhc2UpLCBzbyBhXHJcbiAgICAgICAgLy8gZnJlc2hseS1jbG9uZWQgb3IgZGVmYXVsdC1jb25zdHJ1Y3RlZCBzeW5hcHNlIGlzIHRoZSBpZGVudGl0eSBlZGdlLlxyXG4gICAgICAgIHRoaXMuZ2FpbiA9IGdhaW4gPz8gYmFuZHMubWFwKCgpID0+IDEpO1xyXG4gICAgICAgIHRoaXMucGhhc2UgPSBwaGFzZSA/PyBiYW5kcy5tYXAoKCkgPT4gMCk7XHJcbiAgICAgICAgdGhpcy5jb3VwbGluZyA9IGNvdXBsaW5nO1xyXG4gICAgfVxyXG59XHJcbiJdLCJ2ZXJzaW9uIjozfQ==

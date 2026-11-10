@@ -1,0 +1,34 @@
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import { OrderedDelivery } from "../dist/acquired/ordered-delivery.js";
+test("faster parallel results publish in dispatch order, including a failed first result", async () => {
+    const order = new OrderedDelivery();
+    const first = order.reserve("first");
+    const second = order.reserve("second");
+    const third = order.reserve("third");
+    const received = [];
+    const b = second.turn.then(() => { received.push("second success"); second.finish(); });
+    const c = third.turn.then(() => { received.push("third success"); third.finish(); });
+    await Promise.resolve();
+    assert.equal(received.length, 0, "finished later work cannot overtake the first request");
+    await first.turn;
+    received.push("first failure");
+    first.finish();
+    await Promise.all([b, c]);
+    assert.deepEqual(received, ["first failure", "second success", "third success"]);
+});
+test("a task awaiting its human answer retains its delivery place across resumption", async () => {
+    const order = new OrderedDelivery();
+    const first = order.reserve("first");
+    const second = order.reserve("second");
+    let delivered = false;
+    const b = second.turn.then(() => { delivered = true; second.finish(); });
+    await first.turn;
+    assert.equal(order.reserve("first"), first, "resumption reuses the original request's place");
+    await Promise.resolve();
+    assert.equal(delivered, false);
+    order.reserve("first").finish();
+    await b;
+    assert.equal(delivered, true);
+    first.finish();
+});

@@ -1,0 +1,19 @@
+{
+  "errors": [],
+  "terrain": {
+    "status": "Chargement du relief : 19 tâches restantes",
+    "stats": "webgpu | SSE 20 px | 19 tuiles implicites | 110 FPS",
+    "errors": []
+  },
+  "webgl": {
+    "status": "Terre active, atmosphère désactivée",
+    "stats": "webgl | SSE 20 px | 34 tuiles implicites | 27 FPS",
+    "errors": []
+  },
+  "disposed": {
+    "scenePreserved": true,
+    "meshes": 0,
+    "cameras": 0,
+    "lights": 0
+  }
+}

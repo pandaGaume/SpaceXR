@@ -20,8 +20,9 @@ export class PolylineSimplifier<T extends ICartesian2> {
         if (points.length <= 2) return points;
         const toleranceValue = tolerance ?? this._tolerance;
         const highestQualityValue = highestQuality ?? this._highestQuality;
-        points = highestQualityValue ? points : this._simplifyDouglasPeucker(points, toleranceValue);
-        return this._simplifyRadialDist(points, this._tolerance);
+        const sqTolerance = toleranceValue * toleranceValue;
+        points = highestQualityValue ? points : this._simplifyRadialDist(points, sqTolerance);
+        return this._simplifyDouglasPeucker(points, sqTolerance);
     }
 
     protected _simplifyRadialDist(points: Array<T>, sqTolerance: number): Array<T> {

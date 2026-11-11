@@ -1,4 +1,4 @@
-import { IBounds, ICartesian2, isClipable, IShape, ISize2 } from "../../geometry";
+import { IBounds, ICartesian2, isClipable, isPolygon, IShape, ISize2 } from "../../geometry";
 import { VectorTileFeature } from "./tiles.vector.feature";
 import { IVectorTileFeature, VectorTileGeomType } from "./tiles.vector.interfaces";
 
@@ -8,7 +8,7 @@ export class VectorTileFeatureBuilder {
         [false, true, false, false, false, false], // POINT
         [false, false, true, true, false, true], // LINESTRING
         [false, false, false, true, false, false], // POLYGON
-    ]; 
+    ];
 
     _type: VectorTileGeomType;
     _bounds?: IBounds;
@@ -70,8 +70,15 @@ export class VectorTileFeatureBuilder {
                     geometries.push(clipped);
                 }
             }
+        } else {
+            geometries.push(...this._shapes);
         }
-        const points: Array<Array<ICartesian2>> = geometries.map((g) => Array.from(g));
+        // A clipped shape may share its points with the LOD collection.
+        const points: Array<Array<ICartesian2>> = [];
+        for (const geometry of geometries) {
+            const rings = [Array.from(geometry), ...(isPolygon(geometry) ? (geometry.holes ?? []) : [])];
+            for (const ring of rings) points.push(ring.map((p) => ({ x: p.x, y: p.y })));
+        }
         return new VectorTileFeature(id, this._type, ...points);
     }
 }

@@ -1,26 +1,23 @@
 import { FloatArray, isArrayOfFloatArray } from "../../types";
 import { Bounds } from "../geometry.bounds";
-import { Cartesian2, Cartesian3 } from "../geometry.cartesian";
+import { Cartesian3 } from "../geometry.cartesian";
 import { IBounds, ICartesian3, isArrayOfCartesianArray, RegionCode } from "../geometry.interfaces";
 import { AbstractShape } from "./geometry.shape";
 import { IPolyline, ShapeType } from "./geometry.shapes.interfaces";
 
 export class Polyline extends AbstractShape implements IPolyline {
-
     public static Concat(...p: Array<IPolyline>): IPolyline {
         const points: Array<ICartesian3> = [];
 
         for (let i = 0; i < p.length; i++) {
-            const polyPoints = p[i].points.map(pt => new Cartesian3(pt.x, pt.y, pt.z));
+            const polyPoints = p[i].points.map((pt) => new Cartesian3(pt.x, pt.y, pt.z));
 
             if (i > 0 && points.length > 0) {
                 const lastPoint = points[points.length - 1];
                 const firstNewPoint = polyPoints[0];
 
                 // Compare coordinates to avoid duplication
-                if (lastPoint.x === firstNewPoint.x &&
-                    lastPoint.y === firstNewPoint.y &&
-                    lastPoint.z === firstNewPoint.z) {
+                if (lastPoint.x === firstNewPoint.x && lastPoint.y === firstNewPoint.y && lastPoint.z === firstNewPoint.z) {
                     // Skip the first point of the current polyline
                     polyPoints.shift();
                 }
@@ -92,48 +89,43 @@ export class Polyline extends AbstractShape implements IPolyline {
     }
 
     protected _clipPolyline(clipArea: IBounds): IPolyline | Array<IPolyline> | undefined {
-        if (clipArea.intersects(this.boundingBox)) {
-            const polylines = [];
-            let points = [];
-            const codes = this._points.map((p) => Cartesian2.ComputeCode(p, clipArea));
-            let a = this._points[0];
-            let codea = codes[0];
-            let inside: boolean = codea == 0;
-            for (let i = 1; i < codes.length; i++) {
-                const b = this._points[i];
-                const codeb = codes[i];
-
-                // keep this algorithm for lisibility
-                if (inside) {
-                    points.push(this._buildPoint(a.x, a.y, a.z));
-                    if (codeb != 0) {
-                        const intersection = this._computeIntersectionToRef(clipArea, a, b, codeb, this._buildPoint(0, 0, 0));
-                        points.push(intersection);
-                        polylines.push(new Polyline(points));
-                        points = [];
-                        inside = !inside;
-                    }
+        const polylines: IPolyline[] = [];
+        let points: ICartesian3[] = [];
+        const flush = () => {
+            if (points.length > 1) polylines.push(new Polyline(points));
+            points = [];
+        };
+        // Clip each XY segment parametrically, including outside-to-outside crossings.
+        for (let i = 1; i < this._points.length; i++) {
+            const a = this._points[i - 1],
+                b = this._points[i];
+            let start = 0,
+                end = 1;
+            for (const [origin, delta, min, max] of [
+                [a.x, b.x - a.x, clipArea.xmin, clipArea.xmax],
+                [a.y, b.y - a.y, clipArea.ymin, clipArea.ymax],
+            ]) {
+                if (delta === 0) {
+                    if (origin < min || origin > max) end = -1;
                 } else {
-                    if (codeb == 0) {
-                        const intersection = this._computeIntersectionToRef(clipArea, a, b, codea, this._buildPoint(0, 0, 0));
-                        points.push(intersection);
-                        inside = !inside;
-                    }
+                    const t0 = (min - origin) / delta,
+                        t1 = (max - origin) / delta;
+                    start = Math.max(start, Math.min(t0, t1));
+                    end = Math.min(end, Math.max(t0, t1));
                 }
-                a = b;
-                codea = codeb;
             }
-            // add last points
-            if (inside) {
-                points.push(this._buildPoint(a.x, a.y, a.z));
+            if (end <= start) {
+                flush();
+                continue;
             }
-            // add last polyline
-            if (points.length) {
-                polylines.push(new Polyline(points));
-            }
-            return polylines.length ? (polylines.length == 1 ? polylines[0] : polylines) : undefined;
+            const at = (t: number) => this._buildPoint(a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t, a.z + (b.z - a.z) * t);
+            if (start > 0) flush();
+            if (!points.length) points.push(at(start));
+            points.push(at(end));
+            if (end < 1) flush();
         }
-        return undefined;
+        flush();
+        return polylines.length === 1 ? polylines[0] : polylines.length ? polylines : undefined;
     }
 
     protected _computeIntersectionToRef<T extends ICartesian3>(clipArea: IBounds, a: ICartesian3, b: ICartesian3, code_out: RegionCode, ref: T): T {

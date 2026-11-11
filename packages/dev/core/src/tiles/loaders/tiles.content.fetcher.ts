@@ -63,7 +63,7 @@ export class TileContentFetcher<T> implements ITileContentFetcher<T> {
         // then try to get it from the datasource
         this._datasource.fetchAsync(address, tile).then(
             (result) => {
-                if (result.ok && address.quadkey) {
+                if (result.ok && address.quadkey !== undefined) {
                     this._cache.set(this._buildCacheKey(address.quadkey), result.content);
                     tile.content = result.content;
                     callback?.(tile);
@@ -102,6 +102,6 @@ export class TileContentFetcher<T> implements ITileContentFetcher<T> {
     }
 
     private _buildCacheKey(key?: string): string {
-        return this._prefix ? `${key}` : `${this._prefix}${key}`;
+        return `${this._prefix ?? ""}${key ?? ""}`;
     }
 }

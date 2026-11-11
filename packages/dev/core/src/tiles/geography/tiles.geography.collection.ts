@@ -10,7 +10,10 @@ import { PolylineSimplifier } from "../../geometry/geometry.simplify";
 import { Observable } from "../../events";
 
 export class ShapeCollectionEventArgs {
-    public constructor(public lod: number, public IShapes: Array<IShape>) {}
+    public constructor(
+        public lod: number,
+        public IShapes: Array<IShape>
+    ) {}
 }
 
 /// <summary>
@@ -64,6 +67,7 @@ export class ShapeCollection implements IHasTileMetrics {
     }
 
     public trySet(lod: number, ...shapes: Array<IGeoShape>): boolean {
+        if (!Number.isInteger(lod) || lod < this.metrics.minLOD || lod > this.metrics.maxLOD) return false;
         let collection = this.get(lod);
         const views = shapes.map((s) => this._buildShape(s, lod, this.metrics)).filter((v) => v !== null) as IShape[];
         if (views.length === 0) {
@@ -99,7 +103,7 @@ export class ShapeCollection implements IHasTileMetrics {
 
     protected _buildPolygon(shape: IGeoPolygon, lod: number, metrics: ITileMetrics): Nullable<IShape> {
         const points = this._transform(shape.points, lod, metrics);
-        return Polygon.FromPoints(points);
+        return points.length >= 3 ? Polygon.FromPoints(points) : null;
     }
 
     protected _buildLine(shape: IGeoLine, lod: number, metrics: ITileMetrics): Nullable<IShape> {
@@ -130,9 +134,8 @@ export class ShapeCollection implements IHasTileMetrics {
 
     // filter out points that are nearly ONE point
     protected _filter(...args: Array<ICartesian3>): boolean {
-        if (args.length < 2) return true;
+        if (args.length < 2) return false;
         const p1 = args[0];
-        const p2 = args[1];
-        return Cartesian3.Equals(p1, p2, ShapeCollection.Epsilon) == false;
+        return args.some((point) => !Cartesian3.Equals(p1, point, ShapeCollection.Epsilon));
     }
 }

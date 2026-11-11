@@ -1,0 +1,47 @@
+b1607484d51056f39702c851ca0e5641
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.SpectralNeuron = void 0;
+const tslib_1 = require("tslib");
+const graph_1 = require("../graph");
+const nn_neuron_1 = require("./nn.neuron");
+/**
+ * A spectral neuron. Structural (like every `Neuron`): it carries only the
+ * discretization it uses to read its spectral inputs — the FFT size, the
+ * sample rate (which maps a carrier frequency to an FFT bin), and the band
+ * half-width in bins. The forward pass lives in `SpectralInferenceRuntime`;
+ * this node performs no computation on its own.
+ *
+ * A future per-neuron NON-LINEARITY belongs here: a non-linearity is what
+ * manufactures harmonics and intermodulation (Decision 001, H7). It is
+ * deliberately absent at this milestone, so the substrate stays strictly
+ * linear (the demos it replays are linear).
+ *
+ * Mirrors `MlpNeuron` (plain `@cloneable` fields, all-optional constructor so
+ * `GraphItem.clone()`'s `new ctor()` works); `Neuron` is left untouched.
+ */
+class SpectralNeuron extends nn_neuron_1.Neuron {
+    constructor(nfft = 256, sampleRate = 1024, bandHalfWidthBins = 1, onsc = null, opsc = null, position) {
+        super(onsc, opsc, position);
+        this.nfft = 256;
+        this.sampleRate = 1024;
+        this.bandHalfWidthBins = 1;
+        this.nfft = nfft;
+        this.sampleRate = sampleRate;
+        this.bandHalfWidthBins = bandHalfWidthBins;
+    }
+}
+exports.SpectralNeuron = SpectralNeuron;
+tslib_1.__decorate([
+    graph_1.cloneable,
+    tslib_1.__metadata("design:type", Number)
+], SpectralNeuron.prototype, "nfft", void 0);
+tslib_1.__decorate([
+    graph_1.cloneable,
+    tslib_1.__metadata("design:type", Number)
+], SpectralNeuron.prototype, "sampleRate", void 0);
+tslib_1.__decorate([
+    graph_1.cloneable,
+    tslib_1.__metadata("design:type", Number)
+], SpectralNeuron.prototype, "bandHalfWidthBins", void 0);
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiQzpcXFVzZXJzXFxHdWlsbGF1bWVQZWxsZXRpZXJcXERvY3VtZW50c1xcR2l0SHViXFxzcGlreXBhbmRhXFxwYWNrYWdlc1xcZGV2XFxjb3JlXFxzcmNcXG5ldXJhbG5ldHdvcmtcXG5uLnNwZWN0cmFsLm5ldXJvbi50cyIsIm1hcHBpbmdzIjoiOzs7O0FBQ0Esb0NBQTZDO0FBRTdDLDJDQUFxQztBQUdyQzs7Ozs7Ozs7Ozs7Ozs7R0FjRztBQUNILE1BQWEsY0FBMEUsU0FBUSxrQkFBUztJQUtwRyxZQUNJLE9BQWUsR0FBRyxFQUNsQixhQUFxQixJQUFJLEVBQ3pCLG9CQUE0QixDQUFDLEVBQzdCLE9BQTJCLElBQUksRUFDL0IsT0FBMkIsSUFBSSxFQUMvQixRQUFxQjtRQUVyQixLQUFLLENBQUMsSUFBSSxFQUFFLElBQUksRUFBRSxRQUFRLENBQUMsQ0FBQztRQVpkLFNBQUksR0FBVyxHQUFHLENBQUM7UUFDbkIsZUFBVSxHQUFXLElBQUksQ0FBQztRQUMxQixzQkFBaUIsR0FBVyxDQUFDLENBQUM7UUFXNUMsSUFBSSxDQUFDLElBQUksR0FBRyxJQUFJLENBQUM7UUFDakIsSUFBSSxDQUFDLFVBQVUsR0FBRyxVQUFVLENBQUM7UUFDN0IsSUFBSSxDQUFDLGlCQUFpQixHQUFHLGlCQUFpQixDQUFDO0lBQy9DLENBQUM7Q0FDSjtBQWxCRCx3Q0FrQkM7QUFqQnFCO0lBQWpCLGlCQUFTOzs0Q0FBMkI7QUFDbkI7SUFBakIsaUJBQVM7O2tEQUFrQztBQUMxQjtJQUFqQixpQkFBUzs7eURBQXNDIiwibmFtZXMiOltdLCJzb3VyY2VzIjpbIkM6XFxVc2Vyc1xcR3VpbGxhdW1lUGVsbGV0aWVyXFxEb2N1bWVudHNcXEdpdEh1Ylxcc3Bpa3lwYW5kYVxccGFja2FnZXNcXGRldlxcY29yZVxcc3JjXFxuZXVyYWxuZXR3b3JrXFxubi5zcGVjdHJhbC5uZXVyb24udHMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgSUNhcnRlc2lhbiB9IGZyb20gXCIuLi9nZW9tZXRyeVwiO1xyXG5pbXBvcnQgeyBjbG9uZWFibGUsIElPbGluayB9IGZyb20gXCIuLi9ncmFwaFwiO1xyXG5pbXBvcnQgeyBOdWxsYWJsZSB9IGZyb20gXCIuLi90eXBlc1wiO1xyXG5pbXBvcnQgeyBOZXVyb24gfSBmcm9tIFwiLi9ubi5uZXVyb25cIjtcclxuaW1wb3J0IHsgSVNwZWN0cmFsTmV1cm9uLCBJU3BlY3RyYWxOZXVyb25Db250ZXh0IH0gZnJvbSBcIi4vbm4uc3BlY3RyYWwuaW50ZXJmYWNlc1wiO1xyXG5cclxuLyoqXHJcbiAqIEEgc3BlY3RyYWwgbmV1cm9uLiBTdHJ1Y3R1cmFsIChsaWtlIGV2ZXJ5IGBOZXVyb25gKTogaXQgY2FycmllcyBvbmx5IHRoZVxyXG4gKiBkaXNjcmV0aXphdGlvbiBpdCB1c2VzIHRvIHJlYWQgaXRzIHNwZWN0cmFsIGlucHV0cyDigJQgdGhlIEZGVCBzaXplLCB0aGVcclxuICogc2FtcGxlIHJhdGUgKHdoaWNoIG1hcHMgYSBjYXJyaWVyIGZyZXF1ZW5jeSB0byBhbiBGRlQgYmluKSwgYW5kIHRoZSBiYW5kXHJcbiAqIGhhbGYtd2lkdGggaW4gYmlucy4gVGhlIGZvcndhcmQgcGFzcyBsaXZlcyBpbiBgU3BlY3RyYWxJbmZlcmVuY2VSdW50aW1lYDtcclxuICogdGhpcyBub2RlIHBlcmZvcm1zIG5vIGNvbXB1dGF0aW9uIG9uIGl0cyBvd24uXHJcbiAqXHJcbiAqIEEgZnV0dXJlIHBlci1uZXVyb24gTk9OLUxJTkVBUklUWSBiZWxvbmdzIGhlcmU6IGEgbm9uLWxpbmVhcml0eSBpcyB3aGF0XHJcbiAqIG1hbnVmYWN0dXJlcyBoYXJtb25pY3MgYW5kIGludGVybW9kdWxhdGlvbiAoRGVjaXNpb24gMDAxLCBINykuIEl0IGlzXHJcbiAqIGRlbGliZXJhdGVseSBhYnNlbnQgYXQgdGhpcyBtaWxlc3RvbmUsIHNvIHRoZSBzdWJzdHJhdGUgc3RheXMgc3RyaWN0bHlcclxuICogbGluZWFyICh0aGUgZGVtb3MgaXQgcmVwbGF5cyBhcmUgbGluZWFyKS5cclxuICpcclxuICogTWlycm9ycyBgTWxwTmV1cm9uYCAocGxhaW4gYEBjbG9uZWFibGVgIGZpZWxkcywgYWxsLW9wdGlvbmFsIGNvbnN0cnVjdG9yIHNvXHJcbiAqIGBHcmFwaEl0ZW0uY2xvbmUoKWAncyBgbmV3IGN0b3IoKWAgd29ya3MpOyBgTmV1cm9uYCBpcyBsZWZ0IHVudG91Y2hlZC5cclxuICovXHJcbmV4cG9ydCBjbGFzcyBTcGVjdHJhbE5ldXJvbjxCIGV4dGVuZHMgSVNwZWN0cmFsTmV1cm9uQ29udGV4dCA9IElTcGVjdHJhbE5ldXJvbkNvbnRleHQ+IGV4dGVuZHMgTmV1cm9uPEI+IGltcGxlbWVudHMgSVNwZWN0cmFsTmV1cm9uPEI+IHtcclxuICAgIEBjbG9uZWFibGUgcHVibGljIG5mZnQ6IG51bWJlciA9IDI1NjtcclxuICAgIEBjbG9uZWFibGUgcHVibGljIHNhbXBsZVJhdGU6IG51bWJlciA9IDEwMjQ7XHJcbiAgICBAY2xvbmVhYmxlIHB1YmxpYyBiYW5kSGFsZldpZHRoQmluczogbnVtYmVyID0gMTtcclxuXHJcbiAgICBwdWJsaWMgY29uc3RydWN0b3IoXHJcbiAgICAgICAgbmZmdDogbnVtYmVyID0gMjU2LFxyXG4gICAgICAgIHNhbXBsZVJhdGU6IG51bWJlciA9IDEwMjQsXHJcbiAgICAgICAgYmFuZEhhbGZXaWR0aEJpbnM6IG51bWJlciA9IDEsXHJcbiAgICAgICAgb25zYzogTnVsbGFibGU8SU9saW5rW10+ID0gbnVsbCxcclxuICAgICAgICBvcHNjOiBOdWxsYWJsZTxJT2xpbmtbXT4gPSBudWxsLFxyXG4gICAgICAgIHBvc2l0aW9uPzogSUNhcnRlc2lhblxyXG4gICAgKSB7XHJcbiAgICAgICAgc3VwZXIob25zYywgb3BzYywgcG9zaXRpb24pO1xyXG4gICAgICAgIHRoaXMubmZmdCA9IG5mZnQ7XHJcbiAgICAgICAgdGhpcy5zYW1wbGVSYXRlID0gc2FtcGxlUmF0ZTtcclxuICAgICAgICB0aGlzLmJhbmRIYWxmV2lkdGhCaW5zID0gYmFuZEhhbGZXaWR0aEJpbnM7XHJcbiAgICB9XHJcbn1cclxuIl0sInZlcnNpb24iOjN9

@@ -1,0 +1,52 @@
+{
+  "label": "T14-pole-512b",
+  "date": "2026-11-06T21:43:07.128Z",
+  "seconds": 6,
+  "results": [
+    {
+      "id": "pole/gpu",
+      "url": "http://localhost:5174/?body=moon&dataset=http://127.0.0.1:8793&engine=gpu&solid=1&imagery=none&lat=-89.67&lon=129.2&radius=8000&pitch=60",
+      "errors": [],
+      "performance": {
+        "engine": "gpu",
+        "framesPerSecond": 32.1,
+        "terrainCpuMs": 23.05,
+        "renderCpuMs": 0.53,
+        "runtimeFrameMs": 4.1,
+        "gpuMs": 5.85,
+        "instances": 327,
+        "drawCalls": 1,
+        "trianglesPerFrame": 2514543,
+        "uploadKiBPerFrame": 2054.3,
+        "uploadCallsPerFrame": 13,
+        "gpuMiB": 205.1,
+        "cpuMiB": 0,
+        "demTiles": 511,
+        "tileRequests": 514,
+        "distinctTileRequests": 513,
+        "tileHosts": [
+          "127.0.0.1:8793"
+        ],
+        "loadSeconds": 8.5
+      },
+      "integrity": {
+        "settleSeconds": 0.6,
+        "holesAtRest": 0,
+        "worstSharedEdgeAtRestMetres": 0,
+        "frames": 104,
+        "framesWithHoles": 0,
+        "worstHoles": 0,
+        "edgeChecks": 9,
+        "sharedVerticesPerCheck": 18580,
+        "worstSharedEdgeMetres": 0,
+        "worstOutOfViewEdgeMetres": 0,
+        "tileRequests": 530,
+        "distinctTileRequests": 530,
+        "tileHosts": [
+          "127.0.0.1:8793"
+        ],
+        "loadSeconds": 7.5
+      }
+    }
+  ]
+}

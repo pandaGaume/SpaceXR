@@ -24,9 +24,16 @@ export abstract class CanvasTileCodec<T> implements ICodec<ImageBitmap>, ISize2 
                 if (!workingContext) {
                     throw new Error("Unable to get 2d context");
                 }
-                this._render(workingContext, data);
-                const imgData = workingContext.getImageData(0, 0, this._canvas.width, this._canvas.height);
-                return await createImageBitmap(imgData);
+                workingContext.save();
+                try {
+                    workingContext.resetTransform();
+                    workingContext.clearRect(0, 0, this.width, this.height);
+                    this._render(workingContext, data);
+                    const imgData = workingContext.getImageData(0, 0, this.width, this.height);
+                    return await createImageBitmap(imgData);
+                } finally {
+                    workingContext.restore();
+                }
             }
         }
         return null;

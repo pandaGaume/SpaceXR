@@ -61,8 +61,8 @@ export class TileVectorRenderer {
         if (!style) {
             return undefined;
         }
-        const a: Record<string, Array<number>> = {};
-        const defaultSlot = this._generateUniqueSlotName();
+        const groups = new Map<string | symbol, Array<number>>();
+        const defaultSlot = Symbol();
         const length = style.layers.length;
         for (let i = 0; i < length; i++) {
             const value = style.layers[i];
@@ -70,17 +70,14 @@ export class TileVectorRenderer {
                 continue;
             }
             const slot = value.slot ?? defaultSlot;
-            let group = a[slot];
+            let group = groups.get(slot);
             if (!group) {
-                a[slot] = group = [];
+                group = [];
+                groups.set(slot, group);
             }
             group.push(i);
         }
-        return Object.values(a).flat();
-    }
-
-    private _generateUniqueSlotName(): string {
-        return `slot-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
+        return [...groups.values()].flat();
     }
 
     protected _drawLayer(ctx: CanvasRenderingContext2D, key: string, layer: IVectorTileLayer, w: number, h: number, styleLayer: IVectorLayerStyle): void {
@@ -126,13 +123,11 @@ export class TileVectorRenderer {
                                     const transformed = this._getTransformedGeometry(feature, scalex, scaley, translate);
                                     // fill polygon
                                     ctx.beginPath();
-                                    this._drawPath(ctx, transformed[0]);
-                                    if (transformed.length > 1) {
-                                        for (let i = 1; i < transformed.length; i++) {
-                                            this._drawPath(ctx, transformed[i]);
-                                        }
+                                    for (const ring of transformed) {
+                                        this._drawPath(ctx, ring);
+                                        if (ring.length) ctx.closePath();
                                     }
-                                    ctx.fill();
+                                    if (color) ctx.fill("evenodd");
                                     // draw outline
                                     if (outlineColor) {
                                         ctx.stroke();
@@ -215,7 +210,7 @@ export class TileVectorRenderer {
                     // set the outline style properties
                     if (outlineColor) {
                         ctx.strokeStyle = outlineColor;
-                        ctx.lineWidth = TileVectorRenderer.DefaultLineWith;
+                        ctx.lineWidth = paint.strockeWidth ?? TileVectorRenderer.DefaultLineWith;
                     }
 
                     const translate = this._evaluate(paint.translate);
@@ -226,12 +221,12 @@ export class TileVectorRenderer {
                             switch (feature.type) {
                                 case VectorTileGeomType.POINT: {
                                     const transformed = this._getTransformedGeometry(feature, scalex, scaley, translate);
-                                    for (const point of transformed) {
-                                        ctx.beginPath();
-                                        ctx.arc(point[0].x, point[0].y, paint.radius, 0, 2 * Math.PI);
-                                        ctx.fill();
-                                        if (outlineColor) {
-                                            ctx.stroke();
+                                    for (const points of transformed) {
+                                        for (const point of points) {
+                                            ctx.beginPath();
+                                            ctx.arc(point.x, point.y, paint.radius, 0, 2 * Math.PI);
+                                            if (color) ctx.fill();
+                                            if (outlineColor) ctx.stroke();
                                         }
                                     }
                                     break;
@@ -270,15 +265,11 @@ export class TileVectorRenderer {
         const geom = feature.loadGeometry();
         const transformed: Array<Array<ICartesian2>> = [];
         for (let i = 0; i < geom.length; i++) {
-            for (let j = 0; j < geom[i].length; j++) {
-                if (translate) {
-                    geom[i][j].x += translate[0];
-                    geom[i][j].y += translate[1];
-                }
-                geom[i][j].x *= scalex;
-                geom[i][j].y *= scaley;
-            }
-            transformed.push(this._simplifier.simplify(geom[i]));
+            const points = geom[i].map((point) => ({
+                x: point.x * scalex + (translate?.[0] ?? 0),
+                y: point.y * scaley + (translate?.[1] ?? 0),
+            }));
+            transformed.push(feature.type === VectorTileGeomType.LINESTRING ? this._simplifier.simplify(points) : points);
         }
         return transformed;
     }
@@ -290,6 +281,7 @@ export class TileVectorRenderer {
     protected _drawPolygon(ctx: CanvasRenderingContext2D, points: Array<Array<ICartesian2>>): void {}
 
     protected _drawPath(ctx: CanvasRenderingContext2D, points: Array<ICartesian2>): void {
+        if (!points.length) return;
         let i = 0;
         let p = points[i];
         ctx.moveTo(p.x, p.y);

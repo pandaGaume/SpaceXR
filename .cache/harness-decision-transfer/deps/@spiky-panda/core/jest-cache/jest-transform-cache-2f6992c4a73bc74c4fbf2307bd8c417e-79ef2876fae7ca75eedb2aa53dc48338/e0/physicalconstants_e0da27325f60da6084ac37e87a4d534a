@@ -1,0 +1,48 @@
+1627a9d58da75b09bae1c3b81c5ef8f6
+"use strict";
+/**
+ * Fundamental physical constants, in canonical SI.
+ *
+ * Why here: `chemical.species.ts` already carries `GAS_CONSTANT_R` for the
+ * atmosphere stack, and a spectroscopic model needs the same handful of
+ * constants (Boltzmann, Planck, the speed of light, the electron mass).
+ * Defining them once, with their status, keeps two plugins from each
+ * rounding them their own way.
+ *
+ * Four of the five are EXACT by the 2019 definition of the SI: the
+ * kilogram, the second, the metre and the kelvin are now fixed through
+ * h, the caesium transition, c and k_B. They carry no uncertainty, and
+ * writing more digits of them is not possible, only wrong. The electron
+ * mass is measured, so it has one: the CODATA 2018 value is given here
+ * to the digits that matter for this codebase.
+ */
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ELECTRONVOLT = exports.ELECTRON_MASS = exports.ELEMENTARY_CHARGE = exports.SPEED_OF_LIGHT = exports.PLANCK_CONSTANT = exports.BOLTZMANN_CONSTANT = void 0;
+exports.electronvoltsToJoules = electronvoltsToJoules;
+exports.thermalEnergyEv = thermalEnergyEv;
+/** Boltzmann constant [J/K]. Exact, SI 2019. */
+exports.BOLTZMANN_CONSTANT = 1.380649e-23;
+/** Planck constant [J.s]. Exact, SI 2019. */
+exports.PLANCK_CONSTANT = 6.62607015e-34;
+/** Speed of light in vacuum [m/s]. Exact, SI 2019. */
+exports.SPEED_OF_LIGHT = 299792458;
+/** Elementary charge [C]. Exact, SI 2019; also the electronvolt in joules. */
+exports.ELEMENTARY_CHARGE = 1.602176634e-19;
+/** Electron rest mass [kg]. CODATA 2018, measured. */
+exports.ELECTRON_MASS = 9.1093837015e-31;
+/** One electronvolt in joules. The same number as the elementary charge,
+ *  named for the conversions that read better with it. */
+exports.ELECTRONVOLT = exports.ELEMENTARY_CHARGE;
+/** Convert an energy from electronvolts to joules. */
+function electronvoltsToJoules(ev) {
+    return ev * exports.ELECTRONVOLT;
+}
+/**
+ * `k_B * T` in electronvolts, the quantity every Boltzmann factor is
+ * divided by. Written once because `exp(-E / kT)` with E in eV and T in
+ * kelvin is where unit mistakes happen.
+ */
+function thermalEnergyEv(temperatureK) {
+    return (exports.BOLTZMANN_CONSTANT * temperatureK) / exports.ELECTRONVOLT;
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiQzpcXFVzZXJzXFxHdWlsbGF1bWVQZWxsZXRpZXJcXERvY3VtZW50c1xcR2l0SHViXFxzcGlreXBhbmRhXFxwYWNrYWdlc1xcZGV2XFxjb3JlXFxzcmNcXHNpbVxccGh5c2ljYWwuY29uc3RhbnRzLnRzIiwibWFwcGluZ3MiOiI7QUFBQTs7Ozs7Ozs7Ozs7Ozs7O0dBZUc7OztBQXNCSCxzREFFQztBQU9ELDBDQUVDO0FBL0JELGdEQUFnRDtBQUNuQyxRQUFBLGtCQUFrQixHQUFHLFlBQVksQ0FBQztBQUUvQyw2Q0FBNkM7QUFDaEMsUUFBQSxlQUFlLEdBQUcsY0FBYyxDQUFDO0FBRTlDLHNEQUFzRDtBQUN6QyxRQUFBLGNBQWMsR0FBRyxTQUFTLENBQUM7QUFFeEMsOEVBQThFO0FBQ2pFLFFBQUEsaUJBQWlCLEdBQUcsZUFBZSxDQUFDO0FBRWpELHNEQUFzRDtBQUN6QyxRQUFBLGFBQWEsR0FBRyxnQkFBZ0IsQ0FBQztBQUU5QzswREFDMEQ7QUFDN0MsUUFBQSxZQUFZLEdBQUcseUJBQWlCLENBQUM7QUFFOUMsc0RBQXNEO0FBQ3RELFNBQWdCLHFCQUFxQixDQUFDLEVBQVU7SUFDNUMsT0FBTyxFQUFFLEdBQUcsb0JBQVksQ0FBQztBQUM3QixDQUFDO0FBRUQ7Ozs7R0FJRztBQUNILFNBQWdCLGVBQWUsQ0FBQyxZQUFvQjtJQUNoRCxPQUFPLENBQUMsMEJBQWtCLEdBQUcsWUFBWSxDQUFDLEdBQUcsb0JBQVksQ0FBQztBQUM5RCxDQUFDIiwibmFtZXMiOltdLCJzb3VyY2VzIjpbIkM6XFxVc2Vyc1xcR3VpbGxhdW1lUGVsbGV0aWVyXFxEb2N1bWVudHNcXEdpdEh1Ylxcc3Bpa3lwYW5kYVxccGFja2FnZXNcXGRldlxcY29yZVxcc3JjXFxzaW1cXHBoeXNpY2FsLmNvbnN0YW50cy50cyJdLCJzb3VyY2VzQ29udGVudCI6WyIvKipcclxuICogRnVuZGFtZW50YWwgcGh5c2ljYWwgY29uc3RhbnRzLCBpbiBjYW5vbmljYWwgU0kuXHJcbiAqXHJcbiAqIFdoeSBoZXJlOiBgY2hlbWljYWwuc3BlY2llcy50c2AgYWxyZWFkeSBjYXJyaWVzIGBHQVNfQ09OU1RBTlRfUmAgZm9yIHRoZVxyXG4gKiBhdG1vc3BoZXJlIHN0YWNrLCBhbmQgYSBzcGVjdHJvc2NvcGljIG1vZGVsIG5lZWRzIHRoZSBzYW1lIGhhbmRmdWwgb2ZcclxuICogY29uc3RhbnRzIChCb2x0em1hbm4sIFBsYW5jaywgdGhlIHNwZWVkIG9mIGxpZ2h0LCB0aGUgZWxlY3Ryb24gbWFzcykuXHJcbiAqIERlZmluaW5nIHRoZW0gb25jZSwgd2l0aCB0aGVpciBzdGF0dXMsIGtlZXBzIHR3byBwbHVnaW5zIGZyb20gZWFjaFxyXG4gKiByb3VuZGluZyB0aGVtIHRoZWlyIG93biB3YXkuXHJcbiAqXHJcbiAqIEZvdXIgb2YgdGhlIGZpdmUgYXJlIEVYQUNUIGJ5IHRoZSAyMDE5IGRlZmluaXRpb24gb2YgdGhlIFNJOiB0aGVcclxuICoga2lsb2dyYW0sIHRoZSBzZWNvbmQsIHRoZSBtZXRyZSBhbmQgdGhlIGtlbHZpbiBhcmUgbm93IGZpeGVkIHRocm91Z2hcclxuICogaCwgdGhlIGNhZXNpdW0gdHJhbnNpdGlvbiwgYyBhbmQga19CLiBUaGV5IGNhcnJ5IG5vIHVuY2VydGFpbnR5LCBhbmRcclxuICogd3JpdGluZyBtb3JlIGRpZ2l0cyBvZiB0aGVtIGlzIG5vdCBwb3NzaWJsZSwgb25seSB3cm9uZy4gVGhlIGVsZWN0cm9uXHJcbiAqIG1hc3MgaXMgbWVhc3VyZWQsIHNvIGl0IGhhcyBvbmU6IHRoZSBDT0RBVEEgMjAxOCB2YWx1ZSBpcyBnaXZlbiBoZXJlXHJcbiAqIHRvIHRoZSBkaWdpdHMgdGhhdCBtYXR0ZXIgZm9yIHRoaXMgY29kZWJhc2UuXHJcbiAqL1xyXG5cclxuLyoqIEJvbHR6bWFubiBjb25zdGFudCBbSi9LXS4gRXhhY3QsIFNJIDIwMTkuICovXHJcbmV4cG9ydCBjb25zdCBCT0xUWk1BTk5fQ09OU1RBTlQgPSAxLjM4MDY0OWUtMjM7XHJcblxyXG4vKiogUGxhbmNrIGNvbnN0YW50IFtKLnNdLiBFeGFjdCwgU0kgMjAxOS4gKi9cclxuZXhwb3J0IGNvbnN0IFBMQU5DS19DT05TVEFOVCA9IDYuNjI2MDcwMTVlLTM0O1xyXG5cclxuLyoqIFNwZWVkIG9mIGxpZ2h0IGluIHZhY3V1bSBbbS9zXS4gRXhhY3QsIFNJIDIwMTkuICovXHJcbmV4cG9ydCBjb25zdCBTUEVFRF9PRl9MSUdIVCA9IDI5OTc5MjQ1ODtcclxuXHJcbi8qKiBFbGVtZW50YXJ5IGNoYXJnZSBbQ10uIEV4YWN0LCBTSSAyMDE5OyBhbHNvIHRoZSBlbGVjdHJvbnZvbHQgaW4gam91bGVzLiAqL1xyXG5leHBvcnQgY29uc3QgRUxFTUVOVEFSWV9DSEFSR0UgPSAxLjYwMjE3NjYzNGUtMTk7XHJcblxyXG4vKiogRWxlY3Ryb24gcmVzdCBtYXNzIFtrZ10uIENPREFUQSAyMDE4LCBtZWFzdXJlZC4gKi9cclxuZXhwb3J0IGNvbnN0IEVMRUNUUk9OX01BU1MgPSA5LjEwOTM4MzcwMTVlLTMxO1xyXG5cclxuLyoqIE9uZSBlbGVjdHJvbnZvbHQgaW4gam91bGVzLiBUaGUgc2FtZSBudW1iZXIgYXMgdGhlIGVsZW1lbnRhcnkgY2hhcmdlLFxyXG4gKiAgbmFtZWQgZm9yIHRoZSBjb252ZXJzaW9ucyB0aGF0IHJlYWQgYmV0dGVyIHdpdGggaXQuICovXHJcbmV4cG9ydCBjb25zdCBFTEVDVFJPTlZPTFQgPSBFTEVNRU5UQVJZX0NIQVJHRTtcclxuXHJcbi8qKiBDb252ZXJ0IGFuIGVuZXJneSBmcm9tIGVsZWN0cm9udm9sdHMgdG8gam91bGVzLiAqL1xyXG5leHBvcnQgZnVuY3Rpb24gZWxlY3Ryb252b2x0c1RvSm91bGVzKGV2OiBudW1iZXIpOiBudW1iZXIge1xyXG4gICAgcmV0dXJuIGV2ICogRUxFQ1RST05WT0xUO1xyXG59XHJcblxyXG4vKipcclxuICogYGtfQiAqIFRgIGluIGVsZWN0cm9udm9sdHMsIHRoZSBxdWFudGl0eSBldmVyeSBCb2x0em1hbm4gZmFjdG9yIGlzXHJcbiAqIGRpdmlkZWQgYnkuIFdyaXR0ZW4gb25jZSBiZWNhdXNlIGBleHAoLUUgLyBrVClgIHdpdGggRSBpbiBlViBhbmQgVCBpblxyXG4gKiBrZWx2aW4gaXMgd2hlcmUgdW5pdCBtaXN0YWtlcyBoYXBwZW4uXHJcbiAqL1xyXG5leHBvcnQgZnVuY3Rpb24gdGhlcm1hbEVuZXJneUV2KHRlbXBlcmF0dXJlSzogbnVtYmVyKTogbnVtYmVyIHtcclxuICAgIHJldHVybiAoQk9MVFpNQU5OX0NPTlNUQU5UICogdGVtcGVyYXR1cmVLKSAvIEVMRUNUUk9OVk9MVDtcclxufVxyXG4iXSwidmVyc2lvbiI6M30=

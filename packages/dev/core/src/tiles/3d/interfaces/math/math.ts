@@ -68,7 +68,8 @@ export const R_ZupToYup: Mat44Type = new Float64Array([1, 0, 0, 0, 0, 0, 1, 0, 0
 ///   - Rotation about ECEF-Z becomes rotation about Babylon-Y (since z→y).
 /// </summary>
 export function EcefMatToBjsToRef(M_ecef: Mat44Type, ref: Mat44Type): void {
-    const tmp = new Float32Array(16);
+    // Float64: ECEF translations (~1e7 m) lose sub-meter precision in float32.
+    const tmp = new Float64Array(16);
     Mat44MultToRef(A, M_ecef, tmp); // t = A * M
     Mat44MultToRef(tmp, Ainv, ref); // M_bjs = t * Ainv
 }
@@ -552,6 +553,19 @@ export function IsTileSphereBeyondHorizon(tileSphere: SphereType, camera: ICarte
     }
 
     const sphereRadius = Math.max(0, tileSphere[3] + extraMeters);
+
+    // A sphere enclosing the planet center subtends every direction (angular
+    // radius PI), which asin() cannot express: it can never be fully beyond
+    // the horizon. Same for a camera sitting inside the sphere.
+    if (sphereRadius >= rS) {
+        return false;
+    }
+    const dx = C.x - S.x;
+    const dy = C.y - S.y;
+    const dz = C.z - S.z;
+    if (dx * dx + dy * dy + dz * dz <= sphereRadius * sphereRadius) {
+        return false;
+    }
 
     const u = Cartesian3.Normalize(C, rCam);
     const shat = Cartesian3.Normalize(S, rS);

@@ -1,0 +1,140 @@
+{
+  "roots": [
+    "C:/Users/GuillaumePelletier/Documents/GitHub/Gaume/spikypanda-harness",
+    "C:/Users/GuillaumePelletier/Documents/GitHub/spikypanda"
+  ],
+  "files": [
+    {
+      "source": "C:\\Users\\GuillaumePelletier\\Documents\\GitHub\\SpaceXR\\.cache\\harness-decision-transfer\\README.md",
+      "destination": "C:/Users/GuillaumePelletier/Documents/GitHub/Gaume/spikypanda-harness/README.md",
+      "before": "1a07b1d69a8fc047eb6b3ff654d09a62282d34cea730c05c963c95050eb75b3e",
+      "after": "a4416058ce0f0ed569124306cb3f7dd98e897a4dfe7fad0645453a3c1e99506a"
+    },
+    {
+      "source": "C:\\Users\\GuillaumePelletier\\Documents\\GitHub\\SpaceXR\\.cache\\harness-decision-transfer\\package.json",
+      "destination": "C:/Users/GuillaumePelletier/Documents/GitHub/Gaume/spikypanda-harness/package.json",
+      "before": "c3cf47cdca4e13253b34ac2433bb0763c9c7a494aad5f044683a504d8f123c59",
+      "after": "42438039b9b9ac7e530f19374b6331e736a49160c1f9fdcc9103388d3428cf2d"
+    },
+    {
+      "source": "C:\\Users\\GuillaumePelletier\\Documents\\GitHub\\SpaceXR\\.cache\\harness-decision-transfer\\src\\index.ts",
+      "destination": "C:/Users/GuillaumePelletier/Documents/GitHub/Gaume/spikypanda-harness/src/index.ts",
+      "before": null,
+      "after": "619e3178774aeb2bd904dfd15803877e1bed11cf03b52b4927d0bda64af31488"
+    },
+    {
+      "source": "C:\\Users\\GuillaumePelletier\\Documents\\GitHub\\SpaceXR\\.cache\\harness-decision-transfer\\src\\graph\\nodes.ts",
+      "destination": "C:/Users/GuillaumePelletier/Documents/GitHub/Gaume/spikypanda-harness/src/graph/nodes.ts",
+      "before": "80bc114a2e34276b2ddf81438e50b4c175e7fca71f8ca7d3bb92bc8ea59d196c",
+      "after": "4851bbadc0cf4df1c6706fa35af235efe427a6dac0463a82daf291f3f6f3f0e5"
+    },
+    {
+      "source": "C:\\Users\\GuillaumePelletier\\Documents\\GitHub\\SpaceXR\\.cache\\harness-decision-transfer\\src\\broker\\slots.ts",
+      "destination": "C:/Users/GuillaumePelletier/Documents/GitHub/Gaume/spikypanda-harness/src/broker/slots.ts",
+      "before": null,
+      "after": "e7bea3e8097c5288a3e413dbf2e8f29f0bcb7d3e87284a3e7ba8d2ee9244b8e6"
+    },
+    {
+      "source": "C:\\Users\\GuillaumePelletier\\Documents\\GitHub\\SpaceXR\\.cache\\harness-decision-transfer\\src\\decision\\contracts.ts",
+      "destination": "C:/Users/GuillaumePelletier/Documents/GitHub/Gaume/spikypanda-harness/src/decision/contracts.ts",
+      "before": null,
+      "after": "8b5a8f92febeb8d193bed9d2ce6b6127e3667ca8ce13e6f4616fe9a41f7f3682"
+    },
+    {
+      "source": "C:\\Users\\GuillaumePelletier\\Documents\\GitHub\\SpaceXR\\.cache\\harness-decision-transfer\\src\\decision\\session.ts",
+      "destination": "C:/Users/GuillaumePelletier/Documents/GitHub/Gaume/spikypanda-harness/src/decision/session.ts",
+      "before": null,
+      "after": "679120960b29380444891c2542196603885cb0bee0ee80c64136f17f4558627b"
+    },
+    {
+      "source": "C:\\Users\\GuillaumePelletier\\Documents\\GitHub\\SpaceXR\\.cache\\harness-decision-transfer\\src\\decision\\nodes.ts",
+      "destination": "C:/Users/GuillaumePelletier/Documents/GitHub/Gaume/spikypanda-harness/src/decision/nodes.ts",
+      "before": null,
+      "after": "22479fbef13f734b0f18a428ecfd704078e79dd66b87c56cecd4502fb32f814f"
+    },
+    {
+      "source": "C:\\Users\\GuillaumePelletier\\Documents\\GitHub\\SpaceXR\\.cache\\harness-decision-transfer\\src\\decision\\factory.ts",
+      "destination": "C:/Users/GuillaumePelletier/Documents/GitHub/Gaume/spikypanda-harness/src/decision/factory.ts",
+      "before": null,
+      "after": "8a924265fff8a2ebadaae6e523a3ea1d2a989b0b405da4e8437e80d22e148d9b"
+    },
+    {
+      "source": "C:\\Users\\GuillaumePelletier\\Documents\\GitHub\\SpaceXR\\.cache\\harness-decision-transfer\\src\\decision\\index.ts",
+      "destination": "C:/Users/GuillaumePelletier/Documents/GitHub/Gaume/spikypanda-harness/src/decision/index.ts",
+      "before": null,
+      "after": "ca8b8cff5ed2435061bf8dca02d3501df5df34ea90f53347a73b0154c1f8d995"
+    },
+    {
+      "source": "C:\\Users\\GuillaumePelletier\\Documents\\GitHub\\SpaceXR\\.cache\\harness-decision-transfer\\src\\graphs\\decision.json",
+      "destination": "C:/Users/GuillaumePelletier/Documents/GitHub/Gaume/spikypanda-harness/src/graphs/decision.json",
+      "before": null,
+      "after": "9a0ad4f943b383d2dbfdab391dbd2c6cec0d22dfe260b8d63beb0755ab896c24"
+    },
+    {
+      "source": "C:\\Users\\GuillaumePelletier\\Documents\\GitHub\\SpaceXR\\.cache\\harness-decision-transfer\\src\\graphs\\decision.ts",
+      "destination": "C:/Users/GuillaumePelletier/Documents/GitHub/Gaume/spikypanda-harness/src/graphs/decision.ts",
+      "before": null,
+      "after": "e921162555ebe101da88c0a0d0bf0d6220a20c814b31bdfa57e0139b29ebe545"
+    },
+    {
+      "source": "C:\\Users\\GuillaumePelletier\\Documents\\GitHub\\SpaceXR\\.cache\\harness-decision-transfer\\tests\\broker-slots.test.mjs",
+      "destination": "C:/Users/GuillaumePelletier/Documents/GitHub/Gaume/spikypanda-harness/tests/broker-slots.test.mjs",
+      "before": null,
+      "after": "879208efc812ff1d66eaf9c3912def8372e35aa2ec5081c440fdcff42f6c6fbf"
+    },
+    {
+      "source": "C:\\Users\\GuillaumePelletier\\Documents\\GitHub\\SpaceXR\\.cache\\harness-decision-transfer\\tests\\decision-runtime.test.mjs",
+      "destination": "C:/Users/GuillaumePelletier/Documents/GitHub/Gaume/spikypanda-harness/tests/decision-runtime.test.mjs",
+      "before": null,
+      "after": "7af0ca01010ce8d858cbde84cb0d0817f060cf9a729ec43e3e5db526c54e4d05"
+    },
+    {
+      "source": "C:\\Users\\GuillaumePelletier\\Documents\\GitHub\\SpaceXR\\.cache\\harness-decision-transfer\\tests\\decision-broker.test.mjs",
+      "destination": "C:/Users/GuillaumePelletier/Documents/GitHub/Gaume/spikypanda-harness/tests/decision-broker.test.mjs",
+      "before": null,
+      "after": "ffc0dc10c731c4a6762126e08655dfa788d8116f8918f7728317fde5113eb907"
+    },
+    {
+      "source": "C:\\Users\\GuillaumePelletier\\Documents\\GitHub\\SpaceXR\\.cache\\harness-decision-transfer\\doc\\graphe-decision-executable.md",
+      "destination": "C:/Users/GuillaumePelletier/Documents/GitHub/Gaume/spikypanda-harness/doc/graphe-decision-executable.md",
+      "before": null,
+      "after": "68b8fe7a0318b02602655cf1861778726f781b8f61dc9d24e9116ecdc2c5ed15"
+    },
+    {
+      "source": "C:\\Users\\GuillaumePelletier\\Documents\\GitHub\\SpaceXR\\.cache\\core-decision-runtime\\src\\execution\\execution.scheduler.ts",
+      "destination": "C:/Users/GuillaumePelletier/Documents/GitHub/spikypanda/packages/dev/core/src/execution/execution.scheduler.ts",
+      "before": "c9a063e3a06b53fdb7ca6a869b0eee917f2a467b04d38af5d4197cf8d8b2322f",
+      "after": "5f33e377f0373ee39da51051bcfbda64e5c3cd6f0e816db2baa57bcf051b8888"
+    },
+    {
+      "source": "C:\\Users\\GuillaumePelletier\\Documents\\GitHub\\SpaceXR\\.cache\\core-decision-runtime\\src\\execution\\execution.session.ts",
+      "destination": "C:/Users/GuillaumePelletier/Documents/GitHub/spikypanda/packages/dev/core/src/execution/execution.session.ts",
+      "before": "f1071dfcf428eed9b20522e33837452eb3e0e99612e5ef523d1991803f22f538",
+      "after": "cba2dcf72d46b24e82c24aac1e6dc0c6bf269c93e3a6bea390433a93dc6d41b9"
+    },
+    {
+      "source": "C:\\Users\\GuillaumePelletier\\Documents\\GitHub\\SpaceXR\\.cache\\core-decision-runtime\\src\\execution\\execution.graph.ts",
+      "destination": "C:/Users/GuillaumePelletier/Documents/GitHub/spikypanda/packages/dev/core/src/execution/execution.graph.ts",
+      "before": "a4dac45c26ae02dbeed317973d08b7af4ff76fbfb034da4614d995cc46f7d50e",
+      "after": "a8d2a2d31c7bbba6993db788bdea42bd134291e67853e06193a695982ed7da45"
+    },
+    {
+      "source": "C:\\Users\\GuillaumePelletier\\Documents\\GitHub\\SpaceXR\\.cache\\core-decision-runtime\\src\\execution\\execution.interfaces.ts",
+      "destination": "C:/Users/GuillaumePelletier/Documents/GitHub/spikypanda/packages/dev/core/src/execution/execution.interfaces.ts",
+      "before": "adc40d9e9f53c4586beddfda665638c58096f1c00c814c1a417b663843095240",
+      "after": "1aa4ec588782ac6603bb69a45bcd27e0460d030caea672715be99b9f0da395a7"
+    },
+    {
+      "source": "C:\\Users\\GuillaumePelletier\\Documents\\GitHub\\SpaceXR\\.cache\\core-decision-runtime\\dynamic-async.test.ts",
+      "destination": "C:/Users/GuillaumePelletier/Documents/GitHub/spikypanda/packages/tests/execution/dynamic-async.test.ts",
+      "before": null,
+      "after": "d42b1609530e378b7df387d204171c495ba3b787fb565a061cfb29edd8f1ebaa"
+    },
+    {
+      "source": "C:\\Users\\GuillaumePelletier\\Documents\\GitHub\\SpaceXR\\.cache\\core-decision-runtime\\async-dynamic-traversal.md",
+      "destination": "C:/Users/GuillaumePelletier/Documents/GitHub/spikypanda/docs/architecture/async-dynamic-traversal.md",
+      "before": null,
+      "after": "fb81b3ec9f70b02d6f41dc253b8a57061f693e91e9c23e1630d2a7a7ed0254ec"
+    }
+  ]
+}

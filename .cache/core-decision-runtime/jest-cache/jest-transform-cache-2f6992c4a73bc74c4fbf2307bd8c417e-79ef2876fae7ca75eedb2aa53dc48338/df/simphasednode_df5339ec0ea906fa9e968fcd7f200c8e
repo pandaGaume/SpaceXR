@@ -1,0 +1,47 @@
+a898903aa7c88029c6b9a28b2c761ff4
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.PhasedNode = void 0;
+const tslib_1 = require("tslib");
+const graph_interfaces_1 = require("../graph/graph.interfaces");
+const execution_node_1 = require("../execution/execution.node");
+const sim_interfaces_1 = require("./sim.interfaces");
+/**
+ * Base class for nodes that gate themselves on the current sim phase.
+ * Extends the generic RuntimeNode with a declared phases list and an
+ * isReady() override that additionally checks the session's
+ * currentPhase against this list.
+ *
+ * Nodes that fire in every phase (pure KPN, no phase awareness) extend
+ * RuntimeNode directly. Nodes that participate only in PreStep, only
+ * in Step, etc., extend PhasedNode and pass their phases list to the
+ * constructor.
+ *
+ * The scheduler itself remains phase-agnostic; this class encodes the
+ * phase-awareness as a node-side concern, matching our separation
+ * between core/execution (pure dataflow) and core/sim (phase concept).
+ */
+class PhasedNode extends execution_node_1.RuntimeNode {
+    constructor(phases, onsc = null, opsc = null, position, enabled = true) {
+        super(onsc, opsc, position, enabled);
+        this.phases = phases;
+    }
+    isReady(session) {
+        if (!super.isReady(session)) {
+            return false;
+        }
+        // Phase-aware only when the session is a SimSession. Non-sim
+        // sessions ignore phase declarations: phased nodes behave like
+        // regular RuntimeNodes (always-eligible on data readiness).
+        if ((0, sim_interfaces_1.isSimSession)(session)) {
+            return this.phases.includes(session.currentPhase);
+        }
+        return true;
+    }
+}
+exports.PhasedNode = PhasedNode;
+tslib_1.__decorate([
+    graph_interfaces_1.cloneable,
+    tslib_1.__metadata("design:type", Array)
+], PhasedNode.prototype, "phases", void 0);
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiQzpcXFVzZXJzXFxHdWlsbGF1bWVQZWxsZXRpZXJcXERvY3VtZW50c1xcR2l0SHViXFxzcGlreXBhbmRhXFxwYWNrYWdlc1xcZGV2XFxjb3JlXFxzcmNcXHNpbVxcc2ltLnBoYXNlZC5ub2RlLnRzIiwibWFwcGluZ3MiOiI7Ozs7QUFFQSxnRUFBc0Q7QUFFdEQsZ0VBQTBEO0FBRTFELHFEQUE0RjtBQUU1Rjs7Ozs7Ozs7Ozs7Ozs7R0FjRztBQUNILE1BQWEsVUFBc0QsU0FBUSw0QkFBYztJQUdyRixZQUFtQixNQUErQixFQUFFLE9BQTJCLElBQUksRUFBRSxPQUEyQixJQUFJLEVBQUUsUUFBcUIsRUFBRSxVQUFtQixJQUFJO1FBQ2hLLEtBQUssQ0FBQyxJQUFJLEVBQUUsSUFBSSxFQUFFLFFBQVEsRUFBRSxPQUFPLENBQUMsQ0FBQztRQUNyQyxJQUFJLENBQUMsTUFBTSxHQUFHLE1BQU0sQ0FBQztJQUN6QixDQUFDO0lBRWUsT0FBTyxDQUFDLE9BQWlCO1FBQ3JDLElBQUksQ0FBQyxLQUFLLENBQUMsT0FBTyxDQUFDLE9BQU8sQ0FBQyxFQUFFLENBQUM7WUFDMUIsT0FBTyxLQUFLLENBQUM7UUFDakIsQ0FBQztRQUNELDZEQUE2RDtRQUM3RCwrREFBK0Q7UUFDL0QsNERBQTREO1FBQzVELElBQUksSUFBQSw2QkFBWSxFQUFDLE9BQU8sQ0FBQyxFQUFFLENBQUM7WUFDeEIsT0FBTyxJQUFJLENBQUMsTUFBTSxDQUFDLFFBQVEsQ0FBQyxPQUFPLENBQUMsWUFBWSxDQUFDLENBQUM7UUFDdEQsQ0FBQztRQUNELE9BQU8sSUFBSSxDQUFDO0lBQ2hCLENBQUM7Q0FDSjtBQXBCRCxnQ0FvQkM7QUFuQnFCO0lBQWpCLDRCQUFTOzswQ0FBd0MiLCJuYW1lcyI6W10sInNvdXJjZXMiOlsiQzpcXFVzZXJzXFxHdWlsbGF1bWVQZWxsZXRpZXJcXERvY3VtZW50c1xcR2l0SHViXFxzcGlreXBhbmRhXFxwYWNrYWdlc1xcZGV2XFxjb3JlXFxzcmNcXHNpbVxcc2ltLnBoYXNlZC5ub2RlLnRzIl0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB0eXBlIHsgSUNhcnRlc2lhbiB9IGZyb20gXCIuLi9nZW9tZXRyeVwiO1xyXG5pbXBvcnQgeyBJT2xpbmsgfSBmcm9tIFwiLi4vZ3JhcGgvZ3JhcGguaW50ZXJmYWNlc1wiO1xyXG5pbXBvcnQgeyBjbG9uZWFibGUgfSBmcm9tIFwiLi4vZ3JhcGgvZ3JhcGguaW50ZXJmYWNlc1wiO1xyXG5pbXBvcnQgeyBJU2Vzc2lvbiB9IGZyb20gXCIuLi9leGVjdXRpb24vZXhlY3V0aW9uLmludGVyZmFjZXNcIjtcclxuaW1wb3J0IHsgUnVudGltZU5vZGUgfSBmcm9tIFwiLi4vZXhlY3V0aW9uL2V4ZWN1dGlvbi5ub2RlXCI7XHJcbmltcG9ydCB7IE51bGxhYmxlIH0gZnJvbSBcIi4uL3R5cGVzXCI7XHJcbmltcG9ydCB7IElQaGFzZWROb2RlQmFnLCBpc1NpbVNlc3Npb24sIElTdXBwb3J0c1BoYXNpbmcsIFNpbVBoYXNlIH0gZnJvbSBcIi4vc2ltLmludGVyZmFjZXNcIjtcclxuXHJcbi8qKlxyXG4gKiBCYXNlIGNsYXNzIGZvciBub2RlcyB0aGF0IGdhdGUgdGhlbXNlbHZlcyBvbiB0aGUgY3VycmVudCBzaW0gcGhhc2UuXHJcbiAqIEV4dGVuZHMgdGhlIGdlbmVyaWMgUnVudGltZU5vZGUgd2l0aCBhIGRlY2xhcmVkIHBoYXNlcyBsaXN0IGFuZCBhblxyXG4gKiBpc1JlYWR5KCkgb3ZlcnJpZGUgdGhhdCBhZGRpdGlvbmFsbHkgY2hlY2tzIHRoZSBzZXNzaW9uJ3NcclxuICogY3VycmVudFBoYXNlIGFnYWluc3QgdGhpcyBsaXN0LlxyXG4gKlxyXG4gKiBOb2RlcyB0aGF0IGZpcmUgaW4gZXZlcnkgcGhhc2UgKHB1cmUgS1BOLCBubyBwaGFzZSBhd2FyZW5lc3MpIGV4dGVuZFxyXG4gKiBSdW50aW1lTm9kZSBkaXJlY3RseS4gTm9kZXMgdGhhdCBwYXJ0aWNpcGF0ZSBvbmx5IGluIFByZVN0ZXAsIG9ubHlcclxuICogaW4gU3RlcCwgZXRjLiwgZXh0ZW5kIFBoYXNlZE5vZGUgYW5kIHBhc3MgdGhlaXIgcGhhc2VzIGxpc3QgdG8gdGhlXHJcbiAqIGNvbnN0cnVjdG9yLlxyXG4gKlxyXG4gKiBUaGUgc2NoZWR1bGVyIGl0c2VsZiByZW1haW5zIHBoYXNlLWFnbm9zdGljOyB0aGlzIGNsYXNzIGVuY29kZXMgdGhlXHJcbiAqIHBoYXNlLWF3YXJlbmVzcyBhcyBhIG5vZGUtc2lkZSBjb25jZXJuLCBtYXRjaGluZyBvdXIgc2VwYXJhdGlvblxyXG4gKiBiZXR3ZWVuIGNvcmUvZXhlY3V0aW9uIChwdXJlIGRhdGFmbG93KSBhbmQgY29yZS9zaW0gKHBoYXNlIGNvbmNlcHQpLlxyXG4gKi9cclxuZXhwb3J0IGNsYXNzIFBoYXNlZE5vZGU8QiBleHRlbmRzIElQaGFzZWROb2RlQmFnID0gSVBoYXNlZE5vZGVCYWc+IGV4dGVuZHMgUnVudGltZU5vZGU8Qj4gaW1wbGVtZW50cyBJU3VwcG9ydHNQaGFzaW5nIHtcclxuICAgIEBjbG9uZWFibGUgcHVibGljIHBoYXNlczogUmVhZG9ubHlBcnJheTxTaW1QaGFzZT47XHJcblxyXG4gICAgcHVibGljIGNvbnN0cnVjdG9yKHBoYXNlczogUmVhZG9ubHlBcnJheTxTaW1QaGFzZT4sIG9uc2M6IE51bGxhYmxlPElPbGlua1tdPiA9IG51bGwsIG9wc2M6IE51bGxhYmxlPElPbGlua1tdPiA9IG51bGwsIHBvc2l0aW9uPzogSUNhcnRlc2lhbiwgZW5hYmxlZDogYm9vbGVhbiA9IHRydWUpIHtcclxuICAgICAgICBzdXBlcihvbnNjLCBvcHNjLCBwb3NpdGlvbiwgZW5hYmxlZCk7XHJcbiAgICAgICAgdGhpcy5waGFzZXMgPSBwaGFzZXM7XHJcbiAgICB9XHJcblxyXG4gICAgcHVibGljIG92ZXJyaWRlIGlzUmVhZHkoc2Vzc2lvbjogSVNlc3Npb24pOiBib29sZWFuIHtcclxuICAgICAgICBpZiAoIXN1cGVyLmlzUmVhZHkoc2Vzc2lvbikpIHtcclxuICAgICAgICAgICAgcmV0dXJuIGZhbHNlO1xyXG4gICAgICAgIH1cclxuICAgICAgICAvLyBQaGFzZS1hd2FyZSBvbmx5IHdoZW4gdGhlIHNlc3Npb24gaXMgYSBTaW1TZXNzaW9uLiBOb24tc2ltXHJcbiAgICAgICAgLy8gc2Vzc2lvbnMgaWdub3JlIHBoYXNlIGRlY2xhcmF0aW9uczogcGhhc2VkIG5vZGVzIGJlaGF2ZSBsaWtlXHJcbiAgICAgICAgLy8gcmVndWxhciBSdW50aW1lTm9kZXMgKGFsd2F5cy1lbGlnaWJsZSBvbiBkYXRhIHJlYWRpbmVzcykuXHJcbiAgICAgICAgaWYgKGlzU2ltU2Vzc2lvbihzZXNzaW9uKSkge1xyXG4gICAgICAgICAgICByZXR1cm4gdGhpcy5waGFzZXMuaW5jbHVkZXMoc2Vzc2lvbi5jdXJyZW50UGhhc2UpO1xyXG4gICAgICAgIH1cclxuICAgICAgICByZXR1cm4gdHJ1ZTtcclxuICAgIH1cclxufVxyXG4iXSwidmVyc2lvbiI6M30=

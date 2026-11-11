@@ -16,3 +16,4 @@ export * from "./templateUri";
 export * from "./tile3d";
 export * from "./tile.implicitTiling";
 export * from "./tileset";
+export * from "./math/region";

@@ -1,0 +1,66 @@
+fb1ff2487e5dd5d0d0776ee1c568a9f6
+"use strict";
+// ═══════════════════════════════════════════════════════════════════════════
+// StartNode : Begin-Play style entry point for a runtime graph.
+//
+// Modeled after Unreal Engine's BeginPlay: a source node that publishes
+// a one-shot trigger on its _started output when the surrounding
+// session is started. Downstream RunnableNode instances wired to that
+// trigger receive a signal on their _start input and can transition
+// their own lifecycle, cascading the start across the graph.
+//
+// Lifecycle:
+//   - Session.start() calls arm() on every StartNode of its graph,
+//     setting an internal _pending flag.
+//   - On the next Session.run(t), isReady() is true once (because
+//     _pending), the node fires, publishes the trigger, and clears the
+//     flag.
+//   - Subsequent ticks see _pending=false → isReady()=false → no fire,
+//     until Session.start() is called again.
+//
+// StartNode has no data ports and no _enable port: its sole purpose is
+// to fire the lifecycle trigger.  The user can still disable it via
+// the standard `enabled` field if they want to suppress it entirely.
+// ═══════════════════════════════════════════════════════════════════════════
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.StartNode = void 0;
+const control_ports_1 = require("./control-ports");
+const execution_node_1 = require("./execution.node");
+class StartNode extends execution_node_1.RuntimeNode {
+    constructor() {
+        super(...arguments);
+        this._pending = false;
+        /** No control inputs: StartNode is a pure source. */
+        this.controlInputPorts = [];
+        /** Single trigger output: the Begin-Play signal. */
+        this.controlOutputPorts = [control_ports_1.STARTED_OUTPUT_PORT];
+        /** Always-on: the enable toggle is hidden in the editor. The
+         *  scheduler still respects `enabled` if set programmatically. */
+        this.supportsEnabling = false;
+    }
+    /** Mark the node as fireable on the next tick. Session.start() calls
+     *  this on every StartNode of the graph. */
+    arm() {
+        this._pending = true;
+    }
+    /** Returns true the cycle after arm() until fire() consumes it. */
+    isReady(_session) {
+        return this.enabled && this._pending;
+    }
+    fire(session, _t) {
+        if (!this._pending)
+            return;
+        this._pending = false;
+        const links = session.graph.links;
+        for (const link of this.onsc()) {
+            if (!link.enabled || link.slot !== control_ports_1.CONTROL_PORT_STARTED)
+                continue;
+            const idx = links.indexOf(link);
+            if (idx < 0)
+                continue;
+            session.publish(idx, true);
+        }
+    }
+}
+exports.StartNode = StartNode;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiQzpcXFVzZXJzXFxHdWlsbGF1bWVQZWxsZXRpZXJcXERvY3VtZW50c1xcR2l0SHViXFxzcGlreXBhbmRhXFxwYWNrYWdlc1xcZGV2XFxjb3JlXFxzcmNcXGV4ZWN1dGlvblxcc3RhcnQubm9kZS50cyIsIm1hcHBpbmdzIjoiO0FBQUEsOEVBQThFO0FBQzlFLGdFQUFnRTtBQUNoRSxFQUFFO0FBQ0Ysd0VBQXdFO0FBQ3hFLGlFQUFpRTtBQUNqRSxzRUFBc0U7QUFDdEUsb0VBQW9FO0FBQ3BFLDZEQUE2RDtBQUM3RCxFQUFFO0FBQ0YsYUFBYTtBQUNiLG1FQUFtRTtBQUNuRSx5Q0FBeUM7QUFDekMsa0VBQWtFO0FBQ2xFLHVFQUF1RTtBQUN2RSxZQUFZO0FBQ1osdUVBQXVFO0FBQ3ZFLDZDQUE2QztBQUM3QyxFQUFFO0FBQ0YsdUVBQXVFO0FBQ3ZFLG9FQUFvRTtBQUNwRSxxRUFBcUU7QUFDckUsOEVBQThFOzs7QUFFOUUsbURBQTRFO0FBRTVFLHFEQUErQztBQUUvQyxNQUFhLFNBQVUsU0FBUSw0QkFBVztJQUExQzs7UUFDWSxhQUFRLEdBQUcsS0FBSyxDQUFDO1FBRXpCLHFEQUFxRDtRQUM1QixzQkFBaUIsR0FBbUMsRUFBRSxDQUFDO1FBQ2hGLG9EQUFvRDtRQUMzQix1QkFBa0IsR0FBbUMsQ0FBQyxtQ0FBbUIsQ0FBQyxDQUFDO1FBRXBHOzBFQUNrRTtRQUN6QyxxQkFBZ0IsR0FBRyxLQUFLLENBQUM7SUF5QnRELENBQUM7SUF2Qkc7Z0RBQzRDO0lBQ3JDLEdBQUc7UUFDTixJQUFJLENBQUMsUUFBUSxHQUFHLElBQUksQ0FBQztJQUN6QixDQUFDO0lBRUQsbUVBQW1FO0lBQ25ELE9BQU8sQ0FBQyxRQUFrQjtRQUN0QyxPQUFPLElBQUksQ0FBQyxPQUFPLElBQUksSUFBSSxDQUFDLFFBQVEsQ0FBQztJQUN6QyxDQUFDO0lBRWUsSUFBSSxDQUFDLE9BQWlCLEVBQUUsRUFBVTtRQUM5QyxJQUFJLENBQUMsSUFBSSxDQUFDLFFBQVE7WUFBRSxPQUFPO1FBQzNCLElBQUksQ0FBQyxRQUFRLEdBQUcsS0FBSyxDQUFDO1FBRXRCLE1BQU0sS0FBSyxHQUFHLE9BQU8sQ0FBQyxLQUFLLENBQUMsS0FBZ0MsQ0FBQztRQUM3RCxLQUFLLE1BQU0sSUFBSSxJQUFJLElBQUksQ0FBQyxJQUFJLEVBQVksRUFBRSxDQUFDO1lBQ3ZDLElBQUksQ0FBQyxJQUFJLENBQUMsT0FBTyxJQUFJLElBQUksQ0FBQyxJQUFJLEtBQUssb0NBQW9CO2dCQUFFLFNBQVM7WUFDbEUsTUFBTSxHQUFHLEdBQUcsS0FBSyxDQUFDLE9BQU8sQ0FBQyxJQUFJLENBQUMsQ0FBQztZQUNoQyxJQUFJLEdBQUcsR0FBRyxDQUFDO2dCQUFFLFNBQVM7WUFDdEIsT0FBTyxDQUFDLE9BQU8sQ0FBQyxHQUFHLEVBQUUsSUFBSSxDQUFDLENBQUM7UUFDL0IsQ0FBQztJQUNMLENBQUM7Q0FDSjtBQW5DRCw4QkFtQ0MiLCJuYW1lcyI6W10sInNvdXJjZXMiOlsiQzpcXFVzZXJzXFxHdWlsbGF1bWVQZWxsZXRpZXJcXERvY3VtZW50c1xcR2l0SHViXFxzcGlreXBhbmRhXFxwYWNrYWdlc1xcZGV2XFxjb3JlXFxzcmNcXGV4ZWN1dGlvblxcc3RhcnQubm9kZS50cyJdLCJzb3VyY2VzQ29udGVudCI6WyIvLyDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZBcclxuLy8gU3RhcnROb2RlIDogQmVnaW4tUGxheSBzdHlsZSBlbnRyeSBwb2ludCBmb3IgYSBydW50aW1lIGdyYXBoLlxyXG4vL1xyXG4vLyBNb2RlbGVkIGFmdGVyIFVucmVhbCBFbmdpbmUncyBCZWdpblBsYXk6IGEgc291cmNlIG5vZGUgdGhhdCBwdWJsaXNoZXNcclxuLy8gYSBvbmUtc2hvdCB0cmlnZ2VyIG9uIGl0cyBfc3RhcnRlZCBvdXRwdXQgd2hlbiB0aGUgc3Vycm91bmRpbmdcclxuLy8gc2Vzc2lvbiBpcyBzdGFydGVkLiBEb3duc3RyZWFtIFJ1bm5hYmxlTm9kZSBpbnN0YW5jZXMgd2lyZWQgdG8gdGhhdFxyXG4vLyB0cmlnZ2VyIHJlY2VpdmUgYSBzaWduYWwgb24gdGhlaXIgX3N0YXJ0IGlucHV0IGFuZCBjYW4gdHJhbnNpdGlvblxyXG4vLyB0aGVpciBvd24gbGlmZWN5Y2xlLCBjYXNjYWRpbmcgdGhlIHN0YXJ0IGFjcm9zcyB0aGUgZ3JhcGguXHJcbi8vXHJcbi8vIExpZmVjeWNsZTpcclxuLy8gICAtIFNlc3Npb24uc3RhcnQoKSBjYWxscyBhcm0oKSBvbiBldmVyeSBTdGFydE5vZGUgb2YgaXRzIGdyYXBoLFxyXG4vLyAgICAgc2V0dGluZyBhbiBpbnRlcm5hbCBfcGVuZGluZyBmbGFnLlxyXG4vLyAgIC0gT24gdGhlIG5leHQgU2Vzc2lvbi5ydW4odCksIGlzUmVhZHkoKSBpcyB0cnVlIG9uY2UgKGJlY2F1c2VcclxuLy8gICAgIF9wZW5kaW5nKSwgdGhlIG5vZGUgZmlyZXMsIHB1Ymxpc2hlcyB0aGUgdHJpZ2dlciwgYW5kIGNsZWFycyB0aGVcclxuLy8gICAgIGZsYWcuXHJcbi8vICAgLSBTdWJzZXF1ZW50IHRpY2tzIHNlZSBfcGVuZGluZz1mYWxzZSDihpIgaXNSZWFkeSgpPWZhbHNlIOKGkiBubyBmaXJlLFxyXG4vLyAgICAgdW50aWwgU2Vzc2lvbi5zdGFydCgpIGlzIGNhbGxlZCBhZ2Fpbi5cclxuLy9cclxuLy8gU3RhcnROb2RlIGhhcyBubyBkYXRhIHBvcnRzIGFuZCBubyBfZW5hYmxlIHBvcnQ6IGl0cyBzb2xlIHB1cnBvc2UgaXNcclxuLy8gdG8gZmlyZSB0aGUgbGlmZWN5Y2xlIHRyaWdnZXIuICBUaGUgdXNlciBjYW4gc3RpbGwgZGlzYWJsZSBpdCB2aWFcclxuLy8gdGhlIHN0YW5kYXJkIGBlbmFibGVkYCBmaWVsZCBpZiB0aGV5IHdhbnQgdG8gc3VwcHJlc3MgaXQgZW50aXJlbHkuXHJcbi8vIOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkFxyXG5cclxuaW1wb3J0IHsgQ09OVFJPTF9QT1JUX1NUQVJURUQsIFNUQVJURURfT1VUUFVUX1BPUlQgfSBmcm9tIFwiLi9jb250cm9sLXBvcnRzXCI7XHJcbmltcG9ydCB7IElDaGFubmVsLCBJUG9ydERlc2NyaXB0b3IsIElTZXNzaW9uIH0gZnJvbSBcIi4vZXhlY3V0aW9uLmludGVyZmFjZXNcIjtcclxuaW1wb3J0IHsgUnVudGltZU5vZGUgfSBmcm9tIFwiLi9leGVjdXRpb24ubm9kZVwiO1xyXG5cclxuZXhwb3J0IGNsYXNzIFN0YXJ0Tm9kZSBleHRlbmRzIFJ1bnRpbWVOb2RlIHtcclxuICAgIHByaXZhdGUgX3BlbmRpbmcgPSBmYWxzZTtcclxuXHJcbiAgICAvKiogTm8gY29udHJvbCBpbnB1dHM6IFN0YXJ0Tm9kZSBpcyBhIHB1cmUgc291cmNlLiAqL1xyXG4gICAgcHVibGljIG92ZXJyaWRlIHJlYWRvbmx5IGNvbnRyb2xJbnB1dFBvcnRzOiBSZWFkb25seUFycmF5PElQb3J0RGVzY3JpcHRvcj4gPSBbXTtcclxuICAgIC8qKiBTaW5nbGUgdHJpZ2dlciBvdXRwdXQ6IHRoZSBCZWdpbi1QbGF5IHNpZ25hbC4gKi9cclxuICAgIHB1YmxpYyBvdmVycmlkZSByZWFkb25seSBjb250cm9sT3V0cHV0UG9ydHM6IFJlYWRvbmx5QXJyYXk8SVBvcnREZXNjcmlwdG9yPiA9IFtTVEFSVEVEX09VVFBVVF9QT1JUXTtcclxuXHJcbiAgICAvKiogQWx3YXlzLW9uOiB0aGUgZW5hYmxlIHRvZ2dsZSBpcyBoaWRkZW4gaW4gdGhlIGVkaXRvci4gVGhlXHJcbiAgICAgKiAgc2NoZWR1bGVyIHN0aWxsIHJlc3BlY3RzIGBlbmFibGVkYCBpZiBzZXQgcHJvZ3JhbW1hdGljYWxseS4gKi9cclxuICAgIHB1YmxpYyBvdmVycmlkZSByZWFkb25seSBzdXBwb3J0c0VuYWJsaW5nID0gZmFsc2U7XHJcblxyXG4gICAgLyoqIE1hcmsgdGhlIG5vZGUgYXMgZmlyZWFibGUgb24gdGhlIG5leHQgdGljay4gU2Vzc2lvbi5zdGFydCgpIGNhbGxzXHJcbiAgICAgKiAgdGhpcyBvbiBldmVyeSBTdGFydE5vZGUgb2YgdGhlIGdyYXBoLiAqL1xyXG4gICAgcHVibGljIGFybSgpOiB2b2lkIHtcclxuICAgICAgICB0aGlzLl9wZW5kaW5nID0gdHJ1ZTtcclxuICAgIH1cclxuXHJcbiAgICAvKiogUmV0dXJucyB0cnVlIHRoZSBjeWNsZSBhZnRlciBhcm0oKSB1bnRpbCBmaXJlKCkgY29uc3VtZXMgaXQuICovXHJcbiAgICBwdWJsaWMgb3ZlcnJpZGUgaXNSZWFkeShfc2Vzc2lvbjogSVNlc3Npb24pOiBib29sZWFuIHtcclxuICAgICAgICByZXR1cm4gdGhpcy5lbmFibGVkICYmIHRoaXMuX3BlbmRpbmc7XHJcbiAgICB9XHJcblxyXG4gICAgcHVibGljIG92ZXJyaWRlIGZpcmUoc2Vzc2lvbjogSVNlc3Npb24sIF90OiBudW1iZXIpOiB2b2lkIHtcclxuICAgICAgICBpZiAoIXRoaXMuX3BlbmRpbmcpIHJldHVybjtcclxuICAgICAgICB0aGlzLl9wZW5kaW5nID0gZmFsc2U7XHJcblxyXG4gICAgICAgIGNvbnN0IGxpbmtzID0gc2Vzc2lvbi5ncmFwaC5saW5rcyBhcyBSZWFkb25seUFycmF5PElDaGFubmVsPjtcclxuICAgICAgICBmb3IgKGNvbnN0IGxpbmsgb2YgdGhpcy5vbnNjPElDaGFubmVsPigpKSB7XHJcbiAgICAgICAgICAgIGlmICghbGluay5lbmFibGVkIHx8IGxpbmsuc2xvdCAhPT0gQ09OVFJPTF9QT1JUX1NUQVJURUQpIGNvbnRpbnVlO1xyXG4gICAgICAgICAgICBjb25zdCBpZHggPSBsaW5rcy5pbmRleE9mKGxpbmspO1xyXG4gICAgICAgICAgICBpZiAoaWR4IDwgMCkgY29udGludWU7XHJcbiAgICAgICAgICAgIHNlc3Npb24ucHVibGlzaChpZHgsIHRydWUpO1xyXG4gICAgICAgIH1cclxuICAgIH1cclxufVxyXG4iXSwidmVyc2lvbiI6M30=

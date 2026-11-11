@@ -1,0 +1,63 @@
+{
+  "name": "@geomodels/root",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/dev/*",
+    "packages/host/desktop",
+    "tools"
+  ],
+  "engines": {
+    "node": ">=20.11.0 <23.0.0",
+    "npm": ">=8.0.0"
+  },
+  "scripts": {
+    "dev": "npm run dev --workspace @dev/web",
+    "dev:studio": "node tools/studio-vite.mjs dev",
+    "build:studio": "node tools/studio-vite.mjs build",
+    "start:studio": "node tools/run-studio-broker.mjs",
+    "build:desktop": "npm run build --workspace @host/desktop",
+    "start:desktop": "npm run start --workspace @host/desktop",
+    "dist:desktop": "npm run dist --workspace @host/desktop",
+    "build": "node node_modules/typescript/lib/tsc.js -b && npm run build --workspace @dev/web",
+    "preview": "npm run preview --workspace @dev/web",
+    "test:studio": "node node_modules/tsx/dist/cli.mjs --test packages/dev/studio/tests/studio.test.ts packages/dev/studio/tests/terrain.test.ts packages/dev/studio/tests/imagery.test.ts",
+    "typecheck:studio": "node node_modules/typescript/lib/tsc.js -p packages/dev/studio/tsconfig.json --noEmit",
+    "openapi:studio": "node node_modules/tsx/dist/cli.mjs tools/generate-studio-openapi.ts",
+    "convert:model": "node tools/run-converter.mjs geomodel-v1-to-v2.ts",
+    "convert:tileset": "node tools/run-converter.mjs geomodel-v1-to-tileset.ts",
+    "typecheck": "node node_modules/typescript/lib/tsc.js -b && node node_modules/typescript/lib/tsc.js -p packages/dev/studio/tsconfig.json --noEmit && node node_modules/typescript/lib/tsc.js -p packages/dev/web/tsconfig.json --noEmit && node node_modules/typescript/lib/tsc.js -p tools/tsconfig.json --noEmit",
+    "typecheck:watch": "node node_modules/typescript/lib/tsc.js -b --watch",
+    "clean": "node node_modules/typescript/lib/tsc.js -b --clean",
+    "lint:check": "eslint \"packages/dev/**/src/**/*.{ts,tsx}\" \"tools/src/**/*.ts\"",
+    "lint:fix": "eslint --fix \"packages/dev/**/src/**/*.{ts,tsx}\" \"tools/src/**/*.ts\"",
+    "format:check": "prettier --check \"packages/**/src/**/*.{ts,tsx,json,css}\" \"tools/**/*.{ts,json,md}\"",
+    "format:fix": "prettier --write \"packages/**/src/**/*.{ts,tsx,json,css}\" \"tools/**/*.{ts,json,md}\""
+  },
+  "dependencies": {
+    "@cyanmycelium/mcp-broker": "^1.10.1",
+    "@spacexr/3d-tiles-core": "file:../3d-tiles-core/node/packages/core",
+    "tslib": "^2.8.1"
+  },
+  "overrides": {
+    "@cesium/engine": "17.0.0",
+    "@cesium/widgets": "12.0.0",
+    "@zip.js/zip.js": "2.7.34"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.4",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
+    "cesium": "1.129.0",
+    "esbuild": "^0.28.1",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "prettier": "^3.3.3",
+    "rimraf": "^6.0.1",
+    "tsx": "^4.23.15",
+    "typescript": "^5.4.5",
+    "vite": "^7.0.0"
+  }
+}

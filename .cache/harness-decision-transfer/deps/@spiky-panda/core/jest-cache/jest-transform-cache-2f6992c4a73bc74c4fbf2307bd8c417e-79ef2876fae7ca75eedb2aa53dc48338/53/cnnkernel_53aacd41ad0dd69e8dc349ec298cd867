@@ -1,0 +1,28 @@
+b00b89221e905e59984e7924e852932d
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ConvKernel = void 0;
+const nn_weights_1 = require("../nn.weights");
+/// <summary>
+/// A convolutional kernel (filter) holding shared weights.
+/// Size = height × width × inputChannels.
+/// Multiple synapses across spatial positions share these weights.
+/// </summary>
+class ConvKernel {
+    constructor(height, width, inputChannels, initializer = new nn_weights_1.He(height * width * inputChannels), biasInit = 0) {
+        this.height = height;
+        this.width = width;
+        this.inputChannels = inputChannels;
+        const size = height * width * inputChannels;
+        this.weights = new Array(size);
+        for (let i = 0; i < size; i++) {
+            this.weights[i] = initializer.next();
+        }
+        this.bias = biasInit;
+    }
+    get size() {
+        return this.weights.length;
+    }
+}
+exports.ConvKernel = ConvKernel;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiQzpcXFVzZXJzXFxHdWlsbGF1bWVQZWxsZXRpZXJcXERvY3VtZW50c1xcR2l0SHViXFxzcGlreXBhbmRhXFxwYWNrYWdlc1xcZGV2XFxjb3JlXFxzcmNcXG5ldXJhbG5ldHdvcmtcXGNublxcY25uLmtlcm5lbC50cyIsIm1hcHBpbmdzIjoiOzs7QUFBQSw4Q0FBdUQ7QUFHdkQsYUFBYTtBQUNiLDJEQUEyRDtBQUMzRCwwQ0FBMEM7QUFDMUMsbUVBQW1FO0FBQ25FLGNBQWM7QUFDZCxNQUFhLFVBQVU7SUFJbkIsWUFDb0IsTUFBYyxFQUNkLEtBQWEsRUFDYixhQUFxQixFQUNyQyxjQUFrQyxJQUFJLGVBQUUsQ0FBQyxNQUFNLEdBQUcsS0FBSyxHQUFHLGFBQWEsQ0FBQyxFQUN4RSxXQUFtQixDQUFDO1FBSkosV0FBTSxHQUFOLE1BQU0sQ0FBUTtRQUNkLFVBQUssR0FBTCxLQUFLLENBQVE7UUFDYixrQkFBYSxHQUFiLGFBQWEsQ0FBUTtRQUlyQyxNQUFNLElBQUksR0FBRyxNQUFNLEdBQUcsS0FBSyxHQUFHLGFBQWEsQ0FBQztRQUM1QyxJQUFJLENBQUMsT0FBTyxHQUFHLElBQUksS0FBSyxDQUFDLElBQUksQ0FBQyxDQUFDO1FBQy9CLEtBQUssSUFBSSxDQUFDLEdBQUcsQ0FBQyxFQUFFLENBQUMsR0FBRyxJQUFJLEVBQUUsQ0FBQyxFQUFFLEVBQUUsQ0FBQztZQUM1QixJQUFJLENBQUMsT0FBTyxDQUFDLENBQUMsQ0FBQyxHQUFHLFdBQVcsQ0FBQyxJQUFJLEVBQUUsQ0FBQztRQUN6QyxDQUFDO1FBQ0QsSUFBSSxDQUFDLElBQUksR0FBRyxRQUFRLENBQUM7SUFDekIsQ0FBQztJQUVELElBQVcsSUFBSTtRQUNYLE9BQU8sSUFBSSxDQUFDLE9BQU8sQ0FBQyxNQUFNLENBQUM7SUFDL0IsQ0FBQztDQUNKO0FBdEJELGdDQXNCQyIsIm5hbWVzIjpbXSwic291cmNlcyI6WyJDOlxcVXNlcnNcXEd1aWxsYXVtZVBlbGxldGllclxcRG9jdW1lbnRzXFxHaXRIdWJcXHNwaWt5cGFuZGFcXHBhY2thZ2VzXFxkZXZcXGNvcmVcXHNyY1xcbmV1cmFsbmV0d29ya1xcY25uXFxjbm4ua2VybmVsLnRzIl0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7IElXZWlnaHRJbml0aWFsaXplciwgSGUgfSBmcm9tIFwiLi4vbm4ud2VpZ2h0c1wiO1xyXG5pbXBvcnQgeyBJQ29udktlcm5lbCB9IGZyb20gXCIuL2Nubi5pbnRlcmZhY2VzXCI7XHJcblxyXG4vLy8gPHN1bW1hcnk+XHJcbi8vLyBBIGNvbnZvbHV0aW9uYWwga2VybmVsIChmaWx0ZXIpIGhvbGRpbmcgc2hhcmVkIHdlaWdodHMuXHJcbi8vLyBTaXplID0gaGVpZ2h0IMOXIHdpZHRoIMOXIGlucHV0Q2hhbm5lbHMuXHJcbi8vLyBNdWx0aXBsZSBzeW5hcHNlcyBhY3Jvc3Mgc3BhdGlhbCBwb3NpdGlvbnMgc2hhcmUgdGhlc2Ugd2VpZ2h0cy5cclxuLy8vIDwvc3VtbWFyeT5cclxuZXhwb3J0IGNsYXNzIENvbnZLZXJuZWwgaW1wbGVtZW50cyBJQ29udktlcm5lbCB7XHJcbiAgICBwdWJsaWMgcmVhZG9ubHkgd2VpZ2h0czogbnVtYmVyW107XHJcbiAgICBwdWJsaWMgYmlhczogbnVtYmVyO1xyXG5cclxuICAgIHB1YmxpYyBjb25zdHJ1Y3RvcihcclxuICAgICAgICBwdWJsaWMgcmVhZG9ubHkgaGVpZ2h0OiBudW1iZXIsXHJcbiAgICAgICAgcHVibGljIHJlYWRvbmx5IHdpZHRoOiBudW1iZXIsXHJcbiAgICAgICAgcHVibGljIHJlYWRvbmx5IGlucHV0Q2hhbm5lbHM6IG51bWJlcixcclxuICAgICAgICBpbml0aWFsaXplcjogSVdlaWdodEluaXRpYWxpemVyID0gbmV3IEhlKGhlaWdodCAqIHdpZHRoICogaW5wdXRDaGFubmVscyksXHJcbiAgICAgICAgYmlhc0luaXQ6IG51bWJlciA9IDBcclxuICAgICkge1xyXG4gICAgICAgIGNvbnN0IHNpemUgPSBoZWlnaHQgKiB3aWR0aCAqIGlucHV0Q2hhbm5lbHM7XHJcbiAgICAgICAgdGhpcy53ZWlnaHRzID0gbmV3IEFycmF5KHNpemUpO1xyXG4gICAgICAgIGZvciAobGV0IGkgPSAwOyBpIDwgc2l6ZTsgaSsrKSB7XHJcbiAgICAgICAgICAgIHRoaXMud2VpZ2h0c1tpXSA9IGluaXRpYWxpemVyLm5leHQoKTtcclxuICAgICAgICB9XHJcbiAgICAgICAgdGhpcy5iaWFzID0gYmlhc0luaXQ7XHJcbiAgICB9XHJcblxyXG4gICAgcHVibGljIGdldCBzaXplKCk6IG51bWJlciB7XHJcbiAgICAgICAgcmV0dXJuIHRoaXMud2VpZ2h0cy5sZW5ndGg7XHJcbiAgICB9XHJcbn1cclxuIl0sInZlcnNpb24iOjN9

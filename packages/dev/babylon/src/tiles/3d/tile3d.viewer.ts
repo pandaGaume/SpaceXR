@@ -1,27 +1,46 @@
 import * as BABYLON from "@babylonjs/core";
 
 import { Nullable } from "core/types";
-import { ICameraViewState } from "core/camera";
-import { IUriResolver, Tile3dStreamEngine } from "core/tiles/3d/engine";
-import { CanvasDisplay } from "core/map";
+import { IUriResolver, MaxScreenSpaceErrorFn, Tile3dStreamBinding, Tile3dStreamSource } from "core/tiles/3d/engine";
 import { Tile3dScene } from "./tile3d.scene";
 import { Tile3dContentLoader } from "./tile3d.loader";
 import { EventState } from "core/events";
 import { Geo3, IGeo3 } from "core/geography";
 import { Ellipsoid, GeodeticSystem } from "core/geodesy";
-import { IDisplay } from "core/tiles";
 import { ITileset } from "core/tiles/3d/interfaces";
-import { GeodeticCamera } from "../../camera";
-import { GoogleTile3dErrorFn } from "./vendors/google";
+import { CameraStreamPump, GeodeticCamera, IsGeodeticCamera } from "../../camera";
 
 export interface IViewerOptions {
     uri: string;
     resolver?: IUriResolver;
     names?: Record<string, string>;
     ellipsoid?: Ellipsoid;
+    /** Initial camera position (geodetic). Defaults to Map3DViewer.DefaultInitialPosition. */
     initialPosition?: IGeo3;
+    /** Max screen-space error in pixels (constant). Default 16. */
+    maxScreenSpaceError?: number;
+    /** Per-depth max-SSE override (e.g. GoogleTile3dErrorFn for Google Photorealistic tiles). */
+    maxScreenSpaceErrorFn?: MaxScreenSpaceErrorFn;
+    /**
+     * Right-handed scene (default true). Required for correct glTF winding
+     * with the raw-ECEF placement performed by Tile3dScene.
+     */
+    useRightHandedSystem?: boolean;
 }
 
+/**
+ * Camera-driven 3D Tiles viewer (Cesium-like navigation).
+ *
+ * Pipeline: GeodeticCamera -> CameraStreamPump -> Tile3dStreamSource (core
+ * LOD engine: SSE refine/coarsen, hole-free REPLACE, external tilesets) ->
+ * Tile3dStreamBinding -> Tile3dContentLoader (glTF/glb) + Tile3dScene
+ * (ECEF placement).
+ *
+ * The scene embeds RAW ECEF (Babylon world coordinates are ECEF meters), the
+ * engine is created with `useHighPrecisionMatrix` so planet-scale transforms
+ * keep sub-meter precision, and near/far planes are managed by
+ * BABYLON.GeospatialClippingBehavior.
+ */
 export class Map3DViewer {
     public static DefaultCanvasId = "";
     private static CanvasKeyword = "canvas";
@@ -34,12 +53,12 @@ export class Map3DViewer {
     readonly _scene: Nullable<BABYLON.Scene> = null;
     _camera: Nullable<BABYLON.Camera> = null;
 
-    _display: Nullable<IDisplay> = null;
-    _streamEngine: Nullable<Tile3dStreamEngine> = null;
+    _loader: Nullable<Tile3dContentLoader> = null;
+    _source: Nullable<Tile3dStreamSource> = null;
+    _binding: Nullable<Tile3dStreamBinding> = null;
     _map: Nullable<Tile3dScene> = null;
-
-    _cameraSync: Nullable<BABYLON.IDisposable> = null;
-    _cameraNav: Nullable<BABYLON.IDisposable> = null;
+    _pump: Nullable<CameraStreamPump> = null;
+    private _onResize: Nullable<() => void> = null;
 
     public constructor(targetId: string, options: IViewerOptions) {
         this._options = options;
@@ -58,63 +77,56 @@ export class Map3DViewer {
             }
         }
         this._canvas = canvas;
-        if (this._canvas) {
-            this._engine = this._createEngine(this._canvas);
-            if (this._engine) {
-                this._scene = this._createScene(this._engine);
-                if (this._scene) {
-                    this._display = new CanvasDisplay(this._canvas);
-                    this._streamEngine = new Tile3dStreamEngine(options.uri, this._display, new Tile3dContentLoader(this._scene, options.resolver));
-                    if (options.resolver) {
-                        this._streamEngine.contentOptions.uriResolver = options.resolver;
-                    }
-                    this._streamEngine.contentOptions.maxScreenSpaceErrorFn = GoogleTile3dErrorFn;
-                    this._map = new Tile3dScene(options.names?.map ?? "map", this._scene);
-                    this._streamEngine.linkTo(this._map);
-                    this._streamEngine.rootReadyObservable.addOnce(this._onRootReady.bind(this));
-                    this._streamEngine.setContext(); // start the root loading.
+        if (!this._canvas) return;
 
-                    /*this._scene.useRightHandedSystem = true;
-                    BABYLON.SceneLoader.OnPluginActivatedObservable.add((p) => {
-                        if ((p as any).name === "gltf") {
-                            (p as any).useRightHandedSystem = true; // glTF loader matches scene
-                        }
-                    });*/
+        this._engine = this._createEngine(this._canvas);
+        if (!this._engine) return;
+        this._scene = this._createScene(this._engine);
+        if (!this._scene) return;
 
-                    /*this._streamEngine.retreiveMetasAsync().then((m) => {
-                        console.log(`Meta = ${JSON.stringify(m)}`);
-                    });*/
-                }
+        const engine = this._engine;
+        const scene = this._scene;
+
+        // Streaming pipeline. The loader handles renderable content only:
+        // external .json tilesets are fetched and grafted by the stream source
+        // (listing .json here as well would download each one twice).
+        this._loader = new Tile3dContentLoader(scene, options.resolver, [".gltf", ".glb"]);
+        this._source = new Tile3dStreamSource({
+            id: options.names?.tileset ?? "tileset",
+            uri: options.uri,
+            tilesetLoader: this._loader,
+            maxScreenSpaceError: options.maxScreenSpaceError,
+            maxScreenSpaceErrorFn: options.maxScreenSpaceErrorFn,
+            ellipsoid: options.ellipsoid,
+        });
+        this._binding = new Tile3dStreamBinding(this._source, this._loader);
+        this._map = new Tile3dScene(options.names?.map ?? "map", scene);
+        this._binding.linkTo(this._map);
+        this._source.rootReadyObservable.addOnce(this._onRootReady.bind(this));
+
+        // Camera + per-frame LOD drive. The first pump tick triggers the root
+        // tileset load through the engine's traversal.
+        this._camera = this._createCamera(this._getCameraName(), scene, options);
+        if (this._camera) {
+            this._camera.attachControl(this._canvas, true);
+            // _createCamera is an extension point: only a geodetic camera can
+            // be positioned this way, others place themselves.
+            if (IsGeodeticCamera(this._camera)) {
+                const position = options.initialPosition ?? Map3DViewer.DefaultInitialPosition;
+                this._camera.setGeodeticPosition(position.lat, position.lon, position.alt ?? 10_000_000);
             }
+            this._pump = new CameraStreamPump(scene, this._camera, this._source);
         }
+
+        engine.runRenderLoop(() => {
+            scene.render();
+        });
+        this._onResize = () => engine.resize();
+        window.addEventListener("resize", this._onResize);
     }
 
     public getScene(): Nullable<BABYLON.Scene> {
         return this._scene;
-    }
-
-    protected _onRootReady(eventData: ITileset, _eventState: EventState): void {
-        if (this._engine && this._scene) {
-            const engine = this._engine;
-            const scene = this._scene;
-            this._camera = this._createCamera(this._getCameraName(), eventData, scene, this._options);
-            if (this._camera) {
-                //this._cameraNav = SetupAdaptiveUniversalCamera(this._camera, scene);
-                // This attaches the camera to the canvas
-                this._camera.attachControl(this._canvas, true);
-                scene.onAfterCameraRenderObservable.addOnce((_c, _s) => {
-                    this._cameraSync = null; //SetupCameraStateSync(c, this.onCameraStateUpdate.bind(this));
-                });
-            }
-
-            engine.runRenderLoop(() => {
-                scene.render();
-            });
-
-            window.addEventListener("resize", () => {
-                engine.resize();
-            });
-        }
     }
 
     public get canvas(): Nullable<HTMLCanvasElement> {
@@ -123,6 +135,31 @@ export class Map3DViewer {
 
     public get camera(): Nullable<BABYLON.Camera> {
         return this._camera;
+    }
+
+    public get source(): Nullable<Tile3dStreamSource> {
+        return this._source;
+    }
+
+    public dispose(): void {
+        if (this._onResize) {
+            window.removeEventListener("resize", this._onResize);
+            this._onResize = null;
+        }
+        this._engine?.stopRenderLoop();
+        // Pump first (stops new traversals), then the binding (stops feeding the
+        // loader), then the loader, the source and the scene graph.
+        this._pump?.dispose();
+        this._binding?.dispose();
+        this._loader?.dispose();
+        this._source?.dispose();
+        this._map?.dispose();
+        this._scene?.dispose();
+        this._engine?.dispose();
+    }
+
+    protected _onRootReady(_eventData: ITileset, _eventState: EventState): void {
+        // Hook for subclasses (fly to the tileset, UI feedback, ...).
     }
 
     protected _createCanvas(id: string): Nullable<HTMLElement> {
@@ -137,42 +174,26 @@ export class Map3DViewer {
     }
 
     protected _createEngine(canvas: HTMLCanvasElement): BABYLON.Engine | null {
-        const engine = new BABYLON.Engine(canvas, true);
-        return engine;
+        // High-precision matrices: ECEF magnitudes (~1e7 m) need float64 world
+        // matrices to avoid sub-meter jitter near the surface.
+        return new BABYLON.Engine(canvas, true, { useHighPrecisionMatrix: true });
     }
 
     protected _createScene(engine: BABYLON.Engine): BABYLON.Scene | null {
         const scene = new BABYLON.Scene(engine);
+        scene.useRightHandedSystem = this._options.useRightHandedSystem ?? true;
         return scene;
     }
 
-    protected _createCamera(name: string, root: ITileset, _scene: BABYLON.Scene, _options: IViewerOptions): Nullable<BABYLON.Camera> {
-        if (root.root.boundingVolume) {
-            if (this._scene && this._display && root.root.boundingVolume.box) {
-                return this._setupArcRotateCamera(root.root.boundingVolume.box, this._scene);
-                //return this._setupUniversalCameraForTilesetRoot(root.root.boundingVolume.box, this._scene, this._display.resolution.width, this._display.resolution.height);
-            }
-        }
-        return null;
-    }
-
-    protected onCameraStateUpdate(state: ICameraViewState): void {
-        this._streamEngine?.setContext(state);
+    protected _createCamera(name: string, scene: BABYLON.Scene, options: IViewerOptions): Nullable<BABYLON.Camera> {
+        const ellipsoid = options.ellipsoid ?? Ellipsoid.WGS84;
+        const camera = new GeodeticCamera(name, scene, new GeodeticSystem(ellipsoid));
+        // Near/far planes follow the altitude automatically.
+        camera.addBehavior(new BABYLON.GeospatialClippingBehavior());
+        return camera;
     }
 
     protected _getCameraName(): string {
         return this._options.names?.camera ?? "camera";
-    }
-
-    protected _setupArcRotateCamera(box: number[], scene: BABYLON.Scene, margin = 1.5): BABYLON.Camera {
-        const ellipsoid = this._options.ellipsoid ?? Ellipsoid.WGS84;
-
-        const camera = new GeodeticCamera("Camera", scene, new GeodeticSystem(ellipsoid));
-
-        // Set camera near and far planes based on bounding size
-        camera.minZ = 0;
-        camera.maxZ = ellipsoid.semiMajorAxis * margin;
-
-        return camera;
     }
 }

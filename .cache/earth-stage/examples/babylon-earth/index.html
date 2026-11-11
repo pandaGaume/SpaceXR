@@ -1,0 +1,7 @@
+<!doctype html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SpaceXR Terre</title></head>
+<body><canvas id="earth"></canvas><aside><h1>Terre</h1><p id="status">Initialisation...</p>
+<nav><button id="orbit">Orbite</button><button id="terrain">Mont Blanc</button></nav>
+<label><input id="atmosphere" type="checkbox" checked> Atmosphère</label>
+<label>Heure UTC <input id="hour" type="range" min="0" max="23" value="12"><output id="time">12:00</output></label>
+<label>Exposition <input id="exposure" type="range" min="1" max="30" value="12"></label>
+<p>Glisser pour naviguer, molette pour zoomer.</p><p id="attribution"></p><p id="stats"></p></aside><script type="module" src="/src/main.ts"></script></body></html>

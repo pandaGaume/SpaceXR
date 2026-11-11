@@ -6,8 +6,9 @@ import { AbstractShape } from "./geometry.shape";
 import { ILine, IPoint, ShapeType } from "./geometry.shapes.interfaces";
 
 export class Line extends AbstractShape implements ILine {
-
-    public static Zero() : Line { return new Line(Cartesian3.Zero(), Cartesian3.Zero());}
+    public static Zero(): Line {
+        return new Line(Cartesian3.Zero(), Cartesian3.Zero());
+    }
 
     _alice: ICartesian3;
     _bob: ICartesian3;
@@ -59,6 +60,8 @@ export class Line extends AbstractShape implements ILine {
         let b = new Cartesian3(this._bob.x, this._bob.y, this._bob.z);
 
         do {
+            // A clipped endpoint can put both ends outside the same edge.
+            if (code1 & code2) return undefined;
             // Some segment of line lies within the
             // rectangle
             let code_out = code1 != 0 ? code1 : code2;
@@ -98,13 +101,17 @@ export class Line extends AbstractShape implements ILine {
             // Now intersection point x, y is found
             // We replace point outside rectangle
             // by intersection point
+            const t = Math.abs(x2 - x1) >= Math.abs(y2 - y1) ? (x - x1) / (x2 - x1) : (y - y1) / (y2 - y1);
+            const z = a.z + (b.z - a.z) * t;
             if (code_out == code1) {
                 a.x = x;
                 a.y = y;
+                a.z = z;
                 code1 = Cartesian2.ComputeCode(a, clipArea);
             } else {
                 b.x = x;
                 b.y = y;
+                b.z = z;
                 code2 = Cartesian2.ComputeCode(b, clipArea);
             }
         } while (code1 != 0 || code2 != 0);
@@ -125,8 +132,7 @@ export class Line extends AbstractShape implements ILine {
      *  - The math is done in full 3D, not just a 2D projection.
      *  - Epsilon is used for all "almost zero" tests.
      */
-    public intersect(other: Line, epsilon = 1e-9): IPoint | ILine |undefined {
-        
+    public intersect(other: Line, epsilon = 1e-9): IPoint | ILine | undefined {
         const a0 = this._alice;
         const a1 = this._bob;
         const b0 = other._alice;
@@ -149,14 +155,14 @@ export class Line extends AbstractShape implements ILine {
             if (Cartesian3.AreCoincident(a0, b0, epsilon)) {
                 return new Point(a0.x, a0.y, a0.z);
             }
-            return undefined
+            return undefined;
         }
 
         if (aDegenerate) {
             // A is a point, B is a true segment
             return other.containsPoint(a0, epsilon) ? new Point(a0.x, a0.y, a0.z) : undefined;
-        } 
-        
+        }
+
         if (cDegenerate) {
             // B is a point, A is a true segment
             return this.containsPoint(b0, epsilon) ? new Point(b0.x, b0.y, b0.z) : undefined;
@@ -167,10 +173,9 @@ export class Line extends AbstractShape implements ILine {
         const e = Cartesian3.Dot(v, w0);
 
         const denom = a * c - b * b;
-        
+
         // If denom is almost zero, the lines are parallel (maybe collinear)
         if (Math.abs(denom) < epsilon) {
-
             // Check if they are collinear:
             // w0 must be parallel to u (or v)
             const crossUW0 = Cartesian3.Cross(u, w0);
@@ -207,16 +212,16 @@ export class Line extends AbstractShape implements ILine {
             // Overlap exists. It can be a single point or a segment.
             const clamp = (x: number) => Math.max(0, Math.min(1, x));
             const sStart = clamp(sOverlapMin);
-            const sEnd   = clamp(sOverlapMax);
+            const sEnd = clamp(sOverlapMax);
 
             const pStart = this._addScaled(a0, u, sStart);
-            const pEnd   = this._addScaled(a0, u, sEnd);
+            const pEnd = this._addScaled(a0, u, sEnd);
 
             if (Cartesian3.Distance(pStart, pEnd) <= epsilon) {
                 // The overlapping part is effectively a single point
-                return new Point(pStart) ;
+                return new Point(pStart);
             } else {
-                return new Line(pStart, pEnd );
+                return new Line(pStart, pEnd);
             }
         }
 
@@ -244,12 +249,8 @@ export class Line extends AbstractShape implements ILine {
         }
 
         // Unique intersection point (average of the two closest points)
-        const mid = new Cartesian3(
-            0.5 * (pOnA.x + pOnB.x),
-            0.5 * (pOnA.y + pOnB.y),
-            0.5 * (pOnA.z + pOnB.z)
-        );
-        return new Point(mid) ;
+        const mid = new Cartesian3(0.5 * (pOnA.x + pOnB.x), 0.5 * (pOnA.y + pOnB.y), 0.5 * (pOnA.z + pOnB.z));
+        return new Point(mid);
     }
 
     public containsPoint(p: ICartesian3, epsilon = 1e-9): boolean {
@@ -275,7 +276,7 @@ export class Line extends AbstractShape implements ILine {
      *
      * This is done in 3D, but the result is just one scalar.
      */
-    private  _projectParamOnSegment(a0: ICartesian3, u: ICartesian3, uLen2: number, p: ICartesian3): number {
+    private _projectParamOnSegment(a0: ICartesian3, u: ICartesian3, uLen2: number, p: ICartesian3): number {
         const w = Cartesian3.Subtract(p, a0);
         if (uLen2 === 0) {
             return 0;

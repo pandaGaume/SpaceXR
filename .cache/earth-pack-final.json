@@ -1,0 +1,91 @@
+[
+  {
+    "id": "@spacexr/babylon-earth@0.1.0",
+    "name": "@spacexr/babylon-earth",
+    "version": "0.1.0",
+    "size": 35130,
+    "unpackedSize": 131274,
+    "shasum": "03ad83a003303d5842a8afef423853827ab043c9",
+    "integrity": "sha512-76C3T4LxagzcP5jlzKSvgIBsKM2UnbI5xINMEJQdaxiu9pD97p2dNYJfdtpISBUEVkxs//pppKdYIYpRyrTxZA==",
+    "filename": "spacexr-babylon-earth-0.1.0.tgz",
+    "files": [
+      {
+        "path": "LICENSE",
+        "size": 11558,
+        "mode": 420
+      },
+      {
+        "path": "README.md",
+        "size": 5007,
+        "mode": 420
+      },
+      {
+        "path": "dist/index.d.ts",
+        "size": 3492,
+        "mode": 420
+      },
+      {
+        "path": "dist/index.js",
+        "size": 21455,
+        "mode": 420
+      },
+      {
+        "path": "dist/index.js.map",
+        "size": 53855,
+        "mode": 420
+      },
+      {
+        "path": "package.json",
+        "size": 3005,
+        "mode": 420
+      },
+      {
+        "path": "src/atmosphere/babylon-sky.ts",
+        "size": 10060,
+        "mode": 420
+      },
+      {
+        "path": "src/atmosphere/camera.ts",
+        "size": 1645,
+        "mode": 420
+      },
+      {
+        "path": "src/atmosphere/display.wgsl",
+        "size": 992,
+        "mode": 420
+      },
+      {
+        "path": "src/atmosphere/generated/display.ts",
+        "size": 1099,
+        "mode": 420
+      },
+      {
+        "path": "src/earth-model.ts",
+        "size": 1395,
+        "mode": 420
+      },
+      {
+        "path": "src/earth-runtime.ts",
+        "size": 11732,
+        "mode": 420
+      },
+      {
+        "path": "src/index.ts",
+        "size": 293,
+        "mode": 420
+      },
+      {
+        "path": "src/polar-caps.ts",
+        "size": 2312,
+        "mode": 420
+      },
+      {
+        "path": "src/terrain-adapter.ts",
+        "size": 3374,
+        "mode": 420
+      }
+    ],
+    "entryCount": 15,
+    "bundled": []
+  }
+]

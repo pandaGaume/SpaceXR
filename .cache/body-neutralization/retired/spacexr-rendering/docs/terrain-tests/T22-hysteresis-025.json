@@ -1,0 +1,643 @@
+{
+  "label": "hysteresis-025",
+  "date": "2026-11-07T03:29:20.303Z",
+  "seconds": 8,
+  "results": [
+    {
+      "id": "plain/gpu",
+      "url": "http://localhost:5174/?body=moon&dataset=http://127.0.0.1:8794/moon&engine=gpu&solid=1&imagery=none&lat=35&lon=-15&radius=40000&pitch=70",
+      "errors": [],
+      "performance": {
+        "engine": "gpu",
+        "framesPerSecond": 71.2,
+        "frameMsMedian": 10.9,
+        "frameMsP95": 31.8,
+        "frameMsP99": 70.1,
+        "cutEntered": 160,
+        "cutLeft": 161,
+        "cancelledLoads": 4,
+        "refineAttempts": 26,
+        "refines": 25,
+        "terrainCpuMs": 3.47,
+        "renderCpuMs": 0.74,
+        "runtimeFrameMs": 2.6,
+        "gpuMs": 7.24,
+        "instances": 180,
+        "drawCalls": 1,
+        "trianglesPerFrame": 1528688,
+        "uploadKiBPerFrame": 230.8,
+        "uploadCallsPerFrame": 2.8,
+        "gpuMiB": 91.2,
+        "cpuMiB": 0,
+        "demTiles": 194,
+        "tileRequests": 196,
+        "distinctTileRequests": 196,
+        "tileHosts": [
+          "127.0.0.1:8794"
+        ],
+        "loadSeconds": 9.5
+      },
+      "integrity": {
+        "probeDetects": true,
+        "lod": {
+          "shown": 158,
+          "hidden": 159,
+          "returns": 38,
+          "quickReturns": 3,
+          "tilesReturning": 37,
+          "mostReturns": 2,
+          "mostReturningTile": "0/6/19/5",
+          "meanThresholdScale": 3.98,
+          "changesAtRest": 0,
+          "presentedAtRest": 76,
+          "worstErrorAtRest": 19.25,
+          "meanErrorAtRest": 6.37,
+          "selectedAtRest": 76,
+          "errorsAbove10AtRest": 4
+        },
+        "settleSeconds": 0.7,
+        "holesAtRest": 0,
+        "worstSharedEdgeAtRestMetres": 0,
+        "worstPairAtRest": {
+          "gap": 7.454217687985916e-10,
+          "a": {
+            "address": {
+              "face": 4,
+              "lod": 4,
+              "x": 2,
+              "y": 15
+            },
+            "terrain": {
+              "face": 4,
+              "lod": 4,
+              "x": 2,
+              "y": 15
+            },
+            "terrainLevel": 4,
+            "finer": 0,
+            "coarser": 8,
+            "demOfTerrain": {
+              "face": 4,
+              "lod": 4,
+              "x": 2,
+              "y": 15
+            }
+          },
+          "aLattice": [
+            81,
+            128
+          ],
+          "aHeight": -3184.74609375,
+          "b": {
+            "address": {
+              "face": 0,
+              "lod": 4,
+              "x": 2,
+              "y": 0
+            },
+            "terrain": {
+              "face": 0,
+              "lod": 4,
+              "x": 2,
+              "y": 0
+            },
+            "terrainLevel": 4,
+            "finer": 2,
+            "coarser": 0,
+            "demOfTerrain": {
+              "face": 0,
+              "lod": 4,
+              "x": 2,
+              "y": 0
+            }
+          },
+          "bLattice": [
+            81,
+            0
+          ],
+          "bHeight": -3184.74609375,
+          "aReference": [
+            0,
+            0,
+            1,
+            47
+          ],
+          "bReference": [
+            0,
+            0,
+            1,
+            96
+          ]
+        },
+        "frames": 192,
+        "framesWithHoles": 0,
+        "worstHoles": 0,
+        "edgeChecks": 16,
+        "sharedVerticesPerCheck": 41558,
+        "worstSharedEdgeMetres": 0,
+        "worstOutOfViewEdgeMetres": 0,
+        "worstPair": {
+          "gap": 7.454217687985916e-10,
+          "a": {
+            "address": {
+              "face": 4,
+              "lod": 4,
+              "x": 2,
+              "y": 15
+            },
+            "terrain": {
+              "face": 4,
+              "lod": 4,
+              "x": 2,
+              "y": 15
+            },
+            "terrainLevel": 4,
+            "finer": 0,
+            "coarser": 8,
+            "demOfTerrain": {
+              "face": 4,
+              "lod": 4,
+              "x": 2,
+              "y": 15
+            }
+          },
+          "aLattice": [
+            81,
+            128
+          ],
+          "aHeight": -3184.74609375,
+          "b": {
+            "address": {
+              "face": 0,
+              "lod": 4,
+              "x": 2,
+              "y": 0
+            },
+            "terrain": {
+              "face": 0,
+              "lod": 4,
+              "x": 2,
+              "y": 0
+            },
+            "terrainLevel": 4,
+            "finer": 2,
+            "coarser": 8,
+            "demOfTerrain": {
+              "face": 0,
+              "lod": 4,
+              "x": 2,
+              "y": 0
+            }
+          },
+          "bLattice": [
+            81,
+            0
+          ],
+          "bHeight": -3184.74609375,
+          "aReference": [
+            0,
+            0,
+            1,
+            47
+          ],
+          "bReference": [
+            0,
+            0,
+            1,
+            96
+          ]
+        },
+        "tileRequests": 208,
+        "distinctTileRequests": 208,
+        "tileHosts": [
+          "127.0.0.1:8794"
+        ],
+        "loadSeconds": 11.8
+      }
+    },
+    {
+      "id": "pole/gpu",
+      "url": "http://localhost:5174/?body=moon&dataset=http://127.0.0.1:8794/moon&engine=gpu&solid=1&imagery=none&lat=-89.67&lon=129.2&radius=8000&pitch=60",
+      "errors": [],
+      "performance": {
+        "engine": "gpu",
+        "framesPerSecond": 58.8,
+        "frameMsMedian": 12.2,
+        "frameMsP95": 43.3,
+        "frameMsP99": 87.3,
+        "cutEntered": 215,
+        "cutLeft": 220,
+        "cancelledLoads": 16,
+        "refineAttempts": 65,
+        "refines": 42,
+        "terrainCpuMs": 6.82,
+        "renderCpuMs": 0.75,
+        "runtimeFrameMs": 3.8,
+        "gpuMs": 7.24,
+        "instances": 270,
+        "drawCalls": 1,
+        "trianglesPerFrame": 2068977,
+        "uploadKiBPerFrame": 455.4,
+        "uploadCallsPerFrame": 4,
+        "gpuMiB": 136.8,
+        "cpuMiB": 0,
+        "demTiles": 432,
+        "tileRequests": 434,
+        "distinctTileRequests": 434,
+        "tileHosts": [
+          "127.0.0.1:8794"
+        ],
+        "loadSeconds": 10.2
+      },
+      "integrity": {
+        "probeDetects": true,
+        "lod": {
+          "shown": 210,
+          "hidden": 215,
+          "returns": 64,
+          "quickReturns": 16,
+          "tilesReturning": 63,
+          "mostReturns": 2,
+          "mostReturningTile": "5/9/258/255",
+          "meanThresholdScale": 3.98,
+          "changesAtRest": 0,
+          "presentedAtRest": 101,
+          "worstErrorAtRest": 9.98,
+          "meanErrorAtRest": 5.67,
+          "selectedAtRest": 101,
+          "errorsAbove10AtRest": 0
+        },
+        "settleSeconds": 0.4,
+        "holesAtRest": 0,
+        "worstSharedEdgeAtRestMetres": 0,
+        "worstPairAtRest": {
+          "gap": 5.238689482212067e-10,
+          "a": {
+            "address": {
+              "face": 1,
+              "lod": 2,
+              "x": 1,
+              "y": 3
+            },
+            "terrain": {
+              "face": 1,
+              "lod": 0,
+              "x": 0,
+              "y": 0
+            },
+            "terrainLevel": 0,
+            "finer": 4,
+            "coarser": 0,
+            "demOfTerrain": {
+              "face": 1,
+              "lod": 0,
+              "x": 0,
+              "y": 0
+            }
+          },
+          "aLattice": [
+            85,
+            128
+          ],
+          "aHeight": -1611.49609375,
+          "b": {
+            "address": {
+              "face": 5,
+              "lod": 3,
+              "x": 7,
+              "y": 3
+            },
+            "terrain": {
+              "face": 5,
+              "lod": 2,
+              "x": 3,
+              "y": 1
+            },
+            "terrainLevel": 2,
+            "finer": 0,
+            "coarser": 2,
+            "demOfTerrain": {
+              "face": 5,
+              "lod": 2,
+              "x": 3,
+              "y": 1
+            }
+          },
+          "bLattice": [
+            128,
+            42
+          ],
+          "bHeight": -1611.49609375,
+          "aReference": [
+            0.25,
+            0.75,
+            0.25,
+            4
+          ],
+          "bReference": [
+            0.375,
+            1,
+            0.125,
+            4.75
+          ]
+        },
+        "frames": 125,
+        "framesWithHoles": 0,
+        "worstHoles": 0,
+        "edgeChecks": 15,
+        "sharedVerticesPerCheck": 56311,
+        "worstSharedEdgeMetres": 0,
+        "worstOutOfViewEdgeMetres": 0,
+        "worstPair": {
+          "gap": 5.238689482212067e-10,
+          "a": {
+            "address": {
+              "face": 1,
+              "lod": 2,
+              "x": 2,
+              "y": 3
+            },
+            "terrain": {
+              "face": 1,
+              "lod": 0,
+              "x": 0,
+              "y": 0
+            },
+            "terrainLevel": 0,
+            "finer": 4,
+            "coarser": 0,
+            "demOfTerrain": {
+              "face": 1,
+              "lod": 0,
+              "x": 0,
+              "y": 0
+            }
+          },
+          "aLattice": [
+            43,
+            128
+          ],
+          "aHeight": -1832.916015625,
+          "b": {
+            "address": {
+              "face": 5,
+              "lod": 3,
+              "x": 7,
+              "y": 4
+            },
+            "terrain": {
+              "face": 5,
+              "lod": 2,
+              "x": 3,
+              "y": 2
+            },
+            "terrainLevel": 2,
+            "finer": 0,
+            "coarser": 2,
+            "demOfTerrain": {
+              "face": 5,
+              "lod": 2,
+              "x": 3,
+              "y": 2
+            }
+          },
+          "bLattice": [
+            128,
+            86
+          ],
+          "bHeight": -1832.916015625,
+          "aReference": [
+            0.5,
+            0.75,
+            0.25,
+            4
+          ],
+          "bReference": [
+            0.5,
+            1,
+            0.125,
+            4.75
+          ]
+        },
+        "tileRequests": 446,
+        "distinctTileRequests": 446,
+        "tileHosts": [
+          "127.0.0.1:8794"
+        ],
+        "loadSeconds": 9.8
+      }
+    },
+    {
+      "id": "ground-level/gpu",
+      "url": "http://localhost:5174/?body=moon&dataset=http://127.0.0.1:8794/moon&engine=gpu&solid=1&imagery=none&lat=-89.135019&lon=106.871898&radius=35.2&pitch=87.24&yaw=-148.53",
+      "errors": [],
+      "performance": {
+        "engine": "gpu",
+        "framesPerSecond": 66.5,
+        "frameMsMedian": 12.8,
+        "frameMsP95": 32.8,
+        "frameMsP99": 80.9,
+        "cutEntered": 284,
+        "cutLeft": 293,
+        "cancelledLoads": 5,
+        "refineAttempts": 54,
+        "refines": 38,
+        "terrainCpuMs": 6.85,
+        "renderCpuMs": 0.67,
+        "runtimeFrameMs": 3.7,
+        "gpuMs": 6.52,
+        "instances": 324,
+        "drawCalls": 1,
+        "trianglesPerFrame": 2361280,
+        "uploadKiBPerFrame": 420.5,
+        "uploadCallsPerFrame": 4.2,
+        "gpuMiB": 177.9,
+        "cpuMiB": 0,
+        "demTiles": 382,
+        "tileRequests": 384,
+        "distinctTileRequests": 384,
+        "tileHosts": [
+          "127.0.0.1:8794"
+        ],
+        "loadSeconds": 12
+      },
+      "integrity": {
+        "probeDetects": true,
+        "lod": {
+          "shown": 283,
+          "hidden": 293,
+          "returns": 85,
+          "quickReturns": 14,
+          "tilesReturning": 85,
+          "mostReturns": 1,
+          "mostReturningTile": "5/5/17/13",
+          "meanThresholdScale": 3.98,
+          "changesAtRest": 0,
+          "presentedAtRest": 112,
+          "worstErrorAtRest": 21217003928004076000,
+          "meanErrorAtRest": 378874913493481500,
+          "selectedAtRest": 112,
+          "errorsAbove10AtRest": 7
+        },
+        "settleSeconds": 1,
+        "holesAtRest": 0,
+        "worstSharedEdgeAtRestMetres": 0,
+        "worstPairAtRest": {
+          "gap": 5.238689482212067e-10,
+          "a": {
+            "address": {
+              "face": 3,
+              "lod": 2,
+              "x": 1,
+              "y": 3
+            },
+            "terrain": {
+              "face": 3,
+              "lod": 0,
+              "x": 0,
+              "y": 0
+            },
+            "terrainLevel": 0,
+            "finer": 4,
+            "coarser": 0,
+            "demOfTerrain": {
+              "face": 3,
+              "lod": 0,
+              "x": 0,
+              "y": 0
+            }
+          },
+          "aLattice": [
+            85,
+            128
+          ],
+          "aHeight": -117.23046875,
+          "b": {
+            "address": {
+              "face": 5,
+              "lod": 3,
+              "x": 0,
+              "y": 4
+            },
+            "terrain": {
+              "face": 5,
+              "lod": 2,
+              "x": 0,
+              "y": 2
+            },
+            "terrainLevel": 2,
+            "finer": 0,
+            "coarser": 8,
+            "demOfTerrain": {
+              "face": 5,
+              "lod": 2,
+              "x": 0,
+              "y": 2
+            }
+          },
+          "bLattice": [
+            0,
+            86
+          ],
+          "bHeight": -117.23046875,
+          "aReference": [
+            0.25,
+            0.75,
+            0.25,
+            3
+          ],
+          "bReference": [
+            0.375,
+            1,
+            0.125,
+            3.25
+          ]
+        },
+        "frames": 187,
+        "framesWithHoles": 0,
+        "worstHoles": 0,
+        "edgeChecks": 16,
+        "sharedVerticesPerCheck": 64690,
+        "worstSharedEdgeMetres": 0,
+        "worstOutOfViewEdgeMetres": 0,
+        "worstPair": {
+          "gap": 5.238689482212067e-10,
+          "a": {
+            "address": {
+              "face": 0,
+              "lod": 2,
+              "x": 1,
+              "y": 3
+            },
+            "terrain": {
+              "face": 0,
+              "lod": 0,
+              "x": 0,
+              "y": 0
+            },
+            "terrainLevel": 0,
+            "finer": 4,
+            "coarser": 0,
+            "demOfTerrain": {
+              "face": 0,
+              "lod": 0,
+              "x": 0,
+              "y": 0
+            }
+          },
+          "aLattice": [
+            85,
+            128
+          ],
+          "aHeight": -1695.962890625,
+          "b": {
+            "address": {
+              "face": 5,
+              "lod": 3,
+              "x": 3,
+              "y": 0
+            },
+            "terrain": {
+              "face": 5,
+              "lod": 2,
+              "x": 1,
+              "y": 0
+            },
+            "terrainLevel": 2,
+            "finer": 0,
+            "coarser": 1,
+            "demOfTerrain": {
+              "face": 5,
+              "lod": 2,
+              "x": 1,
+              "y": 0
+            }
+          },
+          "bLattice": [
+            42,
+            0
+          ],
+          "bHeight": -1695.962890625,
+          "aReference": [
+            0.25,
+            0.75,
+            0.25,
+            0
+          ],
+          "bReference": [
+            0.375,
+            1,
+            0.125,
+            0
+          ]
+        },
+        "tileRequests": 408,
+        "distinctTileRequests": 408,
+        "tileHosts": [
+          "127.0.0.1:8794"
+        ],
+        "loadSeconds": 12
+      }
+    }
+  ]
+}

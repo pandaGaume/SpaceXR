@@ -1,0 +1,12 @@
+from pathlib import Path
+root=Path('C:/Users/GuillaumePelletier/Documents/GitHub/Gaume/spacexr-rendering/packages/babylon-earth')
+f=root/'src/earth-runtime.ts';s=f.read_text(encoding='utf-8')
+s=s.replace('    GpuTerrainEngine,','    GpuTerrainEngine,\n    MeshTerrainEngine,\n    type ITerrainEngine,')
+s=s.replace('    type IGpuTerrainHandle,\n','').replace('IEcefSpatialState, IGpuTerrainHandle, never','IEcefSpatialState, unknown, never').replace('    IGpuTerrainHandle,\n','    unknown,\n')
+s=s.replace('readonly terrain: GpuTerrainEngine;','readonly terrain: ITerrainEngine;').replace('let terrain: GpuTerrainEngine | undefined;','let terrain: ITerrainEngine | undefined;')
+s=s.replace('    terrain?: {','    terrain?: {\n        /** Existing camera-relative GPU engine by default; mesh is also available. */\n        engine?: "gpu" | "mesh";')
+s=s.replace('terrain = new GpuTerrainEngine(','const TerrainEngine = config.engine === "mesh" ? MeshTerrainEngine : GpuTerrainEngine;\n        terrain = new TerrainEngine(')
+f.write_text(s,encoding='utf-8',newline='\n')
+f=root/'src/terrain-adapter.ts';s=f.read_text(encoding='utf-8').replace('GpuTerrainEngine','ITerrainEngine').replace('    type IGpuTerrainHandle,\n','').replace('    IGpuTerrainHandle,','    unknown,').replace('        IGpuTerrainHandle,','        unknown,');f.write_text(s,encoding='utf-8',newline='\n')
+f=root/'tests/earth.test.ts';s=f.read_text(encoding='utf-8').replace('terrain: { minLOD: 1, maxLOD: 1, cells: 4 }','terrain: { engine: "mesh", minLOD: 1, maxLOD: 1, cells: 4 }');f.write_text(s,encoding='utf-8',newline='\n')
+print('Existing GPU and mesh terrain implementations share the same opaque runtime ports.')

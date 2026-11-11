@@ -1,0 +1,44 @@
+c71ab7cb45d57ddc409c78f86ed3b1b4
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.LinkBuilder = void 0;
+const graph_olink_1 = require("./graph.olink");
+/**
+ * Base builder for the concrete GraphOLink class. Subclasses (e.g.
+ * SynapseBuilder) extend this and override build() to construct their
+ * own link type with a typed signature. The base class no longer
+ * accepts a constructor reference at runtime: see the doc on
+ * graph.interfaces.builder.ts for the rationale.
+ */
+class LinkBuilder {
+    withFrom(node) {
+        this._from = node;
+        return this;
+    }
+    withTo(node) {
+        this._to = node;
+        return this;
+    }
+    build() {
+        if (!this._from || !this._to) {
+            throw new Error("From and To MUST be defined before building a link.");
+        }
+        return this._createLink(this._from, this._to);
+    }
+    /**
+     * Factory for the concrete link class. Subclass builders override
+     * this to instantiate their own link type (e.g. SynapseBuilder
+     * returns a Synapse, ChannelBuilder returns a Channel). The base
+     * implementation returns a plain GraphOLink.
+     */
+    _createLink(from, to) {
+        return new graph_olink_1.GraphOLink(from, to);
+    }
+    reset() {
+        this._from = undefined;
+        this._to = undefined;
+        return this;
+    }
+}
+exports.LinkBuilder = LinkBuilder;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiQzpcXFVzZXJzXFxHdWlsbGF1bWVQZWxsZXRpZXJcXERvY3VtZW50c1xcR2l0SHViXFxTcGFjZVhSXFwuY2FjaGVcXGNvcmUtZGVjaXNpb24tcnVudGltZVxcc3JjXFxncmFwaFxcZ3JhcGguYnVpbGRlci5vbGluay50cyIsIm1hcHBpbmdzIjoiOzs7QUFFQSwrQ0FBMkM7QUFFM0M7Ozs7OztHQU1HO0FBQ0gsTUFBYSxXQUFXO0lBSWIsUUFBUSxDQUFDLElBQVc7UUFDdkIsSUFBSSxDQUFDLEtBQUssR0FBRyxJQUFJLENBQUM7UUFDbEIsT0FBTyxJQUFJLENBQUM7SUFDaEIsQ0FBQztJQUVNLE1BQU0sQ0FBQyxJQUFXO1FBQ3JCLElBQUksQ0FBQyxHQUFHLEdBQUcsSUFBSSxDQUFDO1FBQ2hCLE9BQU8sSUFBSSxDQUFDO0lBQ2hCLENBQUM7SUFFTSxLQUFLO1FBQ1IsSUFBSSxDQUFDLElBQUksQ0FBQyxLQUFLLElBQUksQ0FBQyxJQUFJLENBQUMsR0FBRyxFQUFFLENBQUM7WUFDM0IsTUFBTSxJQUFJLEtBQUssQ0FBQyxxREFBcUQsQ0FBQyxDQUFDO1FBQzNFLENBQUM7UUFDRCxPQUFPLElBQUksQ0FBQyxXQUFXLENBQUMsSUFBSSxDQUFDLEtBQUssRUFBRSxJQUFJLENBQUMsR0FBRyxDQUFDLENBQUM7SUFDbEQsQ0FBQztJQUVEOzs7OztPQUtHO0lBQ08sV0FBVyxDQUFDLElBQVcsRUFBRSxFQUFTO1FBQ3hDLE9BQU8sSUFBSSx3QkFBVSxDQUFDLElBQUksRUFBRSxFQUFFLENBQUMsQ0FBQztJQUNwQyxDQUFDO0lBRU0sS0FBSztRQUNSLElBQUksQ0FBQyxLQUFLLEdBQUcsU0FBUyxDQUFDO1FBQ3ZCLElBQUksQ0FBQyxHQUFHLEdBQUcsU0FBUyxDQUFDO1FBQ3JCLE9BQU8sSUFBSSxDQUFDO0lBQ2hCLENBQUM7Q0FDSjtBQXBDRCxrQ0FvQ0MiLCJuYW1lcyI6W10sInNvdXJjZXMiOlsiQzpcXFVzZXJzXFxHdWlsbGF1bWVQZWxsZXRpZXJcXERvY3VtZW50c1xcR2l0SHViXFxTcGFjZVhSXFwuY2FjaGVcXGNvcmUtZGVjaXNpb24tcnVudGltZVxcc3JjXFxncmFwaFxcZ3JhcGguYnVpbGRlci5vbGluay50cyJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgeyBJT2xpbmssIElOb2RlIH0gZnJvbSBcIi4vZ3JhcGguaW50ZXJmYWNlc1wiO1xyXG5pbXBvcnQgeyBJTGlua0J1aWxkZXIgfSBmcm9tIFwiLi9ncmFwaC5pbnRlcmZhY2VzLmJ1aWxkZXJcIjtcclxuaW1wb3J0IHsgR3JhcGhPTGluayB9IGZyb20gXCIuL2dyYXBoLm9saW5rXCI7XHJcblxyXG4vKipcclxuICogQmFzZSBidWlsZGVyIGZvciB0aGUgY29uY3JldGUgR3JhcGhPTGluayBjbGFzcy4gU3ViY2xhc3NlcyAoZS5nLlxyXG4gKiBTeW5hcHNlQnVpbGRlcikgZXh0ZW5kIHRoaXMgYW5kIG92ZXJyaWRlIGJ1aWxkKCkgdG8gY29uc3RydWN0IHRoZWlyXHJcbiAqIG93biBsaW5rIHR5cGUgd2l0aCBhIHR5cGVkIHNpZ25hdHVyZS4gVGhlIGJhc2UgY2xhc3Mgbm8gbG9uZ2VyXHJcbiAqIGFjY2VwdHMgYSBjb25zdHJ1Y3RvciByZWZlcmVuY2UgYXQgcnVudGltZTogc2VlIHRoZSBkb2Mgb25cclxuICogZ3JhcGguaW50ZXJmYWNlcy5idWlsZGVyLnRzIGZvciB0aGUgcmF0aW9uYWxlLlxyXG4gKi9cclxuZXhwb3J0IGNsYXNzIExpbmtCdWlsZGVyIGltcGxlbWVudHMgSUxpbmtCdWlsZGVyIHtcclxuICAgIHByb3RlY3RlZCBfZnJvbT86IElOb2RlO1xyXG4gICAgcHJvdGVjdGVkIF90bz86IElOb2RlO1xyXG5cclxuICAgIHB1YmxpYyB3aXRoRnJvbShub2RlOiBJTm9kZSk6IHRoaXMge1xyXG4gICAgICAgIHRoaXMuX2Zyb20gPSBub2RlO1xyXG4gICAgICAgIHJldHVybiB0aGlzO1xyXG4gICAgfVxyXG5cclxuICAgIHB1YmxpYyB3aXRoVG8obm9kZTogSU5vZGUpOiB0aGlzIHtcclxuICAgICAgICB0aGlzLl90byA9IG5vZGU7XHJcbiAgICAgICAgcmV0dXJuIHRoaXM7XHJcbiAgICB9XHJcblxyXG4gICAgcHVibGljIGJ1aWxkKCk6IElPbGluayB7XHJcbiAgICAgICAgaWYgKCF0aGlzLl9mcm9tIHx8ICF0aGlzLl90bykge1xyXG4gICAgICAgICAgICB0aHJvdyBuZXcgRXJyb3IoXCJGcm9tIGFuZCBUbyBNVVNUIGJlIGRlZmluZWQgYmVmb3JlIGJ1aWxkaW5nIGEgbGluay5cIik7XHJcbiAgICAgICAgfVxyXG4gICAgICAgIHJldHVybiB0aGlzLl9jcmVhdGVMaW5rKHRoaXMuX2Zyb20sIHRoaXMuX3RvKTtcclxuICAgIH1cclxuXHJcbiAgICAvKipcclxuICAgICAqIEZhY3RvcnkgZm9yIHRoZSBjb25jcmV0ZSBsaW5rIGNsYXNzLiBTdWJjbGFzcyBidWlsZGVycyBvdmVycmlkZVxyXG4gICAgICogdGhpcyB0byBpbnN0YW50aWF0ZSB0aGVpciBvd24gbGluayB0eXBlIChlLmcuIFN5bmFwc2VCdWlsZGVyXHJcbiAgICAgKiByZXR1cm5zIGEgU3luYXBzZSwgQ2hhbm5lbEJ1aWxkZXIgcmV0dXJucyBhIENoYW5uZWwpLiBUaGUgYmFzZVxyXG4gICAgICogaW1wbGVtZW50YXRpb24gcmV0dXJucyBhIHBsYWluIEdyYXBoT0xpbmsuXHJcbiAgICAgKi9cclxuICAgIHByb3RlY3RlZCBfY3JlYXRlTGluayhmcm9tOiBJTm9kZSwgdG86IElOb2RlKTogSU9saW5rIHtcclxuICAgICAgICByZXR1cm4gbmV3IEdyYXBoT0xpbmsoZnJvbSwgdG8pO1xyXG4gICAgfVxyXG5cclxuICAgIHB1YmxpYyByZXNldCgpOiB0aGlzIHtcclxuICAgICAgICB0aGlzLl9mcm9tID0gdW5kZWZpbmVkO1xyXG4gICAgICAgIHRoaXMuX3RvID0gdW5kZWZpbmVkO1xyXG4gICAgICAgIHJldHVybiB0aGlzO1xyXG4gICAgfVxyXG59XHJcbiJdLCJ2ZXJzaW9uIjozfQ==

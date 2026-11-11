@@ -1,0 +1,381 @@
+[
+  {
+    "id": "@spacexr/3d-tiles-babylon@0.1.0",
+    "name": "@spacexr/3d-tiles-babylon",
+    "version": "0.1.0",
+    "size": 268782,
+    "unpackedSize": 1128817,
+    "shasum": "f665f1e00124f09c3dae72e128581f73bd080a11",
+    "integrity": "sha512-oI3b+cC5ykm3HUSRneiPjW3jiTBFaEqumNF/HTUAzgkU+w1uE50EDKEo4Qu/bxd+SjLMsyuX9MrBHqPzrLEQTg==",
+    "filename": "spacexr-3d-tiles-babylon-0.1.0.tgz",
+    "files": [
+      {
+        "path": "LICENSE",
+        "size": 11357,
+        "mode": 420
+      },
+      {
+        "path": "README.md",
+        "size": 11747,
+        "mode": 420
+      },
+      {
+        "path": "dist/index.d.ts",
+        "size": 88130,
+        "mode": 420
+      },
+      {
+        "path": "dist/index.js",
+        "size": 191997,
+        "mode": 420
+      },
+      {
+        "path": "dist/index.js.map",
+        "size": 480890,
+        "mode": 420
+      },
+      {
+        "path": "package.json",
+        "size": 3183,
+        "mode": 420
+      },
+      {
+        "path": "src/camera/camera-change-tracker.ts",
+        "size": 1677,
+        "mode": 420
+      },
+      {
+        "path": "src/camera/geospatial-camera.ts",
+        "size": 3585,
+        "mode": 420
+      },
+      {
+        "path": "src/camera/orbit-frame.ts",
+        "size": 7946,
+        "mode": 420
+      },
+      {
+        "path": "src/camera/orbital-camera.ts",
+        "size": 12758,
+        "mode": 420
+      },
+      {
+        "path": "src/draping/mesh/mesh-raster-drape.ts",
+        "size": 9055,
+        "mode": 420
+      },
+      {
+        "path": "src/draping/mesh/raster-drape-plugin.ts",
+        "size": 6782,
+        "mode": 420
+      },
+      {
+        "path": "src/draping/mesh/shaders/snippets/rasterDrapeFragmentDefinitions.glsl",
+        "size": 1079,
+        "mode": 420
+      },
+      {
+        "path": "src/draping/mesh/shaders/snippets/rasterDrapeFragmentDefinitions.ts",
+        "size": 982,
+        "mode": 420
+      },
+      {
+        "path": "src/draping/mesh/shaders/snippets/rasterDrapeFragmentUpdateDiffuse.glsl",
+        "size": 214,
+        "mode": 420
+      },
+      {
+        "path": "src/draping/mesh/shaders/snippets/rasterDrapeFragmentUpdateDiffuse.ts",
+        "size": 477,
+        "mode": 420
+      },
+      {
+        "path": "src/draping/mesh/shaders/snippets/rasterDrapeUniforms.glsl",
+        "size": 50,
+        "mode": 420
+      },
+      {
+        "path": "src/draping/mesh/shaders/snippets/rasterDrapeUniforms.ts",
+        "size": 282,
+        "mode": 420
+      },
+      {
+        "path": "src/draping/mesh/shaders/snippets/rasterDrapeVertexDefinitions.glsl",
+        "size": 71,
+        "mode": 420
+      },
+      {
+        "path": "src/draping/mesh/shaders/snippets/rasterDrapeVertexDefinitions.ts",
+        "size": 330,
+        "mode": 420
+      },
+      {
+        "path": "src/draping/mesh/shaders/snippets/rasterDrapeVertexMainEnd.glsl",
+        "size": 63,
+        "mode": 420
+      },
+      {
+        "path": "src/draping/mesh/shaders/snippets/rasterDrapeVertexMainEnd.ts",
+        "size": 310,
+        "mode": 420
+      },
+      {
+        "path": "src/draping/mesh/shaders/wgsl/snippets/rasterDrapeFragmentDefinitions.ts",
+        "size": 1083,
+        "mode": 420
+      },
+      {
+        "path": "src/draping/mesh/shaders/wgsl/snippets/rasterDrapeFragmentDefinitions.wgsl",
+        "size": 1266,
+        "mode": 420
+      },
+      {
+        "path": "src/draping/mesh/shaders/wgsl/snippets/rasterDrapeFragmentUpdateDiffuse.ts",
+        "size": 528,
+        "mode": 420
+      },
+      {
+        "path": "src/draping/mesh/shaders/wgsl/snippets/rasterDrapeFragmentUpdateDiffuse.wgsl",
+        "size": 331,
+        "mode": 420
+      },
+      {
+        "path": "src/draping/mesh/shaders/wgsl/snippets/rasterDrapeUniforms.ts",
+        "size": 288,
+        "mode": 420
+      },
+      {
+        "path": "src/draping/mesh/shaders/wgsl/snippets/rasterDrapeUniforms.wgsl",
+        "size": 109,
+        "mode": 420
+      },
+      {
+        "path": "src/draping/mesh/shaders/wgsl/snippets/rasterDrapeVertexDefinitions.ts",
+        "size": 336,
+        "mode": 420
+      },
+      {
+        "path": "src/draping/mesh/shaders/wgsl/snippets/rasterDrapeVertexDefinitions.wgsl",
+        "size": 139,
+        "mode": 420
+      },
+      {
+        "path": "src/draping/mesh/shaders/wgsl/snippets/rasterDrapeVertexMainEnd.ts",
+        "size": 341,
+        "mode": 420
+      },
+      {
+        "path": "src/draping/mesh/shaders/wgsl/snippets/rasterDrapeVertexMainEnd.wgsl",
+        "size": 152,
+        "mode": 420
+      },
+      {
+        "path": "src/gltf/attributions.ts",
+        "size": 1989,
+        "mode": 420
+      },
+      {
+        "path": "src/gltf/content-format.ts",
+        "size": 1962,
+        "mode": 420
+      },
+      {
+        "path": "src/gltf/copyrights.ts",
+        "size": 2113,
+        "mode": 420
+      },
+      {
+        "path": "src/gltf/gltf-tile-adapter.ts",
+        "size": 10924,
+        "mode": 420
+      },
+      {
+        "path": "src/index.ts",
+        "size": 1496,
+        "mode": 420
+      },
+      {
+        "path": "src/monitor/runtime-monitor.ts",
+        "size": 7831,
+        "mode": 420
+      },
+      {
+        "path": "src/raster/raster-pages.ts",
+        "size": 6286,
+        "mode": 420
+      },
+      {
+        "path": "src/raster/raster-tile-adapter.ts",
+        "size": 3478,
+        "mode": 420
+      },
+      {
+        "path": "src/raster/texture-array-backends.ts",
+        "size": 10769,
+        "mode": 420
+      },
+      {
+        "path": "src/raster/texture-array-pool.ts",
+        "size": 5622,
+        "mode": 420
+      },
+      {
+        "path": "src/runtime/motion-refinement.ts",
+        "size": 4267,
+        "mode": 420
+      },
+      {
+        "path": "src/runtime/runtime-driver.ts",
+        "size": 7755,
+        "mode": 420
+      },
+      {
+        "path": "src/scene/geospatial-scene.ts",
+        "size": 4495,
+        "mode": 420
+      },
+      {
+        "path": "src/spatial/camera-frame.ts",
+        "size": 2330,
+        "mode": 420
+      },
+      {
+        "path": "src/spatial/tile-matrix.ts",
+        "size": 1347,
+        "mode": 420
+      },
+      {
+        "path": "src/terrain/displayed-tiles.ts",
+        "size": 9506,
+        "mode": 420
+      },
+      {
+        "path": "src/terrain/gpu/body-frame.ts",
+        "size": 676,
+        "mode": 420
+      },
+      {
+        "path": "src/terrain/gpu/elevation-pages.ts",
+        "size": 6842,
+        "mode": 420
+      },
+      {
+        "path": "src/terrain/gpu/gpu-raster-drape.ts",
+        "size": 4698,
+        "mode": 420
+      },
+      {
+        "path": "src/terrain/gpu/gpu-terrain-engine.ts",
+        "size": 30631,
+        "mode": 420
+      },
+      {
+        "path": "src/terrain/gpu/gpu-terrain-normals.ts",
+        "size": 5881,
+        "mode": 420
+      },
+      {
+        "path": "src/terrain/gpu/grid-shapes.ts",
+        "size": 5373,
+        "mode": 420
+      },
+      {
+        "path": "src/terrain/gpu/instanced-grid.ts",
+        "size": 7341,
+        "mode": 420
+      },
+      {
+        "path": "src/terrain/gpu/pick-surface.ts",
+        "size": 4170,
+        "mode": 420
+      },
+      {
+        "path": "src/terrain/gpu/shaders/instancedGrid.fragment.glsl",
+        "size": 6954,
+        "mode": 420
+      },
+      {
+        "path": "src/terrain/gpu/shaders/instancedGrid.fragment.ts",
+        "size": 5402,
+        "mode": 420
+      },
+      {
+        "path": "src/terrain/gpu/shaders/instancedGrid.vertex.glsl",
+        "size": 11482,
+        "mode": 420
+      },
+      {
+        "path": "src/terrain/gpu/shaders/instancedGrid.vertex.ts",
+        "size": 8414,
+        "mode": 420
+      },
+      {
+        "path": "src/terrain/gpu/shaders/wgsl/instancedGrid.fragment.ts",
+        "size": 6418,
+        "mode": 420
+      },
+      {
+        "path": "src/terrain/gpu/shaders/wgsl/instancedGrid.fragment.wgsl",
+        "size": 7900,
+        "mode": 420
+      },
+      {
+        "path": "src/terrain/gpu/shaders/wgsl/instancedGrid.vertex.ts",
+        "size": 8926,
+        "mode": 420
+      },
+      {
+        "path": "src/terrain/gpu/shaders/wgsl/instancedGrid.vertex.wgsl",
+        "size": 10643,
+        "mode": 420
+      },
+      {
+        "path": "src/terrain/grid-source.ts",
+        "size": 10045,
+        "mode": 420
+      },
+      {
+        "path": "src/terrain/mesh/geodesic-grid-geometry.ts",
+        "size": 6723,
+        "mode": 420
+      },
+      {
+        "path": "src/terrain/mesh/geodesic-grid-pipeline.ts",
+        "size": 41888,
+        "mode": 420
+      },
+      {
+        "path": "src/terrain/mesh/mesh-terrain-engine.ts",
+        "size": 4022,
+        "mode": 420
+      },
+      {
+        "path": "src/terrain/terrain-config.json",
+        "size": 1055,
+        "mode": 420
+      },
+      {
+        "path": "src/terrain/terrain-config.ts",
+        "size": 3406,
+        "mode": 420
+      },
+      {
+        "path": "src/terrain/terrain-engine.ts",
+        "size": 2860,
+        "mode": 420
+      },
+      {
+        "path": "src/terrain/terrain-tile.ts",
+        "size": 2625,
+        "mode": 420
+      },
+      {
+        "path": "src/terrain/terrain-tiling.ts",
+        "size": 4734,
+        "mode": 420
+      }
+    ],
+    "entryCount": 73,
+    "bundled": []
+  }
+]

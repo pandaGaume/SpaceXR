@@ -1,0 +1,47 @@
+{
+    "grid": {
+        "cells": 64
+    },
+    "selection": {
+        "screenSpaceError": 10,
+        "hysteresis": 0.2,
+        "frustumMargin": 0.25,
+        "coarseningDelayMilliseconds": 300,
+        "maxConcurrentLoads": 12,
+        "contentCacheEntries": 1024
+    },
+    "motion": {
+        "maxScale": 4,
+        "restPixelsPerSecond": 50,
+        "fullPixelsPerSecond": 800,
+        "releaseMilliseconds": 300
+    },
+    "dem": {
+        "tileCells": 256,
+        "cacheEntries": 2048,
+        "abortDelayMilliseconds": 500,
+        "interpolation": "cubic",
+        "generatedLevels": 3
+    },
+    "imagery": {
+        "tileCells": 256,
+        "minLOD": 3,
+        "maxLOD": 20,
+        "screenSpaceError": 2,
+        "demSubdivision": 4,
+        "contentCacheEntries": 512,
+        "maxDrapeDepth": 4
+    },
+    "mercator": {
+        "minLOD": 3,
+        "maxLOD": 18
+    },
+    "mesh": {
+        "junctionBudgetMilliseconds": 4
+    },
+    "gpu": {
+        "pickCells": 8,
+        "maxInstanceDepth": 6,
+        "holdMilliseconds": 500
+    }
+}

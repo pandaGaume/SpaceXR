@@ -1,0 +1,55 @@
+# Node
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+*.log
+npm-debug.log*
+
+# .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+TestResults/
+artifacts/
+
+# C, C++, CMake and Unreal
+build/
+out/
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+compile_commands.json
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.dylib
+*.dll
+*.exe
+Binaries/
+DerivedDataCache/
+Intermediate/
+Saved/
+.vsconfig
+
+# Environment and credentials
+.env
+.env.local
+.env.*.local
+.npmrc.bootstrap
+
+# IDE and OS
+.idea/
+.vscode/*.local.json
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# AI tooling
+.claude/
+

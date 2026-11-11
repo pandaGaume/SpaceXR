@@ -1,0 +1,64 @@
+20690eff1860175710c246c0c20495a0
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.GraphNodeBuilder = void 0;
+const graph_interfaces_1 = require("./graph.interfaces");
+const graph_node_1 = require("./graph.node");
+/**
+ * Base builder for the concrete GraphNode class. Subclasses extend
+ * this and override _createNode() to swap the concrete node type. The
+ * base class no longer accepts a constructor reference at runtime; see
+ * graph.interfaces.builder.ts for the rationale.
+ *
+ * Collection methods use rest parameters so callers write
+ * `.withInputs(linkA, linkB)` without brackets; pass an existing array
+ * with `.withInputs(...arr)`.
+ */
+class GraphNodeBuilder {
+    constructor() {
+        this._inputs = null;
+        this._outputs = null;
+    }
+    /**
+     * Helper: resolves builders by calling .build(), leaves pre-built
+     * items as-is. Used by the GraphNodeBuilder / GraphBuilder family
+     * to accept mixed (concrete + builder) inputs uniformly.
+     */
+    static Resolve(items, isType) {
+        return items.map((item) => (isType(item) ? item : item.build()));
+    }
+    withPosition(p) {
+        this._position = p;
+        return this;
+    }
+    withInputs(...links) {
+        this._inputs = this._inputs ?? [];
+        this._inputs.push(...GraphNodeBuilder.Resolve(links, (graph_interfaces_1.isOlink)));
+        return this;
+    }
+    withOutputs(...links) {
+        this._outputs = this._outputs ?? [];
+        this._outputs.push(...GraphNodeBuilder.Resolve(links, (graph_interfaces_1.isOlink)));
+        return this;
+    }
+    build() {
+        return this._createNode(this._inputs, this._outputs, this._position);
+    }
+    /**
+     * Factory for the concrete node class. Subclass builders override
+     * this to instantiate their own node type (e.g. MlpNeuronBuilder
+     * returns an MlpNeuron). The base implementation returns a plain
+     * GraphNode.
+     */
+    _createNode(onsc, opsc, position) {
+        return new graph_node_1.GraphNode(onsc, opsc, position);
+    }
+    reset() {
+        this._position = undefined;
+        this._inputs = null;
+        this._outputs = null;
+        return this;
+    }
+}
+exports.GraphNodeBuilder = GraphNodeBuilder;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiQzpcXFVzZXJzXFxHdWlsbGF1bWVQZWxsZXRpZXJcXERvY3VtZW50c1xcR2l0SHViXFxTcGFjZVhSXFwuY2FjaGVcXGNvcmUtY29uY3VycmVudC10cmFuc2Zlclxcc3JjXFxncmFwaFxcZ3JhcGguYnVpbGRlci5ub2RlLnRzIiwibWFwcGluZ3MiOiI7OztBQUVBLHlEQUE0RDtBQUU1RCw2Q0FBeUM7QUFFekM7Ozs7Ozs7OztHQVNHO0FBQ0gsTUFBYSxnQkFBZ0I7SUFBN0I7UUFXYyxZQUFPLEdBQTRCLElBQUksQ0FBQztRQUN4QyxhQUFRLEdBQTRCLElBQUksQ0FBQztJQXVDdkQsQ0FBQztJQWxERzs7OztPQUlHO0lBQ0ksTUFBTSxDQUFDLE9BQU8sQ0FBTyxLQUFtQixFQUFFLE1BQWtDO1FBQy9FLE9BQU8sS0FBSyxDQUFDLEdBQUcsQ0FBQyxDQUFDLElBQUksRUFBRSxFQUFFLENBQUMsQ0FBQyxNQUFNLENBQUMsSUFBSSxDQUFDLENBQUMsQ0FBQyxDQUFDLElBQUksQ0FBQyxDQUFDLENBQUUsSUFBWSxDQUFDLEtBQUssRUFBRSxDQUFDLENBQUMsQ0FBQztJQUM5RSxDQUFDO0lBTU0sWUFBWSxDQUFDLENBQWE7UUFDN0IsSUFBSSxDQUFDLFNBQVMsR0FBRyxDQUFDLENBQUM7UUFDbkIsT0FBTyxJQUFJLENBQUM7SUFDaEIsQ0FBQztJQUVNLFVBQVUsQ0FBQyxHQUFHLEtBQW1DO1FBQ3BELElBQUksQ0FBQyxPQUFPLEdBQUcsSUFBSSxDQUFDLE9BQU8sSUFBSSxFQUFFLENBQUM7UUFDbEMsSUFBSSxDQUFDLE9BQU8sQ0FBQyxJQUFJLENBQUMsR0FBRyxnQkFBZ0IsQ0FBQyxPQUFPLENBQUMsS0FBSyxFQUFFLENBQUEsMEJBQWUsQ0FBQSxDQUFDLENBQUMsQ0FBQztRQUN2RSxPQUFPLElBQUksQ0FBQztJQUNoQixDQUFDO0lBRU0sV0FBVyxDQUFDLEdBQUcsS0FBbUM7UUFDckQsSUFBSSxDQUFDLFFBQVEsR0FBRyxJQUFJLENBQUMsUUFBUSxJQUFJLEVBQUUsQ0FBQztRQUNwQyxJQUFJLENBQUMsUUFBUSxDQUFDLElBQUksQ0FBQyxHQUFHLGdCQUFnQixDQUFDLE9BQU8sQ0FBQyxLQUFLLEVBQUUsQ0FBQSwwQkFBZSxDQUFBLENBQUMsQ0FBQyxDQUFDO1FBQ3hFLE9BQU8sSUFBSSxDQUFDO0lBQ2hCLENBQUM7SUFFTSxLQUFLO1FBQ1IsT0FBTyxJQUFJLENBQUMsV0FBVyxDQUFDLElBQUksQ0FBQyxPQUFPLEVBQUUsSUFBSSxDQUFDLFFBQVEsRUFBRSxJQUFJLENBQUMsU0FBUyxDQUFDLENBQUM7SUFDekUsQ0FBQztJQUVEOzs7OztPQUtHO0lBQ08sV0FBVyxDQUFDLElBQXdCLEVBQUUsSUFBd0IsRUFBRSxRQUFxQjtRQUMzRixPQUFPLElBQUksc0JBQVMsQ0FBQyxJQUFJLEVBQUUsSUFBSSxFQUFFLFFBQVEsQ0FBQyxDQUFDO0lBQy9DLENBQUM7SUFFTSxLQUFLO1FBQ1IsSUFBSSxDQUFDLFNBQVMsR0FBRyxTQUFTLENBQUM7UUFDM0IsSUFBSSxDQUFDLE9BQU8sR0FBRyxJQUFJLENBQUM7UUFDcEIsSUFBSSxDQUFDLFFBQVEsR0FBRyxJQUFJLENBQUM7UUFDckIsT0FBTyxJQUFJLENBQUM7SUFDaEIsQ0FBQztDQUNKO0FBbkRELDRDQW1EQyIsIm5hbWVzIjpbXSwic291cmNlcyI6WyJDOlxcVXNlcnNcXEd1aWxsYXVtZVBlbGxldGllclxcRG9jdW1lbnRzXFxHaXRIdWJcXFNwYWNlWFJcXC5jYWNoZVxcY29yZS1jb25jdXJyZW50LXRyYW5zZmVyXFxzcmNcXGdyYXBoXFxncmFwaC5idWlsZGVyLm5vZGUudHMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgSUNhcnRlc2lhbiB9IGZyb20gXCIuLi9nZW9tZXRyeVwiO1xyXG5pbXBvcnQgeyBOdWxsYWJsZSB9IGZyb20gXCIuLi90eXBlc1wiO1xyXG5pbXBvcnQgeyBJTm9kZSwgSU9saW5rLCBpc09saW5rIH0gZnJvbSBcIi4vZ3JhcGguaW50ZXJmYWNlc1wiO1xyXG5pbXBvcnQgeyBJTGlua0J1aWxkZXIsIElOb2RlQnVpbGRlciB9IGZyb20gXCIuL2dyYXBoLmludGVyZmFjZXMuYnVpbGRlclwiO1xyXG5pbXBvcnQgeyBHcmFwaE5vZGUgfSBmcm9tIFwiLi9ncmFwaC5ub2RlXCI7XHJcblxyXG4vKipcclxuICogQmFzZSBidWlsZGVyIGZvciB0aGUgY29uY3JldGUgR3JhcGhOb2RlIGNsYXNzLiBTdWJjbGFzc2VzIGV4dGVuZFxyXG4gKiB0aGlzIGFuZCBvdmVycmlkZSBfY3JlYXRlTm9kZSgpIHRvIHN3YXAgdGhlIGNvbmNyZXRlIG5vZGUgdHlwZS4gVGhlXHJcbiAqIGJhc2UgY2xhc3Mgbm8gbG9uZ2VyIGFjY2VwdHMgYSBjb25zdHJ1Y3RvciByZWZlcmVuY2UgYXQgcnVudGltZTsgc2VlXHJcbiAqIGdyYXBoLmludGVyZmFjZXMuYnVpbGRlci50cyBmb3IgdGhlIHJhdGlvbmFsZS5cclxuICpcclxuICogQ29sbGVjdGlvbiBtZXRob2RzIHVzZSByZXN0IHBhcmFtZXRlcnMgc28gY2FsbGVycyB3cml0ZVxyXG4gKiBgLndpdGhJbnB1dHMobGlua0EsIGxpbmtCKWAgd2l0aG91dCBicmFja2V0czsgcGFzcyBhbiBleGlzdGluZyBhcnJheVxyXG4gKiB3aXRoIGAud2l0aElucHV0cyguLi5hcnIpYC5cclxuICovXHJcbmV4cG9ydCBjbGFzcyBHcmFwaE5vZGVCdWlsZGVyIGltcGxlbWVudHMgSU5vZGVCdWlsZGVyIHtcclxuICAgIC8qKlxyXG4gICAgICogSGVscGVyOiByZXNvbHZlcyBidWlsZGVycyBieSBjYWxsaW5nIC5idWlsZCgpLCBsZWF2ZXMgcHJlLWJ1aWx0XHJcbiAgICAgKiBpdGVtcyBhcy1pcy4gVXNlZCBieSB0aGUgR3JhcGhOb2RlQnVpbGRlciAvIEdyYXBoQnVpbGRlciBmYW1pbHlcclxuICAgICAqIHRvIGFjY2VwdCBtaXhlZCAoY29uY3JldGUgKyBidWlsZGVyKSBpbnB1dHMgdW5pZm9ybWx5LlxyXG4gICAgICovXHJcbiAgICBwdWJsaWMgc3RhdGljIFJlc29sdmU8VCwgQj4oaXRlbXM6IEFycmF5PFQgfCBCPiwgaXNUeXBlOiAoaXRlbTogVCB8IEIpID0+IGl0ZW0gaXMgVCk6IFRbXSB7XHJcbiAgICAgICAgcmV0dXJuIGl0ZW1zLm1hcCgoaXRlbSkgPT4gKGlzVHlwZShpdGVtKSA/IGl0ZW0gOiAoaXRlbSBhcyBhbnkpLmJ1aWxkKCkpKTtcclxuICAgIH1cclxuXHJcbiAgICBwcm90ZWN0ZWQgX3Bvc2l0aW9uPzogSUNhcnRlc2lhbjtcclxuICAgIHByb3RlY3RlZCBfaW5wdXRzOiBOdWxsYWJsZTxBcnJheTxJT2xpbms+PiA9IG51bGw7XHJcbiAgICBwcm90ZWN0ZWQgX291dHB1dHM6IE51bGxhYmxlPEFycmF5PElPbGluaz4+ID0gbnVsbDtcclxuXHJcbiAgICBwdWJsaWMgd2l0aFBvc2l0aW9uKHA6IElDYXJ0ZXNpYW4pOiB0aGlzIHtcclxuICAgICAgICB0aGlzLl9wb3NpdGlvbiA9IHA7XHJcbiAgICAgICAgcmV0dXJuIHRoaXM7XHJcbiAgICB9XHJcblxyXG4gICAgcHVibGljIHdpdGhJbnB1dHMoLi4ubGlua3M6IEFycmF5PElPbGluayB8IElMaW5rQnVpbGRlcj4pOiB0aGlzIHtcclxuICAgICAgICB0aGlzLl9pbnB1dHMgPSB0aGlzLl9pbnB1dHMgPz8gW107XHJcbiAgICAgICAgdGhpcy5faW5wdXRzLnB1c2goLi4uR3JhcGhOb2RlQnVpbGRlci5SZXNvbHZlKGxpbmtzLCBpc09saW5rPElPbGluaz4pKTtcclxuICAgICAgICByZXR1cm4gdGhpcztcclxuICAgIH1cclxuXHJcbiAgICBwdWJsaWMgd2l0aE91dHB1dHMoLi4ubGlua3M6IEFycmF5PElPbGluayB8IElMaW5rQnVpbGRlcj4pOiB0aGlzIHtcclxuICAgICAgICB0aGlzLl9vdXRwdXRzID0gdGhpcy5fb3V0cHV0cyA/PyBbXTtcclxuICAgICAgICB0aGlzLl9vdXRwdXRzLnB1c2goLi4uR3JhcGhOb2RlQnVpbGRlci5SZXNvbHZlKGxpbmtzLCBpc09saW5rPElPbGluaz4pKTtcclxuICAgICAgICByZXR1cm4gdGhpcztcclxuICAgIH1cclxuXHJcbiAgICBwdWJsaWMgYnVpbGQoKTogSU5vZGUge1xyXG4gICAgICAgIHJldHVybiB0aGlzLl9jcmVhdGVOb2RlKHRoaXMuX2lucHV0cywgdGhpcy5fb3V0cHV0cywgdGhpcy5fcG9zaXRpb24pO1xyXG4gICAgfVxyXG5cclxuICAgIC8qKlxyXG4gICAgICogRmFjdG9yeSBmb3IgdGhlIGNvbmNyZXRlIG5vZGUgY2xhc3MuIFN1YmNsYXNzIGJ1aWxkZXJzIG92ZXJyaWRlXHJcbiAgICAgKiB0aGlzIHRvIGluc3RhbnRpYXRlIHRoZWlyIG93biBub2RlIHR5cGUgKGUuZy4gTWxwTmV1cm9uQnVpbGRlclxyXG4gICAgICogcmV0dXJucyBhbiBNbHBOZXVyb24pLiBUaGUgYmFzZSBpbXBsZW1lbnRhdGlvbiByZXR1cm5zIGEgcGxhaW5cclxuICAgICAqIEdyYXBoTm9kZS5cclxuICAgICAqL1xyXG4gICAgcHJvdGVjdGVkIF9jcmVhdGVOb2RlKG9uc2M6IE51bGxhYmxlPElPbGlua1tdPiwgb3BzYzogTnVsbGFibGU8SU9saW5rW10+LCBwb3NpdGlvbj86IElDYXJ0ZXNpYW4pOiBJTm9kZSB7XHJcbiAgICAgICAgcmV0dXJuIG5ldyBHcmFwaE5vZGUob25zYywgb3BzYywgcG9zaXRpb24pO1xyXG4gICAgfVxyXG5cclxuICAgIHB1YmxpYyByZXNldCgpOiB0aGlzIHtcclxuICAgICAgICB0aGlzLl9wb3NpdGlvbiA9IHVuZGVmaW5lZDtcclxuICAgICAgICB0aGlzLl9pbnB1dHMgPSBudWxsO1xyXG4gICAgICAgIHRoaXMuX291dHB1dHMgPSBudWxsO1xyXG4gICAgICAgIHJldHVybiB0aGlzO1xyXG4gICAgfVxyXG59XHJcbiJdLCJ2ZXJzaW9uIjozfQ==

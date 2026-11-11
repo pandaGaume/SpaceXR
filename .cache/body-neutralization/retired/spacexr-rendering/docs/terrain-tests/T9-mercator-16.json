@@ -1,0 +1,461 @@
+{
+  "label": "erreur-16",
+  "date": "2026-11-06T18:04:28.710Z",
+  "seconds": 8,
+  "results": [
+    {
+      "id": "mont-blanc/mesh",
+      "url": "http://localhost:5174/?engine=mesh&solid=1&imagery=none&radius=25000&pitch=60",
+      "errors": [],
+      "performance": {
+        "engine": "mesh",
+        "framesPerSecond": 10.1,
+        "terrainCpuMs": 5.49,
+        "renderCpuMs": 3.23,
+        "runtimeFrameMs": 18.4,
+        "gpuMs": 22.7,
+        "instances": 157,
+        "drawCalls": 191,
+        "trianglesPerFrame": 97051,
+        "uploadKiBPerFrame": 126.1,
+        "uploadCallsPerFrame": 42.2,
+        "gpuMiB": 8.8,
+        "cpuMiB": 12.8,
+        "demTiles": 512,
+        "tileRequests": 17871,
+        "loadSeconds": 70.2
+      },
+      "integrity": {
+        "settleSeconds": 60.1,
+        "holesAtRest": 0,
+        "worstSharedEdgeAtRestMetres": 33.048,
+        "worstPairAtRest": {
+          "gap": 33.047851562678666,
+          "a": {
+            "tile": {
+              "lod": 13,
+              "x": 4248,
+              "y": 2915
+            },
+            "lods": {
+              "1": 0,
+              "3": -1,
+              "5": 0,
+              "7": 0
+            },
+            "u": 0,
+            "v": 0.75,
+            "height": 2075.38671875,
+            "levels": [
+              11,
+              13
+            ],
+            "stale": false
+          },
+          "b": {
+            "tile": {
+              "lod": 11,
+              "x": 1061,
+              "y": 728
+            },
+            "lods": {
+              "1": 0,
+              "3": 0,
+              "5": 0,
+              "7": 0
+            },
+            "u": 1,
+            "v": 0.9375,
+            "height": 2108.4345703125,
+            "levels": [
+              11,
+              12
+            ],
+            "stale": false
+          }
+        },
+        "frames": 63,
+        "framesWithHoles": 62,
+        "worstHoles": 5282,
+        "edgeChecks": 15,
+        "sharedVerticesPerCheck": 6159,
+        "worstSharedEdgeMetres": 342,
+        "worstOutOfViewEdgeMetres": 512.5,
+        "worstPair": {
+          "gap": 341.9999999998004,
+          "a": {
+            "tile": {
+              "lod": 5,
+              "x": 17,
+              "y": 11
+            },
+            "lods": {
+              "1": 0,
+              "3": 0,
+              "5": 0,
+              "7": 0
+            },
+            "u": 0.9375,
+            "v": 1,
+            "height": 1271.75,
+            "levels": [
+              5
+            ],
+            "stale": true
+          },
+          "b": {
+            "tile": {
+              "lod": 5,
+              "x": 17,
+              "y": 12
+            },
+            "lods": {
+              "1": 0,
+              "3": 0,
+              "5": -1,
+              "7": 0
+            },
+            "u": 0.9375,
+            "v": 0,
+            "height": 1613.75,
+            "levels": [
+              5
+            ],
+            "stale": true
+          }
+        },
+        "tileRequests": 33581,
+        "loadSeconds": 72.7
+      }
+    },
+    {
+      "id": "mont-blanc/gpu",
+      "url": "http://localhost:5174/?engine=gpu&solid=1&imagery=none&radius=25000&pitch=60",
+      "errors": [],
+      "performance": {
+        "engine": "gpu",
+        "framesPerSecond": 13.1,
+        "terrainCpuMs": 4.27,
+        "renderCpuMs": 0.58,
+        "runtimeFrameMs": 14.5,
+        "gpuMs": 3.36,
+        "instances": 194,
+        "drawCalls": 1,
+        "trianglesPerFrame": 122405,
+        "uploadKiBPerFrame": 2386.8,
+        "uploadCallsPerFrame": 20.3,
+        "gpuMiB": 185.4,
+        "cpuMiB": 0,
+        "demTiles": 512,
+        "tileRequests": 22321,
+        "loadSeconds": 68.6
+      },
+      "integrity": {
+        "settleSeconds": 60,
+        "holesAtRest": 0,
+        "worstSharedEdgeAtRestMetres": 0,
+        "frames": 109,
+        "framesWithHoles": 104,
+        "worstHoles": 7217,
+        "edgeChecks": 15,
+        "sharedVerticesPerCheck": 14170,
+        "worstSharedEdgeMetres": 3820.895,
+        "worstOutOfViewEdgeMetres": 3979.797,
+        "worstPair": {
+          "gap": 3820.89453125,
+          "a": {
+            "address": {
+              "lod": 10,
+              "x": 534,
+              "y": 364
+            },
+            "terrain": {
+              "lod": 9,
+              "x": 267,
+              "y": 182
+            },
+            "terrainLevel": 9,
+            "finer": 8,
+            "coarser": 0,
+            "demOfTerrain": {
+              "lod": 9,
+              "x": 267,
+              "y": 182
+            }
+          },
+          "aLattice": [
+            0,
+            19
+          ],
+          "aHeight": 0,
+          "b": {
+            "address": {
+              "lod": 11,
+              "x": 1067,
+              "y": 729
+            },
+            "terrain": {
+              "lod": 10,
+              "x": 533,
+              "y": 364
+            },
+            "terrainLevel": 10,
+            "finer": 0,
+            "coarser": 6,
+            "demOfTerrain": {
+              "lod": 10,
+              "x": 533,
+              "y": 364
+            }
+          },
+          "bLattice": [
+            32,
+            6
+          ],
+          "bHeight": 3820.89453125,
+          "aReference": [
+            0,
+            0,
+            1,
+            -1
+          ],
+          "bReference": [
+            0.5,
+            0.5,
+            0.5,
+            149
+          ]
+        },
+        "tileRequests": 35061,
+        "loadSeconds": 68.6
+      }
+    },
+    {
+      "id": "mont-blanc-zoom/mesh",
+      "url": "http://localhost:5174/?engine=mesh&solid=1&imagery=none&radius=400000&pitch=60",
+      "errors": [],
+      "performance": {
+        "engine": "mesh",
+        "framesPerSecond": 12.5,
+        "terrainCpuMs": 4.13,
+        "renderCpuMs": 2.78,
+        "runtimeFrameMs": 13.8,
+        "gpuMs": 15.82,
+        "instances": 309,
+        "drawCalls": 178,
+        "trianglesPerFrame": 90626,
+        "uploadKiBPerFrame": 113.2,
+        "uploadCallsPerFrame": 34.4,
+        "gpuMiB": 9.9,
+        "cpuMiB": 14.3,
+        "demTiles": 512,
+        "tileRequests": 28208,
+        "loadSeconds": 67.7
+      },
+      "integrity": {
+        "settleSeconds": 60.1,
+        "holesAtRest": 0,
+        "worstSharedEdgeAtRestMetres": 39.735,
+        "worstPairAtRest": {
+          "gap": 39.73535156216765,
+          "a": {
+            "tile": {
+              "lod": 10,
+              "x": 535,
+              "y": 360
+            },
+            "lods": {
+              "1": 0,
+              "3": 0,
+              "5": 0,
+              "7": 0
+            },
+            "u": 1,
+            "v": 0.9375,
+            "height": 1302.05859375,
+            "levels": [
+              10
+            ],
+            "stale": false
+          },
+          "b": {
+            "tile": {
+              "lod": 10,
+              "x": 536,
+              "y": 360
+            },
+            "lods": {
+              "1": -1,
+              "3": 0,
+              "5": 0,
+              "7": 0
+            },
+            "u": 0,
+            "v": 0.9375,
+            "height": 1341.7939453125,
+            "levels": [
+              10
+            ],
+            "stale": false
+          }
+        },
+        "frames": 105,
+        "framesWithHoles": 27,
+        "worstHoles": 5911,
+        "edgeChecks": 15,
+        "sharedVerticesPerCheck": 6319,
+        "worstSharedEdgeMetres": 94.129,
+        "worstOutOfViewEdgeMetres": 115.25,
+        "worstPair": {
+          "gap": 94.12890625052322,
+          "a": {
+            "tile": {
+              "lod": 10,
+              "x": 535,
+              "y": 364
+            },
+            "lods": {
+              "1": 0,
+              "3": 0,
+              "5": -1,
+              "7": 0
+            },
+            "u": 1,
+            "v": 0.25,
+            "height": 692.62109375,
+            "levels": [
+              8,
+              10
+            ],
+            "stale": false
+          },
+          "b": {
+            "tile": {
+              "lod": 8,
+              "x": 134,
+              "y": 91
+            },
+            "lods": {
+              "1": 0,
+              "3": 0,
+              "5": 0,
+              "7": 0
+            },
+            "u": 0,
+            "v": 0.0625,
+            "height": 786.75,
+            "levels": [
+              8,
+              9
+            ],
+            "stale": true
+          }
+        },
+        "tileRequests": 50072,
+        "loadSeconds": 69
+      }
+    },
+    {
+      "id": "mont-blanc-zoom/gpu",
+      "url": "http://localhost:5174/?engine=gpu&solid=1&imagery=none&radius=400000&pitch=60",
+      "errors": [],
+      "performance": {
+        "engine": "gpu",
+        "framesPerSecond": 15.8,
+        "terrainCpuMs": 3.23,
+        "renderCpuMs": 0.4,
+        "runtimeFrameMs": 9.5,
+        "gpuMs": 3,
+        "instances": 364,
+        "drawCalls": 1,
+        "trianglesPerFrame": 115023,
+        "uploadKiBPerFrame": 3907.5,
+        "uploadCallsPerFrame": 31.1,
+        "gpuMiB": 185.4,
+        "cpuMiB": 0,
+        "demTiles": 512,
+        "tileRequests": 34648,
+        "loadSeconds": 65
+      },
+      "integrity": {
+        "settleSeconds": 60.1,
+        "holesAtRest": 0,
+        "worstSharedEdgeAtRestMetres": 0,
+        "frames": 104,
+        "framesWithHoles": 39,
+        "worstHoles": 9838,
+        "edgeChecks": 15,
+        "sharedVerticesPerCheck": 13601,
+        "worstSharedEdgeMetres": 3706.489,
+        "worstOutOfViewEdgeMetres": 3706.489,
+        "worstPair": {
+          "gap": 3706.4892578125,
+          "a": {
+            "address": {
+              "lod": 11,
+              "x": 1064,
+              "y": 729
+            },
+            "terrain": {
+              "lod": 11,
+              "x": 1064,
+              "y": 729
+            },
+            "terrainLevel": 11,
+            "finer": 1,
+            "coarser": 4,
+            "demOfTerrain": {
+              "lod": 11,
+              "x": 1064,
+              "y": 729
+            }
+          },
+          "aLattice": [
+            1,
+            0
+          ],
+          "aHeight": 0,
+          "b": {
+            "address": {
+              "lod": 12,
+              "x": 2128,
+              "y": 1457
+            },
+            "terrain": {
+              "lod": 12,
+              "x": 2128,
+              "y": 1457
+            },
+            "terrainLevel": 12,
+            "finer": 0,
+            "coarser": 12,
+            "demOfTerrain": {
+              "lod": 12,
+              "x": 2128,
+              "y": 1457
+            }
+          },
+          "bLattice": [
+            2,
+            32
+          ],
+          "bHeight": 3706.4892578125,
+          "aReference": [
+            0,
+            0,
+            1,
+            -1
+          ],
+          "bReference": [
+            0,
+            0,
+            1,
+            462
+          ]
+        },
+        "tileRequests": 55603,
+        "loadSeconds": 66
+      }
+    }
+  ]
+}

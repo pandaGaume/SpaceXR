@@ -34,6 +34,12 @@ export interface IStreamEngine extends IDisposable {
     deactivate(viewId: string): void;
     /** Number of views currently registered. */
     readonly activeViewCount: number;
+    /**
+     * True while some refine/coarsen work is still queued (per-frame budgets
+     * left leftovers). Drivers should keep calling `setContext` until it goes
+     * back to false, otherwise a static camera stalls mid-convergence.
+     */
+    readonly hasPendingWork?: boolean;
 }
 
 /**

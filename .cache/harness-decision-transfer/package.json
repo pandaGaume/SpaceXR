@@ -1,0 +1,30 @@
+{
+  "name": "spikypanda-harness-design",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Graphe de décision exécutable sur les sessions Core et les slots MCP",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "check": "tsc --noEmit",
+    "build": "tsc",
+    "build:proposal": "tsc",
+    "test": "npm run build && node --test --test-timeout=15000 tests/*.test.mjs",
+    "test:decision": "npm run build && node --test --test-timeout=15000 tests/decision-runtime.test.mjs tests/decision-broker.test.mjs tests/broker-slots.test.mjs",
+    "test:harness-onnx": "npm run build:proposal && node --test LLMLingua2/harness-flow/slot-routing.test.mjs && node --max-old-space-size=12288 LLMLingua2/gpu-node/run-model.mjs high-performance --harness-flow",
+    "test:harness-relay": "npm run build:proposal && node --test LLMLingua2/harness-flow/relay.test.mjs LLMLingua2/harness-flow/relay-gpu.test.mjs && node --max-old-space-size=12288 LLMLingua2/gpu-node/run-model.mjs high-performance --harness-relay",
+    "test:gameplay-mlp": "node gameplay-mlp/direct.mjs high-performance && node gameplay-mlp/direct.mjs low-power",
+    "test:gameplay-mlp:worker": "node gameplay-mlp/run.mjs high-performance && node gameplay-mlp/run.mjs low-power",
+    "test:gameplay-mlp:batch20": "node gameplay-mlp/direct.mjs high-performance --batch20 && node gameplay-mlp/direct.mjs low-power --batch20",
+    "inspect:proposal": "node scripts/inspect-proposal.mjs"
+  },
+  "dependencies": {
+    "@spiky-panda/core": "file:../../spikypanda/packages/dev/core",
+    "@cyanmycelium/mcp-broker": "file:../mcp-broker/node/packages/broker",
+    "@cyanmycelium/mcp-core": "1.4.1"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3"
+  }
+}

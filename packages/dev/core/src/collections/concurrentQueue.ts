@@ -35,6 +35,8 @@ export interface IActionQueueItem<R, T> {
     reject: (e: any) => void;
     onSettled?: (e: IActionQueueSettledEvent<R, T>) => void;
     priority: number;
+    /** Set by cancelPending. The item stays in the queue but is skipped by tick(). */
+    cancelled?: boolean;
 }
 
 /**
@@ -91,6 +93,9 @@ export class ConcurrentActionQueue<R, T> {
         if (!item) return false;
 
         this.queuedByData.delete(data);
+        // The backing queue has no removal by identity: flag the item so tick()
+        // drops it instead of running the action after cancellation.
+        item.cancelled = true;
         item.reject(new ActionCancelledError());
         item.onSettled?.({ data, status: ActionQueueStatus.cancelled, reason: "Cancelled before start" });
         return true;
@@ -99,6 +104,7 @@ export class ConcurrentActionQueue<R, T> {
     private tick(): void {
         while (this.running < this.concurrency && !this.queue.isEmpty()) {
             const item = this.queue.dequeue()!;
+            if (item.cancelled) continue;
             this.queuedByData.delete(item.data);
             this.start(item);
         }

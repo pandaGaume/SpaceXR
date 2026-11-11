@@ -86,7 +86,6 @@ export class TilePyramidStreamSource extends StreamingEngine implements IStreamS
     public boundingSphere?: IBoundingSphere;
 
     private readonly _metrics: ITileMetrics;
-    private readonly _ellipsoid?: Ellipsoid;
     private readonly _geodetic?: GeodeticSystem;
     private readonly _sphereCenter: ICartesian3;
     private readonly _sphereRadius: number;
@@ -100,7 +99,6 @@ export class TilePyramidStreamSource extends StreamingEngine implements IStreamS
         this.contentType = options.contentType ?? TILE_PYRAMID_CONTENT_TYPE;
         this.encumbrance = options.encumbrance;
         this._metrics = options.metrics;
-        this._ellipsoid = options.ellipsoid;
         this._geodetic = options.ellipsoid ? new GeodeticSystem(options.ellipsoid) : undefined;
         this._sphereCenter = options.sphereCenter ?? { x: 0, y: 0, z: 0 };
         this._sphereRadius = options.ellipsoid?.semiMajorAxis ?? 0;
@@ -119,7 +117,7 @@ export class TilePyramidStreamSource extends StreamingEngine implements IStreamS
     }
 
     public get ellipsoid(): Ellipsoid | undefined {
-        return this._ellipsoid;
+        return this._geodetic?.ellipsoid;
     }
 
     protected override _traverse(
@@ -198,8 +196,8 @@ export class TilePyramidStreamSource extends StreamingEngine implements IStreamS
     }
 
     private _computeBounds(address: ITile2DAddress): IBounds | undefined {
-        if (this._ellipsoid && this._geodetic) {
-            return TileAddress.ToBoundsECEF(address, this._metrics, this._ellipsoid, this._geodetic);
+        if (this._geodetic) {
+            return TileAddress.ToBoundsECEF(address, this._metrics, this._geodetic);
         }
         return TileAddress.ToBounds(address, this._metrics);
     }

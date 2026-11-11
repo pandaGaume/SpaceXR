@@ -1,0 +1,117 @@
+{
+  "note": "CPU reference experiment. GPU stores RGBA16F while these CPU tables use float32. One global optical table, fixed solar declination. These are not GPU performance measurements.",
+  "reports": [
+    {
+      "name": "day",
+      "output": [
+        32,
+        18
+      ],
+      "directCPU": {
+        "ms": 2485.7675,
+        "densityEvaluations": 6705710,
+        "solarIntegrations": 103158
+      },
+      "qualities": [
+        {
+          "size": [
+            64,
+            16,
+            24
+          ],
+          "textureBytesGPU": 196608,
+          "buildMsCPU": 367.84720000000016,
+          "renderCPU": {
+            "ms": 238.7125000000001,
+            "densityEvaluations": 103598,
+            "solarIntegrations": 0,
+            "hits": 103158,
+            "fallbacks": 0,
+            "shadowed": 0
+          },
+          "warmCpuSpeedup": 10.413227208462057,
+          "totalCpuSpeedupIncludingOneBuild": 4.098141534955255,
+          "radianceRMSE": 0.00003771713043182855,
+          "maxRadianceError": 0.0001039501238771362
+        },
+        {
+          "size": [
+            128,
+            32,
+            32
+          ],
+          "textureBytesGPU": 1048576,
+          "buildMsCPU": 2124.8097999999995,
+          "renderCPU": {
+            "ms": 193.23719999999958,
+            "densityEvaluations": 103598,
+            "solarIntegrations": 0,
+            "hits": 103158,
+            "fallbacks": 0,
+            "shadowed": 0
+          },
+          "warmCpuSpeedup": 12.863814524325571,
+          "totalCpuSpeedupIncludingOneBuild": 1.0723542275027214,
+          "radianceRMSE": 0.000009792481668118641,
+          "maxRadianceError": 0.000027721385350731875
+        }
+      ]
+    },
+    {
+      "name": "sunset",
+      "output": [
+        32,
+        18
+      ],
+      "directCPU": {
+        "ms": 2872.176700000001,
+        "densityEvaluations": 6705710,
+        "solarIntegrations": 103158
+      },
+      "qualities": [
+        {
+          "size": [
+            64,
+            16,
+            24
+          ],
+          "textureBytesGPU": 196608,
+          "buildMsCPU": 416.8050000000003,
+          "renderCPU": {
+            "ms": 204.4326000000001,
+            "densityEvaluations": 103598,
+            "solarIntegrations": 0,
+            "hits": 103158,
+            "fallbacks": 0,
+            "shadowed": 0
+          },
+          "warmCpuSpeedup": 14.049504335414213,
+          "totalCpuSpeedupIncludingOneBuild": 4.623314332551667,
+          "radianceRMSE": 0.00013126444623458243,
+          "maxRadianceError": 0.0015085103053942839
+        },
+        {
+          "size": [
+            128,
+            32,
+            32
+          ],
+          "textureBytesGPU": 1048576,
+          "buildMsCPU": 2302.372000000001,
+          "renderCPU": {
+            "ms": 199.16420000000107,
+            "densityEvaluations": 103598,
+            "solarIntegrations": 0,
+            "hits": 103158,
+            "fallbacks": 0,
+            "shadowed": 0
+          },
+          "warmCpuSpeedup": 14.421149483692277,
+          "totalCpuSpeedupIncludingOneBuild": 1.1481651554752628,
+          "radianceRMSE": 0.000028240359198484285,
+          "maxRadianceError": 0.00009850440985637032
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,81 @@
+{
+  "name": "spacexr-tile-service",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "generate": "tsx tools/generate-schemas.ts",
+    "configure": "tsx tools/service-cli/src/main.ts configure",
+    "dev": "tsx tools/service-cli/src/main.ts dev",
+    "build": "node scripts/build.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "npm run build && vitest run",
+    "lint": "eslint \"{apps,packages,tools,workers,tests}/**/*.ts\"",
+    "format": "prettier --check \"{apps,packages,tools,workers,tests,deployments,docs,migrations,scripts}/**/*.{ts,js,mjs,json,yaml,md,html,css,sql}\" \"*.{json,md,ts}\" --ignore-unknown",
+    "format:fix": "prettier --write \"{apps,packages,tools,workers,tests,deployments,docs,migrations,scripts}/**/*.{ts,js,mjs,json,yaml,md,html,css,sql}\" \"*.{json,md,ts}\" --ignore-unknown",
+    "check": "npm run format && npm run lint && npm run typecheck && npm test",
+    "synthetic": "tsx tools/synthetic.ts",
+    "worker": "tsx workers/build-consumer/src/main.ts",
+    "cli": "tsx tools/service-cli/src/main.ts",
+    "r2:smoke": "tsx tools/r2/smoke.ts",
+    "r2:moon": "tsx tools/r2/nasa-moon.ts",
+    "r2:verify": "tsx tools/r2/verify.ts",
+    "admin:setup": "tsx tools/admin/setup.ts",
+    "admin:dev": "wrangler dev --config wrangler.admin.jsonc --local",
+    "admin:build": "node scripts/build.mjs",
+    "lunar": "tsx tools/lunar/main.ts",
+    "mars": "tsx tools/mars/main.ts",
+    "tiles:serve": "tsx tools/tile-server.ts serve"
+  },
+  "dependencies": {
+    "@gltf-transform/core": "4.5.1",
+    "@gltf-transform/functions": "4.5.1",
+    "@sinclair/typebox": "0.34.52",
+    "@spacexr/3d-tiles-core": "file:../3d-tiles-core/node/packages/core",
+    "@spacexr/3d-tiles-runtime": "file:../3d-tiles-core/node/packages/runtime",
+    "@spacexr/celestial-core": "file:../celestial-core",
+    "@spacexr/dem": "file:../3d-tiles-core/node/packages/dem",
+    "@spacexr/geodesy": "0.4.0",
+    "@spacexr/raster": "file:../3d-tiles-core/node/packages/raster",
+    "@spacexr/tiles": "file:../3d-tiles-core/node/packages/tiles",
+    "aws4fetch": "1.0.20",
+    "geotiff": "3.0.5",
+    "gl-matrix": "3.4.4",
+    "quantia": "file:../quantia",
+    "sharp": "0.35.5",
+    "yaml": "^2.8.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "5.20261104.1",
+    "@types/node": "^22.0.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "ajv": "8.20.0",
+    "esbuild": "0.28.2",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "json-schema-to-typescript": "16.0.0",
+    "miniflare": "4.20260730.0",
+    "prettier": "^3.2.0",
+    "tsx": "4.23.15",
+    "typedoc": "^0.28.0",
+    "typescript": "^5.4.0",
+    "vitest": "4.1.11",
+    "wrangler": "4.157.0"
+  },
+  "overrides": {
+    "vite": "8.3.1",
+    "quantia": "$quantia",
+    "@spacexr/geodesy": "$@spacexr/geodesy",
+    "@spacexr/3d-tiles-core": "$@spacexr/3d-tiles-core",
+    "@spacexr/tiles": "$@spacexr/tiles",
+    "@spacexr/raster": "$@spacexr/raster"
+  }
+}

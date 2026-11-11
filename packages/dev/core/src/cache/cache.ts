@@ -114,6 +114,7 @@ export class CacheEntry<K, V> {
     _prev?: CacheEntry<K, V>;
 
     public constructor(key: K, value?: V, options?: CacheEntryOptions<K, V>) {
+        this._key = key;
         this._options = options;
         this._value = value;
         this._lastAccess = Date.now();
@@ -135,14 +136,14 @@ export class CacheEntry<K, V> {
 
     public get expiration(): number {
         const se = this._options?._slidingExpiration;
-        if (!this._lastAccess || !se) {
+        if (this._lastAccess === undefined || !se) {
             return Infinity;
         }
         return this._lastAccess + se;
     }
 
     public *postEvictionCallback(): IterableIterator<PostEvictionCallback<K, V>> {
-        return this._options?._callbacks;
+        yield* this._options?._callbacks ?? [];
     }
 }
 
@@ -177,7 +178,7 @@ export class MemoryCache<K, V> implements IMemoryCache<K, V> {
     }
 
     public set(key: K, value: V, options?: CacheEntryOptions<K, V>): void {
-        const o = <CacheEntryOptions<K, V>>{ ...{ slidingExpiration: this._policy.slidingExpiration }, ...options };
+        const o = new CacheEntryOptions<K, V>({ _slidingExpiration: this._policy.slidingExpiration, ...options });
         let e = this._cache.get(key);
         if (!e) {
             e = new CacheEntry(key, value, o);
@@ -211,14 +212,14 @@ export class MemoryCache<K, V> implements IMemoryCache<K, V> {
     public clear(predicate?: (k: K) => boolean): void {
         const keys = [...this._cache.keys()];
         for (const k of keys) {
-            if (predicate && predicate(k)) {
+            if (!predicate || predicate(k)) {
                 this.delete(k);
             }
         }
     }
 
     public any(predicate?: (k: K) => boolean): boolean {
-        if (!predicate) return true;
+        if (!predicate) return this._cache.size > 0;
         const keys = [...this._cache.keys()];
         for (const k of keys) {
             if (predicate(k)) {
@@ -254,15 +255,12 @@ export class MemoryCache<K, V> implements IMemoryCache<K, V> {
     }
 
     private updateTimer() {
-        if (this._head) {
+        if (this._timer) clearTimeout(this._timer);
+        this._timer = undefined;
+        if (this._head && Number.isFinite(this._head.expiration)) {
             const delay = this._head.expiration - Date.now();
             //console.log("timeout after clear", Math.round(delay / 1000), "seconds, remains", this._count, "tile(s)");
-            if (this._timer) {
-                clearTimeout(this._timer);
-            }
-            this._timer = setTimeout(this._gc, delay);
-        } else {
-            this._timer = undefined;
+            this._timer = setTimeout(this._gc, Math.max(0, Math.min(delay, 2147483647)));
         }
     }
 
@@ -270,10 +268,8 @@ export class MemoryCache<K, V> implements IMemoryCache<K, V> {
 
     private sortList(e: CacheEntry<K, V> | undefined) {
         if (e) {
-            const head = this._head;
-
             try {
-                if (!e._next && !e._prev) {
+                if (e !== this._head && !e._next && !e._prev) {
                     this.insertLast(e);
                 }
 
@@ -308,14 +304,7 @@ export class MemoryCache<K, V> implements IMemoryCache<K, V> {
                     }
                 }
             } finally {
-                if (this._head && this._head !== head) {
-                    const delay = this._head.expiration - Date.now();
-                    // we change the trigger.
-                    if (this._timer) {
-                        clearTimeout(this._timer);
-                    }
-                    this._timer = setTimeout(this._gc, delay);
-                }
+                this.updateTimer();
             }
         }
     }

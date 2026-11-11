@@ -1,0 +1,28 @@
+[
+  {
+    "name": "orbit",
+    "errors": [],
+    "state": {
+      "stats": "webgpu | SSE 20 px | 23 tuiles implicites | 120 FPS",
+      "errors": [],
+      "attribution": "Relief Mapzen Terrain Tiles (Terrarium), AWS Open Data. Normales issues du DEM. | Imagery © Google"
+    },
+    "mapzenRequests": 204,
+    "existingImageryRequests": 204,
+    "legacyRequests": 0,
+    "decoderWorkers": 2
+  },
+  {
+    "name": "crest",
+    "errors": [],
+    "state": {
+      "stats": "webgpu | SSE 20 px | 37 tuiles implicites | 81 FPS",
+      "errors": [],
+      "attribution": "Relief Mapzen Terrain Tiles (Terrarium), AWS Open Data. Normales issues du DEM. | Imagery © Google"
+    },
+    "mapzenRequests": 411,
+    "existingImageryRequests": 412,
+    "legacyRequests": 0,
+    "decoderWorkers": 2
+  }
+]

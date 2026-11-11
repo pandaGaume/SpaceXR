@@ -1,0 +1,36 @@
+4e96821b1951faeb7ab06ed87d01ddad
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.RnnSynapse = void 0;
+const tslib_1 = require("tslib");
+const graph_1 = require("../../graph");
+/// <summary>
+/// RNN synapse carrying multiple weights, one per gate.
+/// LSTM synapses have 4 weights: [forget, input, candidate, output]
+/// GRU synapses have 3 weights: [reset, update, candidate]
+///
+/// The base ISynapse.weight property maps to weights[0] for compatibility
+/// with the existing optimizer infrastructure.
+/// </summary>
+class RnnSynapse extends graph_1.GraphOLink {
+    constructor(oini, ofin, numGates = 4) {
+        super(oini, ofin);
+        this.weights = new Array(numGates).fill(0);
+    }
+    /// <summary>
+    /// Compatibility accessor - maps to weights[0].
+    /// The optimizer uses this property, so for RNN we apply gradients per-gate separately.
+    /// </summary>
+    get weight() {
+        return this.weights[0];
+    }
+    set weight(v) {
+        this.weights[0] = v;
+    }
+}
+exports.RnnSynapse = RnnSynapse;
+tslib_1.__decorate([
+    graph_1.cloneable,
+    tslib_1.__metadata("design:type", Array)
+], RnnSynapse.prototype, "weights", void 0);
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiQzpcXFVzZXJzXFxHdWlsbGF1bWVQZWxsZXRpZXJcXERvY3VtZW50c1xcR2l0SHViXFxTcGFjZVhSXFwuY2FjaGVcXGNvcmUtZGVjaXNpb24tcnVudGltZVxcc3JjXFxuZXVyYWxuZXR3b3JrXFxybm5cXHJubi5zeW5hcHNlLnRzIiwibWFwcGluZ3MiOiI7Ozs7QUFBQSx1Q0FBMkQ7QUFHM0QsYUFBYTtBQUNiLHdEQUF3RDtBQUN4RCxvRUFBb0U7QUFDcEUsMkRBQTJEO0FBQzNELEdBQUc7QUFDSCwwRUFBMEU7QUFDMUUsK0NBQStDO0FBQy9DLGNBQWM7QUFDZCxNQUFhLFVBQVcsU0FBUSxrQkFBVTtJQUd0QyxZQUFtQixJQUFXLEVBQUUsSUFBVyxFQUFFLFdBQW1CLENBQUM7UUFDN0QsS0FBSyxDQUFDLElBQUksRUFBRSxJQUFJLENBQUMsQ0FBQztRQUNsQixJQUFJLENBQUMsT0FBTyxHQUFHLElBQUksS0FBSyxDQUFDLFFBQVEsQ0FBQyxDQUFDLElBQUksQ0FBQyxDQUFDLENBQUMsQ0FBQztJQUMvQyxDQUFDO0lBRUQsYUFBYTtJQUNiLGdEQUFnRDtJQUNoRCx3RkFBd0Y7SUFDeEYsY0FBYztJQUNkLElBQVcsTUFBTTtRQUNiLE9BQU8sSUFBSSxDQUFDLE9BQU8sQ0FBQyxDQUFDLENBQUMsQ0FBQztJQUMzQixDQUFDO0lBQ0QsSUFBVyxNQUFNLENBQUMsQ0FBUztRQUN2QixJQUFJLENBQUMsT0FBTyxDQUFDLENBQUMsQ0FBQyxHQUFHLENBQUMsQ0FBQztJQUN4QixDQUFDO0NBQ0o7QUFsQkQsZ0NBa0JDO0FBakJxQjtJQUFqQixpQkFBUzs7MkNBQTBCIiwibmFtZXMiOltdLCJzb3VyY2VzIjpbIkM6XFxVc2Vyc1xcR3VpbGxhdW1lUGVsbGV0aWVyXFxEb2N1bWVudHNcXEdpdEh1YlxcU3BhY2VYUlxcLmNhY2hlXFxjb3JlLWRlY2lzaW9uLXJ1bnRpbWVcXHNyY1xcbmV1cmFsbmV0d29ya1xccm5uXFxybm4uc3luYXBzZS50cyJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgeyBjbG9uZWFibGUsIEdyYXBoT0xpbmssIElOb2RlIH0gZnJvbSBcIi4uLy4uL2dyYXBoXCI7XHJcbmltcG9ydCB7IElSbm5TeW5hcHNlIH0gZnJvbSBcIi4vcm5uLmludGVyZmFjZXNcIjtcclxuXHJcbi8vLyA8c3VtbWFyeT5cclxuLy8vIFJOTiBzeW5hcHNlIGNhcnJ5aW5nIG11bHRpcGxlIHdlaWdodHMsIG9uZSBwZXIgZ2F0ZS5cclxuLy8vIExTVE0gc3luYXBzZXMgaGF2ZSA0IHdlaWdodHM6IFtmb3JnZXQsIGlucHV0LCBjYW5kaWRhdGUsIG91dHB1dF1cclxuLy8vIEdSVSBzeW5hcHNlcyBoYXZlIDMgd2VpZ2h0czogW3Jlc2V0LCB1cGRhdGUsIGNhbmRpZGF0ZV1cclxuLy8vXHJcbi8vLyBUaGUgYmFzZSBJU3luYXBzZS53ZWlnaHQgcHJvcGVydHkgbWFwcyB0byB3ZWlnaHRzWzBdIGZvciBjb21wYXRpYmlsaXR5XHJcbi8vLyB3aXRoIHRoZSBleGlzdGluZyBvcHRpbWl6ZXIgaW5mcmFzdHJ1Y3R1cmUuXHJcbi8vLyA8L3N1bW1hcnk+XHJcbmV4cG9ydCBjbGFzcyBSbm5TeW5hcHNlIGV4dGVuZHMgR3JhcGhPTGluayBpbXBsZW1lbnRzIElSbm5TeW5hcHNlIHtcclxuICAgIEBjbG9uZWFibGUgcHVibGljIHdlaWdodHM6IG51bWJlcltdO1xyXG5cclxuICAgIHB1YmxpYyBjb25zdHJ1Y3RvcihvaW5pOiBJTm9kZSwgb2ZpbjogSU5vZGUsIG51bUdhdGVzOiBudW1iZXIgPSA0KSB7XHJcbiAgICAgICAgc3VwZXIob2luaSwgb2Zpbik7XHJcbiAgICAgICAgdGhpcy53ZWlnaHRzID0gbmV3IEFycmF5KG51bUdhdGVzKS5maWxsKDApO1xyXG4gICAgfVxyXG5cclxuICAgIC8vLyA8c3VtbWFyeT5cclxuICAgIC8vLyBDb21wYXRpYmlsaXR5IGFjY2Vzc29yIC0gbWFwcyB0byB3ZWlnaHRzWzBdLlxyXG4gICAgLy8vIFRoZSBvcHRpbWl6ZXIgdXNlcyB0aGlzIHByb3BlcnR5LCBzbyBmb3IgUk5OIHdlIGFwcGx5IGdyYWRpZW50cyBwZXItZ2F0ZSBzZXBhcmF0ZWx5LlxyXG4gICAgLy8vIDwvc3VtbWFyeT5cclxuICAgIHB1YmxpYyBnZXQgd2VpZ2h0KCk6IG51bWJlciB7XHJcbiAgICAgICAgcmV0dXJuIHRoaXMud2VpZ2h0c1swXTtcclxuICAgIH1cclxuICAgIHB1YmxpYyBzZXQgd2VpZ2h0KHY6IG51bWJlcikge1xyXG4gICAgICAgIHRoaXMud2VpZ2h0c1swXSA9IHY7XHJcbiAgICB9XHJcbn1cclxuIl0sInZlcnNpb24iOjN9

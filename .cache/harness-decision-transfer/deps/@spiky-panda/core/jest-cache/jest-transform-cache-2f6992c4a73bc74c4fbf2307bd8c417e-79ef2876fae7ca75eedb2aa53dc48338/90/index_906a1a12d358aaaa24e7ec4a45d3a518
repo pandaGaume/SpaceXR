@@ -1,0 +1,21 @@
+e43c7fae1690ef69125e4dbbcedbd81c
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const tslib_1 = require("tslib");
+/**
+ * The unit projection layer.
+ *
+ * Importing this barrel is what registers the implemented projections, QUDT
+ * being the only one today. The unimplemented targets export their type and
+ * their documentation and register nothing, so `unitProjectionIds()` lists
+ * what works rather than what is planned.
+ *
+ * See `docs/architecture/unit-projection.md`.
+ */
+tslib_1.__exportStar(require("./projection.interfaces"), exports);
+tslib_1.__exportStar(require("./projection.registry"), exports);
+tslib_1.__exportStar(require("./projection.qudt"), exports);
+tslib_1.__exportStar(require("./projection.opcua"), exports);
+tslib_1.__exportStar(require("./projection.sparkplug"), exports);
+tslib_1.__exportStar(require("./projection.om"), exports);
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiQzpcXFVzZXJzXFxHdWlsbGF1bWVQZWxsZXRpZXJcXERvY3VtZW50c1xcR2l0SHViXFxzcGlreXBhbmRhXFxwYWNrYWdlc1xcZGV2XFxjb3JlXFxzcmNcXG1hdGhcXHVuaXRzXFxpbmRleC50cyIsIm1hcHBpbmdzIjoiOzs7QUFBQTs7Ozs7Ozs7O0dBU0c7QUFDSCxrRUFBd0M7QUFDeEMsZ0VBQXNDO0FBQ3RDLDREQUFrQztBQUNsQyw2REFBbUM7QUFDbkMsaUVBQXVDO0FBQ3ZDLDBEQUFnQyIsIm5hbWVzIjpbXSwic291cmNlcyI6WyJDOlxcVXNlcnNcXEd1aWxsYXVtZVBlbGxldGllclxcRG9jdW1lbnRzXFxHaXRIdWJcXHNwaWt5cGFuZGFcXHBhY2thZ2VzXFxkZXZcXGNvcmVcXHNyY1xcbWF0aFxcdW5pdHNcXGluZGV4LnRzIl0sInNvdXJjZXNDb250ZW50IjpbIi8qKlxyXG4gKiBUaGUgdW5pdCBwcm9qZWN0aW9uIGxheWVyLlxyXG4gKlxyXG4gKiBJbXBvcnRpbmcgdGhpcyBiYXJyZWwgaXMgd2hhdCByZWdpc3RlcnMgdGhlIGltcGxlbWVudGVkIHByb2plY3Rpb25zLCBRVURUXHJcbiAqIGJlaW5nIHRoZSBvbmx5IG9uZSB0b2RheS4gVGhlIHVuaW1wbGVtZW50ZWQgdGFyZ2V0cyBleHBvcnQgdGhlaXIgdHlwZSBhbmRcclxuICogdGhlaXIgZG9jdW1lbnRhdGlvbiBhbmQgcmVnaXN0ZXIgbm90aGluZywgc28gYHVuaXRQcm9qZWN0aW9uSWRzKClgIGxpc3RzXHJcbiAqIHdoYXQgd29ya3MgcmF0aGVyIHRoYW4gd2hhdCBpcyBwbGFubmVkLlxyXG4gKlxyXG4gKiBTZWUgYGRvY3MvYXJjaGl0ZWN0dXJlL3VuaXQtcHJvamVjdGlvbi5tZGAuXHJcbiAqL1xyXG5leHBvcnQgKiBmcm9tIFwiLi9wcm9qZWN0aW9uLmludGVyZmFjZXNcIjtcclxuZXhwb3J0ICogZnJvbSBcIi4vcHJvamVjdGlvbi5yZWdpc3RyeVwiO1xyXG5leHBvcnQgKiBmcm9tIFwiLi9wcm9qZWN0aW9uLnF1ZHRcIjtcclxuZXhwb3J0ICogZnJvbSBcIi4vcHJvamVjdGlvbi5vcGN1YVwiO1xyXG5leHBvcnQgKiBmcm9tIFwiLi9wcm9qZWN0aW9uLnNwYXJrcGx1Z1wiO1xyXG5leHBvcnQgKiBmcm9tIFwiLi9wcm9qZWN0aW9uLm9tXCI7XHJcbiJdLCJ2ZXJzaW9uIjozfQ==

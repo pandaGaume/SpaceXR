@@ -1,0 +1,53 @@
+c695d7894f11cd6245d6329b01b867b2
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Channel = void 0;
+const tslib_1 = require("tslib");
+const graph_interfaces_1 = require("../graph/graph.interfaces");
+const graph_olink_1 = require("../graph/graph.olink");
+/**
+ * Concrete IChannel. Extends GraphOLink so source/target endpoints
+ * stay managed by the existing graph layer; adds slot (input-port name
+ * on the destination), delayed (the channel is pre-seeded with
+ * initialValue at session reset, breaking feedback cycles), and the
+ * inherited IEnabled.enabled toggle.
+ */
+class Channel extends graph_olink_1.GraphOLink {
+    constructor(oini, ofin, slot = 0, delayed = false, initialValue, enabled = true, toSlot) {
+        // Set slot / toSlot / enabled BEFORE wiring the endpoints: attaching
+        // to a node fires its routing hooks (nscAdded / pscAdded), which key
+        // the channel by its slot. Passing the endpoints to super() would
+        // attach them before these fields exist, keying the cache under
+        // `undefined`. So construct unwired, set identity, then wire.
+        super();
+        this.slot = slot;
+        this.toSlot = toSlot;
+        this.delayed = delayed;
+        this.initialValue = initialValue;
+        this.enabled = enabled;
+        this.oini = oini ?? null;
+        this.ofin = ofin ?? null;
+    }
+}
+exports.Channel = Channel;
+tslib_1.__decorate([
+    graph_interfaces_1.cloneable,
+    tslib_1.__metadata("design:type", Object)
+], Channel.prototype, "slot", void 0);
+tslib_1.__decorate([
+    graph_interfaces_1.cloneable,
+    tslib_1.__metadata("design:type", Object)
+], Channel.prototype, "toSlot", void 0);
+tslib_1.__decorate([
+    graph_interfaces_1.cloneable,
+    tslib_1.__metadata("design:type", Boolean)
+], Channel.prototype, "delayed", void 0);
+tslib_1.__decorate([
+    graph_interfaces_1.cloneable,
+    tslib_1.__metadata("design:type", Object)
+], Channel.prototype, "initialValue", void 0);
+tslib_1.__decorate([
+    graph_interfaces_1.cloneable,
+    tslib_1.__metadata("design:type", Boolean)
+], Channel.prototype, "enabled", void 0);
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiQzpcXFVzZXJzXFxHdWlsbGF1bWVQZWxsZXRpZXJcXERvY3VtZW50c1xcR2l0SHViXFxTcGFjZVhSXFwuY2FjaGVcXGNvcmUtY29uY3VycmVudC10cmFuc2Zlclxcc3JjXFxleGVjdXRpb25cXGV4ZWN1dGlvbi5jaGFubmVsLnRzIiwibWFwcGluZ3MiOiI7Ozs7QUFBQSxnRUFBNkQ7QUFDN0Qsc0RBQWtEO0FBR2xEOzs7Ozs7R0FNRztBQUNILE1BQWEsT0FBcUIsU0FBUSx3QkFBVTtJQU9oRCxZQUFtQixJQUFZLEVBQUUsSUFBWSxFQUFFLE9BQXdCLENBQUMsRUFBRSxVQUFtQixLQUFLLEVBQUUsWUFBZ0IsRUFBRSxVQUFtQixJQUFJLEVBQUUsTUFBd0I7UUFDbksscUVBQXFFO1FBQ3JFLHFFQUFxRTtRQUNyRSxrRUFBa0U7UUFDbEUsZ0VBQWdFO1FBQ2hFLDhEQUE4RDtRQUM5RCxLQUFLLEVBQUUsQ0FBQztRQUNSLElBQUksQ0FBQyxJQUFJLEdBQUcsSUFBSSxDQUFDO1FBQ2pCLElBQUksQ0FBQyxNQUFNLEdBQUcsTUFBTSxDQUFDO1FBQ3JCLElBQUksQ0FBQyxPQUFPLEdBQUcsT0FBTyxDQUFDO1FBQ3ZCLElBQUksQ0FBQyxZQUFZLEdBQUcsWUFBWSxDQUFDO1FBQ2pDLElBQUksQ0FBQyxPQUFPLEdBQUcsT0FBTyxDQUFDO1FBQ3ZCLElBQUksQ0FBQyxJQUFJLEdBQUcsSUFBSSxJQUFJLElBQUksQ0FBQztRQUN6QixJQUFJLENBQUMsSUFBSSxHQUFHLElBQUksSUFBSSxJQUFJLENBQUM7SUFDN0IsQ0FBQztDQUNKO0FBdEJELDBCQXNCQztBQXJCcUI7SUFBakIsNEJBQVM7O3FDQUE4QjtBQUN0QjtJQUFqQiw0QkFBUzs7dUNBQWlDO0FBQ3pCO0lBQWpCLDRCQUFTOzt3Q0FBeUI7QUFDakI7SUFBakIsNEJBQVM7OzZDQUF5QjtBQUNqQjtJQUFqQiw0QkFBUzs7d0NBQXlCIiwibmFtZXMiOltdLCJzb3VyY2VzIjpbIkM6XFxVc2Vyc1xcR3VpbGxhdW1lUGVsbGV0aWVyXFxEb2N1bWVudHNcXEdpdEh1YlxcU3BhY2VYUlxcLmNhY2hlXFxjb3JlLWNvbmN1cnJlbnQtdHJhbnNmZXJcXHNyY1xcZXhlY3V0aW9uXFxleGVjdXRpb24uY2hhbm5lbC50cyJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgeyBjbG9uZWFibGUsIElOb2RlIH0gZnJvbSBcIi4uL2dyYXBoL2dyYXBoLmludGVyZmFjZXNcIjtcclxuaW1wb3J0IHsgR3JhcGhPTGluayB9IGZyb20gXCIuLi9ncmFwaC9ncmFwaC5vbGlua1wiO1xyXG5pbXBvcnQgeyBJQ2hhbm5lbCB9IGZyb20gXCIuL2V4ZWN1dGlvbi5pbnRlcmZhY2VzXCI7XHJcblxyXG4vKipcclxuICogQ29uY3JldGUgSUNoYW5uZWwuIEV4dGVuZHMgR3JhcGhPTGluayBzbyBzb3VyY2UvdGFyZ2V0IGVuZHBvaW50c1xyXG4gKiBzdGF5IG1hbmFnZWQgYnkgdGhlIGV4aXN0aW5nIGdyYXBoIGxheWVyOyBhZGRzIHNsb3QgKGlucHV0LXBvcnQgbmFtZVxyXG4gKiBvbiB0aGUgZGVzdGluYXRpb24pLCBkZWxheWVkICh0aGUgY2hhbm5lbCBpcyBwcmUtc2VlZGVkIHdpdGhcclxuICogaW5pdGlhbFZhbHVlIGF0IHNlc3Npb24gcmVzZXQsIGJyZWFraW5nIGZlZWRiYWNrIGN5Y2xlcyksIGFuZCB0aGVcclxuICogaW5oZXJpdGVkIElFbmFibGVkLmVuYWJsZWQgdG9nZ2xlLlxyXG4gKi9cclxuZXhwb3J0IGNsYXNzIENoYW5uZWw8VCA9IHVua25vd24+IGV4dGVuZHMgR3JhcGhPTGluayBpbXBsZW1lbnRzIElDaGFubmVsPFQ+IHtcclxuICAgIEBjbG9uZWFibGUgcHVibGljIHNsb3Q6IHN0cmluZyB8IG51bWJlcjtcclxuICAgIEBjbG9uZWFibGUgcHVibGljIHRvU2xvdD86IHN0cmluZyB8IG51bWJlcjtcclxuICAgIEBjbG9uZWFibGUgcHVibGljIGRlbGF5ZWQ6IGJvb2xlYW47XHJcbiAgICBAY2xvbmVhYmxlIHB1YmxpYyBpbml0aWFsVmFsdWU/OiBUO1xyXG4gICAgQGNsb25lYWJsZSBwdWJsaWMgZW5hYmxlZDogYm9vbGVhbjtcclxuXHJcbiAgICBwdWJsaWMgY29uc3RydWN0b3Iob2luaT86IElOb2RlLCBvZmluPzogSU5vZGUsIHNsb3Q6IHN0cmluZyB8IG51bWJlciA9IDAsIGRlbGF5ZWQ6IGJvb2xlYW4gPSBmYWxzZSwgaW5pdGlhbFZhbHVlPzogVCwgZW5hYmxlZDogYm9vbGVhbiA9IHRydWUsIHRvU2xvdD86IHN0cmluZyB8IG51bWJlcikge1xyXG4gICAgICAgIC8vIFNldCBzbG90IC8gdG9TbG90IC8gZW5hYmxlZCBCRUZPUkUgd2lyaW5nIHRoZSBlbmRwb2ludHM6IGF0dGFjaGluZ1xyXG4gICAgICAgIC8vIHRvIGEgbm9kZSBmaXJlcyBpdHMgcm91dGluZyBob29rcyAobnNjQWRkZWQgLyBwc2NBZGRlZCksIHdoaWNoIGtleVxyXG4gICAgICAgIC8vIHRoZSBjaGFubmVsIGJ5IGl0cyBzbG90LiBQYXNzaW5nIHRoZSBlbmRwb2ludHMgdG8gc3VwZXIoKSB3b3VsZFxyXG4gICAgICAgIC8vIGF0dGFjaCB0aGVtIGJlZm9yZSB0aGVzZSBmaWVsZHMgZXhpc3QsIGtleWluZyB0aGUgY2FjaGUgdW5kZXJcclxuICAgICAgICAvLyBgdW5kZWZpbmVkYC4gU28gY29uc3RydWN0IHVud2lyZWQsIHNldCBpZGVudGl0eSwgdGhlbiB3aXJlLlxyXG4gICAgICAgIHN1cGVyKCk7XHJcbiAgICAgICAgdGhpcy5zbG90ID0gc2xvdDtcclxuICAgICAgICB0aGlzLnRvU2xvdCA9IHRvU2xvdDtcclxuICAgICAgICB0aGlzLmRlbGF5ZWQgPSBkZWxheWVkO1xyXG4gICAgICAgIHRoaXMuaW5pdGlhbFZhbHVlID0gaW5pdGlhbFZhbHVlO1xyXG4gICAgICAgIHRoaXMuZW5hYmxlZCA9IGVuYWJsZWQ7XHJcbiAgICAgICAgdGhpcy5vaW5pID0gb2luaSA/PyBudWxsO1xyXG4gICAgICAgIHRoaXMub2ZpbiA9IG9maW4gPz8gbnVsbDtcclxuICAgIH1cclxufVxyXG4iXSwidmVyc2lvbiI6M30=

@@ -1,0 +1,41 @@
+{
+  "results": [
+    {
+      "pose": 0,
+      "projectedCenterY": 482.3008897304614,
+      "checked": 374362,
+      "leaks": 0,
+      "max": 0,
+      "maxEquivalentHeight": 0,
+      "samples": []
+    },
+    {
+      "pose": 1,
+      "projectedCenterY": 496.61505177829684,
+      "checked": 375990,
+      "leaks": 0,
+      "max": 0,
+      "maxEquivalentHeight": 0,
+      "samples": []
+    },
+    {
+      "pose": 2,
+      "projectedCenterY": 510.99772189998424,
+      "checked": 378351,
+      "leaks": 0,
+      "max": 0,
+      "maxEquivalentHeight": 0,
+      "samples": []
+    },
+    {
+      "pose": 3,
+      "projectedCenterY": 525.4246566470968,
+      "checked": 381188,
+      "leaks": 0,
+      "max": 0,
+      "maxEquivalentHeight": 0,
+      "samples": []
+    }
+  ],
+  "errors": []
+}

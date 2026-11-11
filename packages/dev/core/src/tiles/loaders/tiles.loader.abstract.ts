@@ -126,7 +126,7 @@ export abstract class AbstractTileLoader<T> extends ValidableBase implements ITi
     public unlinkFrom(target: ITargetBlock<ITile<T>>): IPipelineLink<ITile<T>> | undefined {
         const i = this._links.findIndex((l) => l.target === target);
         if (i !== -1) {
-            const l = this._links.splice(i)[0];
+            const l = this._links.splice(i, 1)[0];
             this._onUnlinked(l);
             l.dispose();
             return l;

@@ -28,15 +28,11 @@ export enum Tile3dRefineType {
 }
 
 /**
- * Function signature for computing the screen space error (SSE) of a tile or object.
- *
- * @param tileGeometricError - The geometric error of the tile/object (in meters).
- * @param distanceToCamera - The distance from the tile/object to the camera (in meters).
- * @param viewportHeight - The height of the viewport (in pixels).
- * @param tanfov2 - The tangent of half the field of view (unitless).
- * @returns The screen space error, typically measured in pixels.
+ * Screen-space-error function signature. Re-exported from the streaming
+ * module (single definition repo-wide; both barrels surface the same symbol).
  */
-export type ScreenSpaceErrorFn = (tileGeometricError: number, distanceToCamera: number, viewportHeight: number, tanfov2: number) => number;
+export type { ScreenSpaceErrorFn } from "../../../streaming/streaming.visibility.overflight";
+import type { ScreenSpaceErrorFn } from "../../../streaming/streaming.visibility.overflight";
 
 /**
  * Computes the screen space error (SSE) for an object based on its geometric error,
@@ -183,6 +179,14 @@ export interface ITile3dStreamEngine extends ISourceBlock<ITile3d>, IHasDisplay,
     setContext(state?: ICameraViewState): void;
 }
 
+/**
+ * @deprecated Standalone engine kept for reference during the transition.
+ * Use `Tile3dStreamSource` (an IStreamSubEngine with working coarsening,
+ * region volumes and hole-free REPLACE refinement) driven by
+ * `setContext(viewId, cameraViewState)` instead. Note the coordinate
+ * convention differs: this engine stores worldBoundingVolume in the Babylon
+ * basis, Tile3dStreamSource stores raw ECEF.
+ */
 export class Tile3dStreamEngine extends SourceBlock<ITile3d> implements ITile3dStreamEngine {
     public static DEFAULT_MAX_SCREEN_SPACE_ERROR = 16;
     public static DEFAULT_HYSTERESIS_PERCENT = 0.1;

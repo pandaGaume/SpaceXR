@@ -5,12 +5,6 @@ import { IElevationGridFactory } from "./map.interfaces";
 import { ISize2, IsSize } from "core/geometry";
 
 export class ElevationGridFactory implements IElevationGridFactory {
-    /*private static InitZ(column: number, row: number, w: number, h: number): number {
-        let i = column == w - 1 ? 1 : 0;
-        let j = row == h - 1 ? 2 : 0;
-        return i + j;
-    }*/
-
     public buildTopology(options: number | ISize2 | TerrainGridOptions | TerrainGridOptionsBuilder): IVerticesData {
         const o = this._buildTerrainOptions(options);
         const data = new TerrainNormalizedGridBuilder().withOptions(o).build<VertexData>(new VertexData());

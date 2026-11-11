@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="fr">
+<meta charset="utf-8">
+<title>SpaceXR | Atmosphere ellipsoidale HD</title>
+<style>
+body{font:16px system-ui;background:#111827;color:#e5e7eb;max-width:1150px;margin:32px auto;padding:0 20px}h1{font-size:26px}p{line-height:1.5;color:#b7c6d9}label{display:inline-block;margin:8px 18px 8px 0}button,select,input{font:inherit;padding:7px;background:#203149;color:white;border:1px solid #486078;border-radius:5px}fieldset input{width:100px}fieldset{margin:20px 0;border:1px solid #486078}button{cursor:pointer}button:disabled{opacity:.5}#views{display:flex;gap:20px;flex-wrap:wrap}canvas{width:480px;height:270px;image-rendering:pixelated;border:1px solid #486078}pre{white-space:pre-wrap;background:#192438;padding:18px;font-size:13px}.caption{margin:8px 0}details{margin:18px 0}
+#hdSection{margin:24px 0}#hdSky{display:block;width:100%;height:auto;image-rendering:auto;background:#000}#hdSky:fullscreen{width:100vw;height:100vh;object-fit:contain;background:#000}#hdStatus{font-size:13px}#hdSection[hidden]{display:none}
+</style>
+<h1>Atmosphere ellipsoidale : Sky-View et rendu HD</h1>
+<p>Diffusion simple Rayleigh et Mie. Altitude geodesique ECEF, ellipsoide terrestre ou martien. Comparaison en radiance lineaire, exposition commune pour l'affichage. Aucun raccordement Babylon ou XR dans cette experience.</p>
+<fieldset><legend>Mode physique spectral, rendu HD</legend>
+<label>Transport <select id="transport"><option value="spectral">Spectral physique</option><option value="legacy">RGB historique et comparatifs</option></select></label>
+<label>Etat initial <select id="physicalPreset"><option value="earth">Terre</option><option value="mars">Mars, poussiere experimentale</option><option value="co2">Mars, CO2 sans poussiere</option></select></label>
+<label>Planete <select id="physicalPlanet"><option value="earth">Ellipsoide Terre</option><option value="mars">Ellipsoide Mars</option></select></label>
+<label>Pression (Pa) <input id="pressure" type="number" min="0" max="200000" value="101325"></label>
+<label>Temperature gaz (K) <input id="gasTemperature" type="number" min="100" max="1000" value="288"></label>
+<label>Gravite (m/s2) <input id="gravity" type="number" min="0.1" max="30" step="0.01" value="9.80665"></label>
+<p>Fractions molaires relatives, normalisees ensemble :</p>
+<label>N2 <input id="gasN2" type="number" min="0" value="78.08" step="0.01"></label><label>O2 <input id="gasO2" type="number" min="0" value="20.95" step="0.01"></label><label>CO2 <input id="gasCO2" type="number" min="0" value="0.04" step="0.01"></label><label>Ar <input id="gasAr" type="number" min="0" value="0.93" step="0.01"></label>
+<p>Poussiere : spheres homogenes, distribution lognormale. Les indices ci-dessous sont des hypotheses experimentales constantes avec la longueur d'onde, pas une mesure validee des poussieres martiennes.</p>
+<label>Epaisseur optique a 550 nm <input id="dustTau" type="number" min="0" max="3" step="0.01" value="0.015"></label>
+<label>Hauteur poussiere (m) <input id="dustHeight" type="number" min="100" max="50000" value="1200"></label>
+<label>Rayon median (micrometres) <input id="dustRadius" type="number" min="0.01" max="3" step="0.01" value="0.1"></label>
+<label>Sigma de ln(rayon) <input id="dustSigma" type="number" min="0" max="0.6" step="0.05" value="0.3"></label>
+<label>Indice n <input id="dustN" type="number" min="1" max="3" step="0.01" value="1.45"></label><label>Absorption k <input id="dustK" type="number" min="0" max="1" step="0.001" value="0.003"></label>
+<label>Source <select id="stellarSource"><option value="blackbody">Corps noir (Planck)</option><option value="band">Bande spectrale experimentale</option></select></label>
+<label>Temperature etoile (K) <input id="starTemperature" type="number" min="1000" max="20000" value="5778"></label>
+<label>Distance (UA) <input id="starDistance" type="number" min="0.1" max="20" step="0.001" value="1"></label>
+<label>Centre bande (nm) <input id="bandCenter" type="number" min="380" max="780" value="550"></label><label>Largeur FWHM (nm) <input id="bandWidth" type="number" min="20" max="400" value="80"></label>
+<label>Echantillonnage <select id="spectralSamples"><option value="24">24 longueurs d'onde</option><option value="48">48 longueurs d'onde</option></select></label>
+<label>Elevation solaire (degres) <input id="solarElevation" type="number" min="-90" max="90" step="0.1" value="1"></label>
+<label>Altitude camera (m) <input id="physicalAltitude" type="number" min="2" max="5000000" value="2"></label>
+<p>Les couleurs viennent du transport entre 380 et 780 nm, puis de l'observateur CIE XYZ et de l'ecran sRGB. Pas de teinte cible. Diffusion simple; sans raies d'absorption ni diffusion multiple. Apres modification, cliquer Rendu HD.</p>
+</fieldset>
+<label>Vue <select id="view"><option value="ground">Sol, horizon</option><option value="orbit">Orbite</option><option value="polar">Region polaire</option><option value="limb">Bord de la planete</option><option value="dawn">Aube orbitale a 60 km (soleil impose en RGB)</option></select></label>
+<label>Soleil <select id="sun"><option value="day">Jour</option><option value="sunset">Coucher</option><option value="night">Nuit</option></select></label>
+<label>Resolution <select id="resolution"><option value="32">32 x 18</option><option value="48">48 x 27</option><option value="96">96 x 54</option></select></label>
+<label>Raccords <select id="seams"><option value="0.08">Transition continue</option><option value="0">Interpolation brute</option></select></label><label>Exposition <input id="exposure" type="number" value="12" min="1" max="100" style="width:60px"></label>
+<p><label>Volume camera <select id="volumeSize"><option value="12">12 x 8 x 48</option><option value="24">24 x 16 x 64</option></select></label><label>Profondeur scene <select id="sceneDepth"><option value="sky">Ciel et globe</option><option value="terrain">Surface a 10 km</option><option value="step">Rupture : 5 km / 20 km</option></select></label></p><p><button id="hybrid">Hybride CPU</button> <button id="hybridgpu">Hybride WebGPU</button></p><p><button id="render">Comparer CPU</button> <button id="gpu" disabled>Comparer WebGPU</button> <button id="layouts" disabled>Comparer les formats GPU</button></p>
+<p><label>LUT solaire (lon x lat x alt) <select id="solarLutSize"><option value="128">128 x 32 x 32, 1 Mio</option><option value="256">256 x 64 x 48, 6 Mio</option></select></label><button id="solarlut">LUT 3D WebGPU</button> <button id="solarlutvolume">Volume + LUT 3D</button></p>
+<p><label>Definition <select id="hdDefinition"><option value="1920">Full HD : 1920 x 1080</option><option value="1280">HD : 1280 x 720</option></select></label><label>Champ horizontal <select id="hdFov"><option value="20">20 degres, rapproche</option><option value="40">40 degres</option><option value="10">10 degres, teleobjectif</option><option value="77.3196">77 degres, grand angle initial</option><option value="scene">Cadrage de la scene</option></select></label><label><input type="checkbox" id="hdFrameSun" checked> Cadrer le Soleil (sol / aube / poles)</label><label>Sky-View <select id="skyLutQuality"><option value="256">256 x 128, 64 echantillons</option><option value="128">128 x 64, 32 echantillons</option></select></label><label><input type="checkbox" id="hdSun" checked> Soleil</label><button id="renderhd">Rendu HD</button> <button id="animatehd" disabled>Animer le regard</button> <button id="fullscreenhd" disabled>Plein ecran</button> <button id="savehd" disabled>PNG natif</button> <button id="calibratehd" disabled>Mesurer le seuil camera</button> <button id="reporthd" disabled>Rapport JSON</button></p>
+<section id="hdSection" hidden><h2>Ciel a la definition de l'ecran</h2><p id="hdCaption">Sky-View LUT et reconstruction par pixel. Globe uni, sans terrain detaille ni nuages.</p><canvas id="hdSky" width="1920" height="1080" aria-label="Ciel atmospherique en definition HD native"></canvas><pre id="hdStatus">Preparation...</pre></section>
+<div id="views"><div><div class="caption">Reference</div><canvas id="reference" width="48" height="27"></canvas></div><div><div class="caption">Mode teste : LUT, octree ou volume</div><canvas id="accelerated" width="48" height="27"></canvas></div></div>
+<p>Erreur absolue amplifiee : noir = faible, jaune = forte. Radiance lineaire x10000, avant exposition.</p><canvas id="error" width="48" height="27"></canvas>
+<pre id="status">Pret. Le premier calcul remplit le cache; le second reutilise le meme point de vue.</pre>
+<details><summary>Ce que les mesures signifient</summary><p>CPU : calcul de reference, construction a froid, reutilisation a chaud. WebGPU : cache prepare par le CPU, deux integrations GPU sur les memes rayons. Les temps WebGPU comprennent transfert et lecture retour, ce ne sont pas des temps GPU purs. Le budget limite l'arbre a 30000 noeuds; les zones non preparees sont integrees directement. Le cache reste reutilisable quand on change seulement la resolution ou l'exposition.</p></details>
+<script type="module" src="./demo.js"></script>
+</html>

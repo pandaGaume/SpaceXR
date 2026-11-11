@@ -1,0 +1,64 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [20.x]
+    steps:
+      # Until @spacexr/3d-tiles-core, -runtime and tiles are published, they are linked from a sibling checkout.
+      - uses: actions/checkout@v7
+        with:
+          path: 3d-tiles-babylon
+      # A change spanning both repositories uses one branch name: its pull request builds against that branch of
+      # 3d-tiles-core, without waiting for core to merge. Everything else builds against main.
+      - name: Choose the 3d-tiles-core branch
+        id: core
+        env:
+          BRANCH: ${{ github.head_ref || github.ref_name }}
+        run: |
+          status=0
+          git ls-remote --exit-code --heads https://github.com/pandaGaume/3d-tiles-core.git "refs/heads/$BRANCH" > /dev/null || status=$?
+          case "$status" in
+            0) ref="$BRANCH" ;;
+            2) ref=main ;;
+            *) echo "Cannot read the branches of 3d-tiles-core." >&2; exit 1 ;;
+          esac
+          echo "ref=$ref" >> "$GITHUB_OUTPUT"
+          echo "Building against 3d-tiles-core $ref" | tee -a "$GITHUB_STEP_SUMMARY"
+      - uses: actions/checkout@v7
+        with:
+          repository: pandaGaume/3d-tiles-core
+          ref: ${{ steps.core.outputs.ref }}
+          path: 3d-tiles-core
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+          cache-dependency-path: |
+            3d-tiles-core/node/package-lock.json
+            3d-tiles-babylon/package-lock.json
+      - name: Build 3d-tiles-core
+        working-directory: 3d-tiles-core/node
+        run: |
+          npm ci
+          npm run build --workspace @spacexr/3d-tiles-core --workspace @spacexr/tiles --workspace @spacexr/raster --workspace @spacexr/dem --workspace @spacexr/grid --workspace @spacexr/3d-tiles-runtime
+      - run: npm ci
+        working-directory: 3d-tiles-babylon
+      - run: npm run format
+        working-directory: 3d-tiles-babylon
+      - run: npm run lint
+        working-directory: 3d-tiles-babylon
+      - run: npm run typecheck
+        working-directory: 3d-tiles-babylon
+      - run: npm test
+        working-directory: 3d-tiles-babylon
+      - run: npm run build
+        working-directory: 3d-tiles-babylon

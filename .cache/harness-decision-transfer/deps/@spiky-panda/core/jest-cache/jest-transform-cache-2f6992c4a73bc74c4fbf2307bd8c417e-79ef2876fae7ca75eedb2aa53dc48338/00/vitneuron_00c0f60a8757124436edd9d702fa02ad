@@ -1,0 +1,58 @@
+8daf4b669d93c2b55fb7a72bef6be0c3
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.VitNeuron = void 0;
+const tslib_1 = require("tslib");
+const graph_1 = require("../../../graph");
+const nn_neuron_1 = require("../../nn.neuron");
+const vit_interfaces_1 = require("./vit.interfaces");
+/// <summary>
+/// Vision Transformer neuron.
+/// Each neuron belongs to a specific role in the ViT architecture:
+///   - Input: raw pixel value
+///   - PatchEmbed: linear projection of patch into embedding space
+///   - ClassToken: learnable aggregation token
+///   - Attention: computes Q/K/V and attention-weighted output
+///   - MLP: feed-forward within transformer block
+///   - Output: classification head
+///
+/// Spatial metadata (embedIndex, tokenIndex, blockIndex, headIndex)
+/// identifies the neuron's position within the transformer structure.
+/// </summary>
+class VitNeuron extends nn_neuron_1.Neuron {
+    constructor(neuronType = vit_interfaces_1.VitNeuronType.Input, bias = 0, embedIndex = -1, tokenIndex = -1, blockIndex = -1, headIndex = -1, onsc = null, opsc = null, position) {
+        super(onsc, opsc, position);
+        this.neuronType = neuronType;
+        this.bias = bias;
+        this.embedIndex = embedIndex;
+        this.tokenIndex = tokenIndex;
+        this.blockIndex = blockIndex;
+        this.headIndex = headIndex;
+    }
+}
+exports.VitNeuron = VitNeuron;
+tslib_1.__decorate([
+    graph_1.cloneable,
+    tslib_1.__metadata("design:type", String)
+], VitNeuron.prototype, "neuronType", void 0);
+tslib_1.__decorate([
+    graph_1.cloneable,
+    tslib_1.__metadata("design:type", Number)
+], VitNeuron.prototype, "bias", void 0);
+tslib_1.__decorate([
+    graph_1.cloneable,
+    tslib_1.__metadata("design:type", Number)
+], VitNeuron.prototype, "embedIndex", void 0);
+tslib_1.__decorate([
+    graph_1.cloneable,
+    tslib_1.__metadata("design:type", Number)
+], VitNeuron.prototype, "tokenIndex", void 0);
+tslib_1.__decorate([
+    graph_1.cloneable,
+    tslib_1.__metadata("design:type", Number)
+], VitNeuron.prototype, "blockIndex", void 0);
+tslib_1.__decorate([
+    graph_1.cloneable,
+    tslib_1.__metadata("design:type", Number)
+], VitNeuron.prototype, "headIndex", void 0);
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiQzpcXFVzZXJzXFxHdWlsbGF1bWVQZWxsZXRpZXJcXERvY3VtZW50c1xcR2l0SHViXFxzcGlreXBhbmRhXFxwYWNrYWdlc1xcZGV2XFxjb3JlXFxzcmNcXG5ldXJhbG5ldHdvcmtcXHRyYW5zZm9ybWVyXFx2aXRcXHZpdC5uZXVyb24udHMiLCJtYXBwaW5ncyI6Ijs7OztBQUNBLDBDQUFtRDtBQUVuRCwrQ0FBeUM7QUFDekMscURBQTZEO0FBRTdELGFBQWE7QUFDYiw4QkFBOEI7QUFDOUIsbUVBQW1FO0FBQ25FLDhCQUE4QjtBQUM5QixtRUFBbUU7QUFDbkUsK0NBQStDO0FBQy9DLCtEQUErRDtBQUMvRCxrREFBa0Q7QUFDbEQsbUNBQW1DO0FBQ25DLEdBQUc7QUFDSCxvRUFBb0U7QUFDcEUsc0VBQXNFO0FBQ3RFLGNBQWM7QUFDZCxNQUFhLFNBQVUsU0FBUSxrQkFBTTtJQVFqQyxZQUNJLGFBQTRCLDhCQUFhLENBQUMsS0FBSyxFQUMvQyxPQUFlLENBQUMsRUFDaEIsYUFBcUIsQ0FBQyxDQUFDLEVBQ3ZCLGFBQXFCLENBQUMsQ0FBQyxFQUN2QixhQUFxQixDQUFDLENBQUMsRUFDdkIsWUFBb0IsQ0FBQyxDQUFDLEVBQ3RCLE9BQTJCLElBQUksRUFDL0IsT0FBMkIsSUFBSSxFQUMvQixRQUFxQjtRQUVyQixLQUFLLENBQUMsSUFBSSxFQUFFLElBQUksRUFBRSxRQUFRLENBQUMsQ0FBQztRQUM1QixJQUFJLENBQUMsVUFBVSxHQUFHLFVBQVUsQ0FBQztRQUM3QixJQUFJLENBQUMsSUFBSSxHQUFHLElBQUksQ0FBQztRQUNqQixJQUFJLENBQUMsVUFBVSxHQUFHLFVBQVUsQ0FBQztRQUM3QixJQUFJLENBQUMsVUFBVSxHQUFHLFVBQVUsQ0FBQztRQUM3QixJQUFJLENBQUMsVUFBVSxHQUFHLFVBQVUsQ0FBQztRQUM3QixJQUFJLENBQUMsU0FBUyxHQUFHLFNBQVMsQ0FBQztJQUMvQixDQUFDO0NBQ0o7QUEzQkQsOEJBMkJDO0FBMUJxQjtJQUFqQixpQkFBUzs7NkNBQWtDO0FBQzFCO0lBQWpCLGlCQUFTOzt1Q0FBcUI7QUFDYjtJQUFqQixpQkFBUzs7NkNBQTJCO0FBQ25CO0lBQWpCLGlCQUFTOzs2Q0FBMkI7QUFDbkI7SUFBakIsaUJBQVM7OzZDQUEyQjtBQUNuQjtJQUFqQixpQkFBUzs7NENBQTBCIiwibmFtZXMiOltdLCJzb3VyY2VzIjpbIkM6XFxVc2Vyc1xcR3VpbGxhdW1lUGVsbGV0aWVyXFxEb2N1bWVudHNcXEdpdEh1Ylxcc3Bpa3lwYW5kYVxccGFja2FnZXNcXGRldlxcY29yZVxcc3JjXFxuZXVyYWxuZXR3b3JrXFx0cmFuc2Zvcm1lclxcdml0XFx2aXQubmV1cm9uLnRzIl0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7IElDYXJ0ZXNpYW4gfSBmcm9tIFwiLi4vLi4vLi4vZ2VvbWV0cnlcIjtcclxuaW1wb3J0IHsgY2xvbmVhYmxlLCBJT2xpbmsgfSBmcm9tIFwiLi4vLi4vLi4vZ3JhcGhcIjtcclxuaW1wb3J0IHsgTnVsbGFibGUgfSBmcm9tIFwiLi4vLi4vLi4vdHlwZXNcIjtcclxuaW1wb3J0IHsgTmV1cm9uIH0gZnJvbSBcIi4uLy4uL25uLm5ldXJvblwiO1xyXG5pbXBvcnQgeyBJVml0TmV1cm9uLCBWaXROZXVyb25UeXBlIH0gZnJvbSBcIi4vdml0LmludGVyZmFjZXNcIjtcclxuXHJcbi8vLyA8c3VtbWFyeT5cclxuLy8vIFZpc2lvbiBUcmFuc2Zvcm1lciBuZXVyb24uXHJcbi8vLyBFYWNoIG5ldXJvbiBiZWxvbmdzIHRvIGEgc3BlY2lmaWMgcm9sZSBpbiB0aGUgVmlUIGFyY2hpdGVjdHVyZTpcclxuLy8vICAgLSBJbnB1dDogcmF3IHBpeGVsIHZhbHVlXHJcbi8vLyAgIC0gUGF0Y2hFbWJlZDogbGluZWFyIHByb2plY3Rpb24gb2YgcGF0Y2ggaW50byBlbWJlZGRpbmcgc3BhY2VcclxuLy8vICAgLSBDbGFzc1Rva2VuOiBsZWFybmFibGUgYWdncmVnYXRpb24gdG9rZW5cclxuLy8vICAgLSBBdHRlbnRpb246IGNvbXB1dGVzIFEvSy9WIGFuZCBhdHRlbnRpb24td2VpZ2h0ZWQgb3V0cHV0XHJcbi8vLyAgIC0gTUxQOiBmZWVkLWZvcndhcmQgd2l0aGluIHRyYW5zZm9ybWVyIGJsb2NrXHJcbi8vLyAgIC0gT3V0cHV0OiBjbGFzc2lmaWNhdGlvbiBoZWFkXHJcbi8vL1xyXG4vLy8gU3BhdGlhbCBtZXRhZGF0YSAoZW1iZWRJbmRleCwgdG9rZW5JbmRleCwgYmxvY2tJbmRleCwgaGVhZEluZGV4KVxyXG4vLy8gaWRlbnRpZmllcyB0aGUgbmV1cm9uJ3MgcG9zaXRpb24gd2l0aGluIHRoZSB0cmFuc2Zvcm1lciBzdHJ1Y3R1cmUuXHJcbi8vLyA8L3N1bW1hcnk+XHJcbmV4cG9ydCBjbGFzcyBWaXROZXVyb24gZXh0ZW5kcyBOZXVyb24gaW1wbGVtZW50cyBJVml0TmV1cm9uIHtcclxuICAgIEBjbG9uZWFibGUgcHVibGljIG5ldXJvblR5cGU6IFZpdE5ldXJvblR5cGU7XHJcbiAgICBAY2xvbmVhYmxlIHB1YmxpYyBiaWFzOiBudW1iZXI7XHJcbiAgICBAY2xvbmVhYmxlIHB1YmxpYyBlbWJlZEluZGV4OiBudW1iZXI7XHJcbiAgICBAY2xvbmVhYmxlIHB1YmxpYyB0b2tlbkluZGV4OiBudW1iZXI7XHJcbiAgICBAY2xvbmVhYmxlIHB1YmxpYyBibG9ja0luZGV4OiBudW1iZXI7XHJcbiAgICBAY2xvbmVhYmxlIHB1YmxpYyBoZWFkSW5kZXg6IG51bWJlcjtcclxuXHJcbiAgICBwdWJsaWMgY29uc3RydWN0b3IoXHJcbiAgICAgICAgbmV1cm9uVHlwZTogVml0TmV1cm9uVHlwZSA9IFZpdE5ldXJvblR5cGUuSW5wdXQsXHJcbiAgICAgICAgYmlhczogbnVtYmVyID0gMCxcclxuICAgICAgICBlbWJlZEluZGV4OiBudW1iZXIgPSAtMSxcclxuICAgICAgICB0b2tlbkluZGV4OiBudW1iZXIgPSAtMSxcclxuICAgICAgICBibG9ja0luZGV4OiBudW1iZXIgPSAtMSxcclxuICAgICAgICBoZWFkSW5kZXg6IG51bWJlciA9IC0xLFxyXG4gICAgICAgIG9uc2M6IE51bGxhYmxlPElPbGlua1tdPiA9IG51bGwsXHJcbiAgICAgICAgb3BzYzogTnVsbGFibGU8SU9saW5rW10+ID0gbnVsbCxcclxuICAgICAgICBwb3NpdGlvbj86IElDYXJ0ZXNpYW5cclxuICAgICkge1xyXG4gICAgICAgIHN1cGVyKG9uc2MsIG9wc2MsIHBvc2l0aW9uKTtcclxuICAgICAgICB0aGlzLm5ldXJvblR5cGUgPSBuZXVyb25UeXBlO1xyXG4gICAgICAgIHRoaXMuYmlhcyA9IGJpYXM7XHJcbiAgICAgICAgdGhpcy5lbWJlZEluZGV4ID0gZW1iZWRJbmRleDtcclxuICAgICAgICB0aGlzLnRva2VuSW5kZXggPSB0b2tlbkluZGV4O1xyXG4gICAgICAgIHRoaXMuYmxvY2tJbmRleCA9IGJsb2NrSW5kZXg7XHJcbiAgICAgICAgdGhpcy5oZWFkSW5kZXggPSBoZWFkSW5kZXg7XHJcbiAgICB9XHJcbn1cclxuIl0sInZlcnNpb24iOjN9

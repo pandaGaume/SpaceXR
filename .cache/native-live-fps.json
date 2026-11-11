@@ -1,0 +1,18 @@
+{
+  "errors": [],
+  "results": [
+    {
+      "enabled": false,
+      "actualFramesPerSecond": 119.40127970708885,
+      "hud": "120 FPS",
+      "post": 0
+    },
+    {
+      "enabled": true,
+      "actualFramesPerSecond": 20.260244264146625,
+      "hud": "22 FPS",
+      "post": 0
+    }
+  ],
+  "restHud": "116 FPS"
+}

@@ -1,0 +1,133 @@
+6ade98891838fe50791aa4248f9b06cf
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ApplyTo = exports.Child = exports.APPLY_TO_LINK_TYPE = exports.CHILD_LINK_TYPE = exports.GraphOLink = void 0;
+exports.isChildRelation = isChildRelation;
+exports.isApplyToRelation = isApplyToRelation;
+const graph_graphItem_1 = require("./graph.graphItem");
+class GraphOLink extends graph_graphItem_1.GraphItem {
+    constructor(oini, ofin) {
+        super();
+        this._oini = null;
+        this._ofin = null;
+        this.oini = oini ?? null;
+        this.ofin = ofin ?? null;
+    }
+    get oini() {
+        return this._oini;
+    }
+    set oini(n) {
+        if (this._oini !== n) {
+            this._oini?.remove(this);
+            this._oini = n;
+            this._oini?.add(this);
+        }
+    }
+    get ofin() {
+        return this._ofin;
+    }
+    set ofin(n) {
+        if (this._ofin !== n) {
+            this._ofin?.remove(this);
+            this._ofin = n;
+            this._ofin?.add(this);
+        }
+    }
+    dispose() {
+        this._oini?.remove(this);
+        this._ofin?.remove(this);
+        super.dispose();
+    }
+}
+exports.GraphOLink = GraphOLink;
+/**
+ * Ontology ids of the structural relations, and the predicates that recognise
+ * them.
+ *
+ * These exist because `instanceof` is not safe here. A page can hold more than
+ * one copy of this module: the node editor bundles core inline, while the
+ * plugins externalise it to a global, so a link built on one side is an
+ * instance of a class the other side has never seen. The endpoints are right,
+ * the ontology id is right, and `instanceof` is false.
+ *
+ * That failure is silent, which is what makes it expensive. A fault link built
+ * by the editor was attached to the correct nodes, carried `type === "applyTo"`,
+ * and was skipped by the model's filter, so the montage ran with every fault
+ * inert and no error anywhere: a motor turning at its no-load speed looks
+ * perfectly healthy.
+ *
+ * The `type` field is already the ontology id and is set by every constructor,
+ * so testing it is both the cheaper check and the correct one. Copies of the
+ * class are irrelevant; agreement on the vocabulary is what matters.
+ */
+exports.CHILD_LINK_TYPE = "child";
+exports.APPLY_TO_LINK_TYPE = "applyTo";
+/** True for a parent/child structural relation, whichever copy of core built it. */
+function isChildRelation(link) {
+    return !!link && link.type === exports.CHILD_LINK_TYPE;
+}
+/** True for a fault-application relation, whichever copy of core built it. */
+function isApplyToRelation(link) {
+    return !!link && link.type === exports.APPLY_TO_LINK_TYPE;
+}
+/**
+ * `Child` relation: a STRUCTURAL link (not a dataflow channel) expressing the
+ * generic 1/N parent -> child hierarchy. Directed parent (`oini`) -> child
+ * (`ofin`), so the SAME link surfaces both directions through the node
+ * adjacency: a node's `onsc` filtered to `Child` gives its children (N), its
+ * `opsc` filtered to `Child` gives its parent (1).
+ *
+ * It carries no port / payload; its `type` is the ontology id "child"
+ * (`isBindingRelation: false`, so it never renders as a config cable and is
+ * skipped by the per-slot routing cache). `IHasTransform.parent` is DERIVED
+ * (lazily cached) from the incoming `Child` link: the 3D transform tree is one
+ * consumer of this generic graph relation, scene-context resolution another.
+ * Idiomatic alongside the typed link subclasses already in the codebase
+ * (CnnSynapse / RnnSynapse / VitSynapse all extend GraphOLink).
+ */
+class Child extends GraphOLink {
+    constructor(parent, child) {
+        // The identity is set BEFORE the endpoints are wired, and the order is
+        // load-bearing. Attaching an endpoint calls `node.add(link)`, which
+        // invalidates the child's derived parent cache only for links it
+        // recognises as a `Child`. Recognition reads `type`, so wiring first
+        // and naming afterwards would attach a link nothing could identify
+        // during the one moment it matters, and the cache would keep a stale
+        // parent for the life of the node.
+        super();
+        this.type = "child";
+        // oini = parent, ofin = child; each setter registers the link on the
+        // node's onsc / opsc.
+        this.oini = parent ?? null;
+        this.ofin = child ?? null;
+    }
+}
+exports.Child = Child;
+/**
+ * `ApplyTo` relation: a STRUCTURAL link (not a dataflow channel) by which a
+ * FAULT (or any operator node, `oini`) APPLIES its physics to a TARGET model
+ * (`ofin`). Directed source -> target; the target surfaces its incoming
+ * `ApplyTo` links via `opsc` filtered to `ApplyTo`, then drives them with
+ * `link.oini.applyTo(this, ctx)` (the fault reads the target model's
+ * PROPERTIES directly, e.g. `motor.rotorMass` / `motor.airGap`, and accumulates
+ * its effect). Properties are read from the model, NOT published as ports; a
+ * port is a runtime DATA relation, an `ApplyTo` is a MODEL-consumption relation.
+ *
+ * Carries no payload; `type` is the ontology id "applyTo" (`isBindingRelation:
+ * false`, structural). Idiomatic alongside the other typed link subclasses
+ * (Child, CnnSynapse, ...). The fault keeps its own tuning editables (severity,
+ * defect counts, ...); the target validates acceptance (`acceptFault`).
+ */
+class ApplyTo extends GraphOLink {
+    constructor(fault, target) {
+        // Identity before attachment, for the same reason as `Child`: anything
+        // that inspects a link while it is being wired can only go by `type`.
+        super();
+        this.type = "applyTo";
+        // oini = fault (source), ofin = target model.
+        this.oini = fault ?? null;
+        this.ofin = target ?? null;
+    }
+}
+exports.ApplyTo = ApplyTo;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiQzpcXFVzZXJzXFxHdWlsbGF1bWVQZWxsZXRpZXJcXERvY3VtZW50c1xcR2l0SHViXFxzcGlreXBhbmRhXFxwYWNrYWdlc1xcZGV2XFxjb3JlXFxzcmNcXGdyYXBoXFxncmFwaC5vbGluay50cyIsIm1hcHBpbmdzIjoiOzs7QUFxRUEsMENBRUM7QUFHRCw4Q0FFQztBQTNFRCx1REFBOEM7QUFHOUMsTUFBYSxVQUF3QixTQUFRLDJCQUFZO0lBSXJELFlBQW1CLElBQVksRUFBRSxJQUFZO1FBQ3pDLEtBQUssRUFBRSxDQUFDO1FBSkosVUFBSyxHQUFvQixJQUFJLENBQUM7UUFDL0IsVUFBSyxHQUFvQixJQUFJLENBQUM7UUFJakMsSUFBSSxDQUFDLElBQUksR0FBRyxJQUFJLElBQUksSUFBSSxDQUFDO1FBQ3pCLElBQUksQ0FBQyxJQUFJLEdBQUcsSUFBSSxJQUFJLElBQUksQ0FBQztJQUM3QixDQUFDO0lBRUQsSUFBVyxJQUFJO1FBQ1gsT0FBTyxJQUFJLENBQUMsS0FBSyxDQUFDO0lBQ3RCLENBQUM7SUFFRCxJQUFXLElBQUksQ0FBQyxDQUFrQjtRQUM5QixJQUFJLElBQUksQ0FBQyxLQUFLLEtBQUssQ0FBQyxFQUFFLENBQUM7WUFDbkIsSUFBSSxDQUFDLEtBQUssRUFBRSxNQUFNLENBQUMsSUFBSSxDQUFDLENBQUM7WUFDekIsSUFBSSxDQUFDLEtBQUssR0FBRyxDQUFDLENBQUM7WUFDZixJQUFJLENBQUMsS0FBSyxFQUFFLEdBQUcsQ0FBQyxJQUFJLENBQUMsQ0FBQztRQUMxQixDQUFDO0lBQ0wsQ0FBQztJQUVELElBQVcsSUFBSTtRQUNYLE9BQU8sSUFBSSxDQUFDLEtBQUssQ0FBQztJQUN0QixDQUFDO0lBRUQsSUFBVyxJQUFJLENBQUMsQ0FBa0I7UUFDOUIsSUFBSSxJQUFJLENBQUMsS0FBSyxLQUFLLENBQUMsRUFBRSxDQUFDO1lBQ25CLElBQUksQ0FBQyxLQUFLLEVBQUUsTUFBTSxDQUFDLElBQUksQ0FBQyxDQUFDO1lBQ3pCLElBQUksQ0FBQyxLQUFLLEdBQUcsQ0FBQyxDQUFDO1lBQ2YsSUFBSSxDQUFDLEtBQUssRUFBRSxHQUFHLENBQUMsSUFBSSxDQUFDLENBQUM7UUFDMUIsQ0FBQztJQUNMLENBQUM7SUFFTSxPQUFPO1FBQ1YsSUFBSSxDQUFDLEtBQUssRUFBRSxNQUFNLENBQUMsSUFBSSxDQUFDLENBQUM7UUFDekIsSUFBSSxDQUFDLEtBQUssRUFBRSxNQUFNLENBQUMsSUFBSSxDQUFDLENBQUM7UUFDekIsS0FBSyxDQUFDLE9BQU8sRUFBRSxDQUFDO0lBQ3BCLENBQUM7Q0FDSjtBQXZDRCxnQ0F1Q0M7QUFFRDs7Ozs7Ozs7Ozs7Ozs7Ozs7OztHQW1CRztBQUNVLFFBQUEsZUFBZSxHQUFHLE9BQU8sQ0FBQztBQUMxQixRQUFBLGtCQUFrQixHQUFHLFNBQVMsQ0FBQztBQUU1QyxvRkFBb0Y7QUFDcEYsU0FBZ0IsZUFBZSxDQUFDLElBQStCO0lBQzNELE9BQU8sQ0FBQyxDQUFDLElBQUksSUFBSSxJQUFJLENBQUMsSUFBSSxLQUFLLHVCQUFlLENBQUM7QUFDbkQsQ0FBQztBQUVELDhFQUE4RTtBQUM5RSxTQUFnQixpQkFBaUIsQ0FBQyxJQUErQjtJQUM3RCxPQUFPLENBQUMsQ0FBQyxJQUFJLElBQUksSUFBSSxDQUFDLElBQUksS0FBSywwQkFBa0IsQ0FBQztBQUN0RCxDQUFDO0FBRUQ7Ozs7Ozs7Ozs7Ozs7O0dBY0c7QUFDSCxNQUFhLEtBQW1CLFNBQVEsVUFBYTtJQUNqRCxZQUFtQixNQUFjLEVBQUUsS0FBYTtRQUM1Qyx1RUFBdUU7UUFDdkUsb0VBQW9FO1FBQ3BFLGlFQUFpRTtRQUNqRSxxRUFBcUU7UUFDckUsbUVBQW1FO1FBQ25FLHFFQUFxRTtRQUNyRSxtQ0FBbUM7UUFDbkMsS0FBSyxFQUFFLENBQUM7UUFDUixJQUFJLENBQUMsSUFBSSxHQUFHLE9BQU8sQ0FBQztRQUNwQixxRUFBcUU7UUFDckUsc0JBQXNCO1FBQ3RCLElBQUksQ0FBQyxJQUFJLEdBQUcsTUFBTSxJQUFJLElBQUksQ0FBQztRQUMzQixJQUFJLENBQUMsSUFBSSxHQUFHLEtBQUssSUFBSSxJQUFJLENBQUM7SUFDOUIsQ0FBQztDQUNKO0FBaEJELHNCQWdCQztBQUVEOzs7Ozs7Ozs7Ozs7OztHQWNHO0FBQ0gsTUFBYSxPQUFxQixTQUFRLFVBQWE7SUFDbkQsWUFBbUIsS0FBYSxFQUFFLE1BQWM7UUFDNUMsdUVBQXVFO1FBQ3ZFLHNFQUFzRTtRQUN0RSxLQUFLLEVBQUUsQ0FBQztRQUNSLElBQUksQ0FBQyxJQUFJLEdBQUcsU0FBUyxDQUFDO1FBQ3RCLDhDQUE4QztRQUM5QyxJQUFJLENBQUMsSUFBSSxHQUFHLEtBQUssSUFBSSxJQUFJLENBQUM7UUFDMUIsSUFBSSxDQUFDLElBQUksR0FBRyxNQUFNLElBQUksSUFBSSxDQUFDO0lBQy9CLENBQUM7Q0FDSjtBQVZELDBCQVVDIiwibmFtZXMiOltdLCJzb3VyY2VzIjpbIkM6XFxVc2Vyc1xcR3VpbGxhdW1lUGVsbGV0aWVyXFxEb2N1bWVudHNcXEdpdEh1Ylxcc3Bpa3lwYW5kYVxccGFja2FnZXNcXGRldlxcY29yZVxcc3JjXFxncmFwaFxcZ3JhcGgub2xpbmsudHMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgTnVsbGFibGUgfSBmcm9tIFwiLi4vdHlwZXNcIjtcbmltcG9ydCB7IEdyYXBoSXRlbSB9IGZyb20gXCIuL2dyYXBoLmdyYXBoSXRlbVwiO1xuaW1wb3J0IHsgSU5vZGUsIElPbGluayB9IGZyb20gXCIuL2dyYXBoLmludGVyZmFjZXNcIjtcblxuZXhwb3J0IGNsYXNzIEdyYXBoT0xpbms8QiA9IHVua25vd24+IGV4dGVuZHMgR3JhcGhJdGVtPEI+IGltcGxlbWVudHMgSU9saW5rPEI+IHtcbiAgICBwcml2YXRlIF9vaW5pOiBOdWxsYWJsZTxJTm9kZT4gPSBudWxsO1xuICAgIHB1YmxpYyBfb2ZpbjogTnVsbGFibGU8SU5vZGU+ID0gbnVsbDtcblxuICAgIHB1YmxpYyBjb25zdHJ1Y3RvcihvaW5pPzogSU5vZGUsIG9maW4/OiBJTm9kZSkge1xuICAgICAgICBzdXBlcigpO1xuICAgICAgICB0aGlzLm9pbmkgPSBvaW5pID8/IG51bGw7XG4gICAgICAgIHRoaXMub2ZpbiA9IG9maW4gPz8gbnVsbDtcbiAgICB9XG5cbiAgICBwdWJsaWMgZ2V0IG9pbmkoKTogTnVsbGFibGU8SU5vZGU+IHtcbiAgICAgICAgcmV0dXJuIHRoaXMuX29pbmk7XG4gICAgfVxuXG4gICAgcHVibGljIHNldCBvaW5pKG46IE51bGxhYmxlPElOb2RlPikge1xuICAgICAgICBpZiAodGhpcy5fb2luaSAhPT0gbikge1xuICAgICAgICAgICAgdGhpcy5fb2luaT8ucmVtb3ZlKHRoaXMpO1xuICAgICAgICAgICAgdGhpcy5fb2luaSA9IG47XG4gICAgICAgICAgICB0aGlzLl9vaW5pPy5hZGQodGhpcyk7XG4gICAgICAgIH1cbiAgICB9XG5cbiAgICBwdWJsaWMgZ2V0IG9maW4oKTogTnVsbGFibGU8SU5vZGU+IHtcbiAgICAgICAgcmV0dXJuIHRoaXMuX29maW47XG4gICAgfVxuXG4gICAgcHVibGljIHNldCBvZmluKG46IE51bGxhYmxlPElOb2RlPikge1xuICAgICAgICBpZiAodGhpcy5fb2ZpbiAhPT0gbikge1xuICAgICAgICAgICAgdGhpcy5fb2Zpbj8ucmVtb3ZlKHRoaXMpO1xuICAgICAgICAgICAgdGhpcy5fb2ZpbiA9IG47XG4gICAgICAgICAgICB0aGlzLl9vZmluPy5hZGQodGhpcyk7XG4gICAgICAgIH1cbiAgICB9XG5cbiAgICBwdWJsaWMgZGlzcG9zZSgpOiB2b2lkIHtcbiAgICAgICAgdGhpcy5fb2luaT8ucmVtb3ZlKHRoaXMpO1xuICAgICAgICB0aGlzLl9vZmluPy5yZW1vdmUodGhpcyk7XG4gICAgICAgIHN1cGVyLmRpc3Bvc2UoKTtcbiAgICB9XG59XG5cbi8qKlxuICogT250b2xvZ3kgaWRzIG9mIHRoZSBzdHJ1Y3R1cmFsIHJlbGF0aW9ucywgYW5kIHRoZSBwcmVkaWNhdGVzIHRoYXQgcmVjb2duaXNlXG4gKiB0aGVtLlxuICpcbiAqIFRoZXNlIGV4aXN0IGJlY2F1c2UgYGluc3RhbmNlb2ZgIGlzIG5vdCBzYWZlIGhlcmUuIEEgcGFnZSBjYW4gaG9sZCBtb3JlIHRoYW5cbiAqIG9uZSBjb3B5IG9mIHRoaXMgbW9kdWxlOiB0aGUgbm9kZSBlZGl0b3IgYnVuZGxlcyBjb3JlIGlubGluZSwgd2hpbGUgdGhlXG4gKiBwbHVnaW5zIGV4dGVybmFsaXNlIGl0IHRvIGEgZ2xvYmFsLCBzbyBhIGxpbmsgYnVpbHQgb24gb25lIHNpZGUgaXMgYW5cbiAqIGluc3RhbmNlIG9mIGEgY2xhc3MgdGhlIG90aGVyIHNpZGUgaGFzIG5ldmVyIHNlZW4uIFRoZSBlbmRwb2ludHMgYXJlIHJpZ2h0LFxuICogdGhlIG9udG9sb2d5IGlkIGlzIHJpZ2h0LCBhbmQgYGluc3RhbmNlb2ZgIGlzIGZhbHNlLlxuICpcbiAqIFRoYXQgZmFpbHVyZSBpcyBzaWxlbnQsIHdoaWNoIGlzIHdoYXQgbWFrZXMgaXQgZXhwZW5zaXZlLiBBIGZhdWx0IGxpbmsgYnVpbHRcbiAqIGJ5IHRoZSBlZGl0b3Igd2FzIGF0dGFjaGVkIHRvIHRoZSBjb3JyZWN0IG5vZGVzLCBjYXJyaWVkIGB0eXBlID09PSBcImFwcGx5VG9cImAsXG4gKiBhbmQgd2FzIHNraXBwZWQgYnkgdGhlIG1vZGVsJ3MgZmlsdGVyLCBzbyB0aGUgbW9udGFnZSByYW4gd2l0aCBldmVyeSBmYXVsdFxuICogaW5lcnQgYW5kIG5vIGVycm9yIGFueXdoZXJlOiBhIG1vdG9yIHR1cm5pbmcgYXQgaXRzIG5vLWxvYWQgc3BlZWQgbG9va3NcbiAqIHBlcmZlY3RseSBoZWFsdGh5LlxuICpcbiAqIFRoZSBgdHlwZWAgZmllbGQgaXMgYWxyZWFkeSB0aGUgb250b2xvZ3kgaWQgYW5kIGlzIHNldCBieSBldmVyeSBjb25zdHJ1Y3RvcixcbiAqIHNvIHRlc3RpbmcgaXQgaXMgYm90aCB0aGUgY2hlYXBlciBjaGVjayBhbmQgdGhlIGNvcnJlY3Qgb25lLiBDb3BpZXMgb2YgdGhlXG4gKiBjbGFzcyBhcmUgaXJyZWxldmFudDsgYWdyZWVtZW50IG9uIHRoZSB2b2NhYnVsYXJ5IGlzIHdoYXQgbWF0dGVycy5cbiAqL1xuZXhwb3J0IGNvbnN0IENISUxEX0xJTktfVFlQRSA9IFwiY2hpbGRcIjtcbmV4cG9ydCBjb25zdCBBUFBMWV9UT19MSU5LX1RZUEUgPSBcImFwcGx5VG9cIjtcblxuLyoqIFRydWUgZm9yIGEgcGFyZW50L2NoaWxkIHN0cnVjdHVyYWwgcmVsYXRpb24sIHdoaWNoZXZlciBjb3B5IG9mIGNvcmUgYnVpbHQgaXQuICovXG5leHBvcnQgZnVuY3Rpb24gaXNDaGlsZFJlbGF0aW9uKGxpbms6IElPbGluayB8IG51bGwgfCB1bmRlZmluZWQpOiBib29sZWFuIHtcbiAgICByZXR1cm4gISFsaW5rICYmIGxpbmsudHlwZSA9PT0gQ0hJTERfTElOS19UWVBFO1xufVxuXG4vKiogVHJ1ZSBmb3IgYSBmYXVsdC1hcHBsaWNhdGlvbiByZWxhdGlvbiwgd2hpY2hldmVyIGNvcHkgb2YgY29yZSBidWlsdCBpdC4gKi9cbmV4cG9ydCBmdW5jdGlvbiBpc0FwcGx5VG9SZWxhdGlvbihsaW5rOiBJT2xpbmsgfCBudWxsIHwgdW5kZWZpbmVkKTogYm9vbGVhbiB7XG4gICAgcmV0dXJuICEhbGluayAmJiBsaW5rLnR5cGUgPT09IEFQUExZX1RPX0xJTktfVFlQRTtcbn1cblxuLyoqXG4gKiBgQ2hpbGRgIHJlbGF0aW9uOiBhIFNUUlVDVFVSQUwgbGluayAobm90IGEgZGF0YWZsb3cgY2hhbm5lbCkgZXhwcmVzc2luZyB0aGVcbiAqIGdlbmVyaWMgMS9OIHBhcmVudCAtPiBjaGlsZCBoaWVyYXJjaHkuIERpcmVjdGVkIHBhcmVudCAoYG9pbmlgKSAtPiBjaGlsZFxuICogKGBvZmluYCksIHNvIHRoZSBTQU1FIGxpbmsgc3VyZmFjZXMgYm90aCBkaXJlY3Rpb25zIHRocm91Z2ggdGhlIG5vZGVcbiAqIGFkamFjZW5jeTogYSBub2RlJ3MgYG9uc2NgIGZpbHRlcmVkIHRvIGBDaGlsZGAgZ2l2ZXMgaXRzIGNoaWxkcmVuIChOKSwgaXRzXG4gKiBgb3BzY2AgZmlsdGVyZWQgdG8gYENoaWxkYCBnaXZlcyBpdHMgcGFyZW50ICgxKS5cbiAqXG4gKiBJdCBjYXJyaWVzIG5vIHBvcnQgLyBwYXlsb2FkOyBpdHMgYHR5cGVgIGlzIHRoZSBvbnRvbG9neSBpZCBcImNoaWxkXCJcbiAqIChgaXNCaW5kaW5nUmVsYXRpb246IGZhbHNlYCwgc28gaXQgbmV2ZXIgcmVuZGVycyBhcyBhIGNvbmZpZyBjYWJsZSBhbmQgaXNcbiAqIHNraXBwZWQgYnkgdGhlIHBlci1zbG90IHJvdXRpbmcgY2FjaGUpLiBgSUhhc1RyYW5zZm9ybS5wYXJlbnRgIGlzIERFUklWRURcbiAqIChsYXppbHkgY2FjaGVkKSBmcm9tIHRoZSBpbmNvbWluZyBgQ2hpbGRgIGxpbms6IHRoZSAzRCB0cmFuc2Zvcm0gdHJlZSBpcyBvbmVcbiAqIGNvbnN1bWVyIG9mIHRoaXMgZ2VuZXJpYyBncmFwaCByZWxhdGlvbiwgc2NlbmUtY29udGV4dCByZXNvbHV0aW9uIGFub3RoZXIuXG4gKiBJZGlvbWF0aWMgYWxvbmdzaWRlIHRoZSB0eXBlZCBsaW5rIHN1YmNsYXNzZXMgYWxyZWFkeSBpbiB0aGUgY29kZWJhc2VcbiAqIChDbm5TeW5hcHNlIC8gUm5uU3luYXBzZSAvIFZpdFN5bmFwc2UgYWxsIGV4dGVuZCBHcmFwaE9MaW5rKS5cbiAqL1xuZXhwb3J0IGNsYXNzIENoaWxkPEIgPSB1bmtub3duPiBleHRlbmRzIEdyYXBoT0xpbms8Qj4ge1xuICAgIHB1YmxpYyBjb25zdHJ1Y3RvcihwYXJlbnQ/OiBJTm9kZSwgY2hpbGQ/OiBJTm9kZSkge1xuICAgICAgICAvLyBUaGUgaWRlbnRpdHkgaXMgc2V0IEJFRk9SRSB0aGUgZW5kcG9pbnRzIGFyZSB3aXJlZCwgYW5kIHRoZSBvcmRlciBpc1xuICAgICAgICAvLyBsb2FkLWJlYXJpbmcuIEF0dGFjaGluZyBhbiBlbmRwb2ludCBjYWxscyBgbm9kZS5hZGQobGluaylgLCB3aGljaFxuICAgICAgICAvLyBpbnZhbGlkYXRlcyB0aGUgY2hpbGQncyBkZXJpdmVkIHBhcmVudCBjYWNoZSBvbmx5IGZvciBsaW5rcyBpdFxuICAgICAgICAvLyByZWNvZ25pc2VzIGFzIGEgYENoaWxkYC4gUmVjb2duaXRpb24gcmVhZHMgYHR5cGVgLCBzbyB3aXJpbmcgZmlyc3RcbiAgICAgICAgLy8gYW5kIG5hbWluZyBhZnRlcndhcmRzIHdvdWxkIGF0dGFjaCBhIGxpbmsgbm90aGluZyBjb3VsZCBpZGVudGlmeVxuICAgICAgICAvLyBkdXJpbmcgdGhlIG9uZSBtb21lbnQgaXQgbWF0dGVycywgYW5kIHRoZSBjYWNoZSB3b3VsZCBrZWVwIGEgc3RhbGVcbiAgICAgICAgLy8gcGFyZW50IGZvciB0aGUgbGlmZSBvZiB0aGUgbm9kZS5cbiAgICAgICAgc3VwZXIoKTtcbiAgICAgICAgdGhpcy50eXBlID0gXCJjaGlsZFwiO1xuICAgICAgICAvLyBvaW5pID0gcGFyZW50LCBvZmluID0gY2hpbGQ7IGVhY2ggc2V0dGVyIHJlZ2lzdGVycyB0aGUgbGluayBvbiB0aGVcbiAgICAgICAgLy8gbm9kZSdzIG9uc2MgLyBvcHNjLlxuICAgICAgICB0aGlzLm9pbmkgPSBwYXJlbnQgPz8gbnVsbDtcbiAgICAgICAgdGhpcy5vZmluID0gY2hpbGQgPz8gbnVsbDtcbiAgICB9XG59XG5cbi8qKlxuICogYEFwcGx5VG9gIHJlbGF0aW9uOiBhIFNUUlVDVFVSQUwgbGluayAobm90IGEgZGF0YWZsb3cgY2hhbm5lbCkgYnkgd2hpY2ggYVxuICogRkFVTFQgKG9yIGFueSBvcGVyYXRvciBub2RlLCBgb2luaWApIEFQUExJRVMgaXRzIHBoeXNpY3MgdG8gYSBUQVJHRVQgbW9kZWxcbiAqIChgb2ZpbmApLiBEaXJlY3RlZCBzb3VyY2UgLT4gdGFyZ2V0OyB0aGUgdGFyZ2V0IHN1cmZhY2VzIGl0cyBpbmNvbWluZ1xuICogYEFwcGx5VG9gIGxpbmtzIHZpYSBgb3BzY2AgZmlsdGVyZWQgdG8gYEFwcGx5VG9gLCB0aGVuIGRyaXZlcyB0aGVtIHdpdGhcbiAqIGBsaW5rLm9pbmkuYXBwbHlUbyh0aGlzLCBjdHgpYCAodGhlIGZhdWx0IHJlYWRzIHRoZSB0YXJnZXQgbW9kZWwnc1xuICogUFJPUEVSVElFUyBkaXJlY3RseSwgZS5nLiBgbW90b3Iucm90b3JNYXNzYCAvIGBtb3Rvci5haXJHYXBgLCBhbmQgYWNjdW11bGF0ZXNcbiAqIGl0cyBlZmZlY3QpLiBQcm9wZXJ0aWVzIGFyZSByZWFkIGZyb20gdGhlIG1vZGVsLCBOT1QgcHVibGlzaGVkIGFzIHBvcnRzOyBhXG4gKiBwb3J0IGlzIGEgcnVudGltZSBEQVRBIHJlbGF0aW9uLCBhbiBgQXBwbHlUb2AgaXMgYSBNT0RFTC1jb25zdW1wdGlvbiByZWxhdGlvbi5cbiAqXG4gKiBDYXJyaWVzIG5vIHBheWxvYWQ7IGB0eXBlYCBpcyB0aGUgb250b2xvZ3kgaWQgXCJhcHBseVRvXCIgKGBpc0JpbmRpbmdSZWxhdGlvbjpcbiAqIGZhbHNlYCwgc3RydWN0dXJhbCkuIElkaW9tYXRpYyBhbG9uZ3NpZGUgdGhlIG90aGVyIHR5cGVkIGxpbmsgc3ViY2xhc3Nlc1xuICogKENoaWxkLCBDbm5TeW5hcHNlLCAuLi4pLiBUaGUgZmF1bHQga2VlcHMgaXRzIG93biB0dW5pbmcgZWRpdGFibGVzIChzZXZlcml0eSxcbiAqIGRlZmVjdCBjb3VudHMsIC4uLik7IHRoZSB0YXJnZXQgdmFsaWRhdGVzIGFjY2VwdGFuY2UgKGBhY2NlcHRGYXVsdGApLlxuICovXG5leHBvcnQgY2xhc3MgQXBwbHlUbzxCID0gdW5rbm93bj4gZXh0ZW5kcyBHcmFwaE9MaW5rPEI+IHtcbiAgICBwdWJsaWMgY29uc3RydWN0b3IoZmF1bHQ/OiBJTm9kZSwgdGFyZ2V0PzogSU5vZGUpIHtcbiAgICAgICAgLy8gSWRlbnRpdHkgYmVmb3JlIGF0dGFjaG1lbnQsIGZvciB0aGUgc2FtZSByZWFzb24gYXMgYENoaWxkYDogYW55dGhpbmdcbiAgICAgICAgLy8gdGhhdCBpbnNwZWN0cyBhIGxpbmsgd2hpbGUgaXQgaXMgYmVpbmcgd2lyZWQgY2FuIG9ubHkgZ28gYnkgYHR5cGVgLlxuICAgICAgICBzdXBlcigpO1xuICAgICAgICB0aGlzLnR5cGUgPSBcImFwcGx5VG9cIjtcbiAgICAgICAgLy8gb2luaSA9IGZhdWx0IChzb3VyY2UpLCBvZmluID0gdGFyZ2V0IG1vZGVsLlxuICAgICAgICB0aGlzLm9pbmkgPSBmYXVsdCA/PyBudWxsO1xuICAgICAgICB0aGlzLm9maW4gPSB0YXJnZXQgPz8gbnVsbDtcbiAgICB9XG59XG4iXSwidmVyc2lvbiI6M30=

@@ -1,0 +1,12 @@
+{
+  "name": "spacexr-atmosphere-octree-prototype",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "benchmark": "node benchmark.js",
+    "start": "node serve.js",
+    "benchmark:hybrid": "node hybrid-benchmark.js",
+    "benchmark:solar-lut": "node solar-lut-benchmark.js"
+  }
+}

@@ -31,7 +31,7 @@ export class VectorTileLayer implements IVectorTileLayer {
     }
 
     public feature(i: number): IVectorTileFeature | undefined {
-        if (i >= 0 || i < this._features.length) {
+        if (Number.isInteger(i) && i >= 0 && i < this._features.length) {
             return this._features[i];
         }
         return undefined;

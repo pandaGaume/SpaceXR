@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#031227" />
+    <title>SpaceXR 3D Tiles Pipeline</title>
+  </head>
+  <body>
+    <canvas
+      id="render-canvas"
+      aria-label="Implicit geodesic grid viewer"
+    ></canvas>
+    <div id="tile-labels" aria-hidden="true"></div>
+    <aside id="runtime-panel" aria-live="polite">
+      <strong>3D Tiles Pipeline</strong>
+      <span id="runtime-status">Starting...</span>
+      <span id="runtime-statistics"></span>
+      <span id="memory-statistics"></span>
+      <span id="cleanup-statistics"></span>
+      <span id="renderer-statistics"></span>
+      <span id="frame-statistics"></span>
+      <label id="vertical-scale-control">
+        Altitude scale
+        <input
+          id="vertical-scale"
+          type="range"
+          min="0"
+          max="10"
+          step="0.5"
+          value="1"
+        />
+        <output id="vertical-scale-value" for="vertical-scale">x1</output>
+      </label>
+    </aside>
+    <small id="attribution"></small>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

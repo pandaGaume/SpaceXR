@@ -1,0 +1,14 @@
+const {chromium}=require('C:/Users/GuillaumePelletier/Documents/GitHub/Gaume/spacexr-atmosphere/node_modules/playwright');const fs=require('node:fs');const out='C:/Users/GuillaumePelletier/Documents/GitHub/SpaceXR/.cache/earth-motion';
+(async()=>{const browser=await chromium.launch({channel:'chrome',headless:true,args:['--enable-unsafe-webgpu','--use-angle=d3d11','--ignore-gpu-blocklist']});
+try{const page=await browser.newPage({viewport:{width:1200,height:860}});const errors=[],demUrls=new Set();
+page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});page.on('request',r=>{if(r.url().includes('elevation-tiles-prod'))demUrls.add(r.url());});
+await page.addInitScript(()=>{window.gpuErrors=[];const request=GPUAdapter.prototype.requestDevice;GPUAdapter.prototype.requestDevice=async function(...args){const device=await request.apply(this,args);window.device=device;device.addEventListener('uncapturederror',e=>window.gpuErrors.push(e.error.message));return device;};});
+await page.goto((process.env.EARTH_URL||'http://127.0.0.1:5191')+'/atmosphere.html?sunset=1&sse=20');
+await page.waitForFunction(()=>window.earthDemo?.earth.atmosphereReady||document.body.dataset.error==='true',{},{timeout:60000});
+await page.waitForFunction(()=>{if(document.body.dataset.error==='true')return true;const runtime=window.earthDemo?.earth.runtime;if(!runtime)return false;const state=runtime.instrumentation.snapshot();if(state.pendingLoads||runtime.hasPendingWork){window.idleEarth=undefined;return false;}window.idleEarth??=performance.now();return performance.now()-window.idleEarth>2000;},{},{timeout:90000});await page.waitForTimeout(500);
+await page.evaluate(()=>window.device.queue.onSubmittedWorkDone());await page.screenshot({path:out+'/mapzen-sunset.png'});
+const state=await page.evaluate(()=>({status:document.querySelector('#status').textContent,stats:document.querySelector('#stats').textContent,time:document.querySelector('#time').value,workers:navigator.hardwareConcurrency,gpuErrors:window.gpuErrors,errors:window.earthDemo?.errors,renderWidth:window.earthDemo.earth.camera.getScene().getEngine().getRenderWidth()}));
+const workers=page.workers().length;await page.evaluate(()=>window.earthDemo.dispose());
+const result={errors,state,decoderWorkers:workers,demRequests:demUrls.size,allMapzenTerrarium:[...demUrls].every(url=>url.startsWith('https://s3.amazonaws.com/elevation-tiles-prod/terrarium/'))};
+console.log(JSON.stringify(result,null,2));fs.writeFileSync(out+'/mapzen-sunset.json',JSON.stringify(result,null,2));if(errors.length||state.gpuErrors.length||state.errors.length||!result.allMapzenTerrarium||!demUrls.size||workers<1)throw Error('Mapzen sunset regression failed');
+}finally{await browser.close();}})().catch(e=>{console.error(e);process.exitCode=1;});

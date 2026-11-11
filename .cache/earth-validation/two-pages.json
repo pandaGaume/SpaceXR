@@ -1,0 +1,26 @@
+[
+  {
+    "entry": "orbital",
+    "title": "SpaceXR Terre orbitale",
+    "status": "Terre et atmosphère spectrale actives",
+    "frames": 194,
+    "errors": [],
+    "gpuErrors": [],
+    "height": 11999997.92438839,
+    "tiles": 40,
+    "atmosphereReady": true,
+    "consoleErrors": []
+  },
+  {
+    "entry": "atmosphere",
+    "title": "SpaceXR dans l’atmosphère",
+    "status": "Terre et atmosphère spectrale actives",
+    "frames": 2523,
+    "errors": [],
+    "gpuErrors": [],
+    "height": 10978.807191586122,
+    "tiles": 136,
+    "atmosphereReady": true,
+    "consoleErrors": []
+  }
+]

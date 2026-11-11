@@ -1,0 +1,20 @@
+{
+  "note": "Browser GPU validation runs, not XR benchmarks. Warm pass medians from three measurements. Readback and compilation are excluded from gpuMs. Solar declination fixed; geodetic ellipsoid geometry. Grazing guard: 20000 meters.",
+  "orbit": {
+    "output": [32, 18], "heightMeters": 400000, "regime": "external", "solarLutSize": [128, 32, 32], "solarLutBytes": 1048576,
+    "solarLutBuildGpuMs": 4.325376, "solarLutBuildWallMs": 24,
+    "directGpuMs": 17.825792, "lutGpuMs": 1.31072, "warmSpeedup": 13.6,
+    "radianceRMSE": 0.000003816813218560825, "maxRadianceError": 0.00001973845064640045, "maxViewTransmittanceError": 0,
+    "solarValidation": {"points": 84, "textureHits": 45, "fallbacks": 5, "maxErrorAgainstGpuDirect": 0.003713726997375488, "maxErrorAgainstCpuDirect": 0.004789853229373586},
+    "cameraVolume": {"dimensions": [12, 8, 48], "medianBuildGpuMs": 1.245184, "fallbackPixels": 576, "cpuAtmosphereIntegration": false},
+    "pipelineTransition": {"heights": [99999, 100001], "regimes": ["internal", "external"], "maxRadianceChange": 0.0000008568167686462402, "maxTransmittanceChange": 0.000009953975677490234}
+  },
+  "orbitalDawn": {
+    "output": [96, 54], "heightMeters": 60000, "sun": [-0.05, 1, 0], "regime": "internal", "solarLutSize": [256, 64, 48], "solarLutBytes": 6291456,
+    "solarLutBuildGpuMs": 11.4688, "solarLutBuildWallMs": 29.600000023841854, "solarLutReusedInMeasuredRun": true,
+    "directGpuMs": 179.89632, "lutGpuMs": 28.50816, "warmSpeedup": 6.310344827586207,
+    "radianceRMSE": 0.0003945607573192813, "maxRadianceError": 0.00459018349647522, "maxViewTransmittanceError": 0,
+    "solarValidation": {"points": 84, "textureHits": 45, "fallbacks": 13, "maxErrorAgainstGpuDirect": 0.02337658405303955, "maxErrorAgainstCpuDirect": 0.023401785232458616},
+    "pipelineTransition": {"heights": [99999, 100001], "regimes": ["internal", "external"], "maxRadianceChange": 0.00000012718373909592628, "maxTransmittanceChange": 0.000009953975677490234}
+  }
+}

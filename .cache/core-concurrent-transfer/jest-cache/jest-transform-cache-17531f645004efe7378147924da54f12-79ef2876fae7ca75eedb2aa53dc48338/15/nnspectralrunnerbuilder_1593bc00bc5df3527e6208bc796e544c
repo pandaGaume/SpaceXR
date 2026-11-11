@@ -1,0 +1,31 @@
+cbaa81ad5407372b64978c04463b3efb
+"use strict";
+// ═══════════════════════════════════════════════════════════════════════════
+// SpectralRunnerBuilder : builds a NeuralRunner backed by a SpectralInferenceRuntime.
+//
+// Mirrors MlpRunnerBuilder in shape (fluent withGraph(...) → build() →
+// NeuralRunner). It does NOT extend NeuralRunnerBuilder<G, R> because that base
+// constrains its link type to `ISynapse` (a scalar `weight`), whereas a
+// SpectralSynapse generalizes the weight to a complex per-band transfer and so
+// does not carry `weight`. Keeping this standalone avoids weakening the shared
+// base's contract for the MLP/CNN/RNN builders.
+// ═══════════════════════════════════════════════════════════════════════════
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.SpectralRunnerBuilder = void 0;
+const nn_runner_1 = require("./nn.runner");
+const nn_spectral_inference_1 = require("./nn.spectral.inference");
+class SpectralRunnerBuilder {
+    withGraph(g) {
+        this._graph = g;
+        return this;
+    }
+    build() {
+        if (!this._graph) {
+            throw new Error("SpectralRunnerBuilder: withGraph(...) is required before build()");
+        }
+        const runtime = new nn_spectral_inference_1.SpectralInferenceRuntime(this._graph);
+        return new nn_runner_1.NeuralRunner(runtime, (rt, input) => rt.run(input));
+    }
+}
+exports.SpectralRunnerBuilder = SpectralRunnerBuilder;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiQzpcXFVzZXJzXFxHdWlsbGF1bWVQZWxsZXRpZXJcXERvY3VtZW50c1xcR2l0SHViXFxTcGFjZVhSXFwuY2FjaGVcXGNvcmUtY29uY3VycmVudC10cmFuc2Zlclxcc3JjXFxuZXVyYWxuZXR3b3JrXFxubi5zcGVjdHJhbC5ydW5uZXIuYnVpbGRlci50cyIsIm1hcHBpbmdzIjoiO0FBQUEsOEVBQThFO0FBQzlFLHNGQUFzRjtBQUN0RixFQUFFO0FBQ0YsdUVBQXVFO0FBQ3ZFLGdGQUFnRjtBQUNoRix3RUFBd0U7QUFDeEUsK0VBQStFO0FBQy9FLCtFQUErRTtBQUMvRSxnREFBZ0Q7QUFDaEQsOEVBQThFOzs7QUFFOUUsMkNBQTJDO0FBQzNDLG1FQUFtRTtBQUduRSxNQUFhLHFCQUFxQjtJQUd2QixTQUFTLENBQUMsQ0FBaUI7UUFDOUIsSUFBSSxDQUFDLE1BQU0sR0FBRyxDQUFDLENBQUM7UUFDaEIsT0FBTyxJQUFJLENBQUM7SUFDaEIsQ0FBQztJQUVNLEtBQUs7UUFDUixJQUFJLENBQUMsSUFBSSxDQUFDLE1BQU0sRUFBRSxDQUFDO1lBQ2YsTUFBTSxJQUFJLEtBQUssQ0FBQyxrRUFBa0UsQ0FBQyxDQUFDO1FBQ3hGLENBQUM7UUFDRCxNQUFNLE9BQU8sR0FBRyxJQUFJLGdEQUF3QixDQUFDLElBQUksQ0FBQyxNQUFNLENBQUMsQ0FBQztRQUMxRCxPQUFPLElBQUksd0JBQVksQ0FBQyxPQUFPLEVBQUUsQ0FBQyxFQUFFLEVBQUUsS0FBSyxFQUFFLEVBQUUsQ0FBQyxFQUFFLENBQUMsR0FBRyxDQUFDLEtBQUssQ0FBQyxDQUFDLENBQUM7SUFDbkUsQ0FBQztDQUNKO0FBZkQsc0RBZUMiLCJuYW1lcyI6W10sInNvdXJjZXMiOlsiQzpcXFVzZXJzXFxHdWlsbGF1bWVQZWxsZXRpZXJcXERvY3VtZW50c1xcR2l0SHViXFxTcGFjZVhSXFwuY2FjaGVcXGNvcmUtY29uY3VycmVudC10cmFuc2Zlclxcc3JjXFxuZXVyYWxuZXR3b3JrXFxubi5zcGVjdHJhbC5ydW5uZXIuYnVpbGRlci50cyJdLCJzb3VyY2VzQ29udGVudCI6WyIvLyDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZBcclxuLy8gU3BlY3RyYWxSdW5uZXJCdWlsZGVyIDogYnVpbGRzIGEgTmV1cmFsUnVubmVyIGJhY2tlZCBieSBhIFNwZWN0cmFsSW5mZXJlbmNlUnVudGltZS5cclxuLy9cclxuLy8gTWlycm9ycyBNbHBSdW5uZXJCdWlsZGVyIGluIHNoYXBlIChmbHVlbnQgd2l0aEdyYXBoKC4uLikg4oaSIGJ1aWxkKCkg4oaSXHJcbi8vIE5ldXJhbFJ1bm5lcikuIEl0IGRvZXMgTk9UIGV4dGVuZCBOZXVyYWxSdW5uZXJCdWlsZGVyPEcsIFI+IGJlY2F1c2UgdGhhdCBiYXNlXHJcbi8vIGNvbnN0cmFpbnMgaXRzIGxpbmsgdHlwZSB0byBgSVN5bmFwc2VgIChhIHNjYWxhciBgd2VpZ2h0YCksIHdoZXJlYXMgYVxyXG4vLyBTcGVjdHJhbFN5bmFwc2UgZ2VuZXJhbGl6ZXMgdGhlIHdlaWdodCB0byBhIGNvbXBsZXggcGVyLWJhbmQgdHJhbnNmZXIgYW5kIHNvXHJcbi8vIGRvZXMgbm90IGNhcnJ5IGB3ZWlnaHRgLiBLZWVwaW5nIHRoaXMgc3RhbmRhbG9uZSBhdm9pZHMgd2Vha2VuaW5nIHRoZSBzaGFyZWRcclxuLy8gYmFzZSdzIGNvbnRyYWN0IGZvciB0aGUgTUxQL0NOTi9STk4gYnVpbGRlcnMuXHJcbi8vIOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkFxyXG5cclxuaW1wb3J0IHsgTmV1cmFsUnVubmVyIH0gZnJvbSBcIi4vbm4ucnVubmVyXCI7XHJcbmltcG9ydCB7IFNwZWN0cmFsSW5mZXJlbmNlUnVudGltZSB9IGZyb20gXCIuL25uLnNwZWN0cmFsLmluZmVyZW5jZVwiO1xyXG5pbXBvcnQgeyBJU3BlY3RyYWxHcmFwaCB9IGZyb20gXCIuL25uLnNwZWN0cmFsLmludGVyZmFjZXNcIjtcclxuXHJcbmV4cG9ydCBjbGFzcyBTcGVjdHJhbFJ1bm5lckJ1aWxkZXIge1xyXG4gICAgcHJpdmF0ZSBfZ3JhcGg/OiBJU3BlY3RyYWxHcmFwaDtcclxuXHJcbiAgICBwdWJsaWMgd2l0aEdyYXBoKGc6IElTcGVjdHJhbEdyYXBoKTogdGhpcyB7XHJcbiAgICAgICAgdGhpcy5fZ3JhcGggPSBnO1xyXG4gICAgICAgIHJldHVybiB0aGlzO1xyXG4gICAgfVxyXG5cclxuICAgIHB1YmxpYyBidWlsZCgpOiBOZXVyYWxSdW5uZXI8U3BlY3RyYWxJbmZlcmVuY2VSdW50aW1lPiB7XHJcbiAgICAgICAgaWYgKCF0aGlzLl9ncmFwaCkge1xyXG4gICAgICAgICAgICB0aHJvdyBuZXcgRXJyb3IoXCJTcGVjdHJhbFJ1bm5lckJ1aWxkZXI6IHdpdGhHcmFwaCguLi4pIGlzIHJlcXVpcmVkIGJlZm9yZSBidWlsZCgpXCIpO1xyXG4gICAgICAgIH1cclxuICAgICAgICBjb25zdCBydW50aW1lID0gbmV3IFNwZWN0cmFsSW5mZXJlbmNlUnVudGltZSh0aGlzLl9ncmFwaCk7XHJcbiAgICAgICAgcmV0dXJuIG5ldyBOZXVyYWxSdW5uZXIocnVudGltZSwgKHJ0LCBpbnB1dCkgPT4gcnQucnVuKGlucHV0KSk7XHJcbiAgICB9XHJcbn1cclxuIl0sInZlcnNpb24iOjN9

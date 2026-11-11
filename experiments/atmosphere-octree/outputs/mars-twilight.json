@@ -1,0 +1,642 @@
+{
+  "method": "CPU direct spectral single scattering, 24 wavelengths, 256 view / 96 solar steps. Five rays in the solar vertical plane. Fixed tau550=0.3; only dust scale height changes.",
+  "note": "Angular experiment, no two-hour duration imposed. Luminance normalized to the reference solar spectrum. Finite atmosphere top and missing multiple scattering limit interpretation of late twilight.",
+  "results": [
+    {
+      "dustScaleHeightMeters": 10000,
+      "solarElevationDegrees": 1,
+      "atmosphereTopMeters": 129841.06272273714,
+      "peakSampleLuminanceY": 0.10182389637663714,
+      "rays": [
+        {
+          "lookElevationDegrees": 0.5,
+          "normalizedLuminanceY": 0.04049565772151941,
+          "linearRgb": [
+            0.03160710677774023,
+            0.04139801499992197,
+            0.05775293998989668
+          ]
+        },
+        {
+          "lookElevationDegrees": 3,
+          "normalizedLuminanceY": 0.10182389637663714,
+          "linearRgb": [
+            0.08261479992054635,
+            0.10368404357496679,
+            0.14001812607492908
+          ]
+        },
+        {
+          "lookElevationDegrees": 15,
+          "normalizedLuminanceY": 0.028081246558668692,
+          "linearRgb": [
+            0.03384980882449283,
+            0.027116339901460628,
+            0.020670802463245885
+          ]
+        },
+        {
+          "lookElevationDegrees": 45,
+          "normalizedLuminanceY": 0.0021138616493154867,
+          "linearRgb": [
+            0.002600130489993445,
+            0.002007623641882113,
+            0.001735679137469004
+          ]
+        },
+        {
+          "lookElevationDegrees": 89,
+          "normalizedLuminanceY": 0.0003304061431141986,
+          "linearRgb": [
+            0.0003968801125448071,
+            0.00031786553342932466,
+            0.00025909662933837465
+          ]
+        }
+      ]
+    },
+    {
+      "dustScaleHeightMeters": 10000,
+      "solarElevationDegrees": -2,
+      "atmosphereTopMeters": 129841.06272273714,
+      "peakSampleLuminanceY": 0.02749054069336459,
+      "rays": [
+        {
+          "lookElevationDegrees": 0.5,
+          "normalizedLuminanceY": 0.006855281557887285,
+          "linearRgb": [
+            0.005367626691225631,
+            0.007030476852298265,
+            0.009504224743479037
+          ]
+        },
+        {
+          "lookElevationDegrees": 3,
+          "normalizedLuminanceY": 0.02749054069336459,
+          "linearRgb": [
+            0.02374934118976091,
+            0.02800388146343949,
+            0.03343762716980502
+          ]
+        },
+        {
+          "lookElevationDegrees": 15,
+          "normalizedLuminanceY": 0.007302015480596763,
+          "linearRgb": [
+            0.008897162912281351,
+            0.006977587891435157,
+            0.005823193867835693
+          ]
+        },
+        {
+          "lookElevationDegrees": 45,
+          "normalizedLuminanceY": 0.0008339926970230462,
+          "linearRgb": [
+            0.0010315865755682692,
+            0.0007900695440191048,
+            0.0006877697576066884
+          ]
+        },
+        {
+          "lookElevationDegrees": 89,
+          "normalizedLuminanceY": 0.00012620655350561156,
+          "linearRgb": [
+            0.00014914780437900134,
+            0.00012255037213905023,
+            0.00009494944231544404
+          ]
+        }
+      ]
+    },
+    {
+      "dustScaleHeightMeters": 10000,
+      "solarElevationDegrees": -6,
+      "atmosphereTopMeters": 129841.06272273714,
+      "peakSampleLuminanceY": 0.004208179606561464,
+      "rays": [
+        {
+          "lookElevationDegrees": 0.5,
+          "normalizedLuminanceY": 0.0011085530490469423,
+          "linearRgb": [
+            0.0009698143501998849,
+            0.001135383245001612,
+            0.0012519510713509875
+          ]
+        },
+        {
+          "lookElevationDegrees": 3,
+          "normalizedLuminanceY": 0.004208179606561464,
+          "linearRgb": [
+            0.004210676309538763,
+            0.004240917869158589,
+            0.0038790491153608614
+          ]
+        },
+        {
+          "lookElevationDegrees": 15,
+          "normalizedLuminanceY": 0.0011039997168736354,
+          "linearRgb": [
+            0.0012714695388403767,
+            0.001063436592837419,
+            0.001013352128569483
+          ]
+        },
+        {
+          "lookElevationDegrees": 45,
+          "normalizedLuminanceY": 0.00013044042437215732,
+          "linearRgb": [
+            0.0001577509482786717,
+            0.00012478052298054392,
+            0.00010616852379845087
+          ]
+        },
+        {
+          "lookElevationDegrees": 89,
+          "normalizedLuminanceY": 0.000016187159021048983,
+          "linearRgb": [
+            0.00001949303147604366,
+            0.00001561808299691773,
+            0.00001209991328614998
+          ]
+        }
+      ]
+    },
+    {
+      "dustScaleHeightMeters": 10000,
+      "solarElevationDegrees": -12,
+      "atmosphereTopMeters": 129841.06272273714,
+      "peakSampleLuminanceY": 0.00013823564750135403,
+      "rays": [
+        {
+          "lookElevationDegrees": 0.5,
+          "normalizedLuminanceY": 0.00004766828979222694,
+          "linearRgb": [
+            0.00005202018064766548,
+            0.0000474227393207297,
+            0.000037315265569134315
+          ]
+        },
+        {
+          "lookElevationDegrees": 3,
+          "normalizedLuminanceY": 0.00013823564750135403,
+          "linearRgb": [
+            0.00016292550710619695,
+            0.00013419788496715282,
+            0.0001056168037865149
+          ]
+        },
+        {
+          "lookElevationDegrees": 15,
+          "normalizedLuminanceY": 0.00003324050140071444,
+          "linearRgb": [
+            0.00003713263233874383,
+            0.00003233684997961003,
+            0.00003075131437681775
+          ]
+        },
+        {
+          "lookElevationDegrees": 45,
+          "normalizedLuminanceY": 0.0000010819776902405518,
+          "linearRgb": [
+            0.0000012742435679018988,
+            0.0000010486049124705952,
+            8.470849989989466e-7
+          ]
+        },
+        {
+          "lookElevationDegrees": 89,
+          "normalizedLuminanceY": 4.1688158997655926e-8,
+          "linearRgb": [
+            5.0411941533571226e-8,
+            3.972645566768136e-8,
+            3.545810685021796e-8
+          ]
+        }
+      ]
+    },
+    {
+      "dustScaleHeightMeters": 10000,
+      "solarElevationDegrees": -20,
+      "atmosphereTopMeters": 129841.06272273714,
+      "peakSampleLuminanceY": 7.22853965160055e-7,
+      "rays": [
+        {
+          "lookElevationDegrees": 0.5,
+          "normalizedLuminanceY": 2.935801695123479e-7,
+          "linearRgb": [
+            3.178047116048189e-7,
+            2.878321874634988e-7,
+            2.793641484683889e-7
+          ]
+        },
+        {
+          "lookElevationDegrees": 3,
+          "normalizedLuminanceY": 7.22853965160055e-7,
+          "linearRgb": [
+            7.837953002515056e-7,
+            7.073778780667022e-7,
+            6.971451115695458e-7
+          ]
+        },
+        {
+          "lookElevationDegrees": 15,
+          "normalizedLuminanceY": 1.693865854014054e-8,
+          "linearRgb": [
+            1.9551165893575962e-8,
+            1.6320625686234423e-8,
+            1.5378329340802356e-8
+          ]
+        },
+        {
+          "lookElevationDegrees": 45,
+          "normalizedLuminanceY": 0,
+          "linearRgb": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "lookElevationDegrees": 89,
+          "normalizedLuminanceY": 0,
+          "linearRgb": [
+            0,
+            0,
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "dustScaleHeightMeters": 10000,
+      "solarElevationDegrees": -29,
+      "atmosphereTopMeters": 129841.06272273714,
+      "peakSampleLuminanceY": 5.7401435707539204e-11,
+      "rays": [
+        {
+          "lookElevationDegrees": 0.5,
+          "normalizedLuminanceY": 5.7401435707539204e-11,
+          "linearRgb": [
+            5.963927251628292e-11,
+            5.681439533752742e-11,
+            5.666137028293356e-11
+          ]
+        },
+        {
+          "lookElevationDegrees": 3,
+          "normalizedLuminanceY": 0,
+          "linearRgb": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "lookElevationDegrees": 15,
+          "normalizedLuminanceY": 0,
+          "linearRgb": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "lookElevationDegrees": 45,
+          "normalizedLuminanceY": 0,
+          "linearRgb": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "lookElevationDegrees": 89,
+          "normalizedLuminanceY": 0,
+          "linearRgb": [
+            0,
+            0,
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "dustScaleHeightMeters": 20000,
+      "solarElevationDegrees": 1,
+      "atmosphereTopMeters": 129841.06272273714,
+      "peakSampleLuminanceY": 0.19981873221784927,
+      "rays": [
+        {
+          "lookElevationDegrees": 0.5,
+          "normalizedLuminanceY": 0.1301603152623733,
+          "linearRgb": [
+            0.1046718436535736,
+            0.13262443258630346,
+            0.1808777926029887
+          ]
+        },
+        {
+          "lookElevationDegrees": 3,
+          "normalizedLuminanceY": 0.19981873221784927,
+          "linearRgb": [
+            0.16464799685933368,
+            0.20306634910743981,
+            0.27132517038124937
+          ]
+        },
+        {
+          "lookElevationDegrees": 15,
+          "normalizedLuminanceY": 0.03854799254046016,
+          "linearRgb": [
+            0.04653739726223023,
+            0.037203246153000906,
+            0.02836719765654091
+          ]
+        },
+        {
+          "lookElevationDegrees": 45,
+          "normalizedLuminanceY": 0.0028117057142489333,
+          "linearRgb": [
+            0.0034649735393653645,
+            0.00266934043620479,
+            0.0023000816118377105
+          ]
+        },
+        {
+          "lookElevationDegrees": 89,
+          "normalizedLuminanceY": 0.00043109710026268603,
+          "linearRgb": [
+            0.0005210221721749274,
+            0.0004144889378278852,
+            0.00033108886261726825
+          ]
+        }
+      ]
+    },
+    {
+      "dustScaleHeightMeters": 20000,
+      "solarElevationDegrees": -2,
+      "atmosphereTopMeters": 129841.06272273714,
+      "peakSampleLuminanceY": 0.07302429654095924,
+      "rays": [
+        {
+          "lookElevationDegrees": 0.5,
+          "normalizedLuminanceY": 0.04262589554478502,
+          "linearRgb": [
+            0.03457961361584213,
+            0.043534884300458744,
+            0.05733879232288443
+          ]
+        },
+        {
+          "lookElevationDegrees": 3,
+          "normalizedLuminanceY": 0.07302429654095924,
+          "linearRgb": [
+            0.06393015089479509,
+            0.07423714372913619,
+            0.0878307798560555
+          ]
+        },
+        {
+          "lookElevationDegrees": 15,
+          "normalizedLuminanceY": 0.01267598898130573,
+          "linearRgb": [
+            0.015454659689103558,
+            0.012109651109377324,
+            0.010111817535996732
+          ]
+        },
+        {
+          "lookElevationDegrees": 45,
+          "normalizedLuminanceY": 0.0014340981594944155,
+          "linearRgb": [
+            0.001777478539115731,
+            0.0013581922151557299,
+            0.001175780765453467
+          ]
+        },
+        {
+          "lookElevationDegrees": 89,
+          "normalizedLuminanceY": 0.00021406886090269048,
+          "linearRgb": [
+            0.00025528065327317474,
+            0.0002077736832873522,
+            0.00015520863516507133
+          ]
+        }
+      ]
+    },
+    {
+      "dustScaleHeightMeters": 20000,
+      "solarElevationDegrees": -6,
+      "atmosphereTopMeters": 129841.06272273714,
+      "peakSampleLuminanceY": 0.015293005482409503,
+      "rays": [
+        {
+          "lookElevationDegrees": 0.5,
+          "normalizedLuminanceY": 0.009379660133595378,
+          "linearRgb": [
+            0.008461213885897403,
+            0.009559454835283579,
+            0.010308576282964561
+          ]
+        },
+        {
+          "lookElevationDegrees": 3,
+          "normalizedLuminanceY": 0.015293005482409503,
+          "linearRgb": [
+            0.015463128828562874,
+            0.015376620453194486,
+            0.013972962903396445
+          ]
+        },
+        {
+          "lookElevationDegrees": 15,
+          "normalizedLuminanceY": 0.003181380027990659,
+          "linearRgb": [
+            0.003665693728974902,
+            0.0030639742596608034,
+            0.002920209930321579
+          ]
+        },
+        {
+          "lookElevationDegrees": 45,
+          "normalizedLuminanceY": 0.000441351377010826,
+          "linearRgb": [
+            0.0005353846730651909,
+            0.0004221019973193461,
+            0.0003554151870001543
+          ]
+        },
+        {
+          "lookElevationDegrees": 89,
+          "normalizedLuminanceY": 0.00005870189200967899,
+          "linearRgb": [
+            0.00007177005879039398,
+            0.00005659181821408129,
+            0.00004116007458004011
+          ]
+        }
+      ]
+    },
+    {
+      "dustScaleHeightMeters": 20000,
+      "solarElevationDegrees": -12,
+      "atmosphereTopMeters": 129841.06272273714,
+      "peakSampleLuminanceY": 0.0011082330934388067,
+      "rays": [
+        {
+          "lookElevationDegrees": 0.5,
+          "normalizedLuminanceY": 0.0007567871344785114,
+          "linearRgb": [
+            0.0008479927620417371,
+            0.0007479395800214647,
+            0.0005763308238686268
+          ]
+        },
+        {
+          "lookElevationDegrees": 3,
+          "normalizedLuminanceY": 0.0011082330934388067,
+          "linearRgb": [
+            0.0013183779686881188,
+            0.0010730506195384835,
+            0.0008386389844656255
+          ]
+        },
+        {
+          "lookElevationDegrees": 15,
+          "normalizedLuminanceY": 0.0003873983908096674,
+          "linearRgb": [
+            0.0004331094022039817,
+            0.0003768750549874296,
+            0.00035727520485901235
+          ]
+        },
+        {
+          "lookElevationDegrees": 45,
+          "normalizedLuminanceY": 0.000026031929570185534,
+          "linearRgb": [
+            0.00003076581146548017,
+            0.00002524631914963326,
+            0.000019890775922985064
+          ]
+        },
+        {
+          "lookElevationDegrees": 89,
+          "normalizedLuminanceY": 0.0000013291019493191896,
+          "linearRgb": [
+            0.0000016463679200724632,
+            0.0000012663417172170997,
+            0.0000010174002893398536
+          ]
+        }
+      ]
+    },
+    {
+      "dustScaleHeightMeters": 20000,
+      "solarElevationDegrees": -20,
+      "atmosphereTopMeters": 129841.06272273714,
+      "peakSampleLuminanceY": 0.00003585803688861488,
+      "rays": [
+        {
+          "lookElevationDegrees": 0.5,
+          "normalizedLuminanceY": 0.000022961927016385007,
+          "linearRgb": [
+            0.000025553772486554898,
+            0.000022372611127463168,
+            0.000021181567650996462
+          ]
+        },
+        {
+          "lookElevationDegrees": 3,
+          "normalizedLuminanceY": 0.00003585803688861488,
+          "linearRgb": [
+            0.000039271805737337714,
+            0.00003502101220380704,
+            0.0000341189305234798
+          ]
+        },
+        {
+          "lookElevationDegrees": 15,
+          "normalizedLuminanceY": 9.521379037774118e-7,
+          "linearRgb": [
+            0.0000010792073938273538,
+            9.225379323665232e-7,
+            8.717604393586144e-7
+          ]
+        },
+        {
+          "lookElevationDegrees": 45,
+          "normalizedLuminanceY": 0,
+          "linearRgb": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "lookElevationDegrees": 89,
+          "normalizedLuminanceY": 0,
+          "linearRgb": [
+            0,
+            0,
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "dustScaleHeightMeters": 20000,
+      "solarElevationDegrees": -29,
+      "atmosphereTopMeters": 129841.06272273714,
+      "peakSampleLuminanceY": 1.5908712071754783e-8,
+      "rays": [
+        {
+          "lookElevationDegrees": 0.5,
+          "normalizedLuminanceY": 1.5908712071754783e-8,
+          "linearRgb": [
+            1.6610751275442544e-8,
+            1.574602970861492e-8,
+            1.5462527818170497e-8
+          ]
+        },
+        {
+          "lookElevationDegrees": 3,
+          "normalizedLuminanceY": 0,
+          "linearRgb": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "lookElevationDegrees": 15,
+          "normalizedLuminanceY": 0,
+          "linearRgb": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "lookElevationDegrees": 45,
+          "normalizedLuminanceY": 0,
+          "linearRgb": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "lookElevationDegrees": 89,
+          "normalizedLuminanceY": 0,
+          "linearRgb": [
+            0,
+            0,
+            0
+          ]
+        }
+      ]
+    }
+  ]
+}

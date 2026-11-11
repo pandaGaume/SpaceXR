@@ -1,0 +1,19 @@
+{
+  "bbox": [
+    -1280,
+    -1280,
+    1280,
+    1000
+  ],
+  "pixelSize": 5,
+  "shape": [
+    456,
+    512
+  ],
+  "range": [
+    422.0,
+    1417.0
+  ],
+  "differenceRmsMetres": 10.792374306682639,
+  "meaning": "Product differences in a nominal shared map grid, not an accuracy estimate"
+}
